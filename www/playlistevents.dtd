@@ -1,0 +1,13 @@
+<!ELEMENT playlistevents ( event ) >
+
+<!ELEMENT event ( ) >
+<!ATTLIST event related_id NMTOKEN #REQUIRED >
+<!ATTLIST event date NMTOKEN #REQUIRED >
+<!ATTLIST event time NMTOKEN #REQUIRED >
+<!ATTLIST event event NMTOKEN #REQUIRED >
+<!ATTLIST event position_x >
+<!ATTLIST event position_y >
+<!ATTLIST event width >
+<!ATTLIST event height >
+<!ATTLIST event related_name >
+

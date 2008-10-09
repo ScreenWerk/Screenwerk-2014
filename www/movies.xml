@@ -1,0 +1,22 @@
+<movies>
+   <movie id="12"
+          url="/data/screenwerk/bin/www/media/originals/Jesus.Christ.Superstar.1973.DVDRip.XviD.AR.avi" 
+          x="0" y="0"
+          width="1280" height="550"
+          title="Blow Up (1966)" />
+   <movie id="13"
+          url="/data/screenwerk/bin/www/media/originals/Jesus Christ Superstar (2000) [eng].avi" 
+          x="0" y="550"
+          width="427" height="250"
+          title="La Notte (1961)" />
+   <movie id="13"
+          url="/data/screenwerk/bin/www/media/originals/Jesus Christ Superstar (2000) [eng].avi" 
+          x="427" y="550"
+          width="427" height="250"
+          title="La Notte (1961)" />
+   <movie id="13"
+          url="/data/screenwerk/bin/www/media/originals/Jesus Christ Superstar (2000) [eng].avi" 
+          x="853" y="550"
+          width="427" height="250"
+          title="La Notte (1961)" />
+</movies>

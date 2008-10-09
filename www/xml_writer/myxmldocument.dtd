@@ -1,0 +1,10 @@
+<!ELEMENT address ( street, zip ) >
+<!ATTLIST address country NMTOKEN #REQUIRED >
+
+<!ELEMENT myxmldocument ( name, address ) >
+
+<!ELEMENT name ( #PCDATA ) >
+
+<!ELEMENT street ( #PCDATA ) >
+
+<!ELEMENT zip ( #PCDATA ) >

@@ -1,0 +1,375 @@
+<html>
+<head>
+<title>Class: XML writer</title>
+</head>
+<body>
+<center><h1>Class: XML writer</h1></center>
+<hr />
+<ul>
+<p><b>Version:</b> <tt>@(#) $Id: xmlwriterclass.class,v 1.32 2002/10/17 05:38:11 mlemos Exp $</tt></p>
+<h2><a name="table_of_contents">Contents</a></h2>
+<ul>
+<li><a href="#2.1.1">Summary</a></li>
+<ul>
+<li><a href="#3.2.0">Name</a></li>
+<li><a href="#3.2.0.0">Author</a></li>
+<li><a href="#3.2.0.1">Copyright</a></li>
+<li><a href="#3.2.0.2">Version</a></li>
+<li><a href="#3.2.0.3">Purpose</a></li>
+<li><a href="#3.2.0.4">Usage</a></li>
+<li><a href="#3.2.0.5">Example</a></li>
+</ul>
+<li><a href="#4.1.1">Variables</a></li>
+<ul>
+<li><a href="#5.2.12">stylesheet</a></li>
+<li><a href="#5.2.13">stylesheettype</a></li>
+<li><a href="#5.2.14">dtdtype</a></li>
+<li><a href="#5.2.15">dtddefinition</a></li>
+<li><a href="#5.2.16">dtdurl</a></li>
+<li><a href="#5.2.17">outputencoding</a></li>
+<li><a href="#5.2.18">inputencoding</a></li>
+<li><a href="#5.2.19">linebreak</a></li>
+<li><a href="#5.2.20">indenttext</a></li>
+<li><a href="#5.2.21">generatedcomment</a></li>
+<li><a href="#5.2.22">error</a></li>
+</ul>
+<li><a href="#6.1.1">Functions</a></li>
+<ul>
+<li><a href="#7.2.5">write</a></li>
+<li><a href="#9.2.6">addtag</a></li>
+<li><a href="#11.2.7">adddata</a></li>
+<li><a href="#13.2.8">adddatatag</a></li>
+</ul>
+</ul>
+<p><a href="#table_of_contents">Top of the table of contents</a></p>
+</ul>
+<hr />
+<ul>
+<h2><li><a name="2.1.1">Summary</a></li></h2>
+<ul>
+<h3><a name="3.2.0">Name</a></h3>
+<p>XML writer</p>
+<h3><a name="3.2.0.0">Author</a></h3>
+<p>Manuel Lemos (<a href="mailto:mlemos@acm.org">mlemos@acm.org</a>)</p>
+<h3><a name="3.2.0.1">Copyright</a></h3>
+<p>Copyright &copy; (C) Manuel Lemos 2001-2002</p>
+<h3><a name="3.2.0.2">Version</a></h3>
+<p>@(#) $Id: xmlwriterclass.class,v 1.32 2002/10/17 05:38:11 mlemos Exp $</p>
+<h3><a name="3.2.0.3">Purpose</a></h3>
+<p>Composing and generating XML documents.</p>
+<h3><a name="3.2.0.4">Usage</a></h3>
+<p>The class has several independent functions that should be used to compose the structure of a XML document.  When the structure is fully composed, the <tt><a href="#function_write">write</a></tt> should be used to output the document in the XML format.</p>
+<h3><a name="3.2.0.5">Example</a></h3>
+<p>Here follows an example of typical use of this class:</p>
+<pre>&lt;?php
+	
+	/*
+	 *  First create an object of the class.
+	 */
+	$xml_writer_object=new xml_writer_class;
+	
+	/*
+	 *  Now, start defining the XML document from the root tag.
+	 */
+	$noattributes=array();
+	$xml_writer_object-&gt;addtag(&quot;myxmldocument&quot;,$noattributes,&quot;&quot;,$root,1);
+	
+	/*
+	 *  Then define the rest of the document tags and data.
+	 */
+	$xml_writer_object-&gt;addtag(&quot;name&quot;,$noattributes,$root,$toptag,0);
+	$xml_writer_object-&gt;adddata(&quot;John Doe&quot;,$toptag,$path);
+	
+	/*
+	 *  Tags may have attributes.
+	 */
+	$attributes=array();
+	$attributes[&quot;country&quot;]=&quot;us&quot;;
+	$xml_writer_object-&gt;addtag(&quot;address&quot;,$attributes,$root,$toptag,1);
+	
+	/*
+	 *  Tags and the correspondent data may be added with a single function call.
+	 */
+	$xml_writer_object-&gt;adddatatag(&quot;street&quot;,$noattributes,&quot;Wall Street, 1641&quot;,$toptag,$datatag);
+	$xml_writer_object-&gt;adddatatag(&quot;zip&quot;,$noattributes,&quot;NY 72834&quot;,$toptag,$datatag);
+	
+	/*
+	 *  Any time before generating the document you may specify a DTD to let other tools validate it...
+	 */
+	$xml_writer_object-&gt;dtdtype=&quot;SYSTEM&quot;;
+	$xml_writer_object-&gt;dtdurl=&quot;myxmldocument.dtd&quot;;
+	
+	/*
+	 *  ...and a stylesheet for displaying the document in particular way in XML capable browsers.
+	 */
+	$xml_writer_object-&gt;stylesheettype=&quot;text/xsl&quot;;
+	$xml_writer_object-&gt;stylesheet=&quot;myxmldocument.xsl&quot;;
+	
+	/*
+	 *  When you are done with the XML document definition, generate it.
+	 */
+	if($xml_writer_object-&gt;write($output))
+	{
+		
+		/*
+		 *  If the document was generated successfully, you may not output it.
+		 */
+		Header(&quot;Content-Type: text/xml; charset=\&quot;&quot;.$xml_writer_object-&gt;outputencoding.&quot;\&quot;&quot;);
+		Header(&quot;Content-Length: &quot;.strval(strlen($output)));
+		echo $output;
+	}
+	else
+	{
+		
+		/*
+		 *  If there was an error, output it as well.
+		 */
+		Header(&quot;Content-Type: text/plain&quot;);
+		echo (&quot;Error: &quot;.$xml_writer_object-&gt;error);
+	}
+?&gt;</pre>
+<p></p>
+<p><a href="#table_of_contents">Table of contents</a></p>
+</ul>
+</ul>
+<hr />
+<ul>
+<h2><li><a name="variables"></a><a name="4.1.1">Variables</a></li></h2>
+<ul>
+<li><tt><a href="#variable_stylesheet">stylesheet</a></tt></li><br />
+<li><tt><a href="#variable_stylesheettype">stylesheettype</a></tt></li><br />
+<li><tt><a href="#variable_dtdtype">dtdtype</a></tt></li><br />
+<li><tt><a href="#variable_dtddefinition">dtddefinition</a></tt></li><br />
+<li><tt><a href="#variable_dtdurl">dtdurl</a></tt></li><br />
+<li><tt><a href="#variable_outputencoding">outputencoding</a></tt></li><br />
+<li><tt><a href="#variable_inputencoding">inputencoding</a></tt></li><br />
+<li><tt><a href="#variable_linebreak">linebreak</a></tt></li><br />
+<li><tt><a href="#variable_indenttext">indenttext</a></tt></li><br />
+<li><tt><a href="#variable_generatedcomment">generatedcomment</a></tt></li><br />
+<li><tt><a href="#variable_error">error</a></tt></li><br />
+<p><a href="#table_of_contents">Table of contents</a></p>
+<h3><a name="variable_stylesheet"></a><li><a name="5.2.12">stylesheet</a></li></h3>
+<h3>Type</h3>
+<p><tt><i>string</i></tt></p>
+<h3>Default value</h3>
+<p><tt>&quot;&quot;</tt></p>
+<h3>Purpose</h3>
+<p>Define the URL for the default stylesheet definition to be used render the XML document.</p>
+<h3>Usage</h3>
+<p>If you intend that browsers display this document in specific way define the URL of where it is located the stylesheet to be used to render the document. Set this variable to an empty string if you do not intend to specify a stylesheet.</p>
+<p><a href="#variables">Variables</a></p>
+<h3><a name="variable_stylesheettype"></a><li><a name="5.2.13">stylesheettype</a></li></h3>
+<h3>Type</h3>
+<p><tt><i>string</i></tt></p>
+<h3>Default value</h3>
+<p><tt>&quot;text/xsl&quot;</tt></p>
+<h3>Purpose</h3>
+<p>Stylesheets may be of several types. This variable defines the MIME content type of the stylesheet specified for this document.</p>
+<h3>Usage</h3>
+<p>Set this variable to MIME designation for the type of stylesheet defined by the variable <tt><a href="#variable_stylesheet">stylesheet</a></tt>.</p>
+<h3>Example</h3>
+<p><tt>&quot;text/css&quot;</tt></p>
+<p><a href="#variables">Variables</a></p>
+<h3><a name="variable_dtdtype"></a><li><a name="5.2.14">dtdtype</a></li></h3>
+<h3>Type</h3>
+<p><tt><i>string</i></tt></p>
+<h3>Default value</h3>
+<p><tt>&quot;&quot;</tt></p>
+<h3>Purpose</h3>
+<p>Define which type of document type definition (DTD).</p>
+<h3>Usage</h3>
+<p>If you intend to specify a DTD, eventually for validation purposes, set this variable to either: &quot;INTERNAL&quot;, &quot;SYSTEM&quot; or &quot;PUBLIC&quot;. Set this variable to an empty string to not use a DTD. &quot;INTERNAL&quot; mean that the DTD is bein defined inline within the <tt><a href="#variable_dtddefinition">dtddefinition</a></tt> variable. &quot;SYSTEM&quot; or &quot;PUBLIC&quot; means that the DTD is defined in an external resource defined by either <tt><a href="#variable_dtddefinition">dtddefinition</a></tt> or <tt><a href="#variable_dtdurl">dtdurl</a></tt>.</p>
+<p><a href="#variables">Variables</a></p>
+<h3><a name="variable_dtddefinition"></a><li><a name="5.2.15">dtddefinition</a></li></h3>
+<h3>Type</h3>
+<p><tt><i>string</i></tt></p>
+<h3>Default value</h3>
+<p><tt>&quot;&quot;</tt></p>
+<h3>Purpose</h3>
+<p>Define of the DTD.</p>
+<h3>Usage</h3>
+<p>For an internal DTD, this variable should contain the actual DTD definition. For an external DTD, it should be of the form <tt>&quot;Registration//Organization//Type Label//Definition Language&quot;</tt>.</p>
+<h3>Example</h3>
+<p>Example of an internal DTD definition:</p>
+<p> <tt>&quot;&lt;!ELEMENT html (head, body)&gt;\n&lt;!ELEMENT head (title?)&gt;\n&lt;!ELEMENT title (#PCDATA)&gt;\n&lt;!ELEMENT body (#PCDATA)&gt;\n&quot;</tt></p>
+<p> Example of an external DTD definition:</p>
+<p> <tt>&quot;-//W3C//DTD XHTML 1.0 Strict//EN&quot;</tt></p>
+<p><a href="#variables">Variables</a></p>
+<h3><a name="variable_dtdurl"></a><li><a name="5.2.16">dtdurl</a></li></h3>
+<h3>Type</h3>
+<p><tt><i>string</i></tt></p>
+<h3>Default value</h3>
+<p><tt>&quot;&quot;</tt></p>
+<h3>Purpose</h3>
+<p>Define the URL of an external DTD.</p>
+<h3>Usage</h3>
+<p>Optionally specify an absolute or relative URL of an external DTD.</p>
+<h3>Example</h3>
+<p><tt>&quot;http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd&quot;</tt></p>
+<p><a href="#variables">Variables</a></p>
+<h3><a name="variable_outputencoding"></a><li><a name="5.2.17">outputencoding</a></li></h3>
+<h3>Type</h3>
+<p><tt><i>string</i></tt></p>
+<h3>Default value</h3>
+<p><tt>&quot;utf-8&quot;</tt></p>
+<h3>Purpose</h3>
+<p>Define the character set encoding of the output document.</p>
+<h3>Usage</h3>
+<p>Currently the class supports only the encodings <tt>utf-8</tt> or <tt>iso-8859-1</tt>.</p>
+<p><a href="#variables">Variables</a></p>
+<h3><a name="variable_inputencoding"></a><li><a name="5.2.18">inputencoding</a></li></h3>
+<h3>Type</h3>
+<p><tt><i>string</i></tt></p>
+<h3>Default value</h3>
+<p><tt>&quot;iso-8859-1&quot;</tt></p>
+<h3>Purpose</h3>
+<p>Define the character set encoding of the of the data values passed to the function <tt><a href="#function_adddata">adddata</a></tt> or the attribute values passed to the function <tt><a href="#function_addtag">addtag</a></tt>.</p>
+<h3>Usage</h3>
+<p>Currently the class supports only the encodings <tt>utf-8</tt> or <tt>iso-8859-1</tt>.</p>
+<p><a href="#variables">Variables</a></p>
+<h3><a name="variable_linebreak"></a><li><a name="5.2.19">linebreak</a></li></h3>
+<h3>Type</h3>
+<p><tt><i>string</i></tt></p>
+<h3>Default value</h3>
+<p><tt>&quot;\n&quot;</tt></p>
+<h3>Purpose</h3>
+<p>Characters to be used when breaking lines of the output XML document.</p>
+<h3>Usage</h3>
+<p>Use either &quot;\n&quot;, &quot;\r\n&quot; or &quot;\r&quot;.</p>
+<p><a href="#variables">Variables</a></p>
+<h3><a name="variable_indenttext"></a><li><a name="5.2.20">indenttext</a></li></h3>
+<h3>Type</h3>
+<p><tt><i>string</i></tt></p>
+<h3>Default value</h3>
+<p><tt>&quot; &quot;</tt></p>
+<h3>Purpose</h3>
+<p>Characters to be used when indenting the lines of the output XML document.</p>
+<h3>Usage</h3>
+<p>Use either one or more spaces or tab characters.</p>
+<p><a href="#variables">Variables</a></p>
+<h3><a name="variable_generatedcomment"></a><li><a name="5.2.21">generatedcomment</a></li></h3>
+<h3>Type</h3>
+<p><tt><i>string</i></tt></p>
+<h3>Default value</h3>
+<p><tt>&quot;Generated by: http://www.phpclasses.org/xmlwriter \$Revision: 1.32 \$&quot;</tt></p>
+<h3>Purpose</h3>
+<p>Define a text string that is used as a XML comment to identify the program that generated the XML document.</p>
+<h3>Usage</h3>
+<p>Set this variable to the name of the program that uses this class to generate XML documents. Set to an empty string to avoid generating this comment.</p>
+<h3>Example</h3>
+<p><tt>&quot;Generated by: my.e-commerce.com&quot;</tt></p>
+<p><a href="#variables">Variables</a></p>
+<h3><a name="variable_error"></a><li><a name="5.2.22">error</a></li></h3>
+<h3>Type</h3>
+<p><tt><i>string</i></tt></p>
+<h3>Default value</h3>
+<p><tt>&quot;&quot;</tt></p>
+<h3>Purpose</h3>
+<p>Contains the error message that explains the reason of failure of certain class functions.</p>
+<h3>Usage</h3>
+<p>Check this variable when a given class function fails.</p>
+<p><a href="#variables">Variables</a></p>
+<p><a href="#table_of_contents">Table of contents</a></p>
+</ul>
+</ul>
+<hr />
+<ul>
+<h2><li><a name="functions"></a><a name="6.1.1">Functions</a></li></h2>
+<ul>
+<li><tt><a href="#function_write">write</a></tt></li><br />
+<li><tt><a href="#function_addtag">addtag</a></tt></li><br />
+<li><tt><a href="#function_adddata">adddata</a></tt></li><br />
+<li><tt><a href="#function_adddatatag">adddatatag</a></tt></li><br />
+<p><a href="#table_of_contents">Table of contents</a></p>
+<h3><a name="function_write"></a><li><a name="7.2.5">write</a></li></h3>
+<h3>Synopsis</h3>
+<p><tt><i>bool</i> write(</tt><ul>
+<tt>(output) <i>string &amp;</i> </tt><tt><a href="#argument_write_output">output</a></tt><tt></tt></ul>
+<tt>)</tt></p>
+<h3>Purpose</h3>
+<p>Generate the XML document.</p>
+<h3>Usage</h3>
+<p>Pass a reference to a string variable that will hold the resulting XML document.</p>
+<h3>Arguments</h3>
+<ul>
+<p><tt><b><a name="argument_write_output">output</a></b></tt> - Reference to a variable that will hold the resulting XML document.</p>
+</ul>
+<h3>Return value</h3>
+<p>Success boolean flag.  If this flag is <tt>0</tt> then the <tt><a href="#variable_error">error</a></tt> variable contains the error message that explains the failure.</p>
+<p><a href="#functions">Functions</a></p>
+<h3><a name="function_addtag"></a><li><a name="9.2.6">addtag</a></li></h3>
+<h3>Synopsis</h3>
+<p><tt><i>bool</i> addtag(</tt><ul>
+<tt><i>string</i> </tt><tt><a href="#argument_addtag_tag">tag</a></tt><tt>,<br />
+</tt><tt>(input and output) <i>array</i> </tt><tt><a href="#argument_addtag_attributes">attributes</a></tt><tt>,<br />
+</tt><tt><i>string</i> </tt><tt><a href="#argument_addtag_parent">parent</a></tt><tt>,<br />
+</tt><tt>(output) <i>string &amp;</i> </tt><tt><a href="#argument_addtag_path">path</a></tt><tt>,<br />
+</tt><tt><i>bool</i> </tt><tt><a href="#argument_addtag_indent">indent</a></tt><tt></tt></ul>
+<tt>)</tt></p>
+<h3>Purpose</h3>
+<p>Add a tag to the XML document structure.</p>
+<h3>Usage</h3>
+<p>Specify the tag definition and the parent XML document element where the tag will be added.</p>
+<h3>Arguments</h3>
+<ul>
+<p><tt><b><a name="argument_addtag_tag">tag</a></b></tt> - Name of the tag to be added.</p>
+<p><tt><b><a name="argument_addtag_attributes">attributes</a></b></tt> - Associative array that defines the list of attributes of the tag, if any.  The indexes of the array entries are the names of the attributes and the values array entries are the attribute values defined in encoding type specified by the <tt><a href="#variable_inputencoding">inputencoding</a></tt> variable.</p>
+<p><tt><b><a name="argument_addtag_parent">parent</a></b></tt> - Path of the parent XML document tag element within each which the new tag is being added.  If the new tag is the document root tag, the parent path is <tt>&quot;&quot;</tt>. The path of previously added tags is returned by the <tt><a href="#argument_addtag_path">path</a></tt> argument of previous calls to this function.</p>
+<p><tt><b><a name="argument_addtag_path">path</a></b></tt> - Reference to a variable that will hold the path of the XML document tag element that is added by this function.</p>
+<p><tt><b><a name="argument_addtag_indent">indent</a></b></tt> - Flag that determines if the elements to be added within this tag will be outputted in individual indented lines.</p>
+</ul>
+<h3>Return value</h3>
+<p>Success boolean flag.  If this flag is <tt>0</tt> then the <tt><a href="#variable_error">error</a></tt> variable contains the error message that explains the failure. This return value may be safely ignored if the function call arguments are correctly defined.</p>
+<p><a href="#functions">Functions</a></p>
+<h3><a name="function_adddata"></a><li><a name="11.2.7">adddata</a></li></h3>
+<h3>Synopsis</h3>
+<p><tt><i>bool</i> adddata(</tt><ul>
+<tt><i>string</i> </tt><tt><a href="#argument_adddata_data">data</a></tt><tt>,<br />
+</tt><tt><i>string</i> </tt><tt><a href="#argument_adddata_parent">parent</a></tt><tt>,<br />
+</tt><tt>(output) <i>string &amp;</i> </tt><tt><a href="#argument_adddata_path">path</a></tt><tt></tt></ul>
+<tt>)</tt></p>
+<h3>Purpose</h3>
+<p>Add a data part to the XML document structure.</p>
+<h3>Usage</h3>
+<p>Specify the data text and the parent XML document element where the tag will be added.</p>
+<h3>Arguments</h3>
+<ul>
+<p><tt><b><a name="argument_adddata_data">data</a></b></tt> - Data text to be added.</p>
+<p><tt><b><a name="argument_adddata_parent">parent</a></b></tt> - Path of the parent XML document tag element within each which the new data part is being added.  The path of previously added tags is returned by the <tt><a href="#argument_addtag_path">path</a></tt> argument of previous calls to the <tt><a href="#function_addtag">addtag</a></tt> function.</p>
+<p><tt><b><a name="argument_adddata_path">path</a></b></tt> - Reference to a variable that will hold the path of the XML document data part element that is added by this function.</p>
+</ul>
+<h3>Return value</h3>
+<p>Success boolean flag.  If this flag is <tt>0</tt> then the <tt><a href="#variable_error">error</a></tt> variable contains the error message that explains the failure. This return value may be safely ignored if the function call arguments are correctly defined.</p>
+<p><a href="#functions">Functions</a></p>
+<h3><a name="function_adddatatag"></a><li><a name="13.2.8">adddatatag</a></li></h3>
+<h3>Synopsis</h3>
+<p><tt><i>bool</i> adddatatag(</tt><ul>
+<tt><i>string</i> </tt><tt><a href="#argument_adddatatag_tag">tag</a></tt><tt>,<br />
+</tt><tt>(input and output) <i>array</i> </tt><tt><a href="#argument_adddatatag_attributes">attributes</a></tt><tt>,<br />
+</tt><tt><i>string</i> </tt><tt><a href="#argument_adddatatag_data">data</a></tt><tt>,<br />
+</tt><tt><i>string</i> </tt><tt><a href="#argument_adddatatag_parent">parent</a></tt><tt>,<br />
+</tt><tt>(output) <i>string &amp;</i> </tt><tt><a href="#argument_adddatatag_path">path</a></tt><tt></tt></ul>
+<tt>)</tt></p>
+<h3>Purpose</h3>
+<p>Add a tag with data to the XML document structure.</p>
+<h3>Usage</h3>
+<p>Specify the tag definition, the text data and the parent XML document element where the tag will be added.</p>
+<h3>Arguments</h3>
+<ul>
+<p><tt><b><a name="argument_adddatatag_tag">tag</a></b></tt> - Name of the tag to be added.</p>
+<p><tt><b><a name="argument_adddatatag_attributes">attributes</a></b></tt> - Associative array that defines the list of attributes of the tag, if any.  The indexes of the array entries are the names of the attributes and the values array entries are the attribute values defined in encoding type specified by the <tt><a href="#variable_inputencoding">inputencoding</a></tt> variable.</p>
+<p><tt><b><a name="argument_adddatatag_data">data</a></b></tt> - Data text to be added.</p>
+<p><tt><b><a name="argument_adddatatag_parent">parent</a></b></tt> - Path of the parent XML document tag element within each which the new tag is being added. The path of previously added tags is returned by the <tt><a href="#argument_addtag_path">path</a></tt> argument of previous calls to the <tt><a href="#function_addtag">addtag</a></tt> function.</p>
+<p><tt><b><a name="argument_adddatatag_path">path</a></b></tt> - Reference to a variable that will hold the path of the XML document tag element that is added by this function.</p>
+</ul>
+<h3>Return value</h3>
+<p>Success boolean flag.  If this flag is <tt>0</tt> then the <tt><a href="#variable_error">error</a></tt> variable contains the error message that explains the failure. This return value may be safely ignored if the function call arguments are correctly defined.</p>
+<p><a href="#functions">Functions</a></p>
+<p><a href="#table_of_contents">Table of contents</a></p>
+</ul>
+</ul>
+
+<hr />
+<address>Manuel Lemos (<a href="mailto:mlemos@acm.org">mlemos@acm.org</a>)</address>
+</body>
+</html>
