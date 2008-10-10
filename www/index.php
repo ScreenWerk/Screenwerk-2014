@@ -24,7 +24,7 @@
 | NO TRAILING SLASH!
 |
 */
-	$system_folder = "system";
+	$system_folder = "CI/system";
 
 /*
 |---------------------------------------------------------------
@@ -41,7 +41,7 @@
 | NO TRAILING SLASH!
 |
 */
-	$application_folder = "application";
+	$application_folder = "../../application";
 
 
 /*
