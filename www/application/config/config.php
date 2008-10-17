@@ -11,7 +11,7 @@
 |	http://www.your-site.com/
 |
 */
-$config['base_url']	= "http://localhost/screenwerk";
+$config['base_url']	= "http://screenwerk.arx.ee/";
 
 /*
 |--------------------------------------------------------------------------
@@ -41,7 +41,7 @@ $config['index_page'] = "index.php";
 | 'ORIG_PATH_INFO'	Uses the ORIG_PATH_INFO
 |
 */
-$config['uri_protocol']	= "AUTO";
+$config['uri_protocol']	= "REQUEST_URI";
 
 /*
 |--------------------------------------------------------------------------
@@ -232,7 +232,7 @@ $config['encryption_key'] = "";
 $config['sess_cookie_name']     = 'sw_session';
 $config['sess_expiration']      = 7200;
 $config['sess_encrypt_cookie']  = FALSE;
-$config['sess_use_database']    = TRUE;
+$config['sess_use_database']    = FALSE;
 $config['sess_table_name']      = 'ci_sessions';
 $config['sess_match_ip']        = FALSE;
 $config['sess_match_useragent'] = FALSE;

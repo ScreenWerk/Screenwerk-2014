@@ -33,10 +33,10 @@
 
 $active_group = "default";
 
-$db['default']['hostname'] = "localhost";
-$db['default']['username'] = "screenwerk";
-$db['default']['password'] = "";
-$db['default']['database'] = "screenwerk";
+$db['default']['hostname'] = "d1647.mysql.zone.ee";
+$db['default']['username'] = "d1647sa26327";
+$db['default']['password'] = "Selver7";
+$db['default']['database'] = "d1647sd18067";
 $db['default']['dbdriver'] = "mysql";
 $db['default']['dbprefix'] = "sw_";
 $db['default']['active_r'] = TRUE;
