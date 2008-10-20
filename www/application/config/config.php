@@ -23,7 +23,7 @@ $config['base_url']	= "http://screenwerk.arx.ee/";
 | variable so that it is blank.
 |
 */
-$config['index_page'] = "index.php";
+$config['index_page'] = "";
 
 /*
 |--------------------------------------------------------------------------
@@ -54,7 +54,7 @@ $config['uri_protocol']	= "REQUEST_URI";
 | http://www.codeigniter.com/user_guide/general/urls.html
 */
 
-$config['url_suffix'] = ".html";
+$config['url_suffix'] = "";
 
 /*
 |--------------------------------------------------------------------------

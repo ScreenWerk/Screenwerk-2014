@@ -25,12 +25,12 @@ class User extends Controller
       $this->output->enable_profiler(TRUE);
       $this->router =& load_class('Router');	
       
-      $this->load->model('Form_model','Form',TRUE);
-      $this->data['menuitems'] = $this->Form->get_user_forms(1);
 	}
 	        
 	function index()
 	{
+			$this->session->protect('user');
+/*
       $User = $this->User->get_all();
       foreach( $User as $key => $value )
       {
@@ -40,6 +40,7 @@ class User extends Controller
       $data['heading'] = "User";
 
       $this->load->view('active_list_view', $data);
+	*/
 	}
 
 	function create()
@@ -106,6 +107,19 @@ class User extends Controller
 	{
       $this->User->delete($this->router->segments[3]);
       redirect('/user/');
+	}
+	
+	function login() {
+		$this->session->login('argo','pass');
+	}
+
+	function test() {
+		$this->session->protect();
+		//print_r($this->session);
+	}
+
+	function logout() {
+		$this->session->logout();
 	}
 
 }
