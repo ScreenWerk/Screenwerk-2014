@@ -9,14 +9,14 @@ class Form_model extends Model {
    
    function get_user_forms($user_id = 1)
    {
-      $query = $this->db->query( '
-   SELECT f.* 
-     FROM sw_forms f 
-LEFT JOIN sw_forms_users fu on fu.form_id = f.id
-    WHERE fu.user_id = '.$user_id.'
- ORDER BY f.id' );
-
-      return $query->result_array();
+#      $query = $this->db->query( '
+#   SELECT f.* 
+#     FROM sw_forms f 
+#LEFT JOIN sw_forms_users fu on fu.form_id = f.id
+#    WHERE fu.user_id = '.$user_id.'
+# ORDER BY f.id' );
+#
+#      return $query->result_array();
    }
 
 
