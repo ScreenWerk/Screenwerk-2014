@@ -3,7 +3,39 @@ body
    margin: 0px;
    padding: 0px;
    font-size:12px;
-   font-family: verdana,arial,sans-serif;
+   font-family: "Lucida Grande", Verdana, Arial, sans-serif;
+}
+
+label{
+float: left;
+width: 120px;
+font-weight: bold;
+}
+
+input, textarea, select{
+margin-bottom: 5px;
+}
+
+textarea{
+width: 250px;
+height: 150px;
+}
+
+
+
+
+.boxes{
+width: 1em;
+}
+
+#submitbutton{
+margin-left: 120px;
+margin-top: 5px;
+width: 90px;
+}
+
+br{
+clear: left;
 }
 
 div.sw-menu
@@ -39,7 +71,7 @@ fieldset.sw legend
 }
 fieldset.sw label
 {
-        color:#990000;
+        color: #990000;
         display: block;
         width: 150px;
 }

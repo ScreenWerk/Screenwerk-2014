@@ -143,7 +143,6 @@ class CI_Session {
 			
 		}
 	}
-	
 
 
 
@@ -180,7 +179,6 @@ class CI_Session {
 		$this->username = $_SESSION['user']['username'];
 		$this->customer_id = $_SESSION['user']['customer_id'];
 		if(isset($_SESSION['user']['redirect_url'])) $this->redirect_url = $_SESSION['user']['redirect_url'];
-		if(isset($_SESSION['data'])) $this->data = $_SESSION['data'];
 		if(isset($_SESSION['forms'])) $this->forms = $_SESSION['forms'];
 
 	}

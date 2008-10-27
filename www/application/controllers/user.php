@@ -4,36 +4,37 @@ class User extends Controller {
 
 	function __construct() {
 		parent::Controller();
-//		$this->output->enable_profiler(TRUE);      
+
+		//$this->output->enable_profiler(TRUE);      
+
 	}
 	        
 	function index() {
-		$this->session->protect('user');
+		redirect('user/login');
 	}
 
 
 	
 	function login() {
-		$this->session->login('argo','pass');
-		echo '<pre>';
-	//	print_r($this->session);
-		echo '<pre>';
-	}
 
+			if($this->input->post('login')) {
+				$this->session->login($this->input->post('user_name'), md5($this->input->post('user_secret')));
+				redirect('');
+			}
 
+			$view['page_title'] = 'LogIn';
+			$view['page_controller'] = 'login';
+			$view['page_content'] = $this->load->view('user_login_view', $view, True);
+			$this->load->view('main_page_view', $view);
 
-	function test() {
-		$this->session->protect();
-		//print_r($this->session);
 	}
 
 
 
 	function logout() {
 		$this->session->logout();
+		redirect('');
 	}
-
-
 
 }
 
