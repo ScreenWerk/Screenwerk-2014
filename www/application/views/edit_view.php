@@ -1,5 +1,7 @@
 <h2><?= humanize($this->router->method .'_'. $this->router->class); ?></h2>
 
+<h3>Argo ei saa mütsigi aru</h3>
+
 <?php
 	echo form_open(current_url());
 	
