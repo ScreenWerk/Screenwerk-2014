@@ -67,6 +67,8 @@ class Collection_model extends Model {
 
 
 	function get_names_list() {
+		$result = array();
+		
 		foreach($this->get_list() as $key => $value):
 			$result[$key] = $value['name'];
 		endforeach;

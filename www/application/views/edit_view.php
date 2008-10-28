@@ -7,7 +7,7 @@
 	
 		if(is_array($field_value)) {
 			echo form_label($field_name, $field_name);
-			echo form_dropdown($field_name, $field_value['list'], $field_value['value']);
+			echo (isset($field_value['list'])) ? form_dropdown($field_name, $field_value['list'], $field_value['value']) : form_dropdown($field_name);
 		} elseif($field_name == 'id') {
 			echo form_hidden($field_name, $field_value);
 		} else {
