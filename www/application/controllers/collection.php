@@ -8,7 +8,7 @@ class Collection extends Controller {
 		$this->load->model('Collection_model', 'collection');
 		$this->load->model('Dimension_model', 'dimension');
 		
-		$this->session->protect('schedule');
+		$this->session->protect('collection');
 		
 		//$this->output->enable_profiler(TRUE);
 	}
@@ -50,7 +50,7 @@ class Collection extends Controller {
 		}
 		
 		$view['data'] = $data;
-		$view['page_menu_code'] = 'schedule';
+		$view['page_menu_code'] = 'collection';
 		$view['page_content'] = $this->load->view('edit_view', $view, True);
 		$this->load->view('main_page_view', $view);
 	}
