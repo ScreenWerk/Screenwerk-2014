@@ -23,7 +23,7 @@
 <div class="toolbar">
 <?= form_submit('save', 'Save'); ?>
 <?= form_submit('cancel', 'Cancel'); ?>
-<?php if($data['id'] != 0) echo form_submit('delete', 'Delete'); ?>
+<?php if($data['id'] != 0) echo form_submit('delete', 'Delete', 'onclick="return confirm_delete();"'); ?>
 </div>
 
 <?= form_close(); ?>

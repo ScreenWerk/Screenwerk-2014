@@ -9,6 +9,14 @@
 		<link rel="stylesheet" type="text/css" media="screen" href="<?= site_url(); ?>css/tabs.css" />
 		<link rel="stylesheet" type="text/css" media="screen" href="<?= site_url(); ?>css/basic.css" />
 		
+function confirm_delete()
+{
+  if (confirm("Are you sure you want to delete?")==true)
+    return true;
+  else
+    return false;
+}
+
 	</head>
 	<body>
 		<h1>Screenwerk</h1>
