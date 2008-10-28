@@ -8,7 +8,8 @@
 		<link rel="stylesheet" type="text/css" media="screen" href="<?= site_url(); ?>css/screen.css" />
 		<link rel="stylesheet" type="text/css" media="screen" href="<?= site_url(); ?>css/tabs.css" />
 		<link rel="stylesheet" type="text/css" media="screen" href="<?= site_url(); ?>css/basic.css" />
-		
+
+<script>
 function confirm_delete()
 {
   if (confirm("Are you sure you want to delete?")==true)
@@ -16,6 +17,7 @@ function confirm_delete()
   else
     return false;
 }
+</script>
 
 	</head>
 	<body>
