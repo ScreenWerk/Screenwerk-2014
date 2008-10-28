@@ -19,9 +19,3 @@
 <?php endforeach; ?>
 
 </table>
-
-<div class="toolbar">
-<?= form_open($this->router->class .'/add'); ?>
-<?= form_submit('add_new', 'Add new'); ?>
-<?= form_close(); ?>
-</div>

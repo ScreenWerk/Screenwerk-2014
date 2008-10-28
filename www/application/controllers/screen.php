@@ -19,6 +19,7 @@ class Screen extends Controller {
 	function index() {
 		$view['data'] = $this->screen->get_list();
 		$view['page_menu_code'] = 'screen';
+		$view['page_submenu'] = array($this->router->class .'/add'=>'Add New '. humanize($this->router->class));
 		$view['page_content'] = $this->load->view('table_view', $view, True);
 		$this->load->view('main_page_view', $view);
 	}
