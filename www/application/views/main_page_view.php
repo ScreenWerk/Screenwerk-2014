@@ -3,17 +3,22 @@
 	<head profile="http://gmpg.org/xfn/11">
 		<meta http-equiv="content-type" content="text/html; charset=utf-8" />
 		
-		<title>Screenwerk : <?= $page_title; ?></title>
+		<title>Screenwerk : <?= humanize(plural($this->router->class)); ?></title>
 		
 		<link rel="stylesheet" type="text/css" media="screen" href="<?= site_url(); ?>css/screen.css" />
+		<link rel="stylesheet" type="text/css" media="screen" href="<?= site_url(); ?>css/tabs.css" />
+		<link rel="stylesheet" type="text/css" media="screen" href="<?= site_url(); ?>css/basic.css" />
 		
 	</head>
 	<body>
-		<div id="menu">
+		<h1>Screenwerk</h1>
+		<div id="header">
 			<?php $this->load->view('main_page_menu_view'); ?>
 		</div>
-		<div id="content">
-			<?= $page_content; ?>
+		<div id="main">
+			<div id="contents">
+				<?= $page_content; ?>
+			</div>
 		</div>
 
 	</body>

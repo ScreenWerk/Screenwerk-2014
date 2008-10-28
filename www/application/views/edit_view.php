@@ -1,3 +1,5 @@
+<h2><?= humanize($this->router->method .'_'. $this->router->class); ?></h2>
+
 <?php
 	echo form_open(current_url());
 	
