@@ -23,7 +23,7 @@
 <div class="toolbar">
 <?= form_submit('save', 'Save'); ?>
 <?= form_submit('cancel', 'Cancel'); ?>
-<?php if($data['id'] != 0) echo form_submit('delete', 'Delete', 'onclick="return confirm_delete();"'); ?>
+<?php if($data['id'] != 0) echo form_submit('delete', 'Delete', 'onclick="return confirm(\'Do You want to delete this '. $this->router->class .'?\');"'); ?>
 </div>
 
 <?= form_close(); ?>
