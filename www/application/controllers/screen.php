@@ -9,8 +9,6 @@ class Screen extends Controller {
 		$this->load->model('Dimension_model', 'dimension');
 		$this->load->model('Schedule_model', 'schedule');
 		
-		$this->session->protect('screen');
-		
 		//$this->output->enable_profiler(TRUE);
 	}
 

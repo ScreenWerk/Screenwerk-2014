@@ -8,8 +8,6 @@ class Schedule extends Controller {
 		$this->load->model('Schedule_model', 'schedule');
 		$this->load->model('Dimension_model', 'dimension');
 		
-		$this->session->protect('schedule');
-		
 		//$this->output->enable_profiler(TRUE);
 	}
 

@@ -8,8 +8,6 @@ class Collection extends Controller {
 		$this->load->model('Collection_model', 'collection');
 		$this->load->model('Dimension_model', 'dimension');
 		
-		$this->session->protect('collection');
-		
 		//$this->output->enable_profiler(TRUE);
 	}
 

@@ -7,8 +7,6 @@ class Bundle extends Controller {
 		
 		$this->load->model('Bundle_model', 'bundle');
 		
-		$this->session->protect('bundle');
-		
 		//$this->output->enable_profiler(TRUE);
 	}
 

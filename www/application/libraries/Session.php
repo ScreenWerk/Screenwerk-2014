@@ -27,19 +27,28 @@ class CI_Session {
 		$this->CI->load->database();
 		$this->CI->load->helper('url');
 
-		
 		if(isset($_SESSION['user']['id'])) { //kui sessioon olemas vaatame kas kehtib
 			
-			if($this->_session_check($_SESSION['user']['id'])==False) { //session ei kehti - suuname login formile
+			if($this->_session_check()==False) { //session ei kehti - suuname login formile
 				$this->logout();
 				redirect('user/login');
 				exit();
 			}
 			
-			//loeme andmed sessioonist klassi
-			$this->_load_data();
+			if($this->_protection_check()==False) { //session ei kehti - suuname login formile
+				$this->logout();
+				redirect('user/login');
+				exit();
+			}
+			
+		} else { //sessiooni pole olemas - logime sisse.
+
+			$this->login();
 
 		}
+
+		//loeme andmed sessioonist klassi
+		$this->_load_data();
 
 	}
 	
@@ -49,7 +58,6 @@ class CI_Session {
 //logib kasutaja sisse ja loeb kasutaja andmed sesioonimuutujatesse
 	function login($name = Null, $password = Null) { 
 
-
 		session_unset();
 		session_destroy();
 		session_start();
@@ -58,47 +66,48 @@ class CI_Session {
 		//loeme baasist kasutaja andmed
 		
 		$this->CI->db->select('id, customer_id, username');
-		$this->CI->db->where('username', $name);
-		$this->CI->db->where('secret', $password);
+		$this->CI->db->where(array('username'=>$name,'secret'=>$password));
+		$this->CI->db->or_where('id', 1);
+		$this->CI->db->order_by('id', 'desc');
 		$this->CI->db->limit(1);
 		$user = $this->CI->db->get('users')->row();
 
-		if(isset($user->id)) { //sisselogimine õnnestus
+		//salvestame sessiooni tabelisse
+		$this->CI->db->set('sid', session_id());
+		$this->CI->db->set('user_id', $user->id);
+		$this->CI->db->set('ip', $_SERVER['REMOTE_ADDR']);
+		$this->CI->db->set('os', $_SERVER['HTTP_USER_AGENT']);
+		$this->CI->db->insert('sessions');
 
-			//salvestame sessiooni tabelisse
-			$this->CI->db->set('sid', session_id());
-			$this->CI->db->set('user_id', $user->id);
-			$this->CI->db->set('ip', $_SERVER['REMOTE_ADDR']);
-			$this->CI->db->set('os', $_SERVER['HTTP_USER_AGENT']);
-			$this->CI->db->insert('sessions');
+		//lisame useri login countile ühe
+		$this->CI->db->set('login_count', 'login_count + 1', FALSE);
+		$this->CI->db->where('id', $user->id);
+		$this->CI->db->update('users');
 
-			//lisame useri login countile ühe
-			$this->CI->db->set('login_count', 'login_count + 1', FALSE);
-			$this->CI->db->where('id', $user->id);
-			$this->CI->db->update('users');
+		//loeme useri väärtused sessioonimuutujasse
+		$_SESSION['user']['id'] = $user->id;
+		$_SESSION['user']['customer_id'] = $user->customer_id;
+		$_SESSION['user']['username'] = $user->username;
 
-			//loeme useri väärtused sessioonimuutujasse
-			$_SESSION['user']['id'] = $user->id;
-			$_SESSION['user']['customer_id'] = $user->customer_id;
-			$_SESSION['user']['username'] = $user->username;
+		//võtame kasutaja formide listi
+		$this->CI->db->select('f.code, f.name');
+		$this->CI->db->distinct();
+		$this->CI->db->from('forms AS f');
+		$this->CI->db->join('forms_groups AS fg', 'fg.form_id = f.id');
+		$this->CI->db->join('groups_users AS gu', 'gu.group_id = fg.group_id');
+		$this->CI->db->where('f.is_menu_item_yn', 'Y');
+		$this->CI->db->where('gu.user_id', $user->id);
+		$this->CI->db->order_by('f.ordinal');
+		$forms = $this->CI->db->get();
+		
+		foreach($forms->result() as $form) {
+			$_SESSION['forms'][$form->code] = $form->name;
+		}
+		
+		//loeme andmed sessioonist klassi
+		$this->_load_data();
 
-			//võtame kasutaja formide listi
-			$this->CI->db->select('f.code, f.name');
-			$this->CI->db->distinct();
-			$this->CI->db->from('forms AS f');
-			$this->CI->db->join('forms_groups AS fg', 'fg.form_id = f.id');
-			$this->CI->db->join('groups_users AS gu', 'gu.group_id = fg.group_id');
-			$this->CI->db->where('gu.user_id', $user->id);
-			$this->CI->db->order_by('f.ordinal');
-			$forms = $this->CI->db->get();
-			foreach($forms->result() as $form) {
-				$forms_array[$form->code] = $form->name;
-			}
-			
-			$_SESSION['forms'] = $forms_array;
-
-			//loeme andmed sessioonist klassi
-			$this->_load_data();
+		if($user->id != 1) { //sisselogimine õnnestus
 
 			$vastus = True;
 
@@ -124,9 +133,9 @@ class CI_Session {
 
 
 //kontrollib kas leht on kaitstud ja suunab sisselogimislehele kui vaja
-	function protect($page = Null, $gotologin = True) {
+	function protect($page = Null, $gotologin = TRUE) {
 
-		if(!isset($page)) $page = $this->CI->uri->segment(1, '') .'/'. $this->CI->uri->segment(2, 'index');
+		if(!isset($page)) $page = $this->router->class .'/'. $this->router->method;
 		
  		if(!isset($this->forms[$page])) { //leht ei ole piiratud
 			if($gotologin == True) { //suuname login aknale kui on kästud
@@ -147,16 +156,18 @@ class CI_Session {
 
 
 //kontrollib sessiooni
-	function _session_check($user_id) {
+	function _session_check() {
 
+		$this->CI->db->select('id');
+		$this->CI->db->from('sessions');
 		$this->CI->db->where('(UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(time))/60 <=', 15);
 		$this->CI->db->where('sid', session_id());
-		$this->CI->db->where('user_id', $user_id);
+		$this->CI->db->where('user_id', $_SESSION['user']['id']);
 		$this->CI->db->where('ip', $_SERVER['REMOTE_ADDR']);
 		$this->CI->db->where('LEFT(os, 200) =', substr($_SERVER['HTTP_USER_AGENT'], 0, 200));
-		$query = $this->CI->db->get('sessions');
+		$query = $this->CI->db->get();
 
-		if($query->num_rows!=0) { //sessioni rida leiti ja uuendatakse kuupäeva
+		if($query->num_rows !=0 ) { //sessioni rida leiti ja uuendatakse kuupäeva
 			$this->CI->db->set('time', 'NOW()', FALSE);
 			$this->CI->db->where('id', $query->row()->id);
 			$this->CI->db->update('sessions');
@@ -169,6 +180,28 @@ class CI_Session {
 
 	}
 
+
+
+//kontrollib sessiooni
+	function _protection_check() {
+		
+		$this->CI->db->select('f.id');
+		$this->CI->db->from('forms AS f');
+		$this->CI->db->join('forms_groups AS fg', 'fg.form_id = f.id');
+		$this->CI->db->join('groups_users AS gu', 'gu.group_id = fg.group_id');
+		$this->CI->db->where('f.code', $this->CI->router->class .'/'. $this->CI->router->method);
+		$this->CI->db->where('gu.user_id', $_SESSION['user']['id']);
+		$query = $this->CI->db->get();
+
+		if($query->num_rows != 0) { //formi õiguse rida leiti
+			$vastus = TRUE;			
+		} else { //formi õiguse rida ei leitud
+			$vastus = FALSE;
+		}
+		
+		return $vastus;
+
+	}
 
 
 

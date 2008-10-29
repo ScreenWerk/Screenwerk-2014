@@ -8,8 +8,6 @@ class Layout extends Controller {
 		$this->load->model('Layout_model', 'layout');
 		$this->load->model('Dimension_model', 'dimension');
 		
-		$this->session->protect('layout');
-		
 		//$this->output->enable_profiler(TRUE);
 	}
 

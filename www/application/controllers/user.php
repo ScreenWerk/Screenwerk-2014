@@ -22,7 +22,7 @@ class User extends Controller {
 				redirect('');
 			}
 
-			$view['page_menu_code'] = 'user/logout';
+			$view['page_menu_code'] = 'user/login';
 			$view['page_content'] = $this->load->view('user_login_view', $view, True);
 			$this->load->view('main_page_view', $view);
 

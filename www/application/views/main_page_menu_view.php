@@ -2,7 +2,8 @@
 <?php
 	if(isset($_SESSION['forms'])) {
 		foreach($_SESSION['forms'] as $key => $value):
-			if($page_menu_code == $key) {
+			if(($key == $this->router->class .'/'. $this->router->method) 
+			 || ($key == $this->router->class .'/index')) {
 				echo '<li><span>'. $value .'</span>';
 				if(isset($page_submenu)) {
 					echo '<ul id="secondary">';
