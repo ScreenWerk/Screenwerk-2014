@@ -5,9 +5,9 @@
 		
 		<title>Screenwerk : <?= humanize(plural($this->router->class)); ?></title>
 		
-		<link rel="stylesheet" type="text/css" media="screen" href="<?= site_url(); ?>css/screen.css" />
-		<link rel="stylesheet" type="text/css" media="screen" href="<?= site_url(); ?>css/tabs.css" />
-		<link rel="stylesheet" type="text/css" media="screen" href="<?= site_url(); ?>css/basic.css" />
+		<link rel="stylesheet" type="text/css" media="screen" href="<?= base_url(); ?>css/screen.css" />
+		<link rel="stylesheet" type="text/css" media="screen" href="<?= base_url(); ?>css/tabs.css" />
+		<link rel="stylesheet" type="text/css" media="screen" href="<?= base_url(); ?>css/basic.css" />
 
 	</head>
 	<body>
