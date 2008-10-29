@@ -13,7 +13,11 @@
 
 	<tr>
 		<td><?= implode('</td><td>', array_values($row_value)); ?></td>
-		<td><?= anchor(site_url($this->router->class .'/edit/'.  $row_id), 'Edit'); ?></td>
+<?php
+	if(isset($_SESSION['forms'][$this->router->class .'/edit'])) {
+		echo '<td>'. anchor(site_url($this->router->class .'/edit/'.  $row_id), 'Edit') .'</td>';
+	}
+?>
 	</tr>
 
 <?php endforeach; ?>
