@@ -90,18 +90,18 @@ class CI_Session {
 		$_SESSION['user']['username'] = $user->username;
 
 		//võtame kasutaja formide listi
-		$this->CI->db->select('f.code, f.name');
+		$this->CI->db->select('f.code, f.name, f.is_menu_item_yn AS menu');
 		$this->CI->db->distinct();
 		$this->CI->db->from('forms AS f');
 		$this->CI->db->join('forms_groups AS fg', 'fg.form_id = f.id');
 		$this->CI->db->join('groups_users AS gu', 'gu.group_id = fg.group_id');
-		$this->CI->db->where('f.is_menu_item_yn', 'Y');
 		$this->CI->db->where('gu.user_id', $user->id);
 		$this->CI->db->order_by('f.ordinal');
 		$forms = $this->CI->db->get();
 		
 		foreach($forms->result() as $form) {
 			$_SESSION['forms'][$form->code] = $form->name;
+			if($form->menu == 'Y') $_SESSION['menu'][$form->code] = $form->name;
 		}
 		
 		//loeme andmed sessioonist klassi
@@ -185,15 +185,7 @@ class CI_Session {
 //kontrollib sessiooni
 	function _protection_check() {
 		
-		$this->CI->db->select('f.id');
-		$this->CI->db->from('forms AS f');
-		$this->CI->db->join('forms_groups AS fg', 'fg.form_id = f.id');
-		$this->CI->db->join('groups_users AS gu', 'gu.group_id = fg.group_id');
-		$this->CI->db->where('f.code', $this->CI->router->class .'/'. $this->CI->router->method);
-		$this->CI->db->where('gu.user_id', $_SESSION['user']['id']);
-		$query = $this->CI->db->get();
-
-		if($query->num_rows != 0) { //formi õiguse rida leiti
+		if(isset($_SESSION['forms'][$this->CI->router->class .'/'. $this->CI->router->method])) { //formi õiguse rida leiti
 			$vastus = TRUE;			
 		} else { //formi õiguse rida ei leitud
 			$vastus = FALSE;
@@ -212,6 +204,7 @@ class CI_Session {
 		$this->username = $_SESSION['user']['username'];
 		$this->customer_id = $_SESSION['user']['customer_id'];
 		if(isset($_SESSION['user']['redirect_url'])) $this->redirect_url = $_SESSION['user']['redirect_url'];
+		if(isset($_SESSION['menu'])) $this->forms = $_SESSION['menu'];
 		if(isset($_SESSION['forms'])) $this->forms = $_SESSION['forms'];
 
 	}

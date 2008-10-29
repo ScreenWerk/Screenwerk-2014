@@ -1,7 +1,7 @@
 <ul id="primary">
 <?php
-	if(isset($_SESSION['forms'])) {
-		foreach($_SESSION['forms'] as $key => $value):
+	if(isset($_SESSION['menu'])) {
+		foreach($_SESSION['menu'] as $key => $value):
 			if(($key == $this->router->class .'/'. $this->router->method) 
 			 || ($key == $this->router->class .'/index')) {
 				echo '<li><span>'. $value .'</span>';
