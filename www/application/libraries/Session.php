@@ -31,19 +31,15 @@ class CI_Session {
 			
 			if($this->_session_check()==False) { //session ei kehti - suuname login formile
 				$this->logout();
-				redirect('user/login');
-				exit();
 			}
 			
 			if($this->_protection_check()==False) { //session ei kehti - suuname login formile
 				$this->logout();
-				redirect('user/login');
-				exit();
 			}
 			
 		} else { //sessiooni pole olemas - logime sisse.
 
-			$this->login();
+			$this->logout();
 
 		}
 
@@ -127,6 +123,8 @@ class CI_Session {
 //logib kasutaja välja
 	function logout() { 
 		$this->login();
+		redirect('user/login');
+		exit();
 	}
 
 
