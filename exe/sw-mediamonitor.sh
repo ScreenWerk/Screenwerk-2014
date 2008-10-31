@@ -14,7 +14,7 @@ while read LINE
 do
    echo "Catched ${LINE}"
    filename=`echo ${LINE} | cut -d"\"" -f2`
-
+   
    echo "sw-media.create.sh \"${filename}\" &"
    ${_DIR_EXE}/sw-media.create.sh "${filename}" &
 done &

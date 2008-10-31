@@ -12,8 +12,12 @@ then
 	exit 1
 fi
 
+incoming_media=${_DIR_INCOMING_MEDIA}/${1}
+media_owner=`ls -o ${incoming_media} | cut -d" " -f3`
+customer_id=`${_DIR_EXE}/sw-customer.find_by_username.sh ${media_owner}`
 
-media_Id=`${_DIR_EXE}/sw-media.find_by_filename.sh "${1}"`
+
+media_Id=`${_DIR_EXE}/sw-media.find_by_filename_and_customer.sh "${1}" ${customer_id}`
 if [ -n "${media_Id}" ]
 then
 	echo "Media \"${1}\" already loaded - Id:${media_Id}"
@@ -21,7 +25,6 @@ then
 fi
 
 
-incoming_media=${_DIR_INCOMING_MEDIA}/${1}
 if [ ! -r "${incoming_media}" ]
 then
 	echo "${incoming_media} is not readable."
@@ -63,13 +66,14 @@ echo "INSERT into ${_DB_TABLE_MEDIA} set filename='${1}', type='${media_type}', 
 
 mysql -u ${_DB_USER} --password="${_DB_PASSWORD}" -D ${_DB_SCHEMA} --host=${_DB_HOST} -sN --default-character-set=utf8<<EOFMYSQL
 INSERT into ${_DB_TABLE_MEDIA}
-set filename='${1}', type='${media_type}', dimension_id=${DIMENSION_ID}, location='ORIGINAL', length=${ID_LENGTH};
+set filename='${1}', customer_id='${customer_id}', type='${media_type}', dimension_id=${DIMENSION_ID}, location='ORIGINAL', length=${ID_LENGTH};
 EOFMYSQL
 
-media_Id=`${_DIR_EXE}/sw-media.find_by_filename.sh "${1}"`
+media_Id=`${_DIR_EXE}/sw-media.find_by_filename_and_customer.sh "${1}" ${customer_id}`
+
 echo "Media \"${1}\" loaded - Id:${media_Id}"
 
 
-mv "${incoming_media}" ${_DIR_ORIGINAL_MEDIA}
+mv "${incoming_media}" ${_DIR_ORIGINAL_MEDIA}/${media_Id}
 
 exit 0
