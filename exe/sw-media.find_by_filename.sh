@@ -1,6 +1,6 @@
 #!/bin/bash
 
-. sw-script-header.sh
+. `dirname ${0}`/sw-script-header.sh
 
 _table=media
 _field=filename
