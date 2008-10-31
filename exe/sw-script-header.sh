@@ -17,7 +17,7 @@ _DB_TABLE_MEDIA=${_DB_PREFIX}medias
 _MAX_MCOLLECTION_LENGTH="86400" # max playlist length in sec's
 
 #_DIR_TRUNK=/home/mihkel/Documents/Screenwerk/trunk
-_DIR_TRUNK=`dirname ${0}`/..
+_DIR_TRUNK=`pwd`/..
 _DIR_EXE=${_DIR_TRUNK}/exe
 
 _DIR_FTP=${_DIR_TRUNK}/ftp
