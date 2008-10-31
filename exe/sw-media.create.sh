@@ -61,7 +61,7 @@ DIMENSION_ID=`${_DIR_EXE}/sw-dimension.findcreate.sh ${ID_WIDTH} ${ID_HEIGHT}`
 
 echo "INSERT into ${_DB_TABLE_MEDIA} set filename='${1}', type='${media_type}', dimension_id=${DIMENSION_ID}, class='ORIGINAL', length=${ID_LENGTH};"
 
-mysql -u ${_DB_USER} --password="${_DB_PASSWORD}" -D ${_DB_SCHEMA} -sN --default-character-set=utf8<<EOFMYSQL
+mysql -u ${_DB_USER} --password="${_DB_PASSWORD}" -D ${_DB_SCHEMA} --host=${_DB_HOST} -sN --default-character-set=utf8<<EOFMYSQL
 INSERT into ${_DB_TABLE_MEDIA}
 set filename='${1}', type='${media_type}', dimension_id=${DIMENSION_ID}, location='ORIGINAL', length=${ID_LENGTH};
 EOFMYSQL

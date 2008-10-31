@@ -6,7 +6,7 @@ _table=media
 _field=filename
 
 
-mysql -u ${_DB_USER} --password="${_DB_PASSWORD}" -D ${_DB_SCHEMA} -s --default-character-set=utf8<<EOFMYSQL
+mysql -u ${_DB_USER} --password="${_DB_PASSWORD}" -D ${_DB_SCHEMA} --host=${_DB_HOST} -s --default-character-set=utf8<<EOFMYSQL
 select Id from ${_DB_PREFIX}${_table}s where ${_field}='${1}';
 EOFMYSQL
 

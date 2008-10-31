@@ -1,7 +1,15 @@
-_DB_USER="screenwerk"
-_DB_PASSWORD=""
-_DB_SCHEMA="screenwerk"
+#_DB_USER="screenwerk"
+#_DB_PASSWORD=""
+#_DB_SCHEMA="screenwerk"
+#_DB_PREFIX="sw_"
+#_DB_HOST="localhost"
+
+_DB_USER="d1647sa26327"
+_DB_PASSWORD="Selver7"
+_DB_SCHEMA="d1647sd18067"
 _DB_PREFIX="sw_"
+_DB_HOST="d1647.mysql.zone.ee"
+
 
 _DB_TABLE_MEDIA=${_DB_PREFIX}medias
 
