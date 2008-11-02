@@ -13,7 +13,7 @@ then
 fi
 
 incoming_media=${_DIR_INCOMING_MEDIA}/${1}
-media_owner=`ls -o ${incoming_media} | cut -d" " -f3`
+media_owner=`ls -o "${incoming_media}" | cut -d" " -f3`
 customer_id=`${_DIR_EXE}/sw-customer.find_by_username.sh ${media_owner}`
 
 
