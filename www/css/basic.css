@@ -1,7 +1,7 @@
 html { min-width: 600px; }
 
 body, div, td, th, h2, h3, h4 { /* redundant rules for bad browsers  */  
-    font-family: verdana,sans-serif;
+  font-family: "Lucida Grande", Verdana, Arial, sans-serif;
 	font-size:    x-small;
 	voice-family: "\"}\"";
 	voice-family: inherit;
@@ -24,7 +24,6 @@ a:active { color: #000; }
 p { line-height: 140%; }
 
 h1,h2 {
-	font-family: trebuchet ms;
 	font-weight: bold;
 	color: #333;
 }
@@ -38,10 +37,14 @@ h1 a { text-decoration: none; color: #333; }
 h1 a:hover { border-bottom: 1px dotted #666; color: #000; }
 
 h2 {
-	font-size: 140%;
-	padding-bottom: 2px;
-	border-bottom: 1px solid #CCC;
-	margin: 0;
+	margin-left: 0;
+	margin-bottom: 4px;
+	margin-right: 0;
+	margin-top: 0;
+	border-bottom-color: #cccccc;
+	font-size: 120%;
+	padding-bottom: 1px;
+	border-bottom: 1px solid;
 }
 
 p.note {
