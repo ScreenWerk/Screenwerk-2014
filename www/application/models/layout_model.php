@@ -4,7 +4,7 @@ class Layout_model extends Model {
 
 	function __construct() {
 		parent::Model();
-		$this->load->model('Dimension_model', 'dimension', TRUE);
+		$this->load->model('Dimension_model', 'dimension');
 	}
 
 
@@ -58,7 +58,7 @@ class Layout_model extends Model {
 	function get_name($id) {
 		$this->db->select('name');
 		$this->db->where('id', $id);
-		$result = $this->db->get('layout');
+		$result = $this->db->get('layouts');
 		
 		if ($result->num_rows() > 0) return $result->row()->name;
 

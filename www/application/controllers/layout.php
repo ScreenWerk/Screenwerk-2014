@@ -7,6 +7,8 @@ class Layout extends Controller {
 		
 		$this->load->model('Layout_model', 'layout');
 		$this->load->model('Dimension_model', 'dimension');
+		$this->load->model('Bundle_layout_model', 'bundle_layout');
+		$this->load->model('Layout_collection_model', 'layout_collection');
 		
 		//$this->output->enable_profiler(TRUE);
 	}
@@ -40,6 +42,25 @@ class Layout extends Controller {
 		}
 		
 		$data = $this->layout->get_one($id);
+		
+		if(isset($id)) {
+			$data_m2m['bundle'] = $this->bundle_layout->get_list(NULL, $id);
+			foreach($data_m2m['bundle'] as &$row):
+				unset($row['bundle_id']);
+				unset($row['layout']);
+				unset($row['layout_id']);
+				unset($row['dimension_id']);
+			endforeach;
+
+			$data_m2m['collection'] = $this->layout_collection->get_list($id, NULL);
+			foreach($data_m2m['collection'] as &$row):
+				unset($row['collection_id']);
+				unset($row['layout']);
+				unset($row['layout_id']);
+			endforeach;
+
+			$view['data_m2m'] = $data_m2m;
+		}
 		
 		$data['dimension']['value'] = $data['dimension_id'];
 		unset($data['dimension_id']);

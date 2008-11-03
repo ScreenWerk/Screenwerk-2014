@@ -7,6 +7,8 @@ class Collection extends Controller {
 		
 		$this->load->model('Collection_model', 'collection');
 		$this->load->model('Dimension_model', 'dimension');
+		$this->load->model('Layout_collection_model', 'layout_collection');
+		$this->load->model('Collection_schedule_model', 'collection_schedule');
 		
 		//$this->output->enable_profiler(TRUE);
 	}
@@ -41,6 +43,24 @@ class Collection extends Controller {
 		
 		$data = $this->collection->get_one($id);
 		
+		if(isset($id)) {
+			$data_m2m['layout'] = $this->layout_collection->get_list(NULL, $id);
+			foreach($data_m2m['layout'] as &$row):
+				unset($row['collection_id']);
+				unset($row['collection']);
+				unset($row['layout_id']);
+			endforeach;
+
+			$data_m2m['schedule'] = $this->collection_schedule->get_list($id, NULL);
+			foreach($data_m2m['schedule'] as &$row):
+				unset($row['collection_id']);
+				unset($row['collection']);
+				unset($row['schedule_id']);
+			endforeach;
+
+			$view['data_m2m'] = $data_m2m;
+		}
+
 		$data['dimension']['value'] = $data['dimension_id'];
 		unset($data['dimension_id']);
 		foreach($this->dimension->get_names_list() as $dimension_key => $dimension_value) {

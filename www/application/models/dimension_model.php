@@ -4,7 +4,6 @@ class Dimension_model extends Model {
 
 	function __construct() {
 			parent::Model();
-			//$this->load->model('Aspect_model','Aspect',TRUE);
 	}
 
 

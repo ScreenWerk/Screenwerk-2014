@@ -7,6 +7,7 @@ class Schedule extends Controller {
 		
 		$this->load->model('Schedule_model', 'schedule');
 		$this->load->model('Dimension_model', 'dimension');
+		$this->load->model('Collection_schedule_model', 'collection_schedule');
 		
 		//$this->output->enable_profiler(TRUE);
 	}
@@ -41,6 +42,17 @@ class Schedule extends Controller {
 		
 		$data = $this->schedule->get_one($id);
 		
+		if(isset($id)) {
+			$data_m2m['collection'] = $this->collection_schedule->get_list(NULL, $id);
+			foreach($data_m2m['collection'] as &$row):
+				unset($row['collection_id']);
+				unset($row['schedule']);
+				unset($row['schedule_id']);
+			endforeach;
+
+			$view['data_m2m'] = $data_m2m;
+		}
+
 		$data['dimension']['value'] = $data['dimension_id'];
 		unset($data['dimension_id']);
 		foreach($this->dimension->get_names_list() as $dimension_key => $dimension_value) {
