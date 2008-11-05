@@ -6,7 +6,6 @@ class Playlist extends Controller
    {
       parent::Controller();
       
-      $this->load->model('Media_model', 'media');
       $this->load->model('Playlist_model', 'Playlist');
 
       $this->output->enable_profiler(TRUE);      
@@ -17,8 +16,12 @@ class Playlist extends Controller
 
 	function index() {
       $screen_id = 28; //$this->router->segments[3];
-      $no_of_days = 7; //$this->router->segments[4];
-      $pl_data = $this->Playlist->create_playlist_for_screen($screen_id, $no_of_days);
+      $no_of_days = 1; //$this->router->segments[4];
+      $bloated_playlist = $this->Playlist->create_playlist_for_screen($screen_id, $no_of_days);
+
+      print_r( $bloated_playlist );
+      return;
+      
       $pl_days =& $pl_data['PlaylistDays'];
       $pl_medias =& $pl_data['PlaylistMedias'];
 

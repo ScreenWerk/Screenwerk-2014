@@ -26,25 +26,6 @@ class PlaylistDay
    }
 }
 
-
-/* obsolete
-class PlaylistEvent
-{
-   function __construct( $time, $event, $event_id,
-                         $media_id = false, $geometry = false, $end_time = false )
-   {
-         $this->time = $time;
-         $this->event = $event;
-         $this->event_id = $event_id;
-         if( !( $media_id === false ) ) $this->media_id = $media_id;
-         if( !( $geometry === false ) ) $this->geometry = $geometry;
-         if( !( $end_time === false ) ) $this->end_time = $end_time;
-   }
-}
-*/
-
-
-
 class Playlist_model extends Model 
 {
    var $PlaylistDays = array();
@@ -54,10 +35,14 @@ class Playlist_model extends Model
    
    var $models = array(
             'Screen', 
-            'Collection', 
             'Schedule',
+            'Collection_Schedule',
+            'Collection', 
+            'Layout_Collection', 
             'Layout',
+            'Bundle_Layout',
             'Bundle',
+            'Media_Bundle',
             'Media'
          );
 
@@ -68,15 +53,16 @@ class Playlist_model extends Model
 	}
 
 
-
 	function create_playlist_for_screen( $screen_id, $no_of_days )
 	{
 	   $this->screen_id = $screen_id;
 	   
       $data['query'] = $this->Screen->get_one( $screen_id );
       $_schedule_id = $data['query']['schedule_id'];
+
+      //TODO: 
+      $ScheduledCollections = $this->Collection_Schedule->get_collections_for_schedule( $_schedule_id );
       
-      $ScheduledCollections = $this->Schedule->list_schedule_collections( $_schedule_id );
       for( $i=0; $i<$no_of_days; $i++ )
       {
          $this->PlaylistDays[$i] =& new PlaylistDay( $i );
@@ -126,13 +112,12 @@ class Playlist_model extends Model
       $this->solve_collected_layout_collisions();
    }
    
-   
-   
    function create_layout_bundles()
    {
       foreach( $this->current_PD->layouts as &$layout )
       {
-         $_bundles = $this->Layout->list_layout_bundles($layout['id']);
+         //TODO:
+         $_bundles = $this->Bundle_Layout->get_bundles_for_layout( $layout['id'] );
          #print_r($_bundles);
 
          if( count( $_bundles ) == 0 ) continue;
@@ -156,19 +141,11 @@ class Playlist_model extends Model
       }
    }
    
-   
-   
    function create_bundled_medias()
    {
       $this->collect_playlist_medias();
    }
    
-   
-   
-//==========================================//
-
-
-
    function solve_collected_layout_collisions()
    {
       /*
@@ -201,14 +178,13 @@ class Playlist_model extends Model
       }
    }
 
-
-
    function collect_playlist_medias()
    {
       $_event_id = 0;
       foreach( $this->current_PD->bundles as &$bundle )
       {
-         $_medias = $this->Bundle->list_bundled_medias($bundle['id']);
+         //TODO:
+         $_medias = $this->Media_Bundle->get_medias_for_bundle( $bundle['id'] );
 
          if( count( $_medias ) == 0 ) continue;
 
@@ -287,14 +263,12 @@ class Playlist_model extends Model
       array_multisort( $event_sort_time, $this->current_PD->events );
    }
 
-    
-
    function collect_playlist_layouts()
    {
-#         print_r($this->current_PD->collections);
       foreach( $this->current_PD->collections as &$collection )
       {
-         $_layouts = $this->Collection->list_collection_layouts($collection['id']);
+         //TODO:
+         $_layouts = $this->Layout_Collection->get_layouts_for_collection( $collection['id'] );
 
          if( count( $_layouts ) == 0 ) continue;
 
@@ -334,8 +308,6 @@ class Playlist_model extends Model
          }
       }
    }      
-
-    
 
    function solve_scheduled_collections_collisions( &$collections )
    {
@@ -388,8 +360,6 @@ class Playlist_model extends Model
          $this->current_PD->collections[] = $_current_collection;
       }
    }
-
-
 
    /*
    * Create playlist with all involved collections

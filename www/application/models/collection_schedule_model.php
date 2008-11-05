@@ -32,6 +32,36 @@ class Collection_schedule_model extends Model {
 		return $data;
 	}
 
+
+   function get_collections_for_schedule( $schedule_id )
+   {
+      if( isset( $this->CollectionsForSchedule[$schedule_id] ) )
+      {
+         return $this->CollectionsForSchedule[$schedule_id];
+      }
+		$this->db->select('cs.id cs_id, c.id, c.name, cs.cron_minute, cs.cron_hour, cs.cron_day, cs.cron_month, cs.cron_weekday, cs.valid_from_date, cs.valid_to_date');
+		$this->db->from('collections_schedules AS cs');
+		$this->db->join('collections AS c', 'c.id = cs.collection_id');
+		$this->db->where('cs.customer_id', $_SESSION['user']['customer_id']);
+		$this->db->where('cs.schedule_id', $schedule_id);
+		$this->db->order_by('c.name', 'asc'); 
+		$query = $this->db->get();
+
+		if($query->num_rows() > 0)
+		{
+			foreach($query->result_array() as $row)
+			{
+				$this->CollectionsForSchedule[$schedule_id][$row['id']] = $row;
+				//unset($this->CollectionsForSchedule[$schedule_id][$row['id']]['id']);
+			}
+		}
+		else
+		{
+			$this->CollectionsForSchedule[$schedule_id] = array();
+		}
+
+		return $this->CollectionsForSchedule[$schedule_id];
+   }
 }
 
 ?>
