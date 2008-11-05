@@ -12,7 +12,7 @@ class Screen_model extends Model {
 
 	function get_list() {
 
-		$this->db->select('id, name, schedule_id, dimension_id');
+		$this->db->select('id, name, schedule_id, dimension_id, content_md5');
 		$this->db->from('screens');
 		$this->db->where('customer_id', $_SESSION['user']['customer_id']);
 		$this->db->order_by('name'); 
@@ -26,6 +26,12 @@ class Screen_model extends Model {
 				unset($data[$row['id']]['dimension_id']);
 				unset($data[$row['id']]['schedule_id']);
 				unset($data[$row['id']]['id']);
+
+				$data[$row['id']]['synchronized'] =
+				    ( $data[$row['id']]['content_md5'] == $this->md5( $row['id'] ) ) ?
+				    'Yes' : 'No'; 
+            unset( $data[$row['id']]['content_md5'] );
+            
 			}
 		} else {
 			$data = array();

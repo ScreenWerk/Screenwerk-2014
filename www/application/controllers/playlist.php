@@ -17,10 +17,9 @@ class Playlist extends Controller
 	function index() {
       $screen_id = 28; //$this->router->segments[3];
       $no_of_days = 1; //$this->router->segments[4];
-      $bloated_playlist = $this->Playlist->create_playlist_for_screen($screen_id, $no_of_days);
+      $pl_data = $this->Playlist->create_playlist_for_screen($screen_id, $no_of_days);
 
-      print_r( $bloated_playlist );
-      return;
+      //print_r( $bloated_playlist );      return;
       
       $pl_days =& $pl_data['PlaylistDays'];
       $pl_medias =& $pl_data['PlaylistMedias'];

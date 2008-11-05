@@ -230,7 +230,7 @@ class Playlist_model extends Model
                $_split = explode( '.', $_source_name );
                $_ext = array_pop($_split);
                $_target_name = $this->screen_id . '_' . $_media['media_id'].'_'.$bundle['width'].'x'.$bundle['height'].'.'.$_ext;
-               $this->PlaylistMedias[$_target_name] = $_source_name;
+               $this->PlaylistMedias[$_target_name] = $_media['media_id'];
                
                
                
