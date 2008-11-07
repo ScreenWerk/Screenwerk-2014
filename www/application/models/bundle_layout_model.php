@@ -22,17 +22,66 @@ class Bundle_layout_model extends Model {
 		if($query->num_rows() > 0) {
 			foreach($query->result_array() as $row) {
 				$data[$row['id']] = $row;
-				unset($data[$row['id']]['id']);
-				$data[$row['id']]['bundle'] = $this->bundle->get_name($row['bundle_id']);
-				$data[$row['id']]['layout'] = $this->layout->get_name($row['layout_id']);
-				$data[$row['id']]['dimension'] = $this->dimension->get_name($row['dimension_id']);
 			}
 		} else {
-			$data = array();
+			foreach($query->field_data() as $row) {
+				$data[0][$row->name] = NULL;
+			}
+			$data[0]['bundle_id'] = $bundle_id;
+			$data[0]['layout_id'] = $layout_id;
 		}
 
 		return $data;
 	}
+
+
+	function delete($id) {
+		$this->db->where('id', $id);
+		$this->db->delete('bundles_layouts');
+	}
+
+
+
+	function update() {
+		
+		$id = $this->input->post('id');
+		$bundle_id = $this->input->post('bundle_id');
+		$layout_id = $this->input->post('layout_id');
+		$position_x = $this->input->post('position_x');
+		$position_y = $this->input->post('position_y');
+		$position_z = $this->input->post('position_z');
+		$start_sec = $this->input->post('start_sec');
+		$stop_sec = $this->input->post('stop_sec');
+		$dimension_id = $this->input->post('dimension_id');
+		
+		foreach($id as $key => $value) {
+			$data = array(
+				'bundle_id' => $bundle_id[$key],
+				'layout_id' => $layout_id[$key],
+				'position_x' => $position_x[$key],
+				'position_y' => $position_y[$key],
+				'position_z' => $position_z[$key],
+				'start_sec' => $start_sec[$key],
+				'stop_sec' => $stop_sec[$key],
+				'dimension_id' => $dimension_id[$key]
+			);
+			
+			if($id[$key] > 0) {
+				$this->db->where('id', $id[$key]);
+				$this->db->update('bundles_layouts', $data);
+			} else {
+				if($bundle_id[$key] != 0 AND $layout_id[$key] != 0) {
+					$data['customer_id'] = $_SESSION['user']['customer_id'];
+					$this->db->insert('bundles_layouts', $data);
+				}
+			}
+		}
+		
+	}
+
+
+
+
 
 
 	function get_bundles_for_layout( $layout_id )

@@ -31,12 +31,20 @@ class Schedule extends Controller {
 			redirect($this->uri->segment(1));
 		}
 
-		if($this->input->post('cancel')) {
+		if($this->input->post('save_collection')) {
+			$this->collection_schedule->update();
+		}
+
+		if($this->input->post('delete')) {
+			$this->schedule->delete($this->input->post('id'));
 			redirect($this->uri->segment(1));
 		}
 		
-		if($this->input->post('delete')) {
-			$this->schedule->delete($this->input->post('id'));
+		if($this->input->post('delete_collection')) {
+			$this->collection_schedule->delete(current(array_keys($this->input->post('delete_collection'))));
+		}
+		
+		if($this->input->post('cancel')) {
 			redirect($this->uri->segment(1));
 		}
 		
@@ -45,9 +53,12 @@ class Schedule extends Controller {
 		if(isset($id)) {
 			$data_m2m['collection'] = $this->collection_schedule->get_list(NULL, $id);
 			foreach($data_m2m['collection'] as &$row):
+				$row['collection']['value'] = $row['collection_id'];
+				$row['collection']['list'][0] = 'Chose...';
+				foreach($this->collection->get_names_list() as $media_key => $media_value) {
+					$row['collection']['list'][$media_key] = $media_value;
+				}
 				unset($row['collection_id']);
-				unset($row['schedule']);
-				unset($row['schedule_id']);
 			endforeach;
 
 			$view['data_m2m'] = $data_m2m;

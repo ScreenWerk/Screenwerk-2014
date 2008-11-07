@@ -21,16 +21,92 @@ class Media_bundle_model extends Model {
 		if($query->num_rows() > 0) {
 			foreach($query->result_array() as $row) {
 				$data[$row['id']] = $row;
-				unset($data[$row['id']]['id']);
-				$data[$row['id']]['media'] = $this->media->get_name($row['media_id']);
-				$data[$row['id']]['bundle'] = $this->bundle->get_name($row['bundle_id']);
 			}
 		} else {
-			$data = array();
+			foreach($query->field_data() as $row) {
+				$data[0][$row->name] = NULL;
+			}
+			$data[0]['media_id'] = $media_id;
+			$data[0]['bundle_id'] = $bundle_id;
 		}
+		//print_r($data);
 
 		return $data;
 	}
+
+
+
+	function get_one($id = NULL) {
+	
+		$this->db->select('id, media_id, bundle_id, frequency, appearances, importance, probability, valid_from_date, valid_to_date');
+		$this->db->from('medias_bundles');
+		$this->db->where('customer_id', $_SESSION['user']['customer_id']);
+		$this->db->where('id', $id);
+		$this->db->limit(1);
+		$query = $this->db->get();
+		
+		if($query->num_rows() > 0) {
+			$data = $query->row_array();
+		} else {
+			foreach($query->field_data() as $row) {
+				$data[$row->name] = NULL;
+			}
+			
+		}
+		
+		return $data;
+		
+	}
+
+
+
+	function delete($id) {
+		$this->db->where('id', $id);
+		$this->db->delete('medias_bundles');
+	}
+
+
+
+	function update() {
+		
+		$id = $this->input->post('id');
+		$media_id = $this->input->post('media_id');
+		$bundle_id = $this->input->post('bundle_id');
+		$frequency = $this->input->post('frequency');
+		$appearances = $this->input->post('appearances');
+		$importance = $this->input->post('importance');
+		$probability = $this->input->post('probability');
+		$valid_from_date = $this->input->post('valid_from_date');
+		$valid_to_date = $this->input->post('valid_to_date');
+		
+		foreach($id as $key => $value) {
+			$data = array(
+				'media_id' => $media_id[$key],
+				'bundle_id' => $bundle_id[$key],
+				'frequency' => $frequency[$key],
+				'appearances' => $appearances[$key],
+				'importance' => $importance[$key],
+				'probability' => $probability[$key]
+			);
+			if($valid_from_date[$key]) $data['valid_from_date'] = date('Y-m-d', strtotime($valid_from_date[$key]));
+			if($valid_to_date[$key]) $data['valid_to_date'] = date('Y-m-d', strtotime($valid_to_date[$key]));
+			
+			if($id[$key] > 0) {
+				$this->db->where('id', $id[$key]);
+				$this->db->update('medias_bundles', $data);
+			} else {
+				if($media_id[$key] != 0 AND $bundle_id[$key] != 0) {
+					$data['customer_id'] = $_SESSION['user']['customer_id'];
+					$this->db->insert('medias_bundles', $data);
+				}
+			}
+		}
+		
+	}
+
+
+
+
 
 
 	function get_medias_for_bundle( $bundle_id )

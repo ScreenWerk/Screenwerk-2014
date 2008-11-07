@@ -21,16 +21,69 @@ class Collection_schedule_model extends Model {
 		if($query->num_rows() > 0) {
 			foreach($query->result_array() as $row) {
 				$data[$row['id']] = $row;
-				unset($data[$row['id']]['id']);
-				$data[$row['id']]['collection'] = $this->collection->get_name($row['collection_id']);
-				$data[$row['id']]['schedule'] = $this->schedule->get_name($row['schedule_id']);
 			}
 		} else {
-			$data = array();
+			foreach($query->field_data() as $row) {
+				$data[0][$row->name] = NULL;
+			}
+			$data[0]['collection_id'] = $collection_id;
+			$data[0]['schedule_id'] = $schedule_id;
 		}
 
 		return $data;
 	}
+
+
+
+	function delete($id) {
+		$this->db->where('id', $id);
+		$this->db->delete('collections_schedules');
+	}
+
+
+
+	function update() {
+
+		$id = $this->input->post('id');
+		$collection_id = $this->input->post('collection_id');
+		$schedule_id = $this->input->post('schedule_id');
+		$cron_minute = $this->input->post('cron_minute');
+		$cron_hour = $this->input->post('cron_hour');
+		$cron_day = $this->input->post('cron_day');
+		$cron_month = $this->input->post('cron_month');
+		$cron_weekday = $this->input->post('cron_weekday');
+		$valid_from_date = $this->input->post('valid_from_date');
+		$valid_to_date = $this->input->post('valid_to_date');
+		
+		foreach($id as $key => $value) {
+			$data = array(
+				'collection_id' => $collection_id[$key],
+				'schedule_id' => $schedule_id[$key],
+				'cron_minute' => $cron_minute[$key],
+				'cron_hour' => $cron_hour[$key],
+				'cron_day' => $cron_day[$key],
+				'cron_month' => $cron_month[$key],
+				'cron_weekday' => $cron_weekday[$key]
+			);
+			if($valid_from_date[$key]) $data['valid_from_date'] = date('Y-m-d', strtotime($valid_from_date[$key]));
+			if($valid_to_date[$key]) $data['valid_to_date'] = date('Y-m-d', strtotime($valid_to_date[$key]));
+			
+			if($id[$key] > 0) {
+				$this->db->where('id', $id[$key]);
+				$this->db->update('collections_schedules', $data);
+			} else {
+				if($collection_id[$key] != 0 AND $schedule_id[$key] != 0) {
+					$data['customer_id'] = $_SESSION['user']['customer_id'];
+					$this->db->insert('collections_schedules', $data);
+				}
+			}
+		}
+		
+	}
+
+
+
+
 
 
    function get_collections_for_schedule( $schedule_id )

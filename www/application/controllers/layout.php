@@ -6,6 +6,7 @@ class Layout extends Controller {
 		parent::Controller();
 		
 		$this->load->model('Layout_model', 'layout');
+		$this->load->model('Bundle_model', 'bundle');
 		$this->load->model('Dimension_model', 'dimension');
 		$this->load->model('Bundle_layout_model', 'bundle_layout');
 		$this->load->model('Layout_collection_model', 'layout_collection');
@@ -32,12 +33,28 @@ class Layout extends Controller {
 			redirect($this->uri->segment(1));
 		}
 
-		if($this->input->post('cancel')) {
+		if($this->input->post('save_bundle')) {
+			$this->bundle_layout->update();
+		}
+
+		if($this->input->post('save_collection')) {
+			$this->layout_collection->update();
+		}
+
+		if($this->input->post('delete')) {
+			$this->layout->delete($this->input->post('id'));
 			redirect($this->uri->segment(1));
 		}
 		
-		if($this->input->post('delete')) {
-			$this->layout->delete($this->input->post('id'));
+		if($this->input->post('delete_bundle')) {
+			$this->bundle_layout->delete(current(array_keys($this->input->post('delete_bundle'))));
+		}
+		
+		if($this->input->post('delete_collection')) {
+			$this->layout_collection->delete(current(array_keys($this->input->post('delete_collection'))));
+		}
+		
+		if($this->input->post('cancel')) {
 			redirect($this->uri->segment(1));
 		}
 		
@@ -46,17 +63,29 @@ class Layout extends Controller {
 		if(isset($id)) {
 			$data_m2m['bundle'] = $this->bundle_layout->get_list(NULL, $id);
 			foreach($data_m2m['bundle'] as &$row):
+				$row['bundle']['value'] = $row['bundle_id'];
+				$row['bundle']['list'][0] = 'Chose...';
+				foreach($this->bundle->get_names_list() as $media_key => $media_value) {
+					$row['bundle']['list'][$media_key] = $media_value;
+				}
 				unset($row['bundle_id']);
-				unset($row['layout']);
-				unset($row['layout_id']);
+				
+				$row['dimension']['value'] = $row['dimension_id'];
+				$row['dimension']['list'][0] = 'Chose...';
+				foreach($this->dimension->get_names_list() as $media_key => $media_value) {
+					$row['dimension']['list'][$media_key] = $media_value;
+				}
 				unset($row['dimension_id']);
 			endforeach;
 
 			$data_m2m['collection'] = $this->layout_collection->get_list($id, NULL);
 			foreach($data_m2m['collection'] as &$row):
+				$row['collection']['value'] = $row['collection_id'];
+				$row['collection']['list'][0] = 'Chose...';
+				foreach($this->collection->get_names_list() as $media_key => $media_value) {
+					$row['collection']['list'][$media_key] = $media_value;
+				}
 				unset($row['collection_id']);
-				unset($row['layout']);
-				unset($row['layout_id']);
 			endforeach;
 
 			$view['data_m2m'] = $data_m2m;

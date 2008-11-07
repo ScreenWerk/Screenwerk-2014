@@ -6,6 +6,7 @@ class Collection extends Controller {
 		parent::Controller();
 		
 		$this->load->model('Collection_model', 'collection');
+		$this->load->model('Schedule_model', 'schedule');
 		$this->load->model('Dimension_model', 'dimension');
 		$this->load->model('Layout_collection_model', 'layout_collection');
 		$this->load->model('Collection_schedule_model', 'collection_schedule');
@@ -32,12 +33,28 @@ class Collection extends Controller {
 			redirect($this->uri->segment(1));
 		}
 
-		if($this->input->post('cancel')) {
+		if($this->input->post('save_layout')) {
+			$this->layout_collection->update();
+		}
+
+		if($this->input->post('save_schedule')) {
+			$this->collection_schedule->update();
+		}
+
+		if($this->input->post('delete')) {
+			$this->collection->delete($this->input->post('id'));
 			redirect($this->uri->segment(1));
 		}
 		
-		if($this->input->post('delete')) {
-			$this->collection->delete($this->input->post('id'));
+		if($this->input->post('delete_layout')) {
+			$this->layout_collection->delete(current(array_keys($this->input->post('delete_layout'))));
+		}
+		
+		if($this->input->post('delete_schedule')) {
+			$this->collection_schedule->delete(current(array_keys($this->input->post('delete_schedule'))));
+		}
+		
+		if($this->input->post('cancel')) {
 			redirect($this->uri->segment(1));
 		}
 		
@@ -46,15 +63,21 @@ class Collection extends Controller {
 		if(isset($id)) {
 			$data_m2m['layout'] = $this->layout_collection->get_list(NULL, $id);
 			foreach($data_m2m['layout'] as &$row):
-				unset($row['collection_id']);
-				unset($row['collection']);
+				$row['layout']['value'] = $row['layout_id'];
+				$row['layout']['list'][0] = 'Chose...';
+				foreach($this->layout->get_names_list() as $media_key => $media_value) {
+					$row['layout']['list'][$media_key] = $media_value;
+				}
 				unset($row['layout_id']);
 			endforeach;
 
 			$data_m2m['schedule'] = $this->collection_schedule->get_list($id, NULL);
 			foreach($data_m2m['schedule'] as &$row):
-				unset($row['collection_id']);
-				unset($row['collection']);
+				$row['schedule']['value'] = $row['schedule_id'];
+				$row['schedule']['list'][0] = 'Chose...';
+				foreach($this->schedule->get_names_list() as $media_key => $media_value) {
+					$row['schedule']['list'][$media_key] = $media_value;
+				}
 				unset($row['schedule_id']);
 			endforeach;
 

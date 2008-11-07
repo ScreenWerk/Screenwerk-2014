@@ -21,16 +21,66 @@ class Layout_collection_model extends Model {
 		if($query->num_rows() > 0) {
 			foreach($query->result_array() as $row) {
 				$data[$row['id']] = $row;
-				unset($data[$row['id']]['id']);
-				$data[$row['id']]['collection'] = $this->collection->get_name($row['collection_id']);
-				$data[$row['id']]['layout'] = $this->layout->get_name($row['layout_id']);
 			}
 		} else {
-			$data = array();
+			foreach($query->field_data() as $row) {
+				$data[0][$row->name] = NULL;
+			}
+			$data[0]['layout_id'] = $layout_id;
+			$data[0]['collection_id'] = $collection_id;
 		}
 
 		return $data;
 	}
+
+
+	function delete($id) {
+		$this->db->where('id', $id);
+		$this->db->delete('layouts_collections');
+	}
+
+
+
+	function update() {
+
+		$id = $this->input->post('id');
+		$layout_id = $this->input->post('layout_id');
+		$collection_id = $this->input->post('collection_id');
+		$frequency = $this->input->post('frequency');
+		$appearances = $this->input->post('appearances');
+		$importance = $this->input->post('importance');
+		$probability = $this->input->post('probability');
+		$valid_from_date = $this->input->post('valid_from_date');
+		$valid_to_date = $this->input->post('valid_to_date');
+		
+		foreach($id as $key => $value) {
+			$data = array(
+				'layout_id' => $layout_id[$key],
+				'collection_id' => $collection_id[$key],
+				'frequency' => $frequency[$key],
+				'appearances' => $appearances[$key],
+				'importance' => $importance[$key],
+				'probability' => $probability[$key]
+			);
+			if($valid_from_date[$key]) $data['valid_from_date'] = date('Y-m-d', strtotime($valid_from_date[$key]));
+			if($valid_to_date[$key]) $data['valid_to_date'] = date('Y-m-d', strtotime($valid_to_date[$key]));
+			
+			if($id[$key] > 0) {
+				$this->db->where('id', $id[$key]);
+				$this->db->update('layouts_collections', $data);
+			} else {
+				if($layout_id[$key] != 0 AND $collection_id[$key] != 0) {
+					$data['customer_id'] = $_SESSION['user']['customer_id'];
+					$this->db->insert('layouts_collections', $data);
+				}
+			}
+		}
+		
+	}
+
+
+
+
 
 
 	function get_layouts_for_collection( $collection_id )

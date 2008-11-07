@@ -8,6 +8,12 @@
 		<link rel="stylesheet" type="text/css" media="screen" href="<?= base_url(); ?>css/screen.css" />
 		<link rel="stylesheet" type="text/css" media="screen" href="<?= base_url(); ?>css/tabs.css" />
 		<link rel="stylesheet" type="text/css" media="screen" href="<?= base_url(); ?>css/basic.css" />
+		
+		<script src="http://www.google.com/jsapi"></script>
+		<script>
+			google.load("prototype", "1.6");
+			google.load("scriptaculous", "1.8")
+		</script>
 
 	</head>
 	<body>
