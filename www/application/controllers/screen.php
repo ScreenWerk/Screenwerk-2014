@@ -71,7 +71,7 @@ class Screen extends Controller {
    function generate_playlist( $screen_id )
    {
       // $screen_id = $this->router->segments[3];
-      $no_of_days = 1; //$this->router->segments[4];
+      $no_of_days = 3; //$this->router->segments[4];
       $pl_data = $this->playlist->create_playlist_for_screen( $screen_id, $no_of_days );
 
       //print_r( $bloated_playlist );      return;

@@ -25,32 +25,29 @@ fi
 media_type=`${_DIR_EXE}/mediatype.sh "${incoming_media}"`
 
 case `echo ${media_type}|cut -d" " -f1` in
-   VIDEO)   ffmpeg_out=${_DIR_SCREENS}/${1}
+   VIDEO)   ffmpeg_out=${_DIR_MASTER_SCREENS}/${1}
 
             screen_id=`echo ${1} | cut -d_ -f1`
             media_id=`echo ${1} | cut -d_ -f2`
             width=`echo ${1} | cut -d_ -f3 | cut -d. -f1 | cut -dx -f1`
             height=`echo ${1} | cut -d_ -f3 | cut -d. -f1 | cut -dx -f2`
 
-            master_video_file=${_DIR_SCREENS}/master_${media_id}_${width}x${height}.video
+            master_video_file=${_DIR_MASTER_SCREENS}/master_${media_id}_${width}x${height}.video
             video_file=${_DIR_SCREENS}/${screen_id}_${media_id}_${width}x${height}.video
 
             if [ -f ${video_file} ]
             then
                echo "${video_file} already in place"
             else
-               if [ -f ${master_video_file} ]
+               if [ ! -f ${master_video_file} ]
                then
-                  echo "ln -s ${master_video_file} ${video_file}"
-                  ln ${master_video_file} ${video_file}
-               else
                   echo "Converting to ${ffmpeg_out}"
                   echo "ffmpeg -i ${incoming_media} -an -s ${width}x${height} ${ffmpeg_out}"
                   ffmpeg -i ${incoming_media} -an -s ${width}x${height} ${ffmpeg_out}
                   mv ${ffmpeg_out} ${master_video_file}
-                  echo "ln -s ${master_video_file} ${video_file}"
-                  ln ${master_video_file} ${video_file}
                fi
+	       echo "ln -s ${master_video_file} ${video_file}"
+	       ln ${master_video_file} ${video_file}
             fi
             ;;
    IMAGE)   cp ${incoming_media} ${_DIR_SCREENS}

@@ -1,6 +1,8 @@
 #!/bin/bash
 
-SCREEN_ID=SWPILOT
+mount.vboxsf SWSHARE /mnt/swshare/
+
+SCREEN_ID=29
 MONITORASPECT="1280/800"
 TODAY=`date +'%Y%m%d'`
 
