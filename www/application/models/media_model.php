@@ -70,7 +70,7 @@ class Media_model extends Model {
 		$result = array();
 		
 		foreach($this->get_list() as $key => $value):
-			$result[$key] = $value['name'];
+			$result[$key] = $value['filename'];
 		endforeach;
 		
 		return $result;
