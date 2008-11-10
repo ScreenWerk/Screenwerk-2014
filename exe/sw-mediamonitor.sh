@@ -15,10 +15,10 @@ inotifywait -m --format '%T "%f" %e "%w"' --timefmt '%d/%m/%Y %H:%M:%S' \
             ${_DIR_INCOMING_MEDIA}/ | \
 while read LINE
 do
-   echo "== INCOMING == Catched ${LINE}"
+   #echo "== INCOMING == Catched ${LINE}"
    filename=`echo ${LINE} | cut -d"\"" -f2`
    
-   echo "sw-media.create.sh \"${filename}\" &"
+   #echo "sw-media.create.sh \"${filename}\" &"
    ${_DIR_EXE}/sw-media.create.sh "${filename}" &
 done &
 
@@ -33,10 +33,10 @@ inotifywait -m --format '%T "%f" %e "%w"' --timefmt '%d/%m/%Y %H:%M:%S' \
             ${_DIR_CONVERT}/ | \
 while read LINE
 do
-   echo "== CONVERT == Catched ${LINE}"
+   #echo "== CONVERT == Catched ${LINE}"
    filename=`echo ${LINE} | cut -d"\"" -f2`
 
-   echo "sw-media.convert.sh \"${filename}\" &"
+   #echo "sw-media.convert.sh \"${filename}\" &"
    ${_DIR_EXE}/sw-media.convert.sh "${filename}" &
 done &
 
@@ -54,6 +54,7 @@ do
    echo "== SCREENS == Catched ${LINE}"
    filename=`echo ${LINE} | cut -d"\"" -f2`
    screen_id=`echo ${filename} | cut -d_ -f1`
-   echo "scp remotes@moos.ww.ee:${_DIR_SCREENS}/${filename} /mnt/swshare/" | tee /home/remotes/signals/${screen_id}
+   echo "scp remotes@moos.ww.ee:${_DIR_SCREENS}/${filename} /mnt/swshare/" | tee -a /home/remotes/signals/${screen_id}
+   echo "ssh remotes@moos.ww.ee rm ${_DIR_SCREENS}/${filename}" | tee -a /home/remotes/signals/${screen_id}
 done &
 exit 0

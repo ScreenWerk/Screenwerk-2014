@@ -181,6 +181,7 @@ class Playlist_model extends Model
    function collect_playlist_medias()
    {
       $_event_id = 0;
+      $event_sort_time = array();
       foreach( $this->current_PD->bundles as &$bundle )
       {
          //TODO:
