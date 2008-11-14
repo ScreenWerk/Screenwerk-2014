@@ -43,8 +43,9 @@ case `echo ${media_type}|cut -d" " -f1` in
                then
                   echo "Converting to ${ffmpeg_out}"
                   echo "ffmpeg -i ${incoming_media} -an -s ${width}x${height} ${ffmpeg_out}"
+                  ffmpeg -i ${incoming_media} -y -an -s ${width}x${height} -target pal-dvd ${ffmpeg_out}
 #                  ffmpeg -i ${incoming_media} -an -s ${width}x${height} ${ffmpeg_out}
-                   ffmpeg -y -i ${incoming_media} -pass 1 -an -s ${width}x${height} -deinterlace -b 3200 -maxrate 7500 -bufsize 4096 ${ffmpeg_out}
+#                   ffmpeg -y -i ${incoming_media} -pass 1 -an -s ${width}x${height} -deinterlace -b 3200 -maxrate 7500 -bufsize 4096 ${ffmpeg_out}
 #                   ffmpeg -y -i ${incoming_media} -pass 2 -an -s ${width}x${height} -deinterlace -b 3200 -minrate 1500 -maxrate 7500 -bufsize 4096 ${ffmpeg_out}
                   mv ${ffmpeg_out} ${master_video_file}
                fi

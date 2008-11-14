@@ -10,7 +10,7 @@ class Screen extends Controller {
 		$this->load->model('Schedule_model', 'schedule');
 		$this->load->model('Playlist_model', 'playlist');
 		
-		//$this->output->enable_profiler(TRUE);
+		$this->output->enable_profiler(TRUE);
 	}
 
 
