@@ -54,7 +54,7 @@ class Schedule extends Controller {
 			$data_m2m['collection'] = $this->collection_schedule->get_list(NULL, $id);
 			foreach($data_m2m['collection'] as &$row):
 				$row['collection']['value'] = $row['collection_id'];
-				$row['collection']['list'][0] = 'Chose...';
+				$row['collection']['list'][0] = 'Choose...';
 				foreach($this->collection->get_names_list() as $media_key => $media_value) {
 					$row['collection']['list'][$media_key] = $media_value;
 				}

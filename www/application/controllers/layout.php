@@ -64,14 +64,14 @@ class Layout extends Controller {
 			$data_m2m['bundle'] = $this->bundle_layout->get_list(NULL, $id);
 			foreach($data_m2m['bundle'] as &$row):
 				$row['bundle']['value'] = $row['bundle_id'];
-				$row['bundle']['list'][0] = 'Chose...';
+				$row['bundle']['list'][0] = 'Choose...';
 				foreach($this->bundle->get_names_list() as $media_key => $media_value) {
 					$row['bundle']['list'][$media_key] = $media_value;
 				}
 				unset($row['bundle_id']);
 				
 				$row['dimension']['value'] = $row['dimension_id'];
-				$row['dimension']['list'][0] = 'Chose...';
+				$row['dimension']['list'][0] = 'Choose...';
 				foreach($this->dimension->get_names_list() as $media_key => $media_value) {
 					$row['dimension']['list'][$media_key] = $media_value;
 				}
@@ -81,7 +81,7 @@ class Layout extends Controller {
 			$data_m2m['collection'] = $this->layout_collection->get_list($id, NULL);
 			foreach($data_m2m['collection'] as &$row):
 				$row['collection']['value'] = $row['collection_id'];
-				$row['collection']['list'][0] = 'Chose...';
+				$row['collection']['list'][0] = 'Choose...';
 				foreach($this->collection->get_names_list() as $media_key => $media_value) {
 					$row['collection']['list'][$media_key] = $media_value;
 				}

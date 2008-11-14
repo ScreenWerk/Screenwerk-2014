@@ -64,7 +64,7 @@ class Collection extends Controller {
 			$data_m2m['layout'] = $this->layout_collection->get_list(NULL, $id);
 			foreach($data_m2m['layout'] as &$row):
 				$row['layout']['value'] = $row['layout_id'];
-				$row['layout']['list'][0] = 'Chose...';
+				$row['layout']['list'][0] = 'Choose...';
 				foreach($this->layout->get_names_list() as $media_key => $media_value) {
 					$row['layout']['list'][$media_key] = $media_value;
 				}
@@ -74,7 +74,7 @@ class Collection extends Controller {
 			$data_m2m['schedule'] = $this->collection_schedule->get_list($id, NULL);
 			foreach($data_m2m['schedule'] as &$row):
 				$row['schedule']['value'] = $row['schedule_id'];
-				$row['schedule']['list'][0] = 'Chose...';
+				$row['schedule']['list'][0] = 'Choose...';
 				foreach($this->schedule->get_names_list() as $media_key => $media_value) {
 					$row['schedule']['list'][$media_key] = $media_value;
 				}

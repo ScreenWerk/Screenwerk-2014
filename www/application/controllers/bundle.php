@@ -65,7 +65,7 @@ class Bundle extends Controller {
 			$data_m2m['media'] = $this->media_bundle->get_list(NULL, $id);
 			foreach($data_m2m['media'] as &$row):
 				$row['media']['value'] = $row['media_id'];
-				$row['media']['list'][0] = 'Chose...';
+				$row['media']['list'][0] = 'Choose...';
 				foreach($this->media->get_names_list() as $media_key => $media_value) {
 					$row['media']['list'][$media_key] = $media_value;
 				}
@@ -75,14 +75,14 @@ class Bundle extends Controller {
 			$data_m2m['layout'] = $this->bundle_layout->get_list($id, NULL);
 			foreach($data_m2m['layout'] as &$row):
 				$row['layout']['value'] = $row['layout_id'];
-				$row['layout']['list'][0] = 'Chose...';
+				$row['layout']['list'][0] = 'Choose...';
 				foreach($this->layout->get_names_list() as $media_key => $media_value) {
 					$row['layout']['list'][$media_key] = $media_value;
 				}
 				unset($row['layout_id']);
 				
 				$row['dimension']['value'] = $row['dimension_id'];
-				$row['dimension']['list'][0] = 'Chose...';
+				$row['dimension']['list'][0] = 'Choose...';
 				foreach($this->dimension->get_names_list() as $media_key => $media_value) {
 					$row['dimension']['list'][$media_key] = $media_value;
 				}
