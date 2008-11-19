@@ -242,7 +242,10 @@ class Playlist_model extends Model
                                   $_event_id,
                                   $_media['media_id'],
                                   $_media['type'],
-                                  $bundle['width'].'x'.$bundle['height'].'+'.$bundle['position_x'].'+'.$bundle['position_y'],
+                                  $bundle['width'],
+                                  $bundle['height'],
+                                  $bundle['position_x'],
+                                  $bundle['position_y'],
                                   $_media['end_time'] 
                                 )
                          );
