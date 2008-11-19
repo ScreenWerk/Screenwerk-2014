@@ -20,21 +20,24 @@ while read event
 do
   event_a=($event)
 
-  #Continue, if event is Stop event
   event_name=${event_a[1]}
   event_id=${event_a[2]}
+  date +"%H:%M:%S E${event_id}: ${event}" >> ${LOGFILE}
+
+  #Continue, if event is Stop event
   if [ "${event_name}" = "stop" ]
   then
     if [ ${event_pid_a[${event_id}]} ]
     then
-      date +"%H:%M:%S ${event}" >> ${LOGFILE}
       if [ `ps -ef | grep ${event_pid_a[${event_id}]} | wc -l` -eq 1 ]
       then
-        echo "- killing event ${event_id} with PID ${event_pid_a[${event_id}]}" >> ${LOGFILE}
+        date +"%H:%M:%S E${event_id}: killing PID ${event_pid_a[${event_id}]}" >> ${LOGFILE}
         kill ${event_pid_a[${event_id}]}
       else
-        echo "- event ${event_id} with pid ${event_pid_a[${event_id}]} allready stopped" >> ${LOGFILE}
+        date +"%H:%M:%S E${event_id}: PID ${event_pid_a[${event_id}]} allready stopped" >> ${LOGFILE}
       fi
+      date +"%H:%M:%S E${event_id}: skip" >> ${LOGFILE}
+    else
     fi
     continue
   fi
@@ -43,11 +46,9 @@ do
   stop_time=${event_a[9]}
   if [ `echo ${stop_time}|cut -c1,2,4,5,7,8` -lt `date +'%H%M%S'` ]
   then
-    date +"%H:%M:%S skip ${event}" >> ${LOGFILE}
+    date +"%H:%M:%S E${event_id}: skip" >> ${LOGFILE}
     continue
   fi
-
-  date +"%H:%M:%S ${event}" >> ${LOGFILE}
 
   start_time=${event_a[0]}
   media_id=${event_a[3]}
@@ -65,9 +66,12 @@ do
       -geometry ${W}x${H}+${X}+${Y} \
       -loop 1 \
       /mnt/swshare/${SCREEN_ID}_${media_id}_${W}x${H}.video \
-      2>&1 >/dev/null &
-    event_pid_a[${event_id}]=$!
-    echo "- Start with PID ${event_pid_a[${event_id}]}" >> ${LOGFILE}
+      2>&1 >/dev/null && date +"%H:%M:%S E${event_id}: Finished" >> ${LOGFILE} &
+
+    ppid=${!}
+    `ps -eo pid,ppid | grep ${ppid}` >> ${LOGFILE}
+    event_pid_a[${event_id}]=`ps -eo pid,ppid | grep ${ppid} | tail -1 | cut -d" " -f1`
+    date +"%H:%M:%S E${event_id}: Started with PID '${event_pid_a[${event_id}]}'" >> ${LOGFILE}
       
     continue
   fi
@@ -79,7 +83,7 @@ do
   d_S="$((10#`echo $start_time|cut -c7-8`-10#`date +'%S'`))"
 
   delay=$(($d_H*3600+$d_M*60+$d_S+2))
-  echo "- Sleep for ${delay} seconds" >> ${LOGFILE}
+  date +"%H:%M:%S E${event_id}: Sleep for ${delay} seconds" >> ${LOGFILE}
   sleep $delay
 
   /usr/bin/mplayer \
@@ -87,9 +91,13 @@ do
     -geometry ${W}x${H}+${X}+${Y} \
     -loop 1 \
     /mnt/swshare/${SCREEN_ID}_${media_id}_${W}x${H}.video \
-    2>&1 >/dev/null &
-    event_pid_a[${event_id}]=$!
-    date +"- %H:%M:%S Start with PID ${event_pid_a[${event_id}]}" >> ${LOGFILE}
+    2>&1 >/dev/null && date +"%H:%M:%S E${event_id}: Finished" >> ${LOGFILE} &
+
+  ppid=${!}
+  `ps -eo pid,ppid | grep ${ppid}` >> ${LOGFILE}
+  event_pid_a[${event_id}]=`ps -eo pid,ppid | grep ${ppid} | tail -1 | cut -d" " -f1`
+  date +"%H:%M:%S E${event_id}: Started with PID '${event_pid_a[${event_id}]}'" >> ${LOGFILE}
+  ps -ef | grep mplay >> ${LOGFILE}
 
 done # >> /mnt/swshare/${SCREEN_ID}_events.log # | dwm
 
