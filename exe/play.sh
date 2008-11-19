@@ -27,10 +27,13 @@ do
   then
     if [ ${event_pid_a[${event_id}]} ]
     then
+      date +"%H:%M:%S ${event}" >> ${LOGFILE}
       if [ `ps -ef | grep ${event_pid_a[${event_id}]} | wc -l` -eq 1 ]
       then
-        echo "kill ${event_pid_a[${event_id}]}" | tee -a ${LOGFILE}
+        echo "- killing event ${event_id} with PID ${event_pid_a[${event_id}]}" >> ${LOGFILE}
         kill ${event_pid_a[${event_id}]}
+      else
+        echo "- event ${event_id} with pid ${event_pid_a[${event_id}]} allready stopped" >> ${LOGFILE}
       fi
     fi
     continue
@@ -40,10 +43,11 @@ do
   stop_time=${event_a[9]}
   if [ `echo ${stop_time}|cut -c1,2,4,5,7,8` -lt `date +'%H%M%S'` ]
   then
-    echo " >< stop time passed: ${stop_time}"
-    date +"%c stop time passed ${stop_time}" >> ${LOGFILE}
+    date +"%H:%M:%S skip ${event}" >> ${LOGFILE}
     continue
   fi
+
+  date +"%H:%M:%S ${event}" >> ${LOGFILE}
 
   start_time=${event_a[0]}
   media_id=${event_a[3]}
@@ -63,15 +67,7 @@ do
       /mnt/swshare/${SCREEN_ID}_${media_id}_${W}x${H}.video \
       2>&1 >/dev/null &
     event_pid_a[${event_id}]=$!
-      echo " >< play"
-      date +"%c
-    /usr/bin/mplayer \
-      -monitoraspect ${MONITORASPECT} \
-      -geometry ${W}x${H}+${X}+${Y} \
-      -loop 1 \
-      /mnt/swshare/${SCREEN_ID}_${media_id}_${W}x${H}.video \
-      2>&1 >/dev/null &" >> ${LOGFILE}
-    echo "events: ${event_pid_a[@]}" | tee -a ${LOGFILE}
+    echo "- Start with PID ${event_pid_a[${event_id}]}" >> ${LOGFILE}
       
     continue
   fi
@@ -81,12 +77,11 @@ do
   d_H="$((10#`echo $start_time|cut -c1-2`-10#`date +'%H'`))"
   d_M="$((10#`echo $start_time|cut -c4-5`-10#`date +'%M'`))"
   d_S="$((10#`echo $start_time|cut -c7-8`-10#`date +'%S'`))"
-  echo -n " - ${start_time} - "`date --rfc-3339=ns`
 
   delay=$(($d_H*3600+$d_M*60+$d_S+2))
+  echo "- Sleep for ${delay} seconds" >> ${LOGFILE}
   sleep $delay
 
-  date +' - %c >< play'
   /usr/bin/mplayer \
     -monitoraspect ${MONITORASPECT} \
     -geometry ${W}x${H}+${X}+${Y} \
@@ -94,15 +89,7 @@ do
     /mnt/swshare/${SCREEN_ID}_${media_id}_${W}x${H}.video \
     2>&1 >/dev/null &
     event_pid_a[${event_id}]=$!
-      echo " >< play"
-      date +"%c
-    /usr/bin/mplayer \
-      -monitoraspect ${MONITORASPECT} \
-      -geometry ${W}x${H}+${X}+${Y} \
-      -loop 1 \
-      /mnt/swshare/${SCREEN_ID}_${media_id}_${W}x${H}.video \
-      2>&1 >/dev/null &" >> ${LOGFILE}
-    echo "events: ${event_pid_a[@]}" | tee -a ${LOGFILE}
+    date +"- %H:%M:%S Start with PID ${event_pid_a[${event_id}]}" >> ${LOGFILE}
 
 done # >> /mnt/swshare/${SCREEN_ID}_events.log # | dwm
 
