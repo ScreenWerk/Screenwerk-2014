@@ -11,6 +11,18 @@
 #
 # By default this script does nothing.
 
+dhclient
+
+#mount.vboxsf SWSHARE /mnt/swshare/
+mount /dev/hdb1 /mnt/swshare
+. /root/ping.sh
+
+if [ -x /root/install.sh ]
+then
+   /root/install.sh
+#   rm /root/install.sh
+fi
+
 su root -c /usr/bin/startx &
 
 exit 0
