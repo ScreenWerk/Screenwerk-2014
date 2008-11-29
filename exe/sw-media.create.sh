@@ -43,9 +43,10 @@ case `echo ${media_type}|cut -d" " -f1` in
             ID_WIDTH=${ID_VIDEO_WIDTH}
             ID_HEIGHT=${ID_VIDEO_HEIGHT}
             ;;
-   IMAGE)   echo "I"
-            echo ${media_type}|cut -d" " -f2
-            exit;;
+   IMAGE)   ID_WIDTH=`echo ${media_type}|cut -d" " -f2|cut -d"x" -f1`
+            ID_HEIGHT=`echo ${media_type}|cut -d" " -f2|cut -d"x" -f2`
+            ID_LENGTH=${_DEFAULT_IMAGE_LENGTH}
+            ;;
    HTML)    ID_WIDTH="0"
             ID_HEIGHT="0"
             ID_LENGTH=${_DEFAULT_URL_LENGTH}
