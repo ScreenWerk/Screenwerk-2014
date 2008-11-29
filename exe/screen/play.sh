@@ -1,17 +1,12 @@
 #!/bin/bash
 
 . /root/screen.conf
+MONITORASPECT=`xwininfo -root | grep geometry | cut -d" " -f4 | cut -d+ -f1 | tr x "/"`
 
 #SCREEN_ID=29
-MONITORASPECT="1440/900"
 TODAY=`date +'%Y%m%d'`
 LOGFILE=${SCREEN_ID}_player.log
 echo "" > ${LOGFILE}
-
-# exec dwm &
-# iceweasel -geometry=720x450-0-0 google.com &
-#iceweasel --geometry=720x450+0+0 google.com &
-
 
 date +'%c starting up' >> ${LOGFILE}
 
@@ -37,7 +32,7 @@ do
         date +"%H:%M:%S E${event_id}: PID ${event_pid_a[${event_id}]} allready stopped" >> ${LOGFILE}
       fi
       date +"%H:%M:%S E${event_id}: skip" >> ${LOGFILE}
-    else
+    #else
     fi
     continue
   fi
