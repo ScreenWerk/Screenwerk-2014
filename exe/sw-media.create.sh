@@ -46,10 +46,11 @@ case `echo ${media_type}|cut -d" " -f1` in
    IMAGE)   ID_WIDTH=`echo ${media_type}|cut -d" " -f2|cut -d"x" -f1`
             ID_HEIGHT=`echo ${media_type}|cut -d" " -f2|cut -d"x" -f2`
             ID_LENGTH=${_DEFAULT_IMAGE_LENGTH}
+            media_type=`echo ${media_type}|cut -d" " -f1`
             ;;
    HTML)    ID_WIDTH="0"
             ID_HEIGHT="0"
-            ID_LENGTH=${_DEFAULT_URL_LENGTH}
+            ID_LENGTH=${_DEFAULT_HTML_LENGTH}
             ;;
    URL)     ID_WIDTH="0"
             ID_HEIGHT="0"
