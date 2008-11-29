@@ -1,11 +1,12 @@
 #!/bin/bash
 #
-# Attempts to rescale source media file named A_B_CxD.4c
-# On success renames media file to A_B_CxD.video, where
+# Attempts to rescale source media file named A_B_CxD
+# On success renames media file to A_B_CxD.MEDIATYPE, where
 # A - screen id
 # B - media id
 # CxD - media dimensions
-# If named media file already exists, just remove source .4c file
+# MEDIATYPE is one of VIDEO, IMAGE, URL or HTML.
+# If named media file already exists, just remove source file
 
 . sw-script-header.sh
 
@@ -65,6 +66,6 @@ esac
 
 
 
-#rm ${incoming_media}
+rm ${incoming_media}
 
 exit 0
