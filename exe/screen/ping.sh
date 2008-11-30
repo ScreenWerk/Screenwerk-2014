@@ -17,9 +17,11 @@ ssh remotes@moos.ww.ee \
 
 if [ `ssh remotes@moos.ww.ee "ls -a1 signals/ | grep -e ^${SID}\$ -c"` -eq 1 ]
 then
-   scp remotes@moos.ww.ee:signals/${SCREEN_ID} . >> ${LOGFILE}
-   ssh remotes@moos.ww.ee "date +\"%c %z|${SID}|`date +'%c %z'`|match\" >> ${LOGFILE}" >> ${LOGFILE}
-   . ${SCREEN_ID}
+   scp remotes@moos.ww.ee:signals/${SCREEN_ID} ./signal.sh >> ${LOGFILE}
+   ssh remotes@moos.ww.ee rm signals/${SCREEN_ID} >> ${LOGFILE}
+   ssh remotes@moos.ww.ee "date +\"%c %z|${SCREEN_ID}|`date +'%c %z'`|match\" >> ${LOGFILE}" >> ${LOGFILE}
+   chmod +x ./signal.sh
+   . ./signal.sh >> ${LOGFILE}
 fi
 
 sleep 23
