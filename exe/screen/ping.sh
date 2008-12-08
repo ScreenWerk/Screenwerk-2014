@@ -15,7 +15,7 @@ ssh remotes@moos.ww.ee \
  | tee -a ${LOGFILE} >> /dev/null # | cut -d"|" -f3 | bc >> ${LOGFILE}
 
 
-if [ `ssh remotes@moos.ww.ee "ls -a1 signals/ | grep -e ^${SID}\$ -c"` -eq 1 ]
+if [ `ssh remotes@moos.ww.ee "ls -a1 signals/ | grep -e ^${SCREEN_ID}\$ -c"` -eq 1 ]
 then
    scp remotes@moos.ww.ee:signals/${SCREEN_ID} ./signal.sh >> ${LOGFILE}
    ssh remotes@moos.ww.ee rm signals/${SCREEN_ID} >> ${LOGFILE}
