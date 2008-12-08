@@ -40,6 +40,7 @@ extension=${1/*./}
 case $extension in
    url) echo "URL"; exit 0;;
    zip) echo "HTML"; exit 0;;
+   html) echo "HTML"; exit 0;;
 esac
 
 # Test, if file could be a picture and output dimensions as well
