@@ -312,5 +312,6 @@ $config['time_reference'] = 'local';
 */
 $config['rewrite_short_tags'] = FALSE;
 
+ini_set('memory_limit', '128M');
 
 ?>
