@@ -25,13 +25,13 @@ fi
 
 media_type=`${_DIR_EXE}/mediatype.sh "${incoming_media}"`
 
+screen_id=`echo ${1} | cut -d_ -f1`
+media_id=`echo ${1} | cut -d_ -f2`
+width=`echo ${1} | cut -d_ -f3 | cut -d. -f1 | cut -dx -f1`
+height=`echo ${1} | cut -d_ -f3 | cut -d. -f1 | cut -dx -f2`
+
 case `echo ${media_type}|cut -d" " -f1` in
    VIDEO)   ffmpeg_out=${_DIR_MASTER_SCREENS}/${1}
-
-            screen_id=`echo ${1} | cut -d_ -f1`
-            media_id=`echo ${1} | cut -d_ -f2`
-            width=`echo ${1} | cut -d_ -f3 | cut -d. -f1 | cut -dx -f1`
-            height=`echo ${1} | cut -d_ -f3 | cut -d. -f1 | cut -dx -f2`
 
             master_video_file=${_DIR_MASTER_SCREENS}/master_${media_id}_${width}x${height}.video
             video_file=${_DIR_SCREENS}/${screen_id}_${media_id}_${width}x${height}.video
@@ -54,11 +54,11 @@ case `echo ${media_type}|cut -d" " -f1` in
 	       ln ${master_video_file} ${video_file}
             fi
             ;;
-   IMAGE)   cp ${incoming_media} ${_DIR_SCREENS}
+   IMAGE)   cp ${incoming_media} ${_DIR_SCREENS}/${screen_id}_${media_id}_${width}x${height}.image
             ;;
-   HTML)    cp ${incoming_media} ${_DIR_SCREENS}
+   HTML)    cp ${incoming_media} ${_DIR_SCREENS}/${screen_id}_${media_id}_${width}x${height}.html
             ;;
-   URL)     cp ${incoming_media} ${_DIR_SCREENS}
+   URL)     cp ${incoming_media} ${_DIR_SCREENS}/${screen_id}_${media_id}_${width}x${height}.url
             ;;
    *)       echo "Unsupported media type"
             exit 1;;
