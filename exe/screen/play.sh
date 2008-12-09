@@ -1,12 +1,21 @@
 #!/bin/bash
 
 . /root/screen.conf
-MONITORASPECT=`xwininfo -root | grep geometry | cut -d" " -f4 | cut -d+ -f1 | tr x "/"`
 
-#SCREEN_ID=29
+
+MONITORASPECT=`xwininfo -root | grep geometry | cut -d" " -f4 | cut -d+ -f1 | tr x "/"` # "1440/900"
 TODAY=`date +'%Y%m%d'`
 LOGFILE=${SCREEN_ID}_player.log
-echo "" > ${LOGFILE}
+echo "" >> ${LOGFILE}
+
+#/root/arora/arora.1 -geometry 400x400-0-0 google.com &
+#sleep 2
+#/root/arora/arora.0 -geometry 400x300+0-0 neti.ee &
+#sleep 2
+#/root/arora/arora.2 -geometry 320x450+0+0 ww.ee &
+#sleep 2
+#/root/arora/arora.3 -geometry 1140x600+150+150 moos.ww.ee/screenwerk &
+
 
 date +'%c starting up' >> ${LOGFILE}
 
@@ -31,8 +40,6 @@ do
       else
         date +"%H:%M:%S E${event_id}: PID ${event_pid_a[${event_id}]} allready stopped" >> ${LOGFILE}
       fi
-      date +"%H:%M:%S E${event_id}: skip" >> ${LOGFILE}
-    #else
     fi
     continue
   fi
@@ -41,8 +48,11 @@ do
   stop_time=${event_a[9]}
   if [ `echo ${stop_time}|cut -c1,2,4,5,7,8` -lt `date +'%H%M%S'` ]
   then
-    date +"%H:%M:%S E${event_id}: skip" >> ${LOGFILE}
-    continue
+    if [ ! ${stop_time} = '00:00:00' ]
+    then
+      date +"%H:%M:%S E${event_id}: skip" >> ${LOGFILE}
+      continue
+    fi
   fi
 
   start_time=${event_a[0]}
@@ -56,16 +66,7 @@ do
   # Play right now, if start time in past.
   if [ `echo ${start_time}|cut -c1,2,4,5,7,8` -lt `date +'%H%M%S'` ]
   then
-    /usr/bin/mplayer \
-      -monitoraspect ${MONITORASPECT} \
-      -geometry ${W}x${H}+${X}+${Y} \
-      -loop 1 \
-      /mnt/swshare/${SCREEN_ID}_${media_id}_${W}x${H}.video \
-      2>&1 >/dev/null && date +"%H:%M:%S E${event_id}: Finished" >> ${LOGFILE} &
-
-    ppid=${!}
-    `ps -eo pid,ppid | grep ${ppid}` >> ${LOGFILE}
-    event_pid_a[${event_id}]=`ps -eo pid,ppid | grep ${ppid} | tail -1 | cut -d" " -f1`
+    . /root/play.${media_type} # defines $event_pid_a[${event_id}]
     date +"%H:%M:%S E${event_id}: Started with PID '${event_pid_a[${event_id}]}'" >> ${LOGFILE}
       
     continue
@@ -81,24 +82,13 @@ do
   date +"%H:%M:%S E${event_id}: Sleep for ${delay} seconds" >> ${LOGFILE}
   sleep $delay
 
-  /usr/bin/mplayer \
-    -monitoraspect ${MONITORASPECT} \
-    -geometry ${W}x${H}+${X}+${Y} \
-    -loop 1 \
-    /mnt/swshare/${SCREEN_ID}_${media_id}_${W}x${H}.video \
-    2>&1 >/dev/null && date +"%H:%M:%S E${event_id}: Finished" >> ${LOGFILE} &
-
-  ppid=${!}
-  `ps -eo pid,ppid | grep ${ppid}` >> ${LOGFILE}
-  event_pid_a[${event_id}]=`ps -eo pid,ppid | grep ${ppid} | tail -1 | cut -d" " -f1`
+  . /root/play.${media_type} # defines $event_pid_a[${event_id}]
   date +"%H:%M:%S E${event_id}: Started with PID '${event_pid_a[${event_id}]}'" >> ${LOGFILE}
-  ps -ef | grep mplay >> ${LOGFILE}
 
-done # >> /mnt/swshare/${SCREEN_ID}_events.log # | dwm
+#  ps -ef | grep mplay >> ${LOGFILE}
 
-# . ${0} # uncomment this, if You like to restart the player
+done
+
+# . ${0} # uncomment this, if You like to restart the player after playlist finishes
 
 exit 0
-
-#/usr/bin/mplayer -monitoraspect ${MONITORASPECT} -geometry 321:241 /mnt/swshare/154327.flv -loop 0 2>&1 >/dev/null &
-
