@@ -1,0 +1,9 @@
+/usr/bin/mplayer \
+   -monitoraspect ${MONITORASPECT} \
+   -geometry ${W}x${H}+${X}+${Y} \
+   -loop 1 \
+   /mnt/swshare/${SCREEN_ID}_${media_id}_${W}x${H}.video \
+   2>&1 >/dev/null && date +"%H:%M:%S E${event_id}: Finished" >> ${LOGFILE} &
+
+ppid=${!}
+event_pid_a[${event_id}]=`ps -eo pid,ppid | grep ${ppid} | tail -1 | cut -d" " -f1`
