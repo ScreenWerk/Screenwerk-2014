@@ -20,11 +20,14 @@ class Upload extends Controller {
 
 
 	function do_upload() {
+	
+		global $mimes;
+		if (count($mimes) == 0) @require_once(APPPATH.'config/mimes'.EXT);
 		
 		$config['upload_path'] = '../ftp/incoming/';
-		$config['allowed_types'] = 'image|video|text';
+		$config['allowed_types'] = $this->__array_search_recursive($_FILES['upload_file']['type'], $mimes);
 		$config['remove_spaces'] = TRUE;
-		
+
 		$this->load->library('upload', $config);
 	
 		if ( ! $this->upload->do_upload('upload_file')) {
@@ -39,6 +42,12 @@ class Upload extends Controller {
 
 	}	
 	
-}
+	function __array_search_recursive($needle, $haystack) {     
+    foreach ($haystack as $k => $v) {
+      for ($i=0; $i<count($v); $i++)
+        if ($v[$i] === $needle) return $k;
+    	}
+  	}
+	}
 
 ?>
