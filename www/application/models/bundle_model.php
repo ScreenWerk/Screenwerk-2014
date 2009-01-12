@@ -87,7 +87,7 @@ class Bundle_model extends Model {
 		if($query->num_rows() > 0) {
 			foreach($query->result_array() as $row) {
 				$data[$row['id']] = $row;
-				unset($data[$row['id']]['id']);
+				//unset($data[$row['id']]['id']);
 			}
 		} else {
 			$data = array();
@@ -152,8 +152,16 @@ class Bundle_model extends Model {
 
 	function update_fs($id) {
 
+      $medias = $this->get_medias($id);
+      $contents[] = implode(';', array_keys(current($medias)));
+      foreach($medias as $media) {
+         $contents[] = implode(';', $media);
+      }
 		$master_bundle_file = DIR_FTP_SCREENS."/$id.bundle";  # ftp/screens/13.bundle
-	   file_put_contents($master_bundle_file, array_keys($this->get_medias($id)));
+		if (file_exists($master_bundle_file)) {
+         unlink($master_bundle_file);
+      }
+	   file_put_contents($master_bundle_file, implode("\n", $contents));
 
 	   $screens = $this->get_screens($id);
 	   foreach($screens as $screen_id => $screen) {
@@ -165,7 +173,9 @@ class Bundle_model extends Model {
          }
 
    		$bundle_file = DIR_FTP_SCREENS."/$screen_id/$id.bundle";  # ftp/screens/35/13.bundle
-	      unlink($bundle_file);
+	      if (file_exists($bundle_file)) {
+	         unlink($bundle_file);
+         }
 	      link($master_bundle_file, $bundle_file);
       }
       unlink($master_bundle_file); # ftp/screens/13.bundle
