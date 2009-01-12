@@ -12,7 +12,7 @@ class Bundle extends Controller {
 		$this->load->model('Dimension_model', 'dimension');
 		$this->load->model('Layout_model', 'layout');
 		
-		//$this->output->enable_profiler(TRUE);
+		$this->output->enable_profiler(TRUE);
 	}
 
 

@@ -36,6 +36,20 @@ define('FOPEN_READ_WRITE_CREATE', 				'a+b');
 define('FOPEN_WRITE_CREATE_STRICT', 			'xb');
 define('FOPEN_READ_WRITE_CREATE_STRICT',		'x+b');
 
+/*
+|--------------------------------------------------------------------------
+| Media file system structure
+|--------------------------------------------------------------------------
+|
+| Media files are accessed there
+|
+*/
+
+define('DIR_FTP_ROOT',                   '/mnt/www_data/screenwerk/www-data/trunk/ftp');
+define('DIR_FTP_ORIGINALS',              DIR_FTP_ROOT.'/originals');
+define('DIR_FTP_CONVERT',                DIR_FTP_ROOT.'/convert');
+define('DIR_FTP_SCREENS',                DIR_FTP_ROOT.'/screens');
+
 
 /* End of file constants.php */
 /* Location: ./system/application/config/constants.php */
