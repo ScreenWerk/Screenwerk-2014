@@ -75,13 +75,13 @@ class Bundle_model extends Model {
 
 
 
-	function get_screens($id) {	
+	function get_screens($bundle_id) {	
 		$this->db->select('screens.id, screens.name');
 		$this->db->from('screens');
 		$this->db->join('collections_schedules', 'collections_schedules.schedule_id = screens.schedule_id', 'left');
 		$this->db->join('layouts_collections', 'layouts_collections.collection_id = collections_schedules.collection_id', 'left');
 		$this->db->join('bundles_layouts', 'bundles_layouts.layout_id = layouts_collections.layout_id', 'left');
-		$this->db->where(array('bundles_layouts.bundle_id' => $id));
+		$this->db->where(array('bundles_layouts.bundle_id' => $bundle_id));
 		$query = $this->db->get();
 		
 		if($query->num_rows() > 0) {
@@ -98,7 +98,7 @@ class Bundle_model extends Model {
 
 
 
-	function get_medias($id) {	
+	function get_medias($bundle_id) {	
 		$this->db->select('medias.id,
 		                   medias_bundles.frequency,
 		                   medias_bundles.probability,
@@ -106,7 +106,7 @@ class Bundle_model extends Model {
 		                   medias_bundles.valid_to_date');
 		$this->db->from('medias');
 		$this->db->join('medias_bundles', 'medias_bundles.media_id = medias.id', 'left');
-		$this->db->where(array('medias_bundles.bundle_id' => $id));
+		$this->db->where(array('medias_bundles.bundle_id' => $bundle_id));
 		$query = $this->db->get();
 		
 		if($query->num_rows() > 0) {
@@ -124,10 +124,7 @@ class Bundle_model extends Model {
 
 
 	function delete($id) {
-	   $screens = $this->get_screens($id);
-	   foreach($screens as $screen_id => $screen) {
-	      @ unlink(DIR_FTP_SCREENS."/$screen_id/$id.bundle"); # ftp/screens/35/13.bundle
-      }
+   	$this->delete_fs($id);
 		$this->db->where('id', $id);
 		$this->db->delete('bundles');
 	}
@@ -150,20 +147,29 @@ class Bundle_model extends Model {
 
 
 
-	function update_fs($id) {
+	function delete_fs($bundle_id) {
+	   $screens = $this->get_screens($bundle_id);
+	   foreach($screens as $screen_id => $screen) {
+	      @ unlink(DIR_FTP_SCREENS."/$screen_id/$bundle_id.bundle"); # ftp/screens/35/13.bundle
+      }
+	}
 
-      $medias = $this->get_medias($id);
+
+
+	function update_fs($bundle_id) {
+
+      $medias = $this->get_medias($bundle_id);
       $contents[] = implode(';', array_keys(current($medias)));
       foreach($medias as $media) {
          $contents[] = implode(';', $media);
       }
-		$master_bundle_file = DIR_FTP_SCREENS."/$id.bundle";  # ftp/screens/13.bundle
+		$master_bundle_file = DIR_FTP_SCREENS."/$bundle_id.bundle";  # ftp/screens/13.bundle
 		if (file_exists($master_bundle_file)) {
          unlink($master_bundle_file);
       }
 	   file_put_contents($master_bundle_file, implode("\n", $contents));
 
-	   $screens = $this->get_screens($id);
+	   $screens = $this->get_screens($bundle_id);
 	   foreach($screens as $screen_id => $screen) {
          if (!file_exists(DIR_FTP_SCREENS."/$screen_id")) {
             mkdir(DIR_FTP_SCREENS."/$screen_id");
@@ -172,7 +178,7 @@ class Bundle_model extends Model {
             mkdir(DIR_FTP_SCREENS."/$screen_id");
          }
 
-   		$bundle_file = DIR_FTP_SCREENS."/$screen_id/$id.bundle";  # ftp/screens/35/13.bundle
+   		$bundle_file = DIR_FTP_SCREENS."/$screen_id/$bundle_id.bundle";  # ftp/screens/35/13.bundle
 	      if (file_exists($bundle_file)) {
 	         unlink($bundle_file);
          }

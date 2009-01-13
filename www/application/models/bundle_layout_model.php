@@ -36,8 +36,18 @@ class Bundle_layout_model extends Model {
 
 
 	function delete($id) {
+	   $bundle_id_a = $this->input->post('bundle_id');
+	   $bundle_id = $bundle_id_a[$id];
+	   $layout_id_a = $this->input->post('layout_id');
+	   $layout_id = $layout_id_a[$id];
+
+	   $this->bundle->delete_fs($bundle_id);
+
 		$this->db->where('id', $id);
 		$this->db->delete('bundles_layouts');
+
+	   $this->bundle->update_fs($bundle_id);
+	   $this->layout->update_fs($layout_id);
 	}
 
 
@@ -75,6 +85,8 @@ class Bundle_layout_model extends Model {
 					$this->db->insert('bundles_layouts', $data);
 				}
 			}
+         $this->bundle->update_fs($data['bundle_id']); // renew bundle file for synchronization with screens
+         $this->layout->update_fs($data['layout_id']); // renew bundle file for synchronization with screens
 		}
 		
 	}

@@ -78,7 +78,55 @@ class Layout_model extends Model {
 
 
 
+	function get_screens($layout_id) {	
+		$this->db->select('screens.id, screens.name');
+		$this->db->from('screens');
+		$this->db->join('collections_schedules', 'collections_schedules.schedule_id = screens.schedule_id', 'left');
+		$this->db->join('layouts_collections', 'layouts_collections.collection_id = collections_schedules.collection_id', 'left');
+		$this->db->where(array('layouts_collections.layout_id' => $layout_id));
+		$query = $this->db->get();
+		
+		if($query->num_rows() > 0) {
+			foreach($query->result_array() as $row) {
+				$data[$row['id']] = $row;
+				//unset($data[$row['id']]['id']);
+			}
+		} else {
+			$data = array();
+		}
+
+		return $data;
+	} 
+
+
+
+	function get_bundles($layout_id) {	
+		$this->db->select('bundles.id,
+		                   bundles_layouts.position_x,
+		                   bundles_layouts.position_y,
+		                   bundles_layouts.start_sec,
+		                   bundles_layouts.stop_sec');
+		$this->db->from('bundles');
+		$this->db->join('bundles_layouts', 'bundles_layouts.bundle_id = bundles.id', 'left');
+		$this->db->where(array('bundles_layouts.layout_id' => $layout_id));
+		$query = $this->db->get();
+		
+		if($query->num_rows() > 0) {
+			foreach($query->result_array() as $row) {
+				$data[$row['id']] = $row;
+				//unset($data[$row['id']]['id']);
+			}
+		} else {
+			$data = array();
+		}
+
+		return $data;
+	} 
+
+
+
 	function delete($id) {
+      $this->delete_fs($id);
 		$this->db->where('id', $id);
 		$this->db->delete('layouts');
 	}
@@ -98,6 +146,52 @@ class Layout_model extends Model {
 			$data['customer_id'] = $_SESSION['user']['customer_id'];
 			$this->db->insert('layouts', $data);
 		}
+	}
+
+
+
+	function delete_fs($layout_id) {
+	   //TODO: right now orphan bundle files are remaining,
+	   // plan is to remove all related bundle files and refresh them
+	   // after layout is removed from DB.
+ 	   $screens = $this->get_screens($layout_id);
+	   foreach($screens as $screen_id => $screen) {
+	      @ unlink(DIR_FTP_SCREENS."/$screen_id/$layout_id.layout");
+      }
+	}
+
+
+
+	function update_fs($layout_id) {
+      if($layout_id==0) return;
+      
+      $bundles = $this->get_bundles($layout_id);
+      $contents[] = implode(';', array_keys(current($bundles)));
+      foreach($bundles as $bundle) {
+         $contents[] = implode(';', $bundle);
+      }
+		$master_layout_file = DIR_FTP_SCREENS."/$layout_id.layout";
+		if (file_exists($master_layout_file)) {
+         unlink($master_layout_file);
+      }
+	   file_put_contents($master_layout_file, implode("\n", $contents));
+
+	   $screens = $this->get_screens($layout_id);
+	   foreach($screens as $screen_id => $screen) {
+         if (!file_exists(DIR_FTP_SCREENS."/$screen_id")) {
+            mkdir(DIR_FTP_SCREENS."/$screen_id");
+         } else if (!is_dir(DIR_FTP_SCREENS."/$screen_id")) {
+            unlink(DIR_FTP_SCREENS."/$screen_id");
+            mkdir(DIR_FTP_SCREENS."/$screen_id");
+         }
+
+   		$layout_file = DIR_FTP_SCREENS."/$screen_id/$layout_id.layout";
+	      if (file_exists($layout_file)) {
+	         unlink($layout_file);
+         }
+	      link($master_layout_file, $layout_file);
+      }
+      unlink($master_layout_file);
 	}
 
 
