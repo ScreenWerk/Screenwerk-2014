@@ -36,8 +36,18 @@ class Collection_schedule_model extends Model {
 
 
 	function delete($id) {
+	   $collection_id_a = $this->input->post('collection_id');
+	   $collection_id = $collection_id_a[$id];
+	   $schedule_id_a = $this->input->post('schedule_id');
+	   $schedule_id = $schedule_id_a[$id];
+
+	   $this->collection->delete_fs($collection_id);
+
 		$this->db->where('id', $id);
 		$this->db->delete('collections_schedules');
+
+	   $this->collection->update_fs($collection_id);
+	   $this->schedule->update_fs($schedule_id);
 	}
 
 
@@ -77,6 +87,8 @@ class Collection_schedule_model extends Model {
 					$this->db->insert('collections_schedules', $data);
 				}
 			}
+         $this->collection->update_fs($data['collection_id']);
+         $this->schedule->update_fs($data['schedule_id']);
 		}
 		
 	}
