@@ -35,8 +35,18 @@ class Layout_collection_model extends Model {
 
 
 	function delete($id) {
+	   $layout_id_a = $this->input->post('layout_id');
+	   $layout_id = $layout_id_a[$id];
+	   $collection_id_a = $this->input->post('collection_id');
+	   $collection_id = $collection_id_a[$id];
+
+	   $this->layout->delete_fs($layout_id);
+
 		$this->db->where('id', $id);
 		$this->db->delete('layouts_collections');
+
+	   $this->layout->update_fs($layout_id);
+	   $this->collection->update_fs($collection_id);
 	}
 
 
@@ -62,6 +72,7 @@ class Layout_collection_model extends Model {
 				'importance' => $importance[$key],
 				'probability' => $probability[$key]
 			);
+
 			if($valid_from_date[$key]) $data['valid_from_date'] = date('Y-m-d', strtotime($valid_from_date[$key]));
 			if($valid_to_date[$key]) $data['valid_to_date'] = date('Y-m-d', strtotime($valid_to_date[$key]));
 			
@@ -74,6 +85,8 @@ class Layout_collection_model extends Model {
 					$this->db->insert('layouts_collections', $data);
 				}
 			}
+         $this->layout->update_fs($data['layout_id']);
+         $this->collection->update_fs($data['collection_id']);
 		}
 		
 	}

@@ -142,6 +142,7 @@ class Layout_model extends Model {
 		if($this->input->post('id') > 0) {
 			$this->db->where('id', $this->input->post('id'));
 			$this->db->update('layouts', $data);
+			$this->update_fs($this->input->post('id'));
 		} else {
 			$data['customer_id'] = $_SESSION['user']['customer_id'];
 			$this->db->insert('layouts', $data);
