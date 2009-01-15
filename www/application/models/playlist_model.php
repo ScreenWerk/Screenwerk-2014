@@ -53,6 +53,42 @@ class Playlist_model extends Model
 	}
 
 
+
+   function regen_fs($screen_id) {
+      $schedule = $this->Screen->get_one( $screen_id );
+      $schedule_id = $schedule['schedule_id'];
+      $this->schedule->update_fs($schedule_id);
+
+      $collections = $this->schedule->get_collections($schedule_id);
+
+      $layouts = array();
+      foreach($collections as $collection) {
+         $this->collection->update_fs($collection['id']);
+         $layouts = array_merge($layouts, $this->collection->get_layouts($collection['id']));
+      }
+//print_r($layouts);die();
+      $bundles = array();
+      foreach($layouts as $layout) {
+         $this->layout->update_fs($layout['id']);
+         $bundles = array_merge($bundles, $this->layout->get_bundles($layout['id']));
+      }
+
+      $medias = array();
+      foreach($bundles as $bundle) {
+         $this->bundle->update_fs($bundle['id']);
+         $medias = array_merge($medias, $this->bundle->get_medias($bundle['id']));
+      }
+
+      return array('schedule' => $schedule,
+                   'collections' => $collections,
+                   'layouts' => $layouts,
+                   'bundles' => $bundles,
+                   'medias' => $medias
+                  );
+   }
+
+
+
 	function create_playlist_for_screen( $screen_id, $no_of_days )
 	{
 	   $this->screen_id = $screen_id;

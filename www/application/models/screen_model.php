@@ -67,6 +67,7 @@ class Screen_model extends Model {
 
 
 	function delete($id) {
+      $this->delete_fs($id);
 		$this->db->where('id', $id);
 		$this->db->delete('screens');
 	}
@@ -82,10 +83,54 @@ class Screen_model extends Model {
 		if($this->input->post('id') > 0) {
 			$this->db->where('id', $this->input->post('id'));
 			$this->db->update('screens', $data);
+			$this->update_fs($this->input->post('id'));
 		} else {
 			$data['customer_id'] = $_SESSION['user']['customer_id'];
 			$this->db->insert('screens', $data);
 		}
+	}
+
+
+
+	function delete_fs($screen_id) {
+	   //TODO: right now orphan layout files are remaining,
+	   // plan is to remove all related layout files and refresh them
+	   // after collection is unlinked.
+      @ unlink(DIR_FTP_SCREENS."/$screen_id/$screen_id.screen");
+	}
+
+
+
+	function update_fs($screen_id) {
+      if($screen_id==0) return;
+      
+      $collections = $this->get_collections($schedule_id);
+      $contents[] = implode(';', array_keys(current($collections)));
+      foreach($collections as $collection) {
+         $contents[] = implode(';', $collection);
+      }
+		$master_schedule_file = DIR_FTP_SCREENS."/$schedule_id.schedule";
+		if (file_exists($master_schedule_file)) {
+         unlink($master_schedule_file);
+      }
+	   file_put_contents($master_schedule_file, implode("\n", $contents));
+
+	   $screens = $this->get_screens($schedule_id);
+	   foreach($screens as $screen_id => $screen) {
+         if (!file_exists(DIR_FTP_SCREENS."/$screen_id")) {
+            mkdir(DIR_FTP_SCREENS."/$screen_id");
+         } else if (!is_dir(DIR_FTP_SCREENS."/$screen_id")) {
+            unlink(DIR_FTP_SCREENS."/$screen_id");
+            mkdir(DIR_FTP_SCREENS."/$screen_id");
+         }
+
+   		$schedule_file = DIR_FTP_SCREENS."/$screen_id/$schedule_id.schedule";
+	      if (file_exists($schedule_file)) {
+	         unlink($schedule_file);
+         }
+	      link($master_schedule_file, $schedule_file);
+      }
+      unlink($master_schedule_file);
 	}
 
 

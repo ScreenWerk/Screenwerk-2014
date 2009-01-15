@@ -70,6 +70,30 @@ class Screen extends Controller {
 
    function generate_playlist( $screen_id )
    {
+      //
+      // alternate method for playlist propagation
+      //
+      $pl_data = $this->playlist->regen_fs($screen_id);
+      //print_r($pl_data);
+      $screen_dir = DIR_FTP_SCREENS . '/' . $screen_id;
+
+      if(!is_dir($screen_dir)) mkdir ($screen_dir);
+      foreach( $pl_data['medias'] as $media )
+      {
+         $_source = DIR_FTP_ORIGINALS . '/' . $media['id'];
+         $_destination = DIR_FTP_SCREENS . '/' . $screen_id . '/' . $media['id'] . '.' . $media['type'];
+
+         if(is_file($_destination)) unlink($_destination);
+         link($_source, $_destination);
+      }
+		redirect( $this->uri->segment( 1 ) );
+      return;
+
+
+
+      //
+      // initial method for playlist propagation
+      //
       // $screen_id = $this->router->segments[3];
       $no_of_days = 3; //$this->router->segments[4];
       $pl_data = $this->playlist->create_playlist_for_screen( $screen_id, $no_of_days );
