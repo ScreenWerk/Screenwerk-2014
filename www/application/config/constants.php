@@ -49,6 +49,7 @@ define('DIR_FTP_ROOT',                   '/mnt/www_data/screenwerk/www-data/trun
 define('DIR_FTP_ORIGINALS',              DIR_FTP_ROOT.'/originals');
 define('DIR_FTP_CONVERT',                DIR_FTP_ROOT.'/convert');
 define('DIR_FTP_SCREENS',                DIR_FTP_ROOT.'/screens');
+define('DIR_FTP_SIGNALS',                DIR_FTP_ROOT.'/signals');
 
 
 /* End of file constants.php */

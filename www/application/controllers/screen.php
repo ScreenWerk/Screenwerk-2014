@@ -86,6 +86,14 @@ class Screen extends Controller {
          if(is_file($_destination)) unlink($_destination);
          link($_source, $_destination);
       }
+
+      link(DIR_FTP_SIGNALS . '/templates/rsync.signal.sh', DIR_FTP_SIGNALS . '/' . $screen_id);
+      
+
+      $data['content_md5'] = $this->screen->md5( $screen_id );
+      $this->screen->db->where( 'id', $screen_id );
+      $this->screen->db->update( 'screens', $data );
+      
 		redirect( $this->uri->segment( 1 ) );
       return;
 
