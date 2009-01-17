@@ -168,7 +168,7 @@ class Bundle_model extends Model {
 		if (file_exists($master_bundle_file)) {
          unlink($master_bundle_file);
       }
-	   file_put_contents($master_bundle_file, implode("\n", $contents));
+	   file_put_contents($master_bundle_file, implode("\n", $contents) . "\n");
 
 	   $screens = $this->get_screens($bundle_id);
 	   foreach($screens as $screen_id => $screen) {

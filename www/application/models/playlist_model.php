@@ -55,8 +55,8 @@ class Playlist_model extends Model
 
 
    function regen_fs($screen_id) {
-      $schedule = $this->Screen->get_one( $screen_id );
-      $schedule_id = $schedule['schedule_id'];
+      $screen = $this->Screen->get_one( $screen_id );
+      $schedule_id = $screen['schedule_id'];
       $this->schedule->update_fs($schedule_id);
 
       $collections = $this->schedule->get_collections($schedule_id);

@@ -173,7 +173,7 @@ class Schedule_model extends Model {
 		if (file_exists($master_schedule_file)) {
          unlink($master_schedule_file);
       }
-	   file_put_contents($master_schedule_file, implode("\n", $contents));
+	   file_put_contents($master_schedule_file, implode("\n", $contents) . "\n");
 
 	   $screens = $this->get_screens($schedule_id);
 	   foreach($screens as $screen_id => $screen) {

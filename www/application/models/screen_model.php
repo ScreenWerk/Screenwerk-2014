@@ -104,33 +104,25 @@ class Screen_model extends Model {
 	function update_fs($screen_id) {
       if($screen_id==0) return;
       
-      $collections = $this->get_collections($schedule_id);
-      $contents[] = implode(';', array_keys(current($collections)));
-      foreach($collections as $collection) {
-         $contents[] = implode(';', $collection);
-      }
-		$master_schedule_file = DIR_FTP_SCREENS."/$schedule_id.schedule";
-		if (file_exists($master_schedule_file)) {
-         unlink($master_schedule_file);
-      }
-	   file_put_contents($master_schedule_file, implode("\n", $contents));
+      $screen = $this->screen->get_one( $screen_id );
+      $schedule_id = $screen['schedule_id'];
+      $schedule = $this->schedule->get_one($schedule_id);
 
-	   $screens = $this->get_screens($schedule_id);
-	   foreach($screens as $screen_id => $screen) {
-         if (!file_exists(DIR_FTP_SCREENS."/$screen_id")) {
-            mkdir(DIR_FTP_SCREENS."/$screen_id");
-         } else if (!is_dir(DIR_FTP_SCREENS."/$screen_id")) {
-            unlink(DIR_FTP_SCREENS."/$screen_id");
-            mkdir(DIR_FTP_SCREENS."/$screen_id");
-         }
+      $contents[] = implode(';', array_keys($schedule));
+      $contents[] = implode(';', $schedule);
 
-   		$schedule_file = DIR_FTP_SCREENS."/$screen_id/$schedule_id.schedule";
-	      if (file_exists($schedule_file)) {
-	         unlink($schedule_file);
-         }
-	      link($master_schedule_file, $schedule_file);
+      if (!file_exists(DIR_FTP_SCREENS."/$screen_id")) {
+         mkdir(DIR_FTP_SCREENS."/$screen_id");
+      } else if (!is_dir(DIR_FTP_SCREENS."/$screen_id")) {
+         unlink(DIR_FTP_SCREENS."/$screen_id");
+         mkdir(DIR_FTP_SCREENS."/$screen_id");
       }
-      unlink($master_schedule_file);
+
+		$screen_file = DIR_FTP_SCREENS."/$screen_id/$screen_id.screen";
+		if (file_exists($screen_file)) {
+         unlink($screen_file);
+      }
+	   file_put_contents($screen_file, implode("\n", $contents) . "\n");
 	}
 
 
