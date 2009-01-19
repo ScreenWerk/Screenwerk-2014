@@ -52,40 +52,34 @@ function in_array()
 	local i
 	needle=$1
 	shift 1
-	[ -z "$1" ] && return 1	# array() undefined
+	[ -z "$1" ] && return 0	# array() undefined
 	for i in $*
 	do
-		[ "$i" == "$needle" ] && return 0
-	done
-	return 1
-}
-
-
-# pass needle as $1 and array should follow
-function is_lt()
-{
-	local i
-	needle=$1
-	shift 1
-	for i in $*
-	do
-		[ "$needle" -le "$i" ] && return 1
+		[ "$i" = "$needle" ] && return 1
 	done
 	return 0
 }
 
 
 # pass needle as $1 and array should follow
-function get_lt()
+function is_le()
+{
+   [ "$1" -le "${!#}" ] && return 1
+	return 0
+}
+
+
+# pass needle as $1 and array should follow
+function get_le()
 {
 	local i
 	needle=$1
 	shift 1
 	for i in $*
 	do
-		[[ "$needle" -le "$i" ]] && ret_val=$needle
+		[[ "$needle" -le "$i" ]] && break
 	done
-	echo $ret_val
+	echo $i
 }
 
 
@@ -105,7 +99,7 @@ function get_ge()
 	shift 1
 	for i in $*
 	do
-		[[ "$needle" -ge "$i" ]] && ret_val=$needle
+		[[ "$needle" -ge "$i" ]] && ret_val=$i
 	done
 	echo $ret_val
 }
@@ -113,61 +107,59 @@ function get_ge()
 
 function max()
 {
-   echo ${1[${1[@]}]}
+   echo ${!#} # return last element of $* array
 }
+function min()
+{
+   echo ${1} # return first element of $* array
+}
+
 
 function last_event()
 {
    I=0
-#   [[ -z $LAST_EVENT ]] && LAST_EVENT=( $NOW_JD $NOW_TIME_H $NOW_TIME_M )
-   [[ -z $LAST_EVENT ]] && LAST_EVENT=( 0 0 0 )
-
-   MAX_TIME_H=${NOW_TIME_H}
-   MAX_TIME_M=${NOW_TIME_M}
-   
-   
 
    while [ "$I" -le "366" ]
    do
       I_JD=$((NOW_JD-I))
+      I=$((I+1))
       [[ "$I_JD" -lt "${cronline[8]}" ]] && return 0
       [[ "$I_JD" -lt "${LAST_EVENT[0]}" ]] && return 0
-      I=$((I+1))
 
       I_DATE=`get_greg_from_JD $I_JD`
       I_DAY=`echo $I_DATE | cut -d' ' -f3`
       I_MONTH=`echo $I_DATE | cut -d' ' -f2`
       I_WEEKDAY=$((I_JD-I_JD/7*7+1));
 
-      if [ ! ${cronline[3]} == "*" ]; then
+      if [ ! "${cronline[3]}" = "*" ]; then
          in_array ${I_DAY} ${cronline[3]}
          [[ $? -eq 0 ]] && continue
       fi
-      if [ ! ${cronline[4]} == "*" ]; then
+      if [ ! "${cronline[4]}" = "*" ]; then
          in_array ${I_MONTH} ${cronline[4]}
          [[ $? -eq 0 ]] && continue
       fi
-      if [ ! "${cronline[5]}" == "*" ]; then
+      if [ ! "${cronline[5]}" = "*" ]; then
          in_array ${I_WEEKDAY} ${cronline[5]}
          [[ $? -eq 0 ]] && continue
       fi
 
-      echo "= Candidate JDay: ${I_JD}"
+      echo "= Candidate last JDay: ${I_JD}"
       #  At this point we have found a candidate day for latest event
-      if [ "${I_JD}" -eq "${NOW_JD}" ];then
-         if [ ${cronline[2]} = "*" ]; then
-            echo "= EVENT_H=${NOW_TIME_H}"
+      if [ "${I_JD}" -eq "${NOW_JD}" ]; then
+         if [ "${cronline[2]}" = "*" ]; then
             EVENT_H=${NOW_TIME_H}
          else
+            #echo "=is_ge ${NOW_TIME_H} ${cronline[2]}="
             is_ge ${NOW_TIME_H} ${cronline[2]}
             [[ $? -eq 0 ]] && continue
             EVENT_H=`get_ge ${NOW_TIME_H} ${cronline[2]}`
          fi
       else
-         if [ ${cronline[2]} = "*" ]; then
+         if [ "${cronline[2]}" = "*" ]; then
             EVENT_H=23
          else
-            EVENT_H=max ${cronline[2]}
+            EVENT_H=`max ${cronline[2]}`
          fi
       fi
 
@@ -176,22 +168,144 @@ function last_event()
          if [ "${cronline[1]}" = "*" ]; then
             EVENT_M=${NOW_TIME_M}
          else
+            #echo "= is_ge ${NOW_TIME_M} ${cronline[1]}="
             is_ge ${NOW_TIME_M} ${cronline[1]}
-            [[ $? -eq 0 ]] && continue
-            EVENT_M=`get_ge ${NOW_TIME_M} ${cronline[1]}`
+            if [ $? -eq 0 ]; then
+               #echo "= NO ="
+               [[ "${NOW_TIME_H}" -eq "0" ]] && continue
+               if [ "${cronline[2]}" = "*" ]; then
+                  EVENT_H=$((NOW_TIME_H-1))
+               else
+                  #echo "=is_ge $((NOW_TIME_H-1)) ${cronline[2]}="
+                  is_ge $((NOW_TIME_H-1)) ${cronline[2]}
+                  [[ $? -eq 0 ]] && continue
+                  EVENT_H=`get_ge $((NOW_TIME_H-1)) ${cronline[2]}`
+               fi
+               EVENT_M=`max ${cronline[1]}`
+            else
+               EVENT_M=`get_ge ${NOW_TIME_M} ${cronline[1]}`
+               #echo "= YES : ${EVENT_M}="
+            fi
          fi
       else
-         if [ ${cronline[1]} = "*" ]; then
+         if [ "${cronline[1]}" = "*" ]; then
             EVENT_M=59
          else
-            EVENT_M=max ${cronline[1]}
+            EVENT_M=`max ${cronline[1]}`
+         fi
+      fi
+
+      if [ "${I_JD}" -lt "${LAST_EVENT[0]}" ]; then
+         break
+      elif [ "${I_JD}" -eq "${LAST_EVENT[0]}" ]; then
+         if [ "${EVENT_H}" -lt "${LAST_EVENT[1]}" ]; then
+            break
+         elif [ "${EVENT_H}" -eq "${LAST_EVENT[1]}" ]; then
+            if [ "${EVENT_M}" -lt "${LAST_EVENT[2]}" ]; then
+               break
+            fi
+         fi
+      fi
+      LAST_EVENT=( ${I_JD} ${EVENT_H} ${EVENT_M} )
+      break
+      
+   done
+}
+
+function next_event()
+{
+   J=${I}
+   I=0
+
+
+   while [ "$J" -le "366" ]
+   do
+      I_JD=$((NOW_JD+I))
+      I=$((I+1))
+      J=$((J+1))
+      [[ "$I_JD" -gt "${cronline[9]}" ]] && return 0
+      [[ "$I_JD" -gt "${NEXT_EVENT[0]}" ]] && return 0
+
+      I_DATE=`get_greg_from_JD $I_JD`
+      I_DAY=`echo $I_DATE | cut -d' ' -f3`
+      I_MONTH=`echo $I_DATE | cut -d' ' -f2`
+      I_WEEKDAY=$((I_JD-I_JD/7*7+1));
+
+      if [ ! "${cronline[3]}" = "*" ]; then
+         in_array ${I_DAY} ${cronline[3]}
+         [[ $? -eq 0 ]] && continue
+      fi
+      if [ ! "${cronline[4]}" = "*" ]; then
+         in_array ${I_MONTH} ${cronline[4]}
+         [[ $? -eq 0 ]] && continue
+      fi
+      if [ ! "${cronline[5]}" = "*" ]; then
+         in_array ${I_WEEKDAY} ${cronline[5]}
+         [[ $? -eq 0 ]] && continue
+      fi
+
+      echo "= Candidate next JDay: ${I_JD}"
+      #  At this point we have found a candidate day for next event
+      if [ "${I_JD}" -eq "${NOW_JD}" ]; then
+         if [ "${cronline[2]}" = "*" ]; then
+            EVENT_H=${NOW_TIME_H}
+         else
+            echo "=is_le ${NOW_TIME_H} ${cronline[2]}="
+            is_le ${NOW_TIME_H} ${cronline[2]}
+            [[ $? -eq 0 ]] && continue
+            EVENT_H=`get_le ${NOW_TIME_H} ${cronline[2]}`
+         fi
+      else
+         if [ "${cronline[2]}" = "*" ]; then
+            EVENT_H=0
+         else
+            EVENT_H=`min ${cronline[2]}`
+         fi
+      fi
+
+
+      if [ "${I_JD}" -eq "${NOW_JD}" -a "${EVENT_H}" -eq "${NOW_TIME_H}" ]; then
+         if [ "${cronline[1]}" = "*" ]; then
+            EVENT_M=${NOW_TIME_M}
+         else
+            echo "=is_le $((NOW_TIME_M+1)) ${cronline[1]}="
+            is_le $((NOW_TIME_M+1)) ${cronline[1]}
+            if [ $? -eq 0 ]; then
+               [[ "${NOW_TIME_H}" -eq "23" ]] && continue
+               if [ "${cronline[2]}" = "*" ]; then
+                  EVENT_H=$((NOW_TIME_H+1))
+               else
+                  is_le $((NOW_TIME_H+1)) ${cronline[2]}
+                  [[ $? -eq 0 ]] && continue
+                  EVENT_H=`get_le $((NOW_TIME_H+1)) ${cronline[2]}`
+               fi
+               EVENT_M=`min ${cronline[1]}`
+            else
+               EVENT_M=`get_le $((NOW_TIME_M+1)) ${cronline[1]}`
+            fi
+         fi
+      else
+         if [ "${cronline[1]}" = "*" ]; then
+            EVENT_M=0
+         else
+            EVENT_M=`min ${cronline[1]}`
          fi
       fi
       
-      LAST_EVENT=( ${I_JD} ${EVENT_H} ${EVENT_M} )
+      if [ "${I_JD}" -gt "${NEXT_EVENT[0]}" ]; then
+         break
+      elif [ "${I_JD}" -eq "${NEXT_EVENT[0]}" ]; then
+         if [ "${EVENT_H}" -gt "${NEXT_EVENT[1]}" ]; then
+            break
+         elif [ "${EVENT_H}" -eq "${NEXT_EVENT[1]}" ]; then
+            if [ "${EVENT_M}" -gt "${NEXT_EVENT[2]}" ]; then
+               break
+            fi
+         fi
+      fi
+      NEXT_EVENT=( ${I_JD} ${EVENT_H} ${EVENT_M} )
 
       break
-      #echo $I_DATE
       
    done
 }
@@ -199,16 +313,18 @@ function last_event()
 # ZERO_JD=2454850 # Sunday, January 18, 2009
 SCHEDULE_FILE=$1
 NOW_DATE=`date +'%Y %m %d'`  # 2009 01 18
-NOW_DATE_M=`date +'%m'`  # 01
+NOW_DATE_M=$((`date +'%m'`))  # 1
 NOW_DATE_D=`date +'%d'`  # 18
 NOW_DATE_W=`date +'%u'`  # 1
 NOW_TIME=`date +'%H %M %S'`  # 23 11 07
-NOW_TIME_H=`date +'%H'`  # 23
-NOW_TIME_M=`date +'%M'`  # 11
-NOW_TIME_S=`date +'%S'`  # 07
+NOW_TIME_H=$((`date +'%H'`))  # 23
+NOW_TIME_M=$((`date +'%M'`))  # 11
+NOW_TIME_S=$((`date +'%S'`))  # 7
 NOW_JD=`get_astro_JD $NOW_DATE`
 NOW_WD=$((NOW_JD-NOW_JD/7*7+1)) # 1 - MON, 2 - TUE, ..., 7 - SUN
 
+LAST_EVENT=( 0 0 0 )
+NEXT_EVENT=( 3999999 23 59 )
 
 
 set -f  # disable globbing. wildcards would be expanded otherwise
@@ -222,7 +338,6 @@ do
    if [ $firstline -eq 1 ]
    then
       firstline=0
-      echo \|$l\| 
       continue
    fi
    echo ===
@@ -243,6 +358,7 @@ do
 
    PIFS=$IFS; IFS=" ,"
       last_event
+      next_event
    IFS=$PIFS
    
    echo '0 id           :'${cronline[0]}  # id
@@ -256,7 +372,7 @@ do
    echo '8 JD valid from:'${cronline[8]}  # JD valid from
    echo '9 JD valid to  :'${cronline[9]}  # JD valid to  
 
-   echo '=='${LAST_EVENT[*]}'=='
+   echo '=='${LAST_EVENT[*]}'=='${NEXT_EVENT[*]}'=='
 
 done
 
