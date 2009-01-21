@@ -42,20 +42,23 @@ L=$((J/11))
 MON=$((J+2-12*L))
 YR=$((100*(N-49)+I+L))
 
-printf '%02i %02i %04i\n' $YR $MON $DAY
+printf '%04i %02i %02i\n' $YR $MON $DAY
 }
 
 
 # pass needle as $1 and array should follow
 function in_array()
 {
+   #echo -n "$* : "
 	local i
 	needle=$1
 	shift 1
 	[ -z "$1" ] && return 0	# array() undefined
 	for i in $*
 	do
+	   #echo "$i =? $needle"
 		[ "$i" = "$needle" ] && return 1
+		#echo "no"
 	done
 	return 0
 }
@@ -127,6 +130,7 @@ function last_event()
       [[ "$I_JD" -lt "${LAST_EVENT[1]}" ]] && return 0
 
       I_DATE=`get_greg_from_JD $I_JD`
+      echo $I_DATE
       I_DAY=`echo $I_DATE | cut -d' ' -f3`
       I_MONTH=`echo $I_DATE | cut -d' ' -f2`
       I_WEEKDAY=$((I_JD-I_JD/7*7+1));
@@ -196,19 +200,19 @@ function last_event()
       fi
 
       if [ "${I_JD}" -lt "${LAST_EVENT[1]}" ]; then
-         break
+         echo br1; break
       elif [ "${I_JD}" -eq "${LAST_EVENT[1]}" ]; then
          if [ "${EVENT_H}" -lt "${LAST_EVENT[2]}" ]; then
-            break
+            echo br2; break
          elif [ "${EVENT_H}" -eq "${LAST_EVENT[2]}" ]; then
             if [ "${EVENT_M}" -lt "${LAST_EVENT[3]}" ]; then
-               break
+               echo br3; break
             fi
          fi
       fi
       LAST_EVENT=( ${cronline[0]} ${I_JD} ${EVENT_H} ${EVENT_M} )
-      break
-      
+
+      echo br4; break
    done
 }
 
@@ -310,23 +314,27 @@ function next_event()
    done
 }
 
+
+
+# 
+#
+#
 # ZERO_JD=2454850 # Sunday, January 18, 2009
+#
 SCHEDULE_FILE=$1
 NOW_DATE=`date +'%-Y %-m %-d'`  # 2009 1 18
 NOW_DATE_M=$((`date +'%-m'`))  # 1
 NOW_DATE_D=`date +'%-d'`  # 18
 NOW_DATE_W=`date +'%-u'`  # 1
-NOW_TIME=`date +'%-H %-M %-S'`  # 23 11 7
+NOW_TIME=`date +'%-H %-M'`  # 23 11
 NOW_TIME_H=$((`date +'%-H'`))  # 23
 NOW_TIME_M=$((`date +'%-M'`))  # 11
-NOW_TIME_S=$((`date +'%-S'`))  # 7
+#NOW_TIME_S=$((`date +'%-S'`))  # 7
 NOW_JD=`get_astro_JD $NOW_DATE`
 NOW_WD=$((NOW_JD-NOW_JD/7*7+1)) # 1 - MON, 2 - TUE, ..., 7 - SUN
 
 LAST_EVENT=( 0 0 0 0 )
 NEXT_EVENT=( 0 3999999 23 59 )
-   export LAST_EVENT
-   export NEXT_EVENT
 
 
 set -f  # disable globbing. wildcards would be expanded otherwise
@@ -374,5 +382,8 @@ do
 done < ${SCHEDULE_FILE}
 
 IFS=$OIFS
-echo "=> last: '${LAST_EVENT[*]}', next: '${NEXT_EVENT[*]}'"
+echo "start: ${NOW_JD} ${NOW_TIME}"
+date +'now: %-Y %-m %-d %-H %-M %-S'
+echo "last: ${LAST_EVENT[*]}"
+echo "next: ${NEXT_EVENT[*]}"
 
