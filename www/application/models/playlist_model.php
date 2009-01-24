@@ -79,7 +79,7 @@ class Playlist_model extends Model
          $medias = array_merge($medias, $this->bundle->get_medias($bundle['id']));
       }
 
-      return array('schedule' => $schedule,
+      return array('schedule_id' => $schedule_id,
                    'collections' => $collections,
                    'layouts' => $layouts,
                    'bundles' => $bundles,
