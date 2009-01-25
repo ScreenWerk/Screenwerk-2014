@@ -28,10 +28,9 @@ OIFS=$IFS; IFS=' ;'
       (
          sleep ${START_SEC}
          
-         ${WORK_DIR}/bundle.player.sh ${bundle_a}
+         ${WORK_DIR}/bundle.player.sh ${bundle_a[@]}
 
          if [ "${STOP_SEC}" -gt 0 ]; then
-         do
             sleep $((STOP_SEC-START_SEC))
          else
             sleep $((LAYOUT_LENGTH-START_SEC))

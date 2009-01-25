@@ -7,17 +7,21 @@ WORK_DIR=`dirname ${0}`
 COLLECTION_FILE=${MEDIA_DIR}/${1}.collection
 c_kill_file=${CONTROL_DIR}/${1}.collection.kill
 
+
 OIFS=$IFS; IFS=' ;'
 
 playable_layouts=$((`cat "${COLLECTION_FILE}" | wc -l`-1))
 while [ ! -f "${c_kill_file}" ]
 do
-   [[ "${playable_layouts} -eq 0" ]] && exit 1
+   [[ "${playable_layouts}" -eq 0 ]] && exit 1
    playable_layouts=0
+
+   firstline=1
    
    while read l
    do
-      if [ $firstline -eq 1 ]; then
+      echo "L: ${l}"
+      if [ "${firstline}" -eq 1 ]; then
          firstline=0
          continue
       fi
@@ -41,7 +45,7 @@ do
 
       playable_layouts=$((${playable_layouts}+1))
       
-      [[ -z "${l_kill_file}" ]] && touch "${l_kill_file}"
+      [[ ! -z "${l_kill_file}" ]] && touch "${l_kill_file}"
       l_kill_file=${CONTROL_DIR}/${LAYOUT_ID}.layout.kill
 
       ${WORK_DIR}/layout.player.sh ${LAYOUT_ID} ${LENGTH} &
