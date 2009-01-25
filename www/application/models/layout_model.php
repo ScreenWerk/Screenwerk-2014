@@ -104,10 +104,13 @@ class Layout_model extends Model {
 		$this->db->select('bundles.id,
 		                   bundles_layouts.position_x,
 		                   bundles_layouts.position_y,
+		                   dimensions.dimension_x,
+		                   dimensions.dimension_y,
 		                   bundles_layouts.start_sec,
 		                   bundles_layouts.stop_sec');
 		$this->db->from('bundles');
 		$this->db->join('bundles_layouts', 'bundles_layouts.bundle_id = bundles.id', 'left');
+		$this->db->join('dimensions', 'dimensions.id = bundles_layouts.dimension_id', 'left');
 		$this->db->where(array('bundles_layouts.layout_id' => $layout_id));
 		$query = $this->db->get();
 		

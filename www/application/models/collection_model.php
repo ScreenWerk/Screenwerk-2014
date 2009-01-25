@@ -101,6 +101,7 @@ class Collection_model extends Model {
 
 	function get_layouts($collection_id) {	
 		$this->db->select('layouts.id,
+                         layouts.length,
 		                   layouts_collections.frequency,
 		                   layouts_collections.probability,
 		                   layouts_collections.valid_from_date,
