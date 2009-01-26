@@ -264,11 +264,7 @@ function next_event()
 
    while read l
    do
-      if [ $firstline -eq 1 ]
-      then
-         firstline=0
-         continue
-      fi
+      [[ "${firstline}" -eq 1 ]] && firstline=0 && continue
 
       cronline=( $l ) # split $l by semicolon
 
