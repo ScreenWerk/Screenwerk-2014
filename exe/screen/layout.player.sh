@@ -18,23 +18,27 @@ OIFS=$IFS; IFS=' ;'
 
 
       bundle_a=( ${l} )
+      BUNDLE_ID="${bundle_a[0]}"
       POS_X="${bundle_a[1]}"
       POS_Y="${bundle_a[2]}"
-      DIMENSION="${bundle_a[3]}x${bundle_a[4]}"
-      START_SEC="${bundle_a[5]}"
-      STOP_SEC="${bundle_a[6]}"
-      BUNDLE_UID="${bundle_a[0]}_${POS_X}_${POS_Y}"
+      POS_Z="${bundle_a[3]}"
+      WIDTH="${bundle_a[4]}}"
+      HEIGHT="${bundle_a[5]}"
+      START_SEC="${bundle_a[6]}"
+      STOP_SEC="${bundle_a[7]}"
+      BUNDLE_UID="${BUNDLE_ID}_${POS_X}_${POS_Y}_${POS_Z}"
+
+      if [ "${STOP_SEC}" -gt 0 ]; then
+         B_DURATION=$((STOP_SEC-START_SEC))
+      else
+         B_DURATION=$((LAYOUT_LENGTH-START_SEC))
+      fi
 
       (
          sleep ${START_SEC}
-         
-         ${WORK_DIR}/bundle.player.sh ${bundle_a[@]}
-
-         if [ "${STOP_SEC}" -gt 0 ]; then
-            sleep $((STOP_SEC-START_SEC))
-         else
-            sleep $((LAYOUT_LENGTH-START_SEC))
-         fi
+         ${WORK_DIR}/bundle.player.sh ${BUNDLE_ID} ${BUNDLE_UID} \
+                ${POS_X} ${POS_Y} ${POS_Z} ${WIDTH} ${HEIGHT} ${B_DURATION}
+         sleep ${B_DURATION}
          touch ${CONTROL_DIR}/${BUNDLE_UID}.bundle.kill
       ) &
       

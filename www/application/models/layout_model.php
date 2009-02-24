@@ -104,6 +104,7 @@ class Layout_model extends Model {
 		$this->db->select('bundles.id,
 		                   bundles_layouts.position_x,
 		                   bundles_layouts.position_y,
+		                   bundles_layouts.position_z,
 		                   dimensions.dimension_x,
 		                   dimensions.dimension_y,
 		                   bundles_layouts.start_sec,

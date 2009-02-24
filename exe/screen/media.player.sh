@@ -4,8 +4,42 @@ WORK_DIR=`dirname ${0}`
 . ${WORK_DIR}/screen.conf
 . ${WORK_DIR}/screenlib.sh
 
-COLLECTION_FILE=${MEDIA_DIR}/${1}.collection
-c_kill_file=${CONTROL_DIR}/${1}.collection.kill
+MEDIA_ID=${1}
+MEDIA_LENGTH=${2}
+MEDIA_TYPE=${3}
+MEDIA_FILE=${MEDIA_DIR}/${1}.${3}
+
+m_kill_file=${CONTROL_DIR}/${1}.media.kill
+
+case ${MEDIA_TYPE} in
+
+video)
+   /usr/bin/mplayer \
+      -monitoraspect ${MONITORASPECT} \
+      -geometry ${W}x${H}+${X}+${Y} \
+      -loop 1 \
+      /mnt/swshare/${SCREEN_ID}_${media_id}_${W}x${H}.video \
+      2>&1 >/dev/null && date +"%H:%M:%S E${event_id}: Finished" >> ${LOGFILE} &
+
+   ppid=${!}
+   event_pid_a[${event_id}]=`ps -eo pid,ppid | grep ${ppid} | tail -1 | cut -d" " -f1`
+   ;;
+
+image)
+   ;;
+
+url)
+   ;;
+
+html)
+   ;;
+
+*)
+   echo "Unknown media type '${MEDIA_TYPE}'. Stopping media '${MEDIA_ID}'"
+   exit 1
+esac
+
+
 
 
 OIFS=$IFS; IFS=' ;'

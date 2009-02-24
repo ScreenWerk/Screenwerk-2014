@@ -100,8 +100,11 @@ class Bundle_model extends Model {
 
 	function get_medias($bundle_id) {	
 		$this->db->select('medias.id,
+		                   medias.length,
 		                   medias.type,
 		                   medias_bundles.frequency,
+		                   medias_bundles.appearances,
+		                   medias_bundles.importance,
 		                   medias_bundles.probability,
 		                   medias_bundles.valid_from_date,
 		                   medias_bundles.valid_to_date');
