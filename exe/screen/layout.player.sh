@@ -22,7 +22,7 @@ OIFS=$IFS; IFS=' ;'
       POS_X="${bundle_a[1]}"
       POS_Y="${bundle_a[2]}"
       POS_Z="${bundle_a[3]}"
-      WIDTH="${bundle_a[4]}}"
+      WIDTH="${bundle_a[4]}"
       HEIGHT="${bundle_a[5]}"
       START_SEC="${bundle_a[6]}"
       STOP_SEC="${bundle_a[7]}"

@@ -20,7 +20,7 @@ do
    
    while read l
    do
-      echo "L: ${l}"
+      #echo "L: ${l}"
       if [ "${firstline}" -eq 1 ]; then
          firstline=0
          continue
