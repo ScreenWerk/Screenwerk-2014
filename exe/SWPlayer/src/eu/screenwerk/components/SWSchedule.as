@@ -1,6 +1,6 @@
 package eu.screenwerk.components
 {
-	import eu.screenwerk.SWCollection;
+	import eu.screenwerk.components.SWCollection;
 	
 	import flash.filesystem.File;
 	import flash.utils.setTimeout;
