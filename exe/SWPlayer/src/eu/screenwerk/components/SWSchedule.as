@@ -1,8 +1,7 @@
 package eu.screenwerk.components
 {
-	import eu.screenwerk.components.SWCollection;
-	
 	import flash.filesystem.File;
+	import flash.utils.clearTimeout;
 	import flash.utils.setTimeout;
 	
 	import mx.core.Application;
@@ -12,17 +11,14 @@ package eu.screenwerk.components
 	{
 		public var sw_id:uint;
 
+		private var timeout_id:uint;
+		
 		private var collections:Array;
 		private var current_collection:SWCollection;
 		private var next_collection:SWCollection;
 
 		public function SWSchedule(id:uint)
 		{
-			this.x = 0;
-			this.y = 0;
-			this.width = parent.width;
-			this.height = parent.height;
-
 			this.sw_id = id;
 
 			var schedule_file:File = Application.application.sw_dir.resolvePath(this.sw_id+'.schedule');
@@ -36,6 +32,7 @@ package eu.screenwerk.components
 			while ( collectionstrings.length > 0 )
 			{
 				var collectionstring:String = collectionstrings.shift();
+				if (collectionstring == '') continue;
 				current_collection = new SWCollection(collectionstring);
 
 				if (i==0)
@@ -52,13 +49,16 @@ package eu.screenwerk.components
 				i++;
 			}
 			
+			this.addChild(this.current_collection);
 			this.current_collection.play();
-			setTimeout(playNextCollection, this.current_collection.getNextDate().getTime() - new Date().getTime());
+			this.timeout_id = setTimeout(playNextCollection, this.current_collection.getNextDate().getTime() - new Date().getTime());
 			
 		}
 		
 		private function playNextCollection():void
 		{
+			clearTimeout(this.timeout_id);
+			
 			var schedule_file:File = Application.application.sw_dir.resolvePath(this.sw_id+'.schedule');
 			var schedule_string:String = Application.application.readFileContents(schedule_file);
 			var collectionstrings:Array = schedule_string.split("\n");

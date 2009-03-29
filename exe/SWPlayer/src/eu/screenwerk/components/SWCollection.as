@@ -1,6 +1,9 @@
 package eu.screenwerk.components
 {
+	import flash.events.TimerEvent;
 	import flash.filesystem.File;
+	import flash.utils.Timer;
+	import flash.utils.setTimeout;
 	
 	import mx.core.Application;
 	import mx.core.UIComponent;
@@ -17,6 +20,8 @@ package eu.screenwerk.components
 		private var valid_to_date:Date;
 		private var valid_from_J:uint;
 		private var valid_to_J:uint;
+		
+		private var layoutstrings:Array;
 		
 		private var last_date:Date;
 		private var next_date:Date;
@@ -62,30 +67,63 @@ package eu.screenwerk.components
 			this.width = parent.width;
 			this.height = parent.height;
 
-			parent.addChild(this);
-
-
-			var collection_file:File = Application.application.sw_dir.resolvePath(this.sw_id+'.collection');
-			var collection_string:String = Application.application.readFileContents(collection_file);
-			var layoutstrings:Array = collection_string.split("\n");
-			var columns:String = layoutstrings.shift(); // discard first line with column descriptors
-			trace( columns );
-			
-						while ( layoutstrings.length > 0 )
-			{
-				current_layout = new SWLayout(layoutstrings.shift());
-			}
-			
-		
+			this.playLayouts();
 		}
 		
 		public function stop():void
 		{
-			parent.removeChild(this);
 			this.current_layout.stop()
+			parent.removeChild(this);
+		}
+		
+		private function playLayouts():void
+		{
+			this.setNextLayout();
+
+			var timer:Timer = new Timer(this.current_layout.length*1000);
+			timer.addEventListener(TimerEvent.TIMER, playNextLayoutOnTimer);
+			timer.start();
+
+			this.addChild(this.current_layout);
+			this.current_layout.play();
 		}
 		
 		
+ 
+		private function playNextLayoutOnTimer(evt:TimerEvent):void
+		{
+			this.current_layout.stop();
+			this.removeChild(this.current_layout);
+
+			this.setNextLayout();
+
+			var timer:Timer = new Timer(this.current_layout.length*1000);
+			timer.addEventListener(TimerEvent.TIMER, playNextLayoutOnTimer);
+			timer.start();
+
+			this.addChild(this.current_layout);
+			this.current_layout.play();
+		}		
+		
+		private function setNextLayout():void
+		{
+			if (this.layoutstrings.length == 0) this.loadLayouts();
+			var layoutstring:String = this.layoutstrings.shift();
+			if (layoutstring == '')
+			{
+				this.loadLayouts();
+				layoutstring == this.layoutstrings.shift();
+			}
+			this.current_layout = new SWLayout(layoutstring);
+		}
+
+		private function loadLayouts():void
+		{
+			var collection_file:File = Application.application.sw_dir.resolvePath(this.sw_id+'.collection');
+			var collection_string:String = Application.application.readFileContents(collection_file);
+			this.layoutstrings = collection_string.split("\n");
+			var columns:String = this.layoutstrings.shift(); // discard first line with column descriptors
+		}
 		
 		
 		
@@ -226,6 +264,7 @@ package eu.screenwerk.components
 			}
 			return -1;
 		}
+
 		private function smallest_of_ge(hay:String,needle:Number):Number
 		{
 			if (hay == '*') return needle;
