@@ -7,7 +7,7 @@ package eu.screenwerk.components
 	
 	public class SWLayout extends UIComponent
 	{
-		private var sw_id:uint;
+		public var sw_id:uint;
 		public var length:uint;
 		private var frequency:uint;
 		private var probability:uint;

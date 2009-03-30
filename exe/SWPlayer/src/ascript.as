@@ -53,6 +53,8 @@ public function init():void
 
 public function readFileContents(file:File):String
 {
+	trace ("Reading from " + file.nativePath);
+
 	var file_contents:String = "";
 	
 	var fileStream:FileStream = new FileStream();

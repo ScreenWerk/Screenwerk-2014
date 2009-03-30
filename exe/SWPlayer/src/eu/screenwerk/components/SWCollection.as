@@ -3,7 +3,6 @@ package eu.screenwerk.components
 	import flash.events.TimerEvent;
 	import flash.filesystem.File;
 	import flash.utils.Timer;
-	import flash.utils.setTimeout;
 	
 	import mx.core.Application;
 	import mx.core.UIComponent;
@@ -21,7 +20,7 @@ package eu.screenwerk.components
 		private var valid_from_J:uint;
 		private var valid_to_J:uint;
 		
-		private var layoutstrings:Array;
+		private var layoutstrings:Array = new Array();
 		
 		private var last_date:Date;
 		private var next_date:Date;
@@ -80,6 +79,7 @@ package eu.screenwerk.components
 		{
 			this.setNextLayout();
 
+			trace( "collection " + this.sw_id + ", starting layout " + this.current_layout.sw_id + " after " + this.current_layout.length + "sec." );
 			var timer:Timer = new Timer(this.current_layout.length*1000);
 			timer.addEventListener(TimerEvent.TIMER, playNextLayoutOnTimer);
 			timer.start();
@@ -94,6 +94,7 @@ package eu.screenwerk.components
 		{
 			this.current_layout.stop();
 			this.removeChild(this.current_layout);
+			this.current_layout = null;
 
 			this.setNextLayout();
 

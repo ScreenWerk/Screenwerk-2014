@@ -1,9 +1,7 @@
 package eu.screenwerk.components
 {
 	import flash.events.Event;
-	import flash.filesystem.File;
 	
-	import mx.core.Application;
 	import mx.core.UIComponent;
 	
 	public class SWMedia extends UIComponent
@@ -28,7 +26,7 @@ package eu.screenwerk.components
 
 		}
 
-		public function play():void
+		public function play(event:Event = null):void
 		{
 			this.width = parent.width;
 			this.height = parent.height;

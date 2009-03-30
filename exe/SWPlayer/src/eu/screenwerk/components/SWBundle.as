@@ -15,12 +15,10 @@ package eu.screenwerk.components
 		private var position_x:uint;
 		private var position_y:uint;
 		private var position_z:uint;
-		private var w:uint;
-		private var h:uint;
 		public var start_sec:uint;
 		public var stop_sec:uint;
 		
-		private var mediastrings:Array;
+		private var mediastrings:Array = new Array();
 		
 		private var current_media:SWMedia;
 		
@@ -31,9 +29,9 @@ package eu.screenwerk.components
 			var bundle_split:Array = layout_str.split(';');
 			//id;position_x;position_y;position_z;dimension_x;dimension_y;start_sec;stop_sec
 			this.sw_id = bundle_split[0].replace(' ','');
-			this.x = bundle_split[1].replace(' ','');
-			this.y = bundle_split[2].replace(' ','');
-			this.z = bundle_split[3].replace(' ','');
+			this.x = bundle_split[1].replace(' ','') * Application.application._x_coef;
+			this.y = bundle_split[2].replace(' ','') * Application.application._y_coef;
+			//this.z = bundle_split[3].replace(' ','');
 			this.width = bundle_split[4].replace(' ','') * Application.application._x_coef;
 			this.height = bundle_split[5].replace(' ','') * Application.application._y_coef;
 			this.start_sec = bundle_split[6].replace(' ','');
@@ -44,7 +42,7 @@ package eu.screenwerk.components
 			this.addEventListener(Event.REMOVED, stop);
 		}
 
-		public function play():void
+		public function play(event:Event):void
 		{
 			var startTimer:Timer = new Timer(this.start_sec*1000);
 			startTimer.addEventListener(TimerEvent.TIMER, playMedias);
@@ -56,7 +54,7 @@ package eu.screenwerk.components
 
 
 
-		private function playMedias():void
+		private function playMedias(event:TimerEvent = null):void
 		{
 			this.setNextMedia();
 
@@ -74,7 +72,12 @@ package eu.screenwerk.components
 			if (mediastring == '')
 			{
 				this.loadMedias();
-				mediastring == this.mediastrings.shift();
+				mediastring = this.mediastrings.shift();
+			}
+			if (mediastring == '')
+			{
+				this.loadMedias();
+				mediastring = this.mediastrings.shift();
 			}
 			this.current_media = new SWMedia(mediastring);
 		}
