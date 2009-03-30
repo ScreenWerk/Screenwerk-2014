@@ -179,7 +179,7 @@ class Layout_model extends Model {
 		if (file_exists($master_layout_file)) {
          unlink($master_layout_file);
       }
-	   file_put_contents($master_layout_file, implode("\n", $contents) . "\n");
+	   file_put_contents($master_layout_file, implode("\n", $contents));
 
 	   $screens = $this->get_screens($layout_id);
 	   foreach($screens as $screen_id => $screen) {

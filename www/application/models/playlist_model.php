@@ -56,6 +56,8 @@ class Playlist_model extends Model
 
    function regen_fs($screen_id) {
       $screen = $this->Screen->get_one( $screen_id );
+      $this->screen->update_fs($screen_id);
+
       $schedule_id = $screen['schedule_id'];
       $this->schedule->update_fs($schedule_id);
 
@@ -66,7 +68,7 @@ class Playlist_model extends Model
          $this->collection->update_fs($collection['id']);
          $layouts = array_merge($layouts, $this->collection->get_layouts($collection['id']));
       }
-//print_r($layouts);die();
+
       $bundles = array();
       foreach($layouts as $layout) {
          $this->layout->update_fs($layout['id']);

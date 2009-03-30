@@ -173,7 +173,7 @@ class Collection_model extends Model {
 		if (file_exists($master_collection_file)) {
          unlink($master_collection_file);
       }
-	   file_put_contents($master_collection_file, implode("\n", $contents) . "\n");
+	   file_put_contents($master_collection_file, implode("\n", $contents));
 
 	   $screens = $this->get_screens($collection_id);
 	   foreach($screens as $screen_id => $screen) {

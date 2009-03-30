@@ -122,7 +122,19 @@ class Screen_model extends Model {
 		if (file_exists($screen_file)) {
          unlink($screen_file);
       }
-	   file_put_contents($screen_file, implode("\n", $contents) . "\n");
+	   file_put_contents($screen_file, implode("\n", $contents));
+
+
+		$screenrc_file = DIR_FTP_SCREENS."/$screen_id/screenrc";
+		if (file_exists($screenrc_file)) {
+         unlink($screenrc_file);
+      }
+      $dimension_name = $this->dimension->get_name($screen['dimension_id']);
+      $split = explode('x',$dimension_name);
+	   file_put_contents($screenrc_file,
+	   	"screen_id=".$screen_id."\n"
+	   .	"screen_width=".$split[0]."\n"
+	   .	"screen_height=".$split[1]);
 	}
 
 
