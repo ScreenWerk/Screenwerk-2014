@@ -16,7 +16,7 @@ package eu.screenwerk.player
 		private var _init_h:uint;
 		
 		public function HTMLPlayer(x:uint, y:uint, w:uint, h:uint, location:String)
-		  {
+		{
 			this._init_x = x;
 			this._init_y = y;
 			this._init_w = w;

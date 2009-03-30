@@ -1,5 +1,6 @@
 package eu.screenwerk.components
 {
+	import flash.events.Event;
 	import flash.events.TimerEvent;
 	import flash.filesystem.File;
 	import flash.utils.Timer;
@@ -46,6 +47,9 @@ package eu.screenwerk.components
 			var to_split:Array = cronline_a[7].toString().split('-');
 			this.valid_to_date = new Date(to_split[0], to_split[1], to_split[2]);
 			this.valid_to_J = uint(this.valid_to_date.getTime() / 1000 / 60 / 60 / 24 +.5 );
+			
+			this.addEventListener(Event.ADDED, play);
+			this.addEventListener(Event.REMOVED, stop);
 		}
 		
 		public function getLastDate():Date
@@ -60,8 +64,9 @@ package eu.screenwerk.components
 			return this.next_date;
 		}
 		
-		public function play():void
+		public function play(event:Event):void
 		{
+			trace( "Play collection "+this.sw_id );
 			this.x = 0;
 			this.y = 0;
 			this.width = parent.width;
@@ -70,41 +75,40 @@ package eu.screenwerk.components
 			this.playLayouts();
 		}
 		
-		public function stop():void
+		public function stop(event:Event):void
 		{
-			this.current_layout.stop()
-			parent.removeChild(this);
+			trace( "Stop collection "+this.sw_id );
+			this.removeChild(this.current_layout);
+			this.current_layout = null;
 		}
 		
 		private function playLayouts():void
 		{
 			this.setNextLayout();
 
-			trace( "collection " + this.sw_id + ", starting layout " + this.current_layout.sw_id + " after " + this.current_layout.length + "sec." );
+			trace( "collection " + this.sw_id + ", starting layout " + this.current_layout.sw_id + ", stopping after " + this.current_layout.length + "sec." );
 			var timer:Timer = new Timer(this.current_layout.length*1000);
 			timer.addEventListener(TimerEvent.TIMER, playNextLayoutOnTimer);
 			timer.start();
 
 			this.addChild(this.current_layout);
-			this.current_layout.play();
 		}
 		
 		
  
 		private function playNextLayoutOnTimer(evt:TimerEvent):void
 		{
-			this.current_layout.stop();
 			this.removeChild(this.current_layout);
-			this.current_layout = null;
 
 			this.setNextLayout();
+
+			trace( "collection " + this.sw_id + ", starting layout " + this.current_layout.sw_id + ", stopping after " + this.current_layout.length + "sec." );
 
 			var timer:Timer = new Timer(this.current_layout.length*1000);
 			timer.addEventListener(TimerEvent.TIMER, playNextLayoutOnTimer);
 			timer.start();
 
 			this.addChild(this.current_layout);
-			this.current_layout.play();
 		}		
 		
 		private function setNextLayout():void
@@ -126,9 +130,7 @@ package eu.screenwerk.components
 			this.layoutstrings = collection_string.split("\n");
 			var columns:String = this.layoutstrings.shift(); // discard first line with column descriptors
 		}
-		
-		
-		
+			
 		private function lastDate():Date
 		{
 			var last_date:Date = null;

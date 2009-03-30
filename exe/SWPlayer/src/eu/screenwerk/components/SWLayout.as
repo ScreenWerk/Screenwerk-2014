@@ -1,5 +1,6 @@
 package eu.screenwerk.components
 {
+	import flash.events.Event;
 	import flash.filesystem.File;
 	
 	import mx.core.Application;
@@ -35,7 +36,7 @@ package eu.screenwerk.components
 		}
 
 
-		public function play():void
+		public function play(event:Event):void
 		{
 			this.x = 0;
 			this.y = 0;
@@ -45,7 +46,7 @@ package eu.screenwerk.components
 			this.playBundles();
 		}
 		
-		public function stop():void
+		public function stop(event:Event):void
 		{
 		}
 

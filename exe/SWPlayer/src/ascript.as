@@ -1,7 +1,6 @@
 
-import eu.screenwerk.components.SWScreen;
-import eu.screenwerk.player.HTMLPlayer;
-import eu.screenwerk.player.ScrollerPlayer;
+import eu.screenwerk.components.*;
+import eu.screenwerk.player.*;
 
 import flash.filesystem.File;
 import flash.filesystem.FileStream;
@@ -72,7 +71,7 @@ public function readFileContents(file:File):String
 
 private function readRcParams():void
 {
-	var config_file:File = this.sw_dir.resolvePath('screenwerkrc');
+	var config_file:File = this.sw_dir.resolvePath('screenrc');
 	var config_string:String = this.readFileContents(config_file);
 
     var config_params:Array = config_string.split("\n");

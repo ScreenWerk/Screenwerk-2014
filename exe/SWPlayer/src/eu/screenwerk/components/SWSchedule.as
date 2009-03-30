@@ -1,5 +1,6 @@
 package eu.screenwerk.components
 {
+	import flash.events.Event;
 	import flash.filesystem.File;
 	import flash.utils.clearTimeout;
 	import flash.utils.setTimeout;
@@ -21,7 +22,14 @@ package eu.screenwerk.components
 		{
 			this.sw_id = id;
 			trace ("Create schedule " + this.sw_id);
+			
+			this.addEventListener(Event.ADDED, play);
+			this.addEventListener(Event.REMOVED, stop);
 
+		}
+		
+		private function play(event:Event):void
+		{
 			var schedule_file:File = Application.application.sw_dir.resolvePath(this.sw_id+'.schedule');
 			var schedule_string:String = Application.application.readFileContents(schedule_file);
 			var collectionstrings:Array = schedule_string.split("\n");
@@ -49,11 +57,16 @@ package eu.screenwerk.components
 
 				i++;
 			}
-			
+
 			this.addChild(this.current_collection);
-			this.current_collection.play();
-			this.timeout_id = setTimeout(playNextCollection, this.current_collection.getNextDate().getTime() - new Date().getTime());
-			
+			var timeout_msec:Number = this.current_collection.getNextDate().getTime() - new Date().getTime();
+			this.timeout_id = setTimeout(playNextCollection, timeout_msec);
+		}
+
+		private function stop(event:Event):void
+		{
+			this.removeChild(this.current_collection);
+			this.current_collection = null;
 		}
 		
 		private function playNextCollection():void
@@ -87,9 +100,9 @@ package eu.screenwerk.components
 				i++;
 			}
 
-			this.current_collection.stop();
+			this.removeChild(this.current_collection);
 			this.current_collection = this.next_collection;
-			this.current_collection.play();
+			this.addChild(this.current_collection);
 			setTimeout(playNextCollection, this.current_collection.getNextDate().getTime() - new Date().getTime());
 		}
 
