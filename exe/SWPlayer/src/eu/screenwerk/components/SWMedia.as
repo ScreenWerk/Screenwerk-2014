@@ -16,6 +16,7 @@ package eu.screenwerk.components
 			var media_split:Array = media_str.split(';');
 			//id;length;type;frequency;appearances;importance;probability;valid_from_date;valid_to_date
 			this.sw_id = media_split[0].replace(' ','');
+			trace ("Create media " + this.sw_id);
 			this.length = media_split[1].replace(' ','');
 			this.type = media_split[2].replace(' ','');
 			this.x = 0;

@@ -32,6 +32,7 @@ package eu.screenwerk.components
 		{
 			var cronline_a:Array = collectionstring.split(';');
 			this.sw_id = cronline_a[0].replace(' ','');
+			trace ("Create collection " + this.sw_id);
 			this.cron_minute = cronline_a[1].replace(' ','');
 			this.cron_hour = cronline_a[2].replace(' ','');
 			this.cron_day = cronline_a[3].replace(' ','');

@@ -20,6 +20,7 @@ package eu.screenwerk.components
 		public function SWSchedule(id:uint)
 		{
 			this.sw_id = id;
+			trace ("Create schedule " + this.sw_id);
 
 			var schedule_file:File = Application.application.sw_dir.resolvePath(this.sw_id+'.schedule');
 			var schedule_string:String = Application.application.readFileContents(schedule_file);

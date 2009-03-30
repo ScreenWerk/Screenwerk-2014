@@ -29,6 +29,7 @@ package eu.screenwerk.components
 			var bundle_split:Array = layout_str.split(';');
 			//id;position_x;position_y;position_z;dimension_x;dimension_y;start_sec;stop_sec
 			this.sw_id = bundle_split[0].replace(' ','');
+			trace ("Create bundle " + this.sw_id);
 			this.x = bundle_split[1].replace(' ','') * Application.application._x_coef;
 			this.y = bundle_split[2].replace(' ','') * Application.application._y_coef;
 			//this.z = bundle_split[3].replace(' ','');

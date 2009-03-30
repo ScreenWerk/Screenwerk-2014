@@ -14,6 +14,7 @@ package eu.screenwerk.components
 		public function SWScreen(id:uint)
 		{
 			this.sw_id = id;
+			trace ("Create screen " + this.sw_id);
 
 			var screen_file:File = Application.application.sw_dir.resolvePath(this.sw_id+'.screen');
 		

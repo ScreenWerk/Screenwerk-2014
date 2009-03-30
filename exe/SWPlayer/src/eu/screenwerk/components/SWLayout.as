@@ -24,6 +24,7 @@ package eu.screenwerk.components
 			var layout_split:Array = layout_str.split(';');
 			//id;length;frequency;probability;valid_from_date;valid_to_date
 			this.sw_id = layout_split[0].replace(' ','');
+			trace ("Create layout " + this.sw_id);
 			this.length = layout_split[1].replace(' ','');
 			this.frequency = layout_split[2].replace(' ','');
 			this.probability = layout_split[3].replace(' ','');
