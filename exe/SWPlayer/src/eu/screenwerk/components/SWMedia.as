@@ -16,7 +16,7 @@ package eu.screenwerk.components
 			var media_split:Array = media_str.split(';');
 			//id;length;type;frequency;appearances;importance;probability;valid_from_date;valid_to_date
 			this.sw_id = media_split[0].replace(' ','');
-			trace ("Create media " + this.sw_id);
+			trace ( new Date().toString() + " Create media " + this.sw_id );
 			this.length = media_split[1].replace(' ','');
 			this.type = media_split[2].replace(' ','');
 			this.x = 0;
@@ -27,16 +27,24 @@ package eu.screenwerk.components
 
 		}
 
-		public function play(event:Event = null):void
+		private function play(event:Event):void
 		{
+			event.stopPropagation();
+			trace( new Date().toString() + " Start media " + this.sw_id
+				+	". Targeted " + event.currentTarget.toString());
+				
+
 			this.width = parent.width;
 			this.height = parent.height;
 
 		}
 		
-		public function stop():void
+		private function stop(event:Event):void
 		{
-			
+			event.stopPropagation();
+			trace( new Date().toString() + " Stop media " + this.sw_id
+				+	". Targeted " + event.currentTarget.toString());
+				
 		}
 
 	}

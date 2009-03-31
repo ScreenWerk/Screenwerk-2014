@@ -21,7 +21,7 @@ package eu.screenwerk.components
 		public function SWSchedule(id:uint)
 		{
 			this.sw_id = id;
-			trace ("Create schedule " + this.sw_id);
+			trace ( new Date().toString() + " Create schedule " + this.sw_id );
 			
 			this.addEventListener(Event.ADDED, play);
 			this.addEventListener(Event.REMOVED, stop);
@@ -30,10 +30,11 @@ package eu.screenwerk.components
 		
 		private function play(event:Event):void
 		{
-			var schedule_file:File = Application.application.sw_dir.resolvePath(this.sw_id+'.schedule');
-			var schedule_string:String = Application.application.readFileContents(schedule_file);
-			var collectionstrings:Array = schedule_string.split("\n");
-			var columns:String = collectionstrings.shift(); // discard first line with column descriptors
+			event.stopPropagation();
+			trace ( new Date().toString() + " Play schedule " + this.sw_id
+				+	". Targeted " + event.currentTarget.toString());
+				
+			var collectionstrings:Array = Application.application.readComponentData(this.sw_id+'.schedule');
 
 			var current_collection:SWCollection;
 			
@@ -65,6 +66,10 @@ package eu.screenwerk.components
 
 		private function stop(event:Event):void
 		{
+			event.stopPropagation();
+			trace (new Date().toString() + " Stop schedule " + this.sw_id
+				+	". Targeted " + event.currentTarget.toString());
+				
 			this.removeChild(this.current_collection);
 			this.current_collection = null;
 		}

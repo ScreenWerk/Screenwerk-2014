@@ -16,14 +16,10 @@ package eu.screenwerk.components
 		public function SWScreen(id:uint)
 		{
 			this.sw_id = id;
-			trace ("Create screen " + this.sw_id);
+			trace ( new Date().toString() + " Create screen " + this.sw_id );
 
-			var screen_file:File = Application.application.sw_dir.resolvePath(this.sw_id+'.screen');
-		
-			var config_string:String = Application.application.readFileContents(screen_file);
+			var schedules:Array = Application.application.readComponentData(this.sw_id+'.screen');
 			
-			var schedules:Array = config_string.split("\n");
-			var columns:String = schedules.shift(); // discard first line with column descriptors
 			var schedule_str:String = schedules.shift();
 			var schedule_a:Array = schedule_str.split(';');
 			this.schedule_id = schedule_a[0];
@@ -35,6 +31,9 @@ package eu.screenwerk.components
 		
 		private function play(event:Event):void
 		{
+			event.stopPropagation();
+			trace (new Date().toString() + " Play screen " + this.sw_id
+				+	". Targeted " + event.currentTarget.toString());
 			this.sw_schedule = new SWSchedule(this.schedule_id);
 			this.sw_schedule.x = 0;
 			this.sw_schedule.y = 0;
@@ -45,6 +44,9 @@ package eu.screenwerk.components
 
 		private function stop(event:Event):void
 		{
+			event.stopPropagation();
+			trace (new Date().toString() + " Stop screen " + this.sw_id
+				+	". Targeted " + event.currentTarget.toString());
 			this.removeChild(this.sw_schedule);
 			this.sw_schedule = null;
 		}

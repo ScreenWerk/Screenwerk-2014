@@ -29,7 +29,7 @@ package eu.screenwerk.components
 			var bundle_split:Array = layout_str.split(';');
 			//id;position_x;position_y;position_z;dimension_x;dimension_y;start_sec;stop_sec
 			this.sw_id = bundle_split[0].replace(' ','');
-			trace ("Create bundle " + this.sw_id);
+			trace ( new Date().toString() + " Create bundle " + this.sw_id );
 			this.x = bundle_split[1].replace(' ','') * Application.application._x_coef;
 			this.y = bundle_split[2].replace(' ','') * Application.application._y_coef;
 			//this.z = bundle_split[3].replace(' ','');
@@ -43,14 +43,26 @@ package eu.screenwerk.components
 			this.addEventListener(Event.REMOVED, stop);
 		}
 
-		public function play(event:Event):void
+		private function play(event:Event):void
 		{
+			event.stopPropagation();
+			trace( new Date().toString() + " Play bundle " + this.sw_id
+				+	". Targeted " + event.currentTarget.toString());
+				
 			var startTimer:Timer = new Timer(this.start_sec*1000);
 			startTimer.addEventListener(TimerEvent.TIMER, playMedias);
 			startTimer.start();
 			var stopTimer:Timer = new Timer(this.stop_sec*1000);
 			stopTimer.addEventListener(TimerEvent.TIMER, stopMedias);
 			stopTimer.start();
+		}
+
+		private function stop(event:Event):void
+		{
+			event.stopPropagation();
+			trace( new Date().toString() + " Stop bundle " + this.sw_id
+				+	". Targeted " + event.currentTarget.toString());
+				
 		}
 
 
@@ -85,15 +97,11 @@ package eu.screenwerk.components
 		
 		private function loadMedias():void
 		{
-			var bundle_file:File = Application.application.sw_dir.resolvePath(this.sw_id+'.bundle');
-			var bundle_string:String = Application.application.readFileContents(bundle_file);
-			this.mediastrings = bundle_string.split("\n");
-			var columns:String = this.mediastrings.shift(); // discard first line with column descriptors
+			this.mediastrings = Application.application.readComponentData(this.sw_id+'.bundle');
 		}
 
 		private function playNextMediaOnTimer(evt:TimerEvent):void
 		{
-			this.current_media.stop();
 			this.removeChild(this.current_media);
 
 			this.playMedias();
@@ -110,11 +118,6 @@ package eu.screenwerk.components
 		}
 		
 		
-		public function stop():void
-		{
-//			parent.RemoveChild(this);
-		}
-
 
 	}
 }

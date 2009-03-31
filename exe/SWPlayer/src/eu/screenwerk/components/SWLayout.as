@@ -25,7 +25,8 @@ package eu.screenwerk.components
 			var layout_split:Array = layout_str.split(';');
 			//id;length;frequency;probability;valid_from_date;valid_to_date
 			this.sw_id = layout_split[0].replace(' ','');
-			trace ("Create layout " + this.sw_id);
+			trace ( new Date().toString() + " Create layout " + this.sw_id );
+			
 			this.length = layout_split[1].replace(' ','');
 			this.frequency = layout_split[2].replace(' ','');
 			this.probability = layout_split[3].replace(' ','');
@@ -33,11 +34,18 @@ package eu.screenwerk.components
 			this.valid_from_date = new Date(from_split[0], from_split[1], from_split[2]);
 			var to_split:Array = layout_split[4].toString().split('-');
 			this.valid_to_date = new Date(to_split[0], to_split[1], to_split[2]);
+
+			this.addEventListener(Event.ADDED, play);
+			this.addEventListener(Event.REMOVED, stop);
 		}
 
 
-		public function play(event:Event):void
+		private function play(event:Event):void
 		{
+			event.stopPropagation();
+			trace( new Date().toString() + " Play layout " + this.sw_id
+				+	". Targeted " + event.currentTarget.toString());
+				
 			this.x = 0;
 			this.y = 0;
 			this.width = parent.width;
@@ -46,16 +54,18 @@ package eu.screenwerk.components
 			this.playBundles();
 		}
 		
-		public function stop(event:Event):void
+		private function stop(event:Event):void
 		{
+			event.stopPropagation();
+			trace( new Date().toString() + " Stop layout " + this.sw_id
+				+	". Targeted " + event.currentTarget.toString());
+				
 		}
 
 		private function playBundles():void
 		{
-			var layout_file:File = Application.application.sw_dir.resolvePath(this.sw_id+'.layout');
-			var layout_string:String = Application.application.readFileContents(layout_file);
-			this.bundlestrings = layout_string.split("\n");
-			var columns:String = this.bundlestrings.shift(); // discard first line with column descriptors
+			
+			this.bundlestrings = Application.application.readComponentData(this.sw_id+'.layout');
 
 			while ( bundlestrings.length > 0 )
 			{

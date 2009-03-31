@@ -38,16 +38,28 @@ public function init():void
 	this.addChild(sw_screen);
 
 
-	var scroller:ScrollerPlayer = new ScrollerPlayer(0,0,200,200);
-	this.addChild(scroller);
-	var browser:HTMLPlayer = new HTMLPlayer(400,400,200,200,'http://www.ww.ee');
-	this.addChild(browser);
-	browser = new HTMLPlayer(200,200,200,200,'http://www.ww.ee');
-	this.addChild(browser);
-	browser = new HTMLPlayer(0,600,720,300,'http://screenwerk.eu');
-	this.addChild(browser);
-	browser = new HTMLPlayer(720,600,720,300,'http://neti.ee');
-	this.addChild(browser);
+//	var scroller:ScrollerPlayer = new ScrollerPlayer(0,0,200,200);
+//	this.addChild(scroller);
+//	var browser:HTMLPlayer = new HTMLPlayer(400,400,200,200,'http://www.ww.ee');
+//	this.addChild(browser);
+//	browser = new HTMLPlayer(200,200,200,200,'http://www.ww.ee');
+//	this.addChild(browser);
+//	browser = new HTMLPlayer(0,600,720,300,'http://screenwerk.eu');
+//	this.addChild(browser);
+//	browser = new HTMLPlayer(720,600,720,300,'http://neti.ee');
+//	this.addChild(browser);
+
+	trace (new Date().toString() + " Player loaded.");
+
+}
+
+public function readComponentData(filename:String):Array
+{
+	var component_file:File = this.sw_dir.resolvePath(filename);
+	var component_string:String = this.readFileContents(component_file);
+	var component_split:Array = component_string.split("\n");
+	trace( "Discarding 1st line: " + component_split.shift() ); // discard first line with column descriptors
+	return component_split;
 }
 
 public function readFileContents(file:File):String

@@ -33,7 +33,8 @@ package eu.screenwerk.components
 		{
 			var cronline_a:Array = collectionstring.split(';');
 			this.sw_id = cronline_a[0].replace(' ','');
-			trace ("Create collection " + this.sw_id);
+			trace ( new Date().toString() + " Create collection " + this.sw_id );
+			
 			this.cron_minute = cronline_a[1].replace(' ','');
 			this.cron_hour = cronline_a[2].replace(' ','');
 			this.cron_day = cronline_a[3].replace(' ','');
@@ -66,7 +67,10 @@ package eu.screenwerk.components
 		
 		public function play(event:Event):void
 		{
-			trace( "Play collection "+this.sw_id );
+			event.stopPropagation();
+			trace( new Date().toString() + " Play collection " + this.sw_id
+				+	". Targeted " + event.currentTarget.toString());
+				
 			this.x = 0;
 			this.y = 0;
 			this.width = parent.width;
@@ -77,7 +81,10 @@ package eu.screenwerk.components
 		
 		public function stop(event:Event):void
 		{
-			trace( "Stop collection "+this.sw_id );
+			event.stopPropagation();
+			trace( new Date().toString() + " Stop collection "+this.sw_id
+				+	". Targeted " + event.currentTarget.toString());
+				
 			this.removeChild(this.current_layout);
 			this.current_layout = null;
 		}
@@ -86,7 +93,7 @@ package eu.screenwerk.components
 		{
 			this.setNextLayout();
 
-			trace( "collection " + this.sw_id + ", starting layout " + this.current_layout.sw_id + ", stopping after " + this.current_layout.length + "sec." );
+			trace( new Date().toString() + " Collection " + this.sw_id + ", starting layout " + this.current_layout.sw_id + ", stopping after " + this.current_layout.length + "sec." );
 			var timer:Timer = new Timer(this.current_layout.length*1000);
 			timer.addEventListener(TimerEvent.TIMER, playNextLayoutOnTimer);
 			timer.start();
@@ -96,13 +103,15 @@ package eu.screenwerk.components
 		
 		
  
-		private function playNextLayoutOnTimer(evt:TimerEvent):void
+		private function playNextLayoutOnTimer(event:TimerEvent):void
 		{
+			event.stopPropagation();
+
 			this.removeChild(this.current_layout);
 
 			this.setNextLayout();
 
-			trace( "collection " + this.sw_id + ", starting layout " + this.current_layout.sw_id + ", stopping after " + this.current_layout.length + "sec." );
+			trace( new Date().toString() + " Collection " + this.sw_id + ", starting layout " + this.current_layout.sw_id + ", stopping after " + this.current_layout.length + "sec." );
 
 			var timer:Timer = new Timer(this.current_layout.length*1000);
 			timer.addEventListener(TimerEvent.TIMER, playNextLayoutOnTimer);
@@ -125,10 +134,7 @@ package eu.screenwerk.components
 
 		private function loadLayouts():void
 		{
-			var collection_file:File = Application.application.sw_dir.resolvePath(this.sw_id+'.collection');
-			var collection_string:String = Application.application.readFileContents(collection_file);
-			this.layoutstrings = collection_string.split("\n");
-			var columns:String = this.layoutstrings.shift(); // discard first line with column descriptors
+			this.layoutstrings = Application.application.readComponentData(this.sw_id+'.collection');
 		}
 			
 		private function lastDate():Date
