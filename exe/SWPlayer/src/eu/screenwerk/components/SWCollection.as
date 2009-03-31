@@ -53,18 +53,6 @@ package eu.screenwerk.components
 			this.addEventListener(Event.REMOVED, stop);
 		}
 		
-		public function getLastDate():Date
-		{
-			this.last_date = this.lastDate();
-			return this.last_date;
-		}
-		
-		public function getNextDate():Date
-		{
-			this.next_date = this.nextDate();
-			return this.next_date;
-		}
-		
 		public function play(event:Event):void
 		{
 			event.stopPropagation();
@@ -87,6 +75,18 @@ package eu.screenwerk.components
 				
 			this.removeChild(this.current_layout);
 			this.current_layout = null;
+		}
+		
+		public function getLastDate():Date
+		{
+			this.last_date = this.lastDate();
+			return this.last_date;
+		}
+		
+		public function getNextDate():Date
+		{
+			this.next_date = this.nextDate();
+			return this.next_date;
 		}
 		
 		private function playLayouts():void

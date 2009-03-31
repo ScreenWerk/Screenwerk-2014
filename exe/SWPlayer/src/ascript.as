@@ -26,8 +26,8 @@ public function init():void
 
 	this.readRcParams();
 
-	this.myText.text += ' xcoef:'+this._x_coef+'='+this.width+'/'+this._defined_screen_width
-	+ '; ycoef:'+this._y_coef+'='+this.height+'/'+this._defined_screen_height+'.';
+	trace (' xcoef:'+this._x_coef+'='+this.width+'/'+this._defined_screen_width
+	+ '; ycoef:'+this._y_coef+'='+this.height+'/'+this._defined_screen_height+'.');
 
  
 
@@ -38,7 +38,7 @@ public function init():void
 	sw_screen.height = this.height;
 	this.addChild(sw_screen);
 
-
+/*
 //	var scroller:ScrollerPlayer = new ScrollerPlayer(0,0,200,200);
 //	this.addChild(scroller);
 //	var browser:HTMLPlayer = new HTMLPlayer(400,400,200,200,'http://www.ww.ee');
@@ -52,6 +52,7 @@ public function init():void
 
 	trace ("\n" + new Date().toString() + " Player loaded.\n");
 
+	*/
 }
 
 public function readComponentData(filename:String):Array

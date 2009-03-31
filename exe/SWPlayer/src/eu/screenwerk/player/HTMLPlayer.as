@@ -1,5 +1,7 @@
 package eu.screenwerk.player
 {
+	import flash.events.Event;
+	
 	import mx.controls.HTML;
 	import mx.core.Application;
 	
@@ -24,15 +26,26 @@ package eu.screenwerk.player
 			this.rescale();
 
 			this.location = location;
+			
+			this.addEventListener(Event.ADDED, play);
+			this.addEventListener(Event.REMOVED, stop);
 		}
 
 		public function rescale():void
 		{
-			this.x = this._init_x * Application.application._x_coef;
-			this.y = this._init_y * Application.application._y_coef;
-			this.width = this._init_w * Application.application._x_coef;
-			this.height = this._init_h * Application.application._y_coef;
+			this.x = this._init_x;// * Application.application._x_coef;
+			this.y = this._init_y;// * Application.application._y_coef;
+			this.width = this._init_w;// * Application.application._x_coef;
+			this.height = this._init_h;// * Application.application._y_coef;
 		}
 
+		private function play(event:Event):void
+		{
+			event.stopPropagation();
+		}
+		private function stop(event:Event):void
+		{
+			event.stopPropagation();
+		}
 	}
 }

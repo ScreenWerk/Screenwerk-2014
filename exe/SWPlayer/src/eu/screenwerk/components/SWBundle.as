@@ -82,7 +82,7 @@ package eu.screenwerk.components
 			
 			this.setNextMedia();
 
-			var timer:Timer = new Timer(this.current_media.length*1000);
+			var timer:Timer = new Timer(this.current_media.length*1000, 1);
 			timer.addEventListener(TimerEvent.TIMER, playNextMediaOnTimer);
 			timer.start();
 
