@@ -49,7 +49,7 @@ public function init():void
 //	browser = new HTMLPlayer(720,600,720,300,'http://neti.ee');
 //	this.addChild(browser);
 
-	trace (new Date().toString() + " Player loaded.");
+	trace ("\n" + new Date().toString() + " Player loaded.\n");
 
 }
 
@@ -59,6 +59,7 @@ public function readComponentData(filename:String):Array
 	var component_string:String = this.readFileContents(component_file);
 	var component_split:Array = component_string.split("\n");
 	trace( "Discarding 1st line: " + component_split.shift() ); // discard first line with column descriptors
+	trace( "Component data: " + component_split.toString() ); 
 	return component_split;
 }
 

@@ -2,7 +2,6 @@ package eu.screenwerk.components
 {
 	import flash.events.Event;
 	import flash.events.TimerEvent;
-	import flash.filesystem.File;
 	import flash.utils.Timer;
 	
 	import mx.core.Application;
@@ -47,12 +46,13 @@ package eu.screenwerk.components
 		{
 			event.stopPropagation();
 			trace( new Date().toString() + " Play bundle " + this.sw_id
+				+	". Start at " + this.start_sec + ", stopping at " + this.stop_sec
 				+	". Targeted " + event.currentTarget.toString());
 				
-			var startTimer:Timer = new Timer(this.start_sec*1000);
-			startTimer.addEventListener(TimerEvent.TIMER, playMedias);
+			var startTimer:Timer = new Timer(this.start_sec*1000, 1);
+			startTimer.addEventListener(TimerEvent.TIMER, playNextMediaOnTimer);
 			startTimer.start();
-			var stopTimer:Timer = new Timer(this.stop_sec*1000);
+			var stopTimer:Timer = new Timer(this.stop_sec*1000, 1);
 			stopTimer.addEventListener(TimerEvent.TIMER, stopMedias);
 			stopTimer.start();
 		}
@@ -67,8 +67,19 @@ package eu.screenwerk.components
 
 
 
-		private function playMedias(event:TimerEvent = null):void
+		private function playNextMediaOnTimer(event:TimerEvent):void
 		{
+			event.stopPropagation();
+			
+			try
+			{
+				//trace( new Date().toString() + " Stopping media " + this.current_media.sw_id + "..." );
+				this.removeChild(this.current_media);
+			}
+			catch (err:Error) {
+				trace( "No current media for bundle " + this.sw_id + "." );
+			}
+			
 			this.setNextMedia();
 
 			var timer:Timer = new Timer(this.current_media.length*1000);
@@ -76,7 +87,19 @@ package eu.screenwerk.components
 			timer.start();
 
 			this.addChild(this.current_media);
+		}		
+
+		
+		private function stopMedias(event:TimerEvent):void
+		{
+			event.stopPropagation();
+			while (this.numChildren > 0)
+			{
+				removeChildAt(0);
+			}
+			parent.removeChild(this);
 		}
+		
 		
 		private function setNextMedia():void
 		{
@@ -100,23 +123,6 @@ package eu.screenwerk.components
 			this.mediastrings = Application.application.readComponentData(this.sw_id+'.bundle');
 		}
 
-		private function playNextMediaOnTimer(evt:TimerEvent):void
-		{
-			this.removeChild(this.current_media);
-
-			this.playMedias();
-		}		
-
-		
-		private function stopMedias():void
-		{
-			while (this.numChildren > 0)
-			{
-				removeChildAt(0);
-			}
-			parent.removeChild(this);
-		}
-		
 		
 
 	}

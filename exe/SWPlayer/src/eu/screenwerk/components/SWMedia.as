@@ -6,7 +6,7 @@ package eu.screenwerk.components
 	
 	public class SWMedia extends UIComponent
 	{
-		private var sw_id:uint;
+		public var sw_id:uint;
 		public var length:uint;
 		private var type:String;
 		
