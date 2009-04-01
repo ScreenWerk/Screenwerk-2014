@@ -1,12 +1,10 @@
 package eu.screenwerk.components
 {
-	import eu.screenwerk.player.HTMLPlayer;
+	import eu.screenwerk.player.*;
 	
 	import flash.display.DisplayObject;
 	import flash.events.Event;
-	import flash.filesystem.File;
 	
-	import mx.core.Application;
 	import mx.core.UIComponent;
 	
 	public class SWMedia extends UIComponent
@@ -46,15 +44,28 @@ package eu.screenwerk.components
 			trace( new Date().toString() + " Play " + this.type
 				+	". Dimensions " + this.width + 'x' + this.height);
 
-			if (this.type == 'url')
+			switch (this.type)
 			{
-				var media_file:File = Application.application.sw_dir.resolvePath(this.sw_id+'.url');
-				var media_string:String = Application.application.readFileContents(media_file);
-				var media_split:Array = media_string.split("\n");
-				var url:String = media_split.shift();
-				
-				this.media = new HTMLPlayer(0,0,this.width,this.height,url);
-				this.addChild(this.media);
+				case 'url':
+					this.media = new URLPlayer(this.sw_id);
+					this.addChild(this.media);
+					break;
+				case 'image':
+					this.media = new ImagePlayer(this.sw_id);
+					this.addChild(this.media);
+					break;
+				case 'html':
+					this.media = new HTMLPlayer(this.sw_id);
+					this.addChild(this.media);
+					break;
+				case 'video':
+					this.media = new VideoPlayer(this.sw_id);
+					this.addChild(this.media);
+					break;
+				case 'flash':
+					break;
+				case 'pdf':
+					break;
 			}
 
 		}

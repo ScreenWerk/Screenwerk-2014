@@ -1,17 +1,16 @@
 package eu.screenwerk.player
 {
 	import flash.events.Event;
-	import flash.filesystem.File;
 	
 	import mx.controls.HTML;
 	import mx.core.Application;
 	
-	public class HTMLPlayer extends HTML
+	public class URLPlayer extends HTML
 	{
 		
-		public function HTMLPlayer(id:uint)
+		public function URLPlayer(id:uint)
 		{
-			var media_file:File = Application.application.sw_dir.resolvePath(id+'.html');
+			var media_file:File = Application.application.sw_dir.resolvePath(id+'.url');
 			var media_string:String = Application.application.readFileContents(media_file);
 			var media_split:Array = media_string.split("\n");
 			var url:String = media_split.shift();
