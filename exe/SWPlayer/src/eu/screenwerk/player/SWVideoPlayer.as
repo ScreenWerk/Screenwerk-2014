@@ -35,13 +35,16 @@ package eu.screenwerk.player
 			this.width = parent.width;
 			this.height = parent.height;
 			
-			var video_file:File = Application.application.sw_dir.resolvePath(this.sw_id + '.video');
+			//var video_file:File = Application.application.sw_dir.resolvePath(this.sw_id + '.video');
+			var video_file:File = Application.application.sw_dir.resolvePath('caption_video.flv');
 
-		    var mywidget:MediaWidget=new MediaWidget(); 
-		    mywidget.width=parent.width; 
-		    mywidget.height = parent.height; 
+		    var mywidget:MediaWidget = new MediaWidget(); 
+		    mywidget.width = this.width; 
+		    mywidget.height = this.height; 
 		    trace ( video_file.nativePath );
+		    //mywidget.source = video_file.url;
 		    this.addChild(mywidget); 
+		    mywidget.removeEmailToWindow();
  		}
  		
 		private function _stop(event:Event):void
