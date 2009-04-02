@@ -59,8 +59,10 @@ package eu.screenwerk.components
 					//this.addChild(this.media);
 					break;
 				case 'video':
-					//this.media = new VideoPlayer(this.sw_id);
-					//this.addChild(this.media);
+					this.media = new SWVideoPlayer(this.sw_id);
+					this.media.width = this.width;
+					this.media.height = this.height;
+					this.addChild(this.media);
 					break;
 				case 'flash':
 					break;

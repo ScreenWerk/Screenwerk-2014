@@ -9,10 +9,12 @@ package eu.screenwerk.player
 	public class ImagePlayer extends Image
 	{
 		private var sw_id:uint;
+		private var is_playing:Boolean = false;
 		
 		public function ImagePlayer(sw_id:uint) 
 		{
 			this.sw_id = sw_id;
+
 			this.addEventListener(Event.ADDED, play);
 			this.addEventListener(Event.REMOVED, stop);
 		}
@@ -20,6 +22,9 @@ package eu.screenwerk.player
 		private function play(event:Event):void
 		{
 			event.stopPropagation();
+			if (this.is_playing) return;
+			this.is_playing = true;
+
 			trace( new Date().toString() + " Start imageplayer " + this.sw_id
 				+	". Targeted " + event.currentTarget.toString());
 

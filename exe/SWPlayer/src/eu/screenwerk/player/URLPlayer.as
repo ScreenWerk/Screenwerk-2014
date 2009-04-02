@@ -25,7 +25,7 @@ package eu.screenwerk.player
 		private function play(event:Event):void
 		{
 			event.stopPropagation();
-			
+
 			this.x = 0;
 			this.y = 0;
 			this.width = parent.width;

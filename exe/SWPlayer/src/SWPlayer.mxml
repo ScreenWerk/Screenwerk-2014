@@ -8,7 +8,7 @@
 	showGripper="false"
 	applicationComplete="init()"
 >
-
+			
 	<mx:Script source="ascript.as"/>
 
 </mx:WindowedApplication>

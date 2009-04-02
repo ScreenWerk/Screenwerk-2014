@@ -109,7 +109,7 @@ package eu.screenwerk.components
 			this.removeChild(this.current_collection);
 			this.current_collection = this.next_collection;
 			this.addChild(this.current_collection);
-			setTimeout(playNextCollection, this.current_collection.getNextDate().getTime() - new Date().getTime());
+			setTimeout(playNextCollection, Math.max(0,this.current_collection.getNextDate().getTime() - new Date().getTime()));
 		}
 
 	}
