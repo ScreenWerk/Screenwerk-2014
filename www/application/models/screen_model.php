@@ -86,7 +86,7 @@ class Screen_model extends Model {
 			$this->update_fs($this->input->post('id'));
 		} else {
 			$data['customer_id'] = $_SESSION['user']['customer_id'];
-			$data['screen_md5'] = md5($this->input->post('id') . time());
+			$data['screen_md5'] = md5(rand(1,999) . time());
 			$this->db->insert('screens', $data);
 		}
 	}
