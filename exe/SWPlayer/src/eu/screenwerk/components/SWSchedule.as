@@ -60,7 +60,7 @@ package eu.screenwerk.components
 			}
 
 			this.addChild(this.current_collection);
-			var timeout_msec:Number = this.current_collection.getNextDate().getTime() - new Date().getTime();
+			var timeout_msec:Number = Math.max(0,this.current_collection.getNextDate().getTime() - new Date().getTime());
 			trace ("Time till next collection - " + timeout_msec/1000 + " seconds.");
 			this.timeout_id = setTimeout(playNextCollection, timeout_msec);
 		}

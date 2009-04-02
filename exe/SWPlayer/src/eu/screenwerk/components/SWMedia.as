@@ -55,24 +55,27 @@ package eu.screenwerk.components
 					this.addChild(this.media);
 					break;
 				case 'html':
-					this.media = new HTMLPlayer(this.sw_id);
-					this.addChild(this.media);
+					//this.media = new HTMLPlayer(this.sw_id);
+					//this.addChild(this.media);
 					break;
 				case 'video':
-					this.media = new VideoPlayer(this.sw_id);
-					this.addChild(this.media);
+					//this.media = new VideoPlayer(this.sw_id);
+					//this.addChild(this.media);
 					break;
 				case 'flash':
 					break;
 				case 'pdf':
 					break;
 			}
-
+			trace( new Date().toString() + " " + this.type
+				+	" loaded.");
 		}
 		
 		private function stop(event:Event):void
 		{
 			event.stopPropagation();
+			trace( new Date().toString() + " Stop media " + this.sw_id
+				+	". Targeted " + event.currentTarget.toString());
 				
 		}
 

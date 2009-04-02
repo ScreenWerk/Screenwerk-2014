@@ -1,6 +1,7 @@
 package eu.screenwerk.player
 {
 	import flash.events.Event;
+	import flash.filesystem.File;
 	
 	import mx.controls.HTML;
 	import mx.core.Application;
@@ -14,12 +15,8 @@ package eu.screenwerk.player
 			var media_string:String = Application.application.readFileContents(media_file);
 			var media_split:Array = media_string.split("\n");
 			var url:String = media_split.shift();
-			this.x = 0;
-			this.y = 0;
-			this.width = parent.width;
-			this.height = parent.height;
 
-			this.location = location;
+			this.location = url;
 			
 			this.addEventListener(Event.ADDED, play);
 			this.addEventListener(Event.REMOVED, stop);
@@ -28,6 +25,11 @@ package eu.screenwerk.player
 		private function play(event:Event):void
 		{
 			event.stopPropagation();
+			
+			this.x = 0;
+			this.y = 0;
+			this.width = parent.width;
+			this.height = parent.height;
 		}
 		private function stop(event:Event):void
 		{

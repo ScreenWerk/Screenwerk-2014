@@ -38,21 +38,6 @@ public function init():void
 	sw_screen.height = this.height;
 	this.addChild(sw_screen);
 
-/*
-//	var scroller:ScrollerPlayer = new ScrollerPlayer(0,0,200,200);
-//	this.addChild(scroller);
-//	var browser:HTMLPlayer = new HTMLPlayer(400,400,200,200,'http://www.ww.ee');
-//	this.addChild(browser);
-//	browser = new HTMLPlayer(200,200,200,200,'http://www.ww.ee');
-//	this.addChild(browser);
-//	browser = new HTMLPlayer(0,600,720,300,'http://screenwerk.eu');
-//	this.addChild(browser);
-//	browser = new HTMLPlayer(720,600,720,300,'http://neti.ee');
-//	this.addChild(browser);
-
-	trace ("\n" + new Date().toString() + " Player loaded.\n");
-
-	*/
 }
 
 public function readComponentData(filename:String):Array

@@ -15,10 +15,6 @@ package eu.screenwerk.player
 			var media_string:String = Application.application.readFileContents(media_file);
 			var media_split:Array = media_string.split("\n");
 			var url:String = media_split.shift();
-			this.x = 0;
-			this.y = 0;
-			this.width = parent.width;
-			this.height = parent.height;
 
 			this.location = location;
 			
@@ -29,6 +25,11 @@ package eu.screenwerk.player
 		private function play(event:Event):void
 		{
 			event.stopPropagation();
+			
+			this.x = 0;
+			this.y = 0;
+			this.width = parent.width;
+			this.height = parent.height;
 		}
 		private function stop(event:Event):void
 		{
