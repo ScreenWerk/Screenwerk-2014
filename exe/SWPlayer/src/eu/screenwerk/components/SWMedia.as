@@ -5,6 +5,8 @@ package eu.screenwerk.components
 	import flash.display.DisplayObject;
 	import flash.events.Event;
 	
+	import mx.controls.VideoDisplay;
+	import mx.core.Application;
 	import mx.core.UIComponent;
 	
 	public class SWMedia extends UIComponent
@@ -13,6 +15,7 @@ package eu.screenwerk.components
 		public var length:uint;
 		private var type:String;
 		private var media:DisplayObject;
+		private var is_playing:Boolean = false;
 		
 		
 		public function SWMedia(media_str:String)
@@ -34,6 +37,10 @@ package eu.screenwerk.components
 		private function play(event:Event):void
 		{
 			event.stopPropagation();
+
+			if (this.is_playing) return;
+			this.is_playing = true;
+
 			trace( new Date().toString() + " Start media " + this.sw_id
 				+	". Targeted " + event.currentTarget.toString());
 				
@@ -59,10 +66,24 @@ package eu.screenwerk.components
 					//this.addChild(this.media);
 					break;
 				case 'video':
-					this.media = new SWVideoPlayer(this.sw_id);
-					this.media.width = this.width;
-					this.media.height = this.height;
-					this.addChild(this.media);
+
+
+					var mymedia:VideoDisplay = new VideoDisplay;
+					this.addChild(mymedia);
+					mymedia.height = this.height;
+					mymedia.width = this.width;
+					var video_file:File = Application.application.sw_dir.resolvePath(this.sw_id + '.video.flv');
+					mymedia.source = video_file.url; 
+					mymedia.play();
+
+//					this.media = new SWVideoPlayer(this.sw_id);
+//					this.media.width = this.width;
+//					this.media.height = this.height;
+//					this.addChild(this.media);
+
+// camera works
+//                var cam:Camera = Camera.getCamera();
+//                mymedia.attachCamera(cam)
 					break;
 				case 'flash':
 					break;

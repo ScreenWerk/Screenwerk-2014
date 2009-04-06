@@ -38,6 +38,8 @@ package eu.screenwerk.components
 			this.stop_sec = bundle_split[7].replace(' ','');
 			if (this.stop_sec == 0) this.stop_sec = layout_duration;
 			
+			this.alpha = 100;
+			
 			this.addEventListener(Event.ADDED, play);
 			this.addEventListener(Event.REMOVED, stop);
 		}
@@ -71,14 +73,7 @@ package eu.screenwerk.components
 		{
 			event.stopPropagation();
 			
-			try
-			{
-				//trace( new Date().toString() + " Stopping media " + this.current_media.sw_id + "..." );
-				this.removeChild(this.current_media);
-			}
-			catch (err:Error) {
-				trace( "No current media for bundle " + this.sw_id + "." );
-			}
+			var old_media:SWMedia = this.current_media;
 			
 			this.setNextMedia();
 
@@ -86,7 +81,16 @@ package eu.screenwerk.components
 			timer.addEventListener(TimerEvent.TIMER, playNextMediaOnTimer);
 			timer.start();
 
-			this.addChild(this.current_media);
+			this.addChildAt(this.current_media,0);
+
+			try
+			{
+				//trace( new Date().toString() + " Stopping media " + this.current_media.sw_id + "..." );
+				this.removeChild(old_media);
+			}
+			catch (err:Error) {
+				trace( "No previous media for bundle " + this.sw_id + "." );
+			}
 		}		
 
 		
