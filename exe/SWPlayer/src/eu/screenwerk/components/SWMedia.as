@@ -50,6 +50,8 @@ package eu.screenwerk.components
 			
 			trace( new Date().toString() + " Play " + this.type
 				+	". Dimensions " + this.width + 'x' + this.height);
+				
+			Application.application.log('play ' + this.type + ' ' + this.sw_id);
 
 			switch (this.type)
 			{
@@ -70,9 +72,12 @@ package eu.screenwerk.components
 
 					var mymedia:VideoDisplay = new VideoDisplay;
 					this.addChild(mymedia);
+					mymedia.maintainAspectRatio = false;
+					
 					mymedia.height = this.height;
 					mymedia.width = this.width;
-					var video_file:File = Application.application.sw_dir.resolvePath(this.sw_id + '.video.flv');
+					var video_file:File = Application.application.sw_dir.resolvePath(
+											this.sw_id + '.video.flv');
 					mymedia.source = video_file.url; 
 					mymedia.play();
 

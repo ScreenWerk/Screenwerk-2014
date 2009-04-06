@@ -4,6 +4,7 @@ import eu.screenwerk.components.*;
 import eu.screenwerk.player.*;
 
 import flash.filesystem.File;
+import flash.filesystem.FileMode;
 import flash.filesystem.FileStream;
 
 import mx.controls.Alert;
@@ -93,5 +94,23 @@ private function readRcParams():void
 	this._x_coef = this.width/this._defined_screen_width;
 	this._y_coef = this.height/this._defined_screen_height;
     
+}
+
+public function log(message:String):void
+{
+	var logstring:String = new Date().toString() + ' ' + message;
+	trace ("Log message: " + logstring );
+
+	var log_file:File = this.sw_dir.resolvePath('screenlog');	
+	var fileStream:FileStream = new FileStream();
+	try {
+		fileStream.open(log_file, FileMode.APPEND);
+		fileStream.writeUTF(logstring + "\n");
+		fileStream.close();
+	}
+	catch(errObject:Error) {
+		Alert.show("Please make sure You have data file available at \n"+log_file.nativePath,
+		"Missing data file",4,null,NativeApplication.nativeApplication.exit);
+	}
 }
 
