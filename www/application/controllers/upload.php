@@ -21,11 +21,8 @@ class Upload extends Controller {
 
 	function do_upload() {
 	
-		global $mimes;
-		if (count($mimes) == 0) @require_once(APPPATH.'config/mimes'.EXT);
-		
 		$config['upload_path'] = '../ftp/incoming/';
-		$config['allowed_types'] = $this->__array_search_recursive($_FILES['upload_file']['type'], $mimes);
+		$config['allowed_types'] = 'zip|bmp|gif|jpg|jpeg|png|mpg|mpeg|m4v|mv4|avi';
 		$config['remove_spaces'] = TRUE;
 
 		$this->load->library('upload', $config);
