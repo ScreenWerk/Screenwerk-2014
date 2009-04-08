@@ -6,22 +6,31 @@
 
 . sw-script-header.sh
 
-if [ $# != 1 ]
+case $# in
+   1)
+      incoming_media=${_DIR_INCOMING_MEDIA}/${1}
+      media_owner=`ls -o "${incoming_media}" | cut -d" " -f3`
+      customer_id=`${_DIR_EXE}/sw-customer.find_by_username.sh ${media_owner}`
+      ;;
+   2)
+      incoming_media=${_DIR_INCOMING_MEDIA}/${2}/${1}
+      customer_id=${2}
+      ;;
+   *)
+      echo "Usage: ${0} <media file name> [customer ID]"
+      exit 1
+      ;;
+esac
+date +"%c sw-media.create.sh start \"${incoming_media}\" for customer ${customer_id}"
+
+
+
+
+media_id=`${_DIR_EXE}/sw-media.find_by_filename_and_customer.sh "${1}" ${customer_id}`
+if [ -n "${media_id}" ]
 then
-	echo "Usage: ${0} <media file path>"
-	exit 1
-fi
-
-incoming_media=${_DIR_INCOMING_MEDIA}/${1}
-media_owner=`ls -o "${incoming_media}" | cut -d" " -f3`
-customer_id=`${_DIR_EXE}/sw-customer.find_by_username.sh ${media_owner}`
-
-
-media_Id=`${_DIR_EXE}/sw-media.find_by_filename_and_customer.sh "${1}" ${customer_id}`
-if [ -n "${media_Id}" ]
-then
-	echo "Media \"${1}\" already loaded - Id:${media_Id}"
-	exit 10
+	date +"%c WARNING: Media \"${1}\" already loaded - id:${media_id}"
+#	exit 10
 fi
 
 
@@ -37,7 +46,12 @@ case `echo ${media_type}|cut -d" " -f1` in
             ID_VIDEO_WIDTH=""
             ID_VIDEO_HEIGHT=""
             ID_LENGTH=""
-            ${_DIR_EXE}/midentify.sh "${_DIR_INCOMING_MEDIA}/${1}" > "${TMP_FILE}"
+            ${_DIR_EXE}/midentify.sh "${incoming_media}" > "${TMP_FILE}"
+            if [ `wc -l "${TMP_FILE}" | cut -d' ' -f1` -eq 0 ]
+            then
+               echo "${incoming_media} by ${customer_id}: Unsupported media type"
+               exit 1
+            fi
             . "${TMP_FILE}"
             rm "${TMP_FILE}"
             ID_WIDTH=${ID_VIDEO_WIDTH}
@@ -60,22 +74,26 @@ case `echo ${media_type}|cut -d" " -f1` in
 esac
 
 
-
 DIMENSION_ID=`${_DIR_EXE}/sw-dimension.findcreate.sh ${ID_WIDTH} ${ID_HEIGHT}`
 #echo "dimension_Id='${DIMENSION_ID}'"
 
-echo "INSERT into ${_DB_TABLE_MEDIA} set filename='${1}', type='${media_type}', dimension_id=${DIMENSION_ID}, class='ORIGINAL', length=${ID_LENGTH};"
+if [ ! -n "${media_id}" ]
+then
+   query="INSERT into ${_DB_TABLE_MEDIA}
+set filename='${1}', customer_id='${customer_id}', type='${media_type}', dimension_id=${DIMENSION_ID}, location='ORIGINAL', length=${ID_LENGTH};"
+   echo $query
 
 mysql -u ${_DB_USER} --password="${_DB_PASSWORD}" -D ${_DB_SCHEMA} --host=${_DB_HOST} -sN --default-character-set=utf8<<EOFMYSQL
 INSERT into ${_DB_TABLE_MEDIA}
 set filename='${1}', customer_id='${customer_id}', type='${media_type}', dimension_id=${DIMENSION_ID}, location='ORIGINAL', length=${ID_LENGTH};
 EOFMYSQL
 
-media_Id=`${_DIR_EXE}/sw-media.find_by_filename_and_customer.sh "${1}" ${customer_id}`
+   media_id=`${_DIR_EXE}/sw-media.find_by_filename_and_customer.sh "${1}" ${customer_id}`
+fi
 
-echo "Media \"${1}\" loaded - Id:${media_Id}"
+date +"%c sw-media.create.sh finish \"${incoming_media}\" for customer ${customer_id} finished with media id:${media_id}"
 
-
-mv "${incoming_media}" ${_DIR_ORIGINAL_MEDIA}/${media_Id}
+[[ -d ${_DIR_ORIGINAL_MEDIA}/${customer_id} ]] || mkdir ${_DIR_ORIGINAL_MEDIA}/${customer_id}
+mv "${incoming_media}" ${_DIR_ORIGINAL_MEDIA}/${customer_id}/
 
 exit 0

@@ -45,9 +45,8 @@ define('FOPEN_READ_WRITE_CREATE_STRICT',		'x+b');
 |
 */
 
-define('DIR_FTP_ROOT',                   '/mnt/www_data/screenwerk/www-data/trunk/ftp');
-define('DIR_FTP_ORIGINALS',              DIR_FTP_ROOT.'/originals');
-define('DIR_FTP_CONVERT',                DIR_FTP_ROOT.'/convert');
+define('DIR_FTP_ROOT',                   '/swtrunk/ftp');
+define('DIR_FTP_MASTERS',              DIR_FTP_ROOT.'/masters');
 define('DIR_FTP_SCREENS',                DIR_FTP_ROOT.'/screens');
 define('DIR_FTP_SIGNALS',                DIR_FTP_ROOT.'/signals');
 

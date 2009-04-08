@@ -56,7 +56,7 @@ fi
 # Assume, that media type is video
 echo "VIDEO"
 
-# Further processing of video file is left for calling prrogram
+# Further processing of video file is left for calling program
 
 exit 0
  

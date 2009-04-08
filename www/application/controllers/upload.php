@@ -28,7 +28,7 @@ class Upload extends Controller {
 		$this->load->library('upload', $config);
 	
 		if ( ! $this->upload->do_upload('upload_file')) {
-			$view['error'] = $this->upload->display_errors();
+			$view['error'] = 'ERROR: '.$this->upload->display_errors();
 		} else {
 			$view['data'] = $this->upload->data();
 		}

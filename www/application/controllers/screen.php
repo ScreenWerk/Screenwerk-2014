@@ -80,17 +80,19 @@ class Screen extends Controller {
       if(!is_dir($screen_dir)) mkdir ($screen_dir);
       foreach( $pl_data['medias'] as $media )
       {
-         $_source = DIR_FTP_ORIGINALS . '/' . $media['id'];
+         $_source = DIR_FTP_MASTERS . '/' . $media['id'] . '.' . $media['type'];
          $_destination = DIR_FTP_SCREENS . '/' . $screen_id . '/' . $media['id'] . '.' . $media['type'];
 
          if(is_file($_destination)) unlink($_destination);
          link($_source, $_destination);
       }
 
+/*
       $_source = DIR_FTP_SIGNALS . '/templates/rsync.signal.sh';
       $_destination = DIR_FTP_SIGNALS . '/' . $screen_id;
       if(is_file($_destination)) unlink($_destination);
       link($_source, $_destination);
+*/
       
 
       $data['content_md5'] = $this->screen->md5( $screen_id );

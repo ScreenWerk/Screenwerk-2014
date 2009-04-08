@@ -10,62 +10,38 @@
 
 . sw-script-header.sh
 
-if [ $# != 1 ]
+if [ $# != 2 ]
 then
-	echo "Usage: ${0} <media file path>"
+	echo "Usage: ${0} <media file name> <customer ID>"
 	exit 1
 fi
 
-incoming_media="${_DIR_CONVERT}/${1}"
-if [ ! -r "${incoming_media}" ]
+original_media="${_DIR_ORIGINAL_MEDIA}/${2}/${1}"
+if [ ! -r "${original_media}" ]
 then
-	echo "${incoming_media} is not readable."
+	echo "${original_media} is not readable."
 	exit 1
 fi
 
-media_type=`${_DIR_EXE}/mediatype.sh "${incoming_media}"`
 
-screen_id=`echo ${1} | cut -d_ -f1`
-media_id=`echo ${1} | cut -d_ -f2`
-width=`echo ${1} | cut -d_ -f3 | cut -d. -f1 | cut -dx -f1`
-height=`echo ${1} | cut -d_ -f3 | cut -d. -f1 | cut -dx -f2`
+media_id=`${_DIR_EXE}/sw-media.find_by_filename_and_customer.sh "${1}" ${2}`
+media_type=`${_DIR_EXE}/mediatype.sh "${original_media}"`
+master_media=${_DIR_MASTERS}/${media_id}.${media_type}
 
 case `echo ${media_type}|cut -d" " -f1` in
-   VIDEO)   ffmpeg_out=${_DIR_MASTER_SCREENS}/${1}
-
-            master_video_file=${_DIR_MASTER_SCREENS}/master_${media_id}_${width}x${height}.video
-            video_file=${_DIR_SCREENS}/${screen_id}_${media_id}_${width}x${height}.video
-
-            if [ -f ${video_file} ]
-            then
-               echo "${video_file} already in place"
-            else
-               if [ ! -f ${master_video_file} ]
-               then
-                  echo "Converting to ${ffmpeg_out}"
-                  echo "ffmpeg -i ${incoming_media} -an -s ${width}x${height} ${ffmpeg_out}"
-                  ffmpeg -i ${incoming_media} -y -an -s ${width}x${height} -target pal-dvd ${ffmpeg_out}
-#                  ffmpeg -i ${incoming_media} -an -s ${width}x${height} ${ffmpeg_out}
-#                   ffmpeg -y -i ${incoming_media} -pass 1 -an -s ${width}x${height} -deinterlace -b 3200 -maxrate 7500 -bufsize 4096 ${ffmpeg_out}
-#                   ffmpeg -y -i ${incoming_media} -pass 2 -an -s ${width}x${height} -deinterlace -b 3200 -minrate 1500 -maxrate 7500 -bufsize 4096 ${ffmpeg_out}
-                  mv ${ffmpeg_out} ${master_video_file}
-               fi
-	       echo "ln -s ${master_video_file} ${video_file}"
-	       ln ${master_video_file} ${video_file}
-            fi
+   VIDEO)   ffmpeg -i "${original_media}" -an -vcodec flv -sameq -y "${master_media}.flv" #2&>1 1>/dev/null
+            mv "${master_media}.flv" "${master_media}"
             ;;
-   IMAGE)   cp ${incoming_media} ${_DIR_SCREENS}/${screen_id}_${media_id}_${width}x${height}.image
+   IMAGE)   cp ${original_media} ${master_media}.image
             ;;
-   HTML)    cp ${incoming_media} ${_DIR_SCREENS}/${screen_id}_${media_id}_${width}x${height}.html
+   HTML)    cp ${original_media} ${master_media}.html
             ;;
-   URL)     cp ${incoming_media} ${_DIR_SCREENS}/${screen_id}_${media_id}_${width}x${height}.url
+   URL)     cp ${original_media} ${master_media}.url
             ;;
    *)       echo "Unsupported media type"
             exit 1;;
 esac
 
-
-
-rm ${incoming_media}
+date +"%c sw-media.convert.sh \"${original_media}\" to ${master_media} finished"
 
 exit 0
