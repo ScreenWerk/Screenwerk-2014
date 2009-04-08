@@ -163,7 +163,10 @@ class Bundle_model extends Model {
 	function update_fs($bundle_id) {
 
       $medias = $this->get_medias($bundle_id);
+
+      //echo "<br/> for bundle $bundle_id.\n";      print_r( $medias );
       $contents[] = implode(';', array_keys(current($medias)));
+
       foreach($medias as $media) {
          $contents[] = implode(';', $media);
       }

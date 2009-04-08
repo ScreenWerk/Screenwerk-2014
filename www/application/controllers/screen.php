@@ -83,6 +83,7 @@ class Screen extends Controller {
          $_source = DIR_FTP_MASTERS . '/' . $media['id'] . '.' . $media['type'];
          $_destination = DIR_FTP_SCREENS . '/' . $screen_id . '/' . $media['id'] . '.' . $media['type'];
 
+         if(!is_file($_source)) die($_source);
          if(is_file($_destination)) unlink($_destination);
          link($_source, $_destination);
       }

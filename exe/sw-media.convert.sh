@@ -25,19 +25,26 @@ fi
 
 
 media_id=`${_DIR_EXE}/sw-media.find_by_filename_and_customer.sh "${1}" ${2}`
-media_type=`${_DIR_EXE}/mediatype.sh "${original_media}"`
-master_media=${_DIR_MASTERS}/${media_id}.${media_type}
+media_type=`${_DIR_EXE}/mediatype.sh "${original_media}"|cut -d" " -f1`
 
-case `echo ${media_type}|cut -d" " -f1` in
-   VIDEO)   ffmpeg -i "${original_media}" -an -vcodec flv -sameq -y "${master_media}.flv" #2&>1 1>/dev/null
-            mv "${master_media}.flv" "${master_media}"
-            ;;
-   IMAGE)   cp ${original_media} ${master_media}.image
-            ;;
-   HTML)    cp ${original_media} ${master_media}.html
-            ;;
-   URL)     cp ${original_media} ${master_media}.url
-            ;;
+case ${media_type} in
+   VIDEO)
+      master_media=${_DIR_MASTERS}/${media_id}.${media_type}
+      ffmpeg -i "${original_media}" -an -vcodec flv -sameq -y "${master_media}.flv" #2&>1 1>/dev/null
+      mv "${master_media}.flv" "${master_media}"
+      ;;
+   IMAGE)
+      master_media=${_DIR_MASTERS}/${media_id}.${media_type}
+      cp ${original_media} ${master_media}
+      ;;
+   HTML)   
+      master_media=${_DIR_MASTERS}/${media_id}.${media_type}
+      cp ${original_media} ${master_media}
+      ;;
+   URL)
+      master_media=${_DIR_MASTERS}/${media_id}.${media_type}
+      cp ${original_media} ${master_media}
+      ;;
    *)       echo "Unsupported media type"
             exit 1;;
 esac

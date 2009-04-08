@@ -21,7 +21,7 @@ class Upload extends Controller {
 
 	function do_upload() {
 	
-		$config['upload_path'] = '../ftp/incoming/';
+		$config['upload_path'] = DIR_FTP_INCOMING;
 		$config['allowed_types'] = 'zip|bmp|gif|jpg|jpeg|png|mpg|mpeg|m4v|mv4|avi';
 		$config['remove_spaces'] = TRUE;
 
