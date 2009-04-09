@@ -5,7 +5,6 @@ package eu.screenwerk.components
 	import flash.utils.clearTimeout;
 	import flash.utils.setTimeout;
 	
-	import mx.controls.VideoDisplay;
 	import mx.core.Application;
 	import mx.core.UIComponent;
 	
@@ -115,6 +114,16 @@ package eu.screenwerk.components
 			this.current_collection = this.next_collection;
 			this.addChild(this.current_collection);
 			setTimeout(playNextCollection, Math.max(0,this.current_collection.getNextDate().getTime() - new Date().getTime()));
+		}
+
+		public function resize():void
+		{
+			for (var i:uint=0; i<this.numChildren; i++)
+			{
+				SWCollection(this.getChildAt(i)).resize();
+				this.getChildAt(i).width = this.width;
+				this.getChildAt(i).height = this.height;
+			}
 		}
 
 	}

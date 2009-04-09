@@ -295,6 +295,16 @@ package eu.screenwerk.components
 			}
 			return -1;
 		}
+
+		public function resize():void
+		{
+			for (var i:uint=0; i<this.numChildren; i++)
+			{
+				SWLayout(this.getChildAt(i)).resize();
+				this.getChildAt(i).width = this.width;
+				this.getChildAt(i).height = this.height;
+			}
+		}
 	}
 	
 }

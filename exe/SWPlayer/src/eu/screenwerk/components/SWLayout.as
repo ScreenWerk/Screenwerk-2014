@@ -1,9 +1,7 @@
 package eu.screenwerk.components
 {
 	import flash.events.Event;
-	import flash.filesystem.File;
 	
-	import mx.controls.VideoDisplay;
 	import mx.core.Application;
 	import mx.core.UIComponent;
 	
@@ -85,6 +83,14 @@ package eu.screenwerk.components
 
 		}
 		
+
+		public function resize():void
+		{
+			for (var i:uint=0; i<this.numChildren; i++)
+			{
+				SWBundle(this.getChildAt(i)).resize();
+			}
+		}
 
 	}
 }

@@ -120,5 +120,14 @@ package eu.screenwerk.components
 				
 		}
 
+		public function resize():void
+		{
+			for (var i:uint=0; i<this.numChildren; i++)
+			{
+				this.getChildAt(i).width = this.width;
+				this.getChildAt(i).height = this.height;
+			}
+		}
+
 	}
 }

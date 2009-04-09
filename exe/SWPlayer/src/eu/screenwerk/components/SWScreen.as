@@ -1,9 +1,7 @@
 package eu.screenwerk.components
 {
 	import flash.events.Event;
-	import flash.filesystem.File;
 	
-	import mx.controls.VideoDisplay;
 	import mx.core.Application;
 	import mx.core.UIComponent;
 	
@@ -59,5 +57,16 @@ package eu.screenwerk.components
 			this.removeChild(this.sw_schedule);
 			this.sw_schedule = null;
 		}
+
+		public function resize():void
+		{
+			for (var i:uint=0; i<this.numChildren; i++)
+			{
+				SWSchedule(this.getChildAt(i)).resize();
+				this.getChildAt(i).width = this.width;
+				this.getChildAt(i).height = this.height;
+			}
+		}
+
 	}
 }
