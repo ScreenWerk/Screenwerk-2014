@@ -41,8 +41,6 @@ package eu.screenwerk.components
 			this.stop_sec = bundle_split[7].replace(' ','');
 			if (this.stop_sec == 0) this.stop_sec = layout_duration;
 			
-			this.opaqueBackground = 0x0000FF;
-			this.alpha = 0;
 			
 			this.addEventListener(Event.ADDED, play);
 			this.addEventListener(Event.REMOVED, stop);
@@ -55,24 +53,21 @@ package eu.screenwerk.components
 			if (this.is_playing) return;
 			this.is_playing = true;
 
-					var mymedia:VideoDisplay = new VideoDisplay;
-					mymedia.maintainAspectRatio = false;
-					
-					mymedia.x=this.x;
-					mymedia.y=this.y;
-					mymedia.height = this.height;
-					mymedia.width = this.width;
-					var video_file:File = Application.application.sw_dir.resolvePath(
-											6 + '.VIDEO');
-					mymedia.source = video_file.url; 
-					parent.addChild(mymedia);
-					mymedia.play();
-
+//					var mymedia:VideoDisplay = new VideoDisplay;
+//					mymedia.maintainAspectRatio = false;
+//					
+//					mymedia.height = this.height;
+//					mymedia.width = this.width;
+//					var video_file:File = Application.application.sw_dir.resolvePath(
+//											6 + '.VIDEO');
+//					mymedia.source = video_file.url; 
+//					this.addChild(mymedia);
+//					mymedia.play();
+//
 			trace( new Date().toString() + " Play bundle " + this.sw_id
 				+	". Start at " + this.start_sec + ", stopping at " + this.stop_sec
 				+	". Targeted " + event.currentTarget.toString());
 
-return;
 				
 			var startTimer:Timer = new Timer(this.start_sec*1000, 1);
 			startTimer.addEventListener(TimerEvent.TIMER, playNextMediaOnTimer);
@@ -106,7 +101,7 @@ return;
 			timer.addEventListener(TimerEvent.TIMER, playNextMediaOnTimer);
 			timer.start();
 
-			this.addChildAt(this.current_media,0);
+			this.addChild(this.current_media);
 
 			try
 			{

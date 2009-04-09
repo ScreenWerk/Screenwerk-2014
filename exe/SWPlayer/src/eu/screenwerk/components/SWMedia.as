@@ -4,6 +4,7 @@ package eu.screenwerk.components
 	
 	import flash.display.DisplayObject;
 	import flash.events.Event;
+	import flash.filesystem.File;
 	
 	import mx.controls.VideoDisplay;
 	import mx.core.Application;
@@ -42,12 +43,24 @@ package eu.screenwerk.components
 			if (this.is_playing) return;
 			this.is_playing = true;
 
+			this.width = parent.width;
+			this.height = parent.height;
+
+//					var mymedia:VideoDisplay = new VideoDisplay;
+//					mymedia.maintainAspectRatio = false;
+//					
+//					mymedia.height = this.height;
+//					mymedia.width = this.width;
+//					var video_file:File = Application.application.sw_dir.resolvePath(
+//											6 + '.VIDEO');
+//					mymedia.source = video_file.url; 
+//					this.addChild(mymedia);
+//					mymedia.play();
+
 			trace( new Date().toString() + " Start media " + this.sw_id
 				+	". Targeted " + event.currentTarget.toString());
 				
 
-			this.width = parent.width;
-			this.height = parent.height;
 			
 			trace( new Date().toString() + " Play " + this.type
 				+	". Dimensions " + this.width + 'x' + this.height);
@@ -56,20 +69,29 @@ package eu.screenwerk.components
 
 			switch (this.type)
 			{
-				case 'url':
+				case 'URL':
 					this.media = new URLPlayer(this.sw_id);
 					this.addChild(this.media);
 					break;
-				case 'image':
+				case 'IMAGE':
 					this.media = new ImagePlayer(this.sw_id);
 					this.addChild(this.media);
 					break;
-				case 'html':
+				case 'HTML':
 					//this.media = new HTMLPlayer(this.sw_id);
 					//this.addChild(this.media);
 					break;
-				case 'video':
-					//this.addChild(mymedia);
+				case 'VIDEO':
+					var mymedia:VideoDisplay = new VideoDisplay;
+					mymedia.maintainAspectRatio = false;
+					
+					mymedia.height = this.height;
+					mymedia.width = this.width;
+					var video_file:File = Application.application.sw_dir.resolvePath(
+											this.sw_id + '.VIDEO');
+					mymedia.source = video_file.url; 
+					this.addChild(mymedia);
+					mymedia.play();
 
 //					this.media = new SWVideoPlayer(this.sw_id);
 //					this.media.width = this.width;
@@ -80,9 +102,9 @@ package eu.screenwerk.components
 //                var cam:Camera = Camera.getCamera();
 //                mymedia.attachCamera(cam)
 					break;
-				case 'flash':
+				case 'FLASH':
 					break;
-				case 'pdf':
+				case 'PDF':
 					break;
 			}
 			trace( new Date().toString() + ' ' + this.sw_id + "." + this.type

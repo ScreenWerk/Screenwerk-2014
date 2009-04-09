@@ -26,8 +26,6 @@ public function init():void
 {
 	//Application.application.stage.displayState = StageDisplayState.FULL_SCREEN; 
 	this.readRcParams();
-	this.width = this._defined_screen_width;
-	this.height = this._defined_screen_height;
 //	this.opaqueBackground = 0x000033;
 //	this.alpha = 1;
 
@@ -112,6 +110,8 @@ private function readRcParams():void
 	this._screen_id = config_params['screen_id'];
 	this._defined_screen_width = config_params['screen_width'];
 	this._defined_screen_height = config_params['screen_height'];
+	this.width = this._defined_screen_width;
+	this.height = this._defined_screen_height;
 	this._x_coef = this.width/this._defined_screen_width;
 	this._y_coef = this.height/this._defined_screen_height;
     
