@@ -2,8 +2,10 @@ package eu.screenwerk.components
 {
 	import flash.events.Event;
 	import flash.events.TimerEvent;
+	import flash.filesystem.File;
 	import flash.utils.Timer;
 	
+	import mx.controls.VideoDisplay;
 	import mx.core.Application;
 	import mx.core.UIComponent;
 	
@@ -20,7 +22,8 @@ package eu.screenwerk.components
 		private var mediastrings:Array = new Array();
 		
 		private var current_media:SWMedia;
-		
+		private var is_playing:Boolean = false;
+
 		
 		public function SWBundle(layout_str:String, layout_duration:uint)
 		{
@@ -38,7 +41,8 @@ package eu.screenwerk.components
 			this.stop_sec = bundle_split[7].replace(' ','');
 			if (this.stop_sec == 0) this.stop_sec = layout_duration;
 			
-			this.alpha = 100;
+			this.opaqueBackground = 0x0000FF;
+			this.alpha = 0;
 			
 			this.addEventListener(Event.ADDED, play);
 			this.addEventListener(Event.REMOVED, stop);
@@ -47,9 +51,28 @@ package eu.screenwerk.components
 		private function play(event:Event):void
 		{
 			event.stopPropagation();
+			
+			if (this.is_playing) return;
+			this.is_playing = true;
+
+					var mymedia:VideoDisplay = new VideoDisplay;
+					mymedia.maintainAspectRatio = false;
+					
+					mymedia.x=this.x;
+					mymedia.y=this.y;
+					mymedia.height = this.height;
+					mymedia.width = this.width;
+					var video_file:File = Application.application.sw_dir.resolvePath(
+											6 + '.VIDEO');
+					mymedia.source = video_file.url; 
+					parent.addChild(mymedia);
+					mymedia.play();
+
 			trace( new Date().toString() + " Play bundle " + this.sw_id
 				+	". Start at " + this.start_sec + ", stopping at " + this.stop_sec
 				+	". Targeted " + event.currentTarget.toString());
+
+return;
 				
 			var startTimer:Timer = new Timer(this.start_sec*1000, 1);
 			startTimer.addEventListener(TimerEvent.TIMER, playNextMediaOnTimer);
@@ -62,6 +85,8 @@ package eu.screenwerk.components
 		private function stop(event:Event):void
 		{
 			event.stopPropagation();
+			this.is_playing = false;
+			
 			trace( new Date().toString() + " Stop bundle " + this.sw_id
 				+	". Targeted " + event.currentTarget.toString());
 				

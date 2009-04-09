@@ -3,6 +3,7 @@ package eu.screenwerk.player
 	import flash.events.Event;
 	import flash.filesystem.File;
 	
+	import mx.controls.Alert;
 	import mx.controls.Image;
 	import mx.core.Application;
 	
@@ -24,7 +25,6 @@ package eu.screenwerk.player
 			event.stopPropagation();
 			if (this.is_playing) return;
 			this.is_playing = true;
-
 			trace( new Date().toString() + " Start imageplayer " + this.sw_id
 				+	". Targeted " + event.currentTarget.toString());
 
@@ -33,7 +33,7 @@ package eu.screenwerk.player
 			this.width = parent.width;
 			this.height = parent.height;
 			
-			var image_file:File = Application.application.sw_dir.resolvePath(this.sw_id + '.image');
+			var image_file:File = Application.application.sw_dir.resolvePath(this.sw_id + '.IMAGE');
 		
 			this.source = image_file.url;
 			this.maintainAspectRatio = false;

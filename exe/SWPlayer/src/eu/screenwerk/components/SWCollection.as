@@ -5,6 +5,7 @@ package eu.screenwerk.components
 	import flash.filesystem.File;
 	import flash.utils.Timer;
 	
+	import mx.controls.VideoDisplay;
 	import mx.core.Application;
 	import mx.core.UIComponent;
 	
@@ -27,7 +28,7 @@ package eu.screenwerk.components
 		private var next_date:Date;
 		
 		private var current_layout:SWLayout;
-		
+		private var is_playing:Boolean = false;
 	
 		public function SWCollection(collectionstring:String)
 		{
@@ -56,6 +57,10 @@ package eu.screenwerk.components
 		public function play(event:Event):void
 		{
 			event.stopPropagation();
+			
+			if (this.is_playing) return;
+			this.is_playing = true;
+
 			trace( new Date().toString() + " Play collection " + this.sw_id
 				+	". Targeted " + event.currentTarget.toString());
 				
@@ -70,6 +75,7 @@ package eu.screenwerk.components
 		public function stop(event:Event):void
 		{
 			event.stopPropagation();
+			this.is_playing = false;
 			trace( new Date().toString() + " Stop collection "+this.sw_id
 				+	". Targeted " + event.currentTarget.toString());
 				

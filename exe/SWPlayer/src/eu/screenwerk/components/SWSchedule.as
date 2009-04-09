@@ -5,6 +5,7 @@ package eu.screenwerk.components
 	import flash.utils.clearTimeout;
 	import flash.utils.setTimeout;
 	
+	import mx.controls.VideoDisplay;
 	import mx.core.Application;
 	import mx.core.UIComponent;
 	
@@ -13,7 +14,7 @@ package eu.screenwerk.components
 		public var sw_id:uint;
 
 		private var timeout_id:uint;
-		
+		private var is_playing:Boolean = false;
 		private var collections:Array;
 		private var current_collection:SWCollection;
 		private var next_collection:SWCollection;
@@ -31,6 +32,10 @@ package eu.screenwerk.components
 		private function play(event:Event):void
 		{
 			event.stopPropagation();
+
+			if (this.is_playing) return;
+			this.is_playing = true;
+
 			trace ( new Date().toString() + " Play schedule " + this.sw_id
 				+	". Targeted " + event.currentTarget.toString());
 				

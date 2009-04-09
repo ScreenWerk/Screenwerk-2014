@@ -37,6 +37,7 @@ package eu.screenwerk.components
 		private function play(event:Event):void
 		{
 			event.stopPropagation();
+//Alert.show(" Start media " + this.sw_id + ". Targeted " + event.currentTarget.toString(),'Play media',4,null,null);
 
 			if (this.is_playing) return;
 			this.is_playing = true;
@@ -68,18 +69,7 @@ package eu.screenwerk.components
 					//this.addChild(this.media);
 					break;
 				case 'video':
-
-
-					var mymedia:VideoDisplay = new VideoDisplay;
-					this.addChild(mymedia);
-					mymedia.maintainAspectRatio = false;
-					
-					mymedia.height = this.height;
-					mymedia.width = this.width;
-					var video_file:File = Application.application.sw_dir.resolvePath(
-											this.sw_id + '.video.flv');
-					mymedia.source = video_file.url; 
-					mymedia.play();
+					//this.addChild(mymedia);
 
 //					this.media = new SWVideoPlayer(this.sw_id);
 //					this.media.width = this.width;
@@ -95,13 +85,14 @@ package eu.screenwerk.components
 				case 'pdf':
 					break;
 			}
-			trace( new Date().toString() + " " + this.type
+			trace( new Date().toString() + ' ' + this.sw_id + "." + this.type
 				+	" loaded.");
 		}
 		
 		private function stop(event:Event):void
 		{
 			event.stopPropagation();
+			this.is_playing = false;
 			trace( new Date().toString() + " Stop media " + this.sw_id
 				+	". Targeted " + event.currentTarget.toString());
 				

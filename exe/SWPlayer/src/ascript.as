@@ -8,6 +8,7 @@ import flash.filesystem.FileMode;
 import flash.filesystem.FileStream;
 
 import mx.controls.Alert;
+import mx.controls.VideoDisplay;
 import mx.core.Application;
 
 private var _defined_screen_width:uint = 1680;
@@ -23,9 +24,15 @@ public var sw_dir:File = home_dir.resolvePath('screenwerk');
 
 public function init():void
 {
-	Application.application.stage.displayState = StageDisplayState.FULL_SCREEN; 
-
+	//Application.application.stage.displayState = StageDisplayState.FULL_SCREEN; 
 	this.readRcParams();
+	this.width = this._defined_screen_width;
+	this.height = this._defined_screen_height;
+//	this.opaqueBackground = 0x000033;
+//	this.alpha = 1;
+
+    //Alert.show("Hello world!\n\n",		"Missing data file",4,null,null);
+
 
 	trace (' xcoef:'+this._x_coef+'='+this.width+'/'+this._defined_screen_width
 	+ '; ycoef:'+this._y_coef+'='+this.height+'/'+this._defined_screen_height+'.');
@@ -33,12 +40,23 @@ public function init():void
  
 
 	var sw_screen:SWScreen = new SWScreen(this._screen_id);
+	this.addChild(sw_screen);
 	sw_screen.x = 0;
 	sw_screen.y = 0;
 	sw_screen.width = this.width;
 	sw_screen.height = this.height;
-	this.addChild(sw_screen);
-
+	
+//					var mymedia:VideoDisplay = new VideoDisplay;
+//					mymedia.maintainAspectRatio = false;
+//					
+//					mymedia.height = 333;
+//					mymedia.width = 333;
+//					var video_file:File = Application.application.sw_dir.resolvePath(
+//											5 + '.VIDEO');
+//					mymedia.source = video_file.url; 
+//					sw_screen.addChild(mymedia);
+//					mymedia.play();
+	
 }
 
 public function readComponentData(filename:String):Array
@@ -66,6 +84,7 @@ public function readFileContents(file:File):String
 	catch(errObject:Error) {
 		Alert.show("Please make sure You have data file available at \n"+file.nativePath,
 		"Missing data file",4,null,NativeApplication.nativeApplication.exit);
+		Application.application.exit();
 	}
 	return file_contents;
 }
@@ -79,6 +98,8 @@ private function readRcParams():void
     
 	while ( config_params.length > 0 ) {
 		var kvPair:String = config_params.shift();
+		if (kvPair == "") continue;
+		
 		var index:uint;
         if ((index = kvPair.indexOf("=")) > 0)
         {
@@ -98,14 +119,14 @@ private function readRcParams():void
 
 public function log(message:String):void
 {
-	var logstring:String = new Date().toString() + ' ' + message;
+	var logstring:String = '"'+new Date().toString() + '" ' + message;
 	trace ("Log message: " + logstring );
 
 	var log_file:File = this.sw_dir.resolvePath('screenlog');	
 	var fileStream:FileStream = new FileStream();
 	try {
 		fileStream.open(log_file, FileMode.APPEND);
-		fileStream.writeUTF(logstring + "\n");
+		fileStream.writeUTFBytes(logstring + "\n");
 		fileStream.close();
 	}
 	catch(errObject:Error) {

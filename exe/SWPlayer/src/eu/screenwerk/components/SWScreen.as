@@ -3,6 +3,7 @@ package eu.screenwerk.components
 	import flash.events.Event;
 	import flash.filesystem.File;
 	
+	import mx.controls.VideoDisplay;
 	import mx.core.Application;
 	import mx.core.UIComponent;
 	
@@ -12,7 +13,8 @@ package eu.screenwerk.components
 		public var sw_id:uint;
 		private var sw_schedule:SWSchedule;
 		private var schedule_id:uint;
-		
+		private var is_playing:Boolean = false;
+
 		public function SWScreen(id:uint)
 		{
 			this.sw_id = id;
@@ -32,8 +34,14 @@ package eu.screenwerk.components
 		private function play(event:Event):void
 		{
 			event.stopPropagation();
+
+			if (this.is_playing) return;
+			this.is_playing = true;
+
 			trace (new Date().toString() + " Play screen " + this.sw_id
 				+	". Targeted " + event.currentTarget.toString());
+
+
 			this.sw_schedule = new SWSchedule(this.schedule_id);
 			this.sw_schedule.x = 0;
 			this.sw_schedule.y = 0;
@@ -45,6 +53,7 @@ package eu.screenwerk.components
 		private function stop(event:Event):void
 		{
 			event.stopPropagation();
+			this.is_playing = false;
 			trace (new Date().toString() + " Stop screen " + this.sw_id
 				+	". Targeted " + event.currentTarget.toString());
 			this.removeChild(this.sw_schedule);
