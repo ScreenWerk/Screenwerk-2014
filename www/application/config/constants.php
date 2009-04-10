@@ -45,7 +45,7 @@ define('FOPEN_READ_WRITE_CREATE_STRICT',		'x+b');
 |
 */
 
-define('DIR_FTP_ROOT',                   '/../ftp');
+define('DIR_FTP_ROOT',                   '../ftp');
 define('DIR_FTP_INCOMING',               DIR_FTP_ROOT.'/incoming');
 define('DIR_FTP_MASTERS',                DIR_FTP_ROOT.'/masters');
 define('DIR_FTP_SCREENS',                DIR_FTP_ROOT.'/screens');
