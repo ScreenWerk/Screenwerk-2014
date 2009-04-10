@@ -9,7 +9,7 @@ cd `dirname $0`
 # catch new files in INCOMING_MEDIA folder
 #
 
-echo "Watch ${_DIR_INCOMING_MEDIA}"
+date +"%c Watch ${_DIR_INCOMING_MEDIA}"
 inotifywait -m -r --format '%f\"%w' --timefmt '%d/%m/%Y %H:%M:%S' \
             -e close_write -e moved_to \
             ${_DIR_INCOMING_MEDIA}/ | \
@@ -40,8 +40,8 @@ do
    ${_DIR_EXE}/sw-media.convert.sh "${filename}" "${customer_id}" &
       
 done &
-echo
 echo ----
+echo
 
 #
 # catch video files in CONVERT folder
