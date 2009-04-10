@@ -12,19 +12,35 @@ class Player extends Controller {
 	        
 	function get_list($customer_md5 = null, $player_md5 = null, $content_md5 = null) {
 		
+		$this->load->helper('file');
+
+		echo '<pre>';
+		
+		$dir = DIR_FTP_SCREENS .'/36/';
+
 		if($content_md5 != 'VANA') {
-			echo 'file1.txt;'. md5('file1.txt') .';128' . "\n";
-			echo 'file2.txt;'. md5('file2.txt') .';723645' . "\n";
-			echo 'file3.txt;'. md5('file3.txt') .';51423' . "\n";
 		} else {
 			echo 'VANA';
 		}
+		
+		foreach(get_filenames($dir) as $file) {
+			echo $file .';'. md5_file($dir.$file) .';'. filesize($dir.$file) ."\n";
+		}
+		
 	}
 
 
 
 	function get_file($customer_md5 = null, $player_md5 = null, $content_md5 = null, $file = null) {
-		redirect('http://screenwerk.eu/screenwerk_files/sw-p.png');
+
+		$this->load->helper('download');
+		
+		$dir = DIR_FTP_SCREENS .'/36/';
+		$file = '5.VIDEO';
+		
+		force_download($file, file_get_contents($dir.$file));
+
+
 	}	
 
 
