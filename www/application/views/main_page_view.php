@@ -11,9 +11,11 @@
 		
 		<script src="http://www.google.com/jsapi"></script>
 		<script>
-			google.load("prototype", "1.6");
-			google.load("scriptaculous", "1.8")
+			//google.load("prototype", "1.6");
+			//google.load("scriptaculous", "1.8")
+			google.load("jquery", "1")
 		</script>
+		<script type="text/javascript" src="<?= base_url(); ?>javascripts/uploadify/jquery.uploadify.js"></script>
 
 	</head>
 	<body>
