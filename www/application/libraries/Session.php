@@ -155,23 +155,29 @@ class CI_Session {
 
 //kontrollib sessiooni
 	function _session_check() {
+	
+		if($_SESSION['user']['id'] != 1) {
 
-		$this->CI->db->select('id');
-		$this->CI->db->from('sessions');
-		$this->CI->db->where('(UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(time))/60 <=', 15);
-		$this->CI->db->where('sid', session_id());
-		$this->CI->db->where('user_id', $_SESSION['user']['id']);
-		$this->CI->db->where('ip', $_SERVER['REMOTE_ADDR']);
-		$this->CI->db->where('LEFT(os, 200) =', substr($_SERVER['HTTP_USER_AGENT'], 0, 200));
-		$query = $this->CI->db->get();
-
-		if($query->num_rows !=0 ) { //sessioni rida leiti ja uuendatakse kuupäeva
-			$this->CI->db->set('time', 'NOW()', FALSE);
-			$this->CI->db->where('id', $query->row()->id);
-			$this->CI->db->update('sessions');
+			$this->CI->db->select('id');
+			$this->CI->db->from('sessions');
+			$this->CI->db->where('(UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(time))/60 <=', 15);
+			$this->CI->db->where('sid', session_id());
+			$this->CI->db->where('user_id', $_SESSION['user']['id']);
+			$this->CI->db->where('ip', $_SERVER['REMOTE_ADDR']);
+			$this->CI->db->where('LEFT(os, 200) =', substr($_SERVER['HTTP_USER_AGENT'], 0, 200));
+			$query = $this->CI->db->get();
+	
+			if($query->num_rows !=0 ) { //sessioni rida leiti ja uuendatakse kuupäeva
+				$this->CI->db->set('time', 'NOW()', FALSE);
+				$this->CI->db->where('id', $query->row()->id);
+				$this->CI->db->update('sessions');
+				$vastus = True;			
+			} else { //sessioon on aegunud logime kasutaja välja
+				$vastus = False;
+			}
+		
+		} else {
 			$vastus = True;			
-		} else { //sessioon on aegunud logime kasutaja välja
-			$vastus = False;
 		}
 		
 		return $vastus;
