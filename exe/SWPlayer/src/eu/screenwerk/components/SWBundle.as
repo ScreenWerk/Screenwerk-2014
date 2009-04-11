@@ -46,28 +46,20 @@ package eu.screenwerk.components
 			if (this.stop_sec == 0) this.stop_sec = layout_duration;
 			
 			
-			this.addEventListener(Event.ADDED, play);
-			this.addEventListener(Event.REMOVED, stop);
+			this.addEventListener(Event.ADDED, play, false, 0, true);
 		}
 
 		private function play(event:Event):void
 		{
 			event.stopPropagation();
+			this.removeEventListener(Event.ADDED, play);
+			this.addEventListener(Event.REMOVED, stop, false, 0, true);
 			
 			if (this.is_playing) return;
 			this.is_playing = true;
 
-//					var mymedia:VideoDisplay = new VideoDisplay;
-//					mymedia.maintainAspectRatio = false;
-//					
-//					mymedia.height = this.height;
-//					mymedia.width = this.width;
-//					var video_file:File = Application.application.sw_dir.resolvePath(
-//											6 + '.VIDEO');
-//					mymedia.source = video_file.url; 
-//					this.addChild(mymedia);
-//					mymedia.play();
-//
+			Application.application.log('play bundle ' + this.sw_id);
+
 			trace( new Date().toString() + " Play bundle " + this.sw_id
 				+	". Start at " + this.start_sec + ", stopping at " + this.stop_sec
 				+	". Targeted " + event.currentTarget.toString());
@@ -76,20 +68,25 @@ package eu.screenwerk.components
 				+	" dimensions " + this.width + 'x' + this.height );
 				
 			var startTimer:Timer = new Timer(this.start_sec*1000, 1);
-			startTimer.addEventListener(TimerEvent.TIMER, playNextMediaOnTimer);
+			startTimer.addEventListener(TimerEvent.TIMER, playNextMediaOnTimer, false, 0, true);
 			startTimer.start();
 			var stopTimer:Timer = new Timer(this.stop_sec*1000, 1);
-			stopTimer.addEventListener(TimerEvent.TIMER, stopMedias);
+			stopTimer.addEventListener(TimerEvent.TIMER, stopMedias, false, 0, true);
 			stopTimer.start();
 		}
 
 		private function stop(event:Event):void
 		{
 			event.stopPropagation();
-			this.is_playing = false;
+			this.removeEventListener(Event.REMOVED, stop);
+				
+			Application.application.log("Stop bundle " + this.sw_id + ". Targeted " + event.currentTarget.toString());
 			
-			trace( new Date().toString() + " Stop bundle " + this.sw_id
-				+	". Targeted " + event.currentTarget.toString());
+			while (this.numChildren > 0)
+			{
+				Application.application.log('RM@' + this.sw_id + '. ' + this.getChildAt(0).toString());
+				this.removeChildAt(0);
+			}
 				
 		}
 
@@ -104,7 +101,7 @@ package eu.screenwerk.components
 			this.setNextMedia();
 
 			var timer:Timer = new Timer(this.current_media.length*1000, 1);
-			timer.addEventListener(TimerEvent.TIMER, playNextMediaOnTimer);
+			timer.addEventListener(TimerEvent.TIMER, playNextMediaOnTimer, false, 0, true);
 			timer.start();
 
 			this.addChild(this.current_media);
@@ -113,6 +110,7 @@ package eu.screenwerk.components
 			{
 				//trace( new Date().toString() + " Stopping media " + this.current_media.sw_id + "..." );
 				this.removeChild(old_media);
+				old_media = null;
 			}
 			catch (err:Error) {
 				trace( "No previous media for bundle " + this.sw_id + "." );
@@ -173,6 +171,10 @@ package eu.screenwerk.components
 			}
 		}
 
+		override public function toString():String
+		{
+			return this.sw_id + ':' + super.toString();
+		}
 		
 
 	}

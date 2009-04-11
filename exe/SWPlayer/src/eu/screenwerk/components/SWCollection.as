@@ -2,10 +2,8 @@ package eu.screenwerk.components
 {
 	import flash.events.Event;
 	import flash.events.TimerEvent;
-	import flash.filesystem.File;
 	import flash.utils.Timer;
 	
-	import mx.controls.VideoDisplay;
 	import mx.core.Application;
 	import mx.core.UIComponent;
 	
@@ -21,6 +19,8 @@ package eu.screenwerk.components
 		private var valid_to_date:Date;
 		private var valid_from_J:uint;
 		private var valid_to_J:uint;
+
+		private var _timer:Timer;
 		
 		private var layoutstrings:Array = new Array();
 		
@@ -34,7 +34,7 @@ package eu.screenwerk.components
 		{
 			var cronline_a:Array = collectionstring.split(';');
 			this.sw_id = cronline_a[0].replace(' ','');
-			trace ( new Date().toString() + " Create collection " + this.sw_id );
+			Application.application.log ( new Date().toString() + " Create collection " + this.sw_id );
 			
 			this.cron_minute = cronline_a[1].replace(' ','');
 			this.cron_hour = cronline_a[2].replace(' ','');
@@ -50,18 +50,20 @@ package eu.screenwerk.components
 			this.valid_to_date = new Date(to_split[0], to_split[1], to_split[2]);
 			this.valid_to_J = uint(this.valid_to_date.getTime() / 1000 / 60 / 60 / 24 +.5 );
 			
-			this.addEventListener(Event.ADDED, play);
-			this.addEventListener(Event.REMOVED, stop);
+			this.addEventListener(Event.ADDED, play, false, 0, true);
 		}
 		
 		public function play(event:Event):void
 		{
 			event.stopPropagation();
+			this.removeEventListener(Event.ADDED, play);
+			this.addEventListener(Event.REMOVED, stop, false, 0, true);
 			
 			if (this.is_playing) return;
 			this.is_playing = true;
 
-			trace( new Date().toString() + " Play collection " + this.sw_id
+			
+			Application.application.log( new Date().toString() + " Play collection " + this.sw_id
 				+	". Targeted " + event.currentTarget.toString());
 				
 			this.x = 0;
@@ -75,12 +77,19 @@ package eu.screenwerk.components
 		public function stop(event:Event):void
 		{
 			event.stopPropagation();
+			this.removeEventListener(Event.REMOVED, stop);
 			this.is_playing = false;
-			trace( new Date().toString() + " Stop collection "+this.sw_id
-				+	". Targeted " + event.currentTarget.toString());
-				
-			this.removeChild(this.current_layout);
-			this.current_layout = null;
+
+			Application.application.log( "Stop collection "+this.sw_id + ". Targeted " + event.currentTarget.toString());
+								
+			while (this.numChildren>0)
+			{
+				Application.application.log('RM@' + this.sw_id + '. ' + this.getChildAt(0).toString());
+				this.removeChildAt(0);
+			}
+
+//			this.removeChild(this.current_layout);
+			this.current_layout = null; //TODO: remove this?
 		}
 		
 		public function getLastDate():Date
@@ -99,10 +108,12 @@ package eu.screenwerk.components
 		{
 			this.setNextLayout();
 
-			trace( new Date().toString() + " Collection " + this.sw_id + ", starting layout " + this.current_layout.sw_id + ", stopping after " + this.current_layout.length + "sec." );
-			var timer:Timer = new Timer(this.current_layout.length*1000);
-			timer.addEventListener(TimerEvent.TIMER, playNextLayoutOnTimer);
-			timer.start();
+			Application.application.log( "Collection 1st run " + this.sw_id 
+				+ ", starting layout " + this.current_layout.sw_id 
+				+ ", stopping after " + this.current_layout.length + "sec." );
+			this._timer = new Timer(this.current_layout.length*1000, 1);
+			this._timer.addEventListener(TimerEvent.TIMER, playNextLayoutOnTimer, false, 0, true);
+			this._timer.start();
 
 			this.addChild(this.current_layout);
 		}
@@ -112,16 +123,18 @@ package eu.screenwerk.components
 		private function playNextLayoutOnTimer(event:TimerEvent):void
 		{
 			event.stopPropagation();
+			this._timer.stop();
+			this._timer = null;
 
 			this.removeChild(this.current_layout);
 
 			this.setNextLayout();
 
-			trace( new Date().toString() + " Collection " + this.sw_id + ", starting layout " + this.current_layout.sw_id + ", stopping after " + this.current_layout.length + "sec." );
+			Application.application.log( "Collection " + this.sw_id + ", starting layout " + this.current_layout.sw_id + ", stopping after " + this.current_layout.length + "sec." );
 
-			var timer:Timer = new Timer(this.current_layout.length*1000);
-			timer.addEventListener(TimerEvent.TIMER, playNextLayoutOnTimer);
-			timer.start();
+			this._timer = new Timer(this.current_layout.length*1000, 1);
+			this._timer.addEventListener(TimerEvent.TIMER, playNextLayoutOnTimer, false, 0, true);
+			this._timer.start();
 
 			this.addChild(this.current_layout);
 		}		
@@ -304,6 +317,10 @@ package eu.screenwerk.components
 				this.getChildAt(i).width = this.width;
 				this.getChildAt(i).height = this.height;
 			}
+		}
+		override public function toString():String
+		{
+			return this.sw_id + ':' + super.toString();
 		}
 	}
 	

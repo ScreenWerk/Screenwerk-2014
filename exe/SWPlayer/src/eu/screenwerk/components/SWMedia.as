@@ -4,9 +4,7 @@ package eu.screenwerk.components
 	
 	import flash.display.DisplayObject;
 	import flash.events.Event;
-	import flash.filesystem.File;
 	
-	import mx.controls.VideoDisplay;
 	import mx.core.Application;
 	import mx.core.UIComponent;
 	
@@ -30,15 +28,14 @@ package eu.screenwerk.components
 			this.x = 0;
 			this.y = 0;
 			
-			this.addEventListener(Event.ADDED, play);
-			this.addEventListener(Event.REMOVED, stop);
-
+			this.addEventListener(Event.ADDED, play, false, 0, true);
 		}
 
 		private function play(event:Event):void
 		{
 			event.stopPropagation();
-//Alert.show(" Start media " + this.sw_id + ". Targeted " + event.currentTarget.toString(),'Play media',4,null,null);
+			this.removeEventListener(Event.ADDED, play);
+			this.addEventListener(Event.REMOVED, stop, false, 0, true);
 
 			if (this.is_playing) return;
 			this.is_playing = true;
@@ -46,16 +43,6 @@ package eu.screenwerk.components
 			this.width = parent.width;
 			this.height = parent.height;
 
-//					var mymedia:VideoDisplay = new VideoDisplay;
-//					mymedia.maintainAspectRatio = false;
-//					
-//					mymedia.height = this.height;
-//					mymedia.width = this.width;
-//					var video_file:File = Application.application.sw_dir.resolvePath(
-//											6 + '.VIDEO');
-//					mymedia.source = video_file.url; 
-//					this.addChild(mymedia);
-//					mymedia.play();
 
 			trace( new Date().toString() + " Start media " + this.sw_id
 				+	". Targeted " + event.currentTarget.toString());
@@ -72,6 +59,7 @@ package eu.screenwerk.components
 				case 'URL':
 					this.media = new URLPlayer(this.sw_id);
 					this.addChild(this.media);
+					
 					break;
 				case 'IMAGE':
 					this.media = new ImagePlayer(this.sw_id);
@@ -82,25 +70,21 @@ package eu.screenwerk.components
 					//this.addChild(this.media);
 					break;
 				case 'VIDEO':
-					var mymedia:VideoDisplay = new VideoDisplay;
-					mymedia.maintainAspectRatio = false;
-					
-					mymedia.height = this.height;
-					mymedia.width = this.width;
-					var video_file:File = Application.application.sw_dir.resolvePath(
-											this.sw_id + '.VIDEO');
-					mymedia.source = video_file.url; 
-					this.addChild(mymedia);
-					mymedia.play();
+					var my_media:SWVideoPlayer = new SWVideoPlayer(this.sw_id);
+					this.addChild(my_media);
+					my_media.play();
 
-//					this.media = new SWVideoPlayer(this.sw_id);
-//					this.media.width = this.width;
-//					this.media.height = this.height;
-//					this.addChild(this.media);
+//					var mymedia:VideoDisplay = new VideoDisplay;
+//					mymedia.maintainAspectRatio = false;
+//					mymedia.height = this.height;
+//					mymedia.width = this.width;
+//					
+//					var video_file:File = Application.application.sw_dir.resolvePath(this.sw_id + '.VIDEO');
+//					mymedia.source = video_file.url; 
+//
+//					this.addChild(mymedia);
+//					mymedia.play();
 
-// camera works
-//                var cam:Camera = Camera.getCamera();
-//                mymedia.attachCamera(cam)
 					break;
 				case 'FLASH':
 					break;
@@ -114,10 +98,22 @@ package eu.screenwerk.components
 		private function stop(event:Event):void
 		{
 			event.stopPropagation();
+			this.removeEventListener(Event.REMOVED, stop);
 			this.is_playing = false;
-			trace( new Date().toString() + " Stop media " + this.sw_id
-				+	". Targeted " + event.currentTarget.toString());
+
+			Application.application.log(" Stop media " + this.sw_id + ". Targeted " + event.currentTarget.toString());
 				
+			while (this.numChildren > 0)
+			{
+				Application.application.log('RM@' + this.sw_id + '. ' + this.getChildAt(0).toString());
+				try
+				{
+					this.removeChildAt(0);
+				} catch (e:Error){
+					Application.application.log('RM@' + this.sw_id + '. ' + e.toString());
+				}
+			}
+			
 		}
 
 		public function resize():void
@@ -129,5 +125,9 @@ package eu.screenwerk.components
 			}
 		}
 
+		override public function toString():String
+		{
+			return this.sw_id + ':' + super.toString();
+		}
 	}
 }

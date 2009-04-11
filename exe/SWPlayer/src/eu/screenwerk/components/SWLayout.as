@@ -35,17 +35,20 @@ package eu.screenwerk.components
 			var to_split:Array = layout_split[4].toString().split('-');
 			this.valid_to_date = new Date(to_split[0], to_split[1], to_split[2]);
 
-			this.addEventListener(Event.ADDED, play);
-			this.addEventListener(Event.REMOVED, stop);
+			this.addEventListener(Event.ADDED, play, false, 0, true);
 		}
 
 
 		private function play(event:Event):void
 		{
 			event.stopPropagation();
+			this.removeEventListener(Event.ADDED, play);
+			this.addEventListener(Event.REMOVED, stop, false, 0, true);
 			
 			if (this.is_playing) return;
 			this.is_playing = true;
+
+			Application.application.log('play layout ' + this.sw_id);
 
 			trace( new Date().toString() + " Play layout " + this.sw_id
 				+	". Targeted " + event.currentTarget.toString());
@@ -61,9 +64,17 @@ package eu.screenwerk.components
 		private function stop(event:Event):void
 		{
 			event.stopPropagation();
+			this.removeEventListener(Event.REMOVED, stop);
+
 			this.is_playing = false;
-			trace( new Date().toString() + " Stop layout " + this.sw_id
-				+	". Targeted " + event.currentTarget.toString());
+
+			Application.application.log("Stop layout " + this.sw_id + ". Targeted " + event.currentTarget.toString());
+				
+			while (this.getChildAt(0) != null)
+			{
+				Application.application.log('RM@' + this.sw_id + '. ' + this.getChildAt(0).toString());
+				this.removeChildAt(0);
+			}
 				
 		}
 
@@ -90,6 +101,11 @@ package eu.screenwerk.components
 			{
 				SWBundle(this.getChildAt(i)).resize();
 			}
+		}
+
+		override public function toString():String
+		{
+			return this.sw_id + ':' + super.toString();
 		}
 
 	}

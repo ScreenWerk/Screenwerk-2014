@@ -1,5 +1,11 @@
 package eu.screenwerk.player
 {
+	import flash.events.Event;
+	import flash.filesystem.File;
+	
+	import mx.controls.VideoDisplay;
+	import mx.core.Application;
+	
 
 	public class SWVideoPlayer extends VideoDisplay
 	{
@@ -14,35 +20,35 @@ package eu.screenwerk.player
 
 			this.x = 0;
 			this.y = 0;
-			//this.maintainAspectRatio = false;
+			this.maintainAspectRatio = false;
 
-			this.addEventListener(Event.ADDED, _play);
-			this.addEventListener(Event.REMOVED, _stop);
-			
+			this.addEventListener(Event.ADDED, _play, false, 0, true);
 		}
 
 		private function _play(event:Event):void
 		{
     		event.stopPropagation();
-			if (this.is_playing) return;
-			this.is_playing = true;
+			this.removeEventListener(Event.ADDED, _play);
 
 			this.width = parent.width;
 			this.height = parent.height;
 			
-			
 			var video_file:File = Application.application.sw_dir.resolvePath(this.sw_id + '.VIDEO');
-			//var video_file:File = Application.application.sw_dir.resolvePath('33.video.flv');
+			this.source = video_file.url; 
+			//this.play();
 
-		    trace ( video_file.nativePath );
-		    this.source = video_file.url;
+			this.addEventListener(Event.REMOVED, _stop, false, 0, true);
  		}
  		
 		private function _stop(event:Event):void
 		{
 			event.stopPropagation();
-			
+			this.removeEventListener(Event.REMOVED, _stop);
+		}
 
+		override public function toString():String
+		{
+			return this.sw_id + ':' + super.toString();
 		}
 
 	}

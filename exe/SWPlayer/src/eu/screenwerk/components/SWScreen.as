@@ -24,14 +24,14 @@ package eu.screenwerk.components
 			var schedule_a:Array = schedule_str.split(';');
 			this.schedule_id = schedule_a[0];
 			
-			this.addEventListener(Event.ADDED, play);
-			this.addEventListener(Event.REMOVED, stop);
-
+			this.addEventListener(Event.ADDED, play, false, 0, true);
 		}
 		
 		private function play(event:Event):void
 		{
 			event.stopPropagation();
+			this.removeEventListener(Event.ADDED, stop);
+			this.addEventListener(Event.REMOVED, stop, false, 0, true);
 
 			if (this.is_playing) return;
 			this.is_playing = true;
@@ -51,11 +51,17 @@ package eu.screenwerk.components
 		private function stop(event:Event):void
 		{
 			event.stopPropagation();
-			this.is_playing = false;
-			trace (new Date().toString() + " Stop screen " + this.sw_id
-				+	". Targeted " + event.currentTarget.toString());
-			this.removeChild(this.sw_schedule);
-			this.sw_schedule = null;
+			this.removeEventListener(Event.REMOVED, stop);
+
+			Application.application.log("Stop screen " + this.sw_id + ". Targeted " + event.currentTarget.toString());
+			
+			while (this.numChildren>0)
+			{
+				Application.application.log('RM@' + this.sw_id + '. ' + this.getChildAt(0).toString());
+				this.removeChildAt(0);
+			}
+
+			this.sw_schedule = null; // TODO: remove this?
 		}
 
 		public function resize():void
@@ -66,6 +72,10 @@ package eu.screenwerk.components
 				this.getChildAt(i).width = this.width;
 				this.getChildAt(i).height = this.height;
 			}
+		}
+		override public function toString():String
+		{
+			return this.sw_id + ':' + super.toString();
 		}
 
 	}

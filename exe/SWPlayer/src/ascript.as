@@ -3,11 +3,11 @@
 import eu.screenwerk.components.*;
 import eu.screenwerk.player.*;
 
-import flash.events.Event;
 import flash.events.KeyboardEvent;
 import flash.filesystem.File;
 import flash.filesystem.FileMode;
 import flash.filesystem.FileStream;
+import flash.utils.Timer;
 
 import mx.controls.Alert;
 import mx.core.Application;
@@ -18,7 +18,8 @@ private var _screen_id:uint = 35;
 
 public var _x_coef:Number;
 public var _y_coef:Number;
-private var is_fullscreen:Boolean = false;
+private var _is_fullscreen:Boolean = true;
+private var _timer:Timer;
 
 private var home_dir:File = File.userDirectory;
 public var sw_dir:File = home_dir.resolvePath('screenwerk');
@@ -27,6 +28,7 @@ public var sw_dir:File = home_dir.resolvePath('screenwerk');
 public function init():void
 {
 	this.readRcParams();
+
 
 	trace (' xcoef:'+this._x_coef+'='+this.width+'/'+this._defined_screen_width
 	+ '; ycoef:'+this._y_coef+'='+this.height+'/'+this._defined_screen_height+'.');
@@ -39,9 +41,11 @@ public function init():void
 	sw_screen.y = 0;
 	sw_screen.width = this.width;
 	sw_screen.height = this.height;
+
 	
-	stage.addEventListener(Event.RESIZE, onResize);
-	stage.addEventListener(KeyboardEvent.KEY_DOWN, toggleFullscreen);
+	stage.addEventListener(KeyboardEvent.KEY_UP, toggleFullscreen, false, 0, true);
+	
+//	stage.dispatchEvent(new KeyboardEvent(KeyboardEvent.KEY_UP));
 }
 
 public function readComponentData(filename:String):Array
@@ -98,52 +102,48 @@ private function readRcParams():void
 	this._defined_screen_width = config_params['screen_width'];
 	this._defined_screen_height = config_params['screen_height'];
 
-//	this.toggleFullscreen(null);
-//	Application.application.stage.displayState = StageDisplayState.FULL_SCREEN_INTERACTIVE; 
-//	this.width = this._defined_screen_width;
-//	this.height = this._defined_screen_height;
+//	this.width = this._defined_screen_width / 2;
+//	this.height = this._defined_screen_height / 2;
 
+	Application.application.stage.displayState = StageDisplayState.FULL_SCREEN_INTERACTIVE;
+	this._is_fullscreen = true;
+	
 	this._x_coef = this.width/this._defined_screen_width;
 	this._y_coef = this.height/this._defined_screen_height;
     
 }
 
-private function onResize(event:Event = null):void
+private function stopResizeListeners():void
 {
-	if (event != null) event.stopPropagation();
+	stage.removeEventListener(KeyboardEvent.KEY_UP, toggleFullscreen);
+}
+
+private function toggleFullscreen(event:KeyboardEvent):void
+{
+	event.stopPropagation();
+	
+	if(this._is_fullscreen) 
+	{
+		stage.displayState = StageDisplayState.NORMAL;
+		this._is_fullscreen = false;
+	}
+	else
+	{
+		Application.application.stage.displayState = StageDisplayState.FULL_SCREEN_INTERACTIVE;
+		this._is_fullscreen = true;
+	}
+
 	this._x_coef = this.width/this._defined_screen_width;
 	this._y_coef = this.height/this._defined_screen_height;
+
 	for (var i:uint=0; i<this.numChildren; i++)
 	{
 		SWScreen(this.getChildAt(i)).resize();
 		this.getChildAt(i).width = this.width;
 		this.getChildAt(i).height = this.height;
 	}
-	this.validateNow();
-}
 
-private function toggleFullscreen(event:KeyboardEvent = null):void
-{
-   if (event != null) event.stopPropagation();
-   
-   if(this.is_fullscreen) 
-   {
-      stage.displayState = StageDisplayState.NORMAL;
-      this.is_fullscreen = false;
-   }
-   else
-   {
-      try
-      {
-         Application.application.stage.displayState = StageDisplayState.FULL_SCREEN_INTERACTIVE;
-         this.is_fullscreen = true;
-      }
-      catch(err:Error) 
-      {
-         trace("FULLSCREEN ERROR " + err);
-      }
-   }
-   this.onResize(null);
+	this.validateNow();
 }
 
 public function log(message:String):void
