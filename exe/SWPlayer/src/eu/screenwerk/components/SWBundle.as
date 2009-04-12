@@ -1,8 +1,8 @@
 package eu.screenwerk.components
 {
 	import flash.events.Event;
-	import flash.events.TimerEvent;
-	import flash.utils.Timer;
+	import flash.utils.clearTimeout;
+	import flash.utils.setTimeout;
 	
 	import mx.core.Application;
 	import mx.core.UIComponent;
@@ -17,6 +17,9 @@ package eu.screenwerk.components
 		private var unscaled_height:uint;
 		public var start_sec:uint;
 		public var stop_sec:uint;
+
+		private var delay_timeout_id:uint;
+		private var stop_timeout_id:uint;
 		
 		private var mediastrings:Array = new Array();
 		
@@ -67,18 +70,16 @@ package eu.screenwerk.components
 			trace( new Date().toString() + " Bundle " + this.sw_id
 				+	" dimensions " + this.width + 'x' + this.height );
 				
-			var startTimer:Timer = new Timer(this.start_sec*1000, 1);
-			startTimer.addEventListener(TimerEvent.TIMER, playNextMediaOnTimer, false, 0, true);
-			startTimer.start();
-			var stopTimer:Timer = new Timer(this.stop_sec*1000, 1);
-			stopTimer.addEventListener(TimerEvent.TIMER, stopMedias, false, 0, true);
-			stopTimer.start();
+			this.delay_timeout_id = setTimeout(playNextMediaOnTimer, this.start_sec*1000);
+			this.stop_timeout_id = setTimeout(stopMedias, this.stop_sec*1000);
 		}
 
 		private function stop(event:Event):void
 		{
 			event.stopPropagation();
 			this.removeEventListener(Event.REMOVED, stop);
+			clearTimeout(this.delay_timeout_id);
+			clearTimeout(this.stop_timeout_id);
 				
 			Application.application.log("Stop bundle " + this.sw_id + ". Targeted " + event.currentTarget.toString());
 			
@@ -92,25 +93,21 @@ package eu.screenwerk.components
 
 
 
-		private function playNextMediaOnTimer(event:TimerEvent):void
+		private function playNextMediaOnTimer():void
 		{
-			event.stopPropagation();
+			clearTimeout(this.delay_timeout_id);
 			
 			var old_media:SWMedia = this.current_media;
 			
 			this.setNextMedia();
 
-			var timer:Timer = new Timer(this.current_media.length*1000, 1);
-			timer.addEventListener(TimerEvent.TIMER, playNextMediaOnTimer, false, 0, true);
-			timer.start();
+			this.delay_timeout_id = setTimeout(playNextMediaOnTimer, this.current_media.length*1000);
 
 			this.addChild(this.current_media);
 
 			try
 			{
-				//trace( new Date().toString() + " Stopping media " + this.current_media.sw_id + "..." );
 				this.removeChild(old_media);
-				old_media = null;
 			}
 			catch (err:Error) {
 				trace( "No previous media for bundle " + this.sw_id + "." );
@@ -118,13 +115,8 @@ package eu.screenwerk.components
 		}		
 
 		
-		private function stopMedias(event:TimerEvent):void
+		private function stopMedias():void
 		{
-			event.stopPropagation();
-			while (this.numChildren > 0)
-			{
-				removeChildAt(0);
-			}
 			parent.removeChild(this);
 		}
 		
