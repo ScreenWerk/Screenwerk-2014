@@ -41,14 +41,16 @@ package eu.screenwerk.components
 
 			var from_split:Array = cronline_a[6].toString().split('-');
 			this.valid_from_date = new Date(from_split[0], from_split[1], from_split[2]);
-			this.valid_from_J = uint(this.valid_from_date.getTime() / 1000 / 60 / 60 / 24 +.5 );
+			this.valid_from_J = Math.floor( this.valid_from_date.getTime() / 1000 / 60 / 60 / 24 );
 
 			var to_split:Array = cronline_a[7].toString().split('-');
 			this.valid_to_date = new Date(to_split[0], to_split[1], to_split[2]);
-			this.valid_to_J = uint(this.valid_to_date.getTime() / 1000 / 60 / 60 / 24 +.5 );
+			this.valid_to_J = Math.floor( this.valid_to_date.getTime() / 1000 / 60 / 60 / 24 );
 			
 			this.setLastDate();
 			this.setNextDate();
+
+			Application.application.log( "Created collection " + this.sw_id + ' - ' + this.lastDate.toTimeString() + '..' + this.nextDate.toTimeString() );
 
 			this.addEventListener(Event.ADDED, play, false, 0, true);
 		}
@@ -115,8 +117,6 @@ package eu.screenwerk.components
 			this.addChild(this.current_layout);
 		}
 		
-		
- 
 		private function playNextLayoutOnTimer(event:TimerEvent):void
 		{
 			event.stopPropagation();
@@ -159,8 +159,8 @@ package eu.screenwerk.components
 			var last_date:Date = null;
 			
 			var now:Date = new Date();
-			var now_J:uint = uint( now.getTime() / 1000 / 60 / 60 / 24 +.5 );
-			var i_date:Date = new Date(now.getTime());
+			var now_J:uint = Math.floor( now.getTime() / 1000 / 60 / 60 / 24 );
+			var i_date:Date = new Date(Math.floor(now.getTime()/1000/60)*60*1000);
 			
 			for (var i:uint=0;i<366;i++)
 			{
@@ -169,7 +169,8 @@ package eu.screenwerk.components
 				if (now_J-i > this.valid_to_J) continue;
 				if (now_J-i < this.valid_from_J) break;
 				
-				i_date = new Date(now.getTime()-i*1000*60*60*24);
+				//i_date = new Date(now.getTime()-i*1000*60*60*24);
+				i_date.setTime(i_date.getTime()-1000*60*60*24);
 				
 	            if (this.instring(this.cron_day.toString(), i_date.getDate().toString()) == false) continue;
 	            if (this.instring(this.cron_month.toString(), i_date.getMonth().toString()) == false) continue;
@@ -215,9 +216,9 @@ package eu.screenwerk.components
 			var next_date:Date = null;
 			
 			var now:Date = new Date();
-			var now_J:uint = uint( ( now.getTime() / 1000 + 1 ) / 60 / 60 / 24 +.5 );
-			var i_date:Date = new Date(now.getTime());
-			
+			var now_J:uint = Math.floor( now.getTime() / 1000 / 60 / 60 / 24 );
+			var i_date:Date = new Date(Math.floor(now.getTime()/1000/60)*60*1000);
+
 			for (var i:uint=0;i<366;i++)
 			{
 				next_date = null;
@@ -225,7 +226,8 @@ package eu.screenwerk.components
 				if (now_J+i < this.valid_from_J) continue;
 				if (now_J+i > this.valid_to_J) break;
 				
-				i_date = new Date(now.getTime()+i*1000*60*60*24);
+				//i_date = new Date(now.getTime()+i*1000*60*60*24);
+				i_date.setTime(i_date.getTime()+1000*60*60*24);
 				
 	            if (this.instring(this.cron_day.toString(), i_date.getDate().toString()) == false) continue;
 	            if (this.instring(this.cron_month.toString(), i_date.getMonth().toString()) == false) continue;
