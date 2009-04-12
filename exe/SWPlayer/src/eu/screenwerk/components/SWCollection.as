@@ -24,9 +24,6 @@ package eu.screenwerk.components
 		
 		private var layoutstrings:Array = new Array();
 		
-		private var last_date:Date;
-		private var next_date:Date;
-		
 		private var current_layout:SWLayout;
 		private var is_playing:Boolean = false;
 	
@@ -50,6 +47,9 @@ package eu.screenwerk.components
 			this.valid_to_date = new Date(to_split[0], to_split[1], to_split[2]);
 			this.valid_to_J = uint(this.valid_to_date.getTime() / 1000 / 60 / 60 / 24 +.5 );
 			
+			this.setLastDate();
+			this.setNextDate();
+
 			this.addEventListener(Event.ADDED, play, false, 0, true);
 		}
 		
@@ -58,10 +58,6 @@ package eu.screenwerk.components
 			event.stopPropagation();
 			this.removeEventListener(Event.ADDED, play);
 			this.addEventListener(Event.REMOVED, stop, false, 0, true);
-			
-			if (this.is_playing) return;
-			this.is_playing = true;
-
 			
 			Application.application.log( new Date().toString() + " Play collection " + this.sw_id
 				+	". Targeted " + event.currentTarget.toString());
@@ -92,17 +88,18 @@ package eu.screenwerk.components
 			this.current_layout = null; //TODO: remove this?
 		}
 		
-		public function getLastDate():Date
-		{
-			this.last_date = this.lastDate();
+
+		private var last_date:Date;
+	    public function get lastDate():Date
+	    {
 			return this.last_date;
-		}
+	    }
 		
-		public function getNextDate():Date
-		{
-			this.next_date = this.nextDate();
+		private var next_date:Date;
+	    public function get nextDate():Date
+	    {
 			return this.next_date;
-		}
+	    }
 		
 		private function playLayouts():void
 		{
@@ -130,7 +127,8 @@ package eu.screenwerk.components
 
 			this.setNextLayout();
 
-			Application.application.log( "Collection " + this.sw_id + ", starting layout " + this.current_layout.sw_id + ", stopping after " + this.current_layout.length + "sec." );
+			Application.application.log( "Collection " + this.sw_id + ", starting layout " + this.current_layout.sw_id 
+				+	", stopping after " + this.current_layout.length + "sec." );
 
 			this._timer = new Timer(this.current_layout.length*1000, 1);
 			this._timer.addEventListener(TimerEvent.TIMER, playNextLayoutOnTimer, false, 0, true);
@@ -156,7 +154,7 @@ package eu.screenwerk.components
 			this.layoutstrings = Application.application.readComponentData(this.sw_id+'.collection');
 		}
 			
-		private function lastDate():Date
+		private function setLastDate():void
 		{
 			var last_date:Date = null;
 			
@@ -205,18 +203,19 @@ package eu.screenwerk.components
 	            	last_date.setMinutes(this.biggest_of_le(this.cron_minute, 59));
 	            }
 	            
-	            return last_date;
+	            this.last_date = last_date;
+	            return;
 			}
 			
-			return null;
+			this.last_date = null;
 		}
 		
-		private function nextDate():Date
+		private function setNextDate():void
 		{
 			var next_date:Date = null;
 			
 			var now:Date = new Date();
-			var now_J:uint = uint( now.getTime() / 1000 / 60 / 60 / 24 +.5 );
+			var now_J:uint = uint( ( now.getTime() / 1000 + 1 ) / 60 / 60 / 24 +.5 );
 			var i_date:Date = new Date(now.getTime());
 			
 			for (var i:uint=0;i<366;i++)
@@ -260,10 +259,11 @@ package eu.screenwerk.components
 	            	next_date.setMinutes(this.smallest_of_ge(this.cron_minute, 0));
 	            }
 	            
-	            return next_date;
+	            this.next_date = next_date;
+	            return;
 			}
 			
-			return null;
+			this.next_date = null;
 		}
 		
 		private function instring(hay:String,needle:String):Boolean

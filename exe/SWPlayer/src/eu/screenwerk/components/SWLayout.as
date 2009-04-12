@@ -70,7 +70,7 @@ package eu.screenwerk.components
 
 			Application.application.log("Stop layout " + this.sw_id + ". Targeted " + event.currentTarget.toString());
 				
-			while (this.getChildAt(0) != null)
+			while (this.numChildren > 0)
 			{
 				Application.application.log('RM@' + this.sw_id + '. ' + this.getChildAt(0).toString());
 				this.removeChildAt(0);

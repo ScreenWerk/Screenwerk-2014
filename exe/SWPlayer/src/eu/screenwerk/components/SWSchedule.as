@@ -41,24 +41,24 @@ package eu.screenwerk.components
 				
 			var collectionstrings:Array = Application.application.readComponentData(this.sw_id+'.schedule');
 
-			var current_collection:SWCollection;
+			var _collection:SWCollection;
 			
 			var i:uint = 0;
 			while ( collectionstrings.length > 0 )
 			{
 				var collectionstring:String = collectionstrings.shift();
 				if (collectionstring == '') continue;
-				current_collection = new SWCollection(collectionstring);
+				_collection = new SWCollection(collectionstring);
 
 				if (i==0)
 				{
-					this.current_collection = current_collection;
+					this.current_collection = _collection;
 					continue;
 				}
 				
-				if (current_collection.getLastDate().getTime() > this.current_collection.getLastDate().getTime() )
+				if (_collection.lastDate.getTime() > this.current_collection.lastDate.getTime() )
 				{
-					this.current_collection = current_collection;
+					this.current_collection = _collection;
 				}
 
 				i++;
@@ -67,7 +67,7 @@ package eu.screenwerk.components
 			this.addChild(this.current_collection);
 			var _now:Number = new Date().getTime();
 			_now = new Date().getMilliseconds();
-			var timeout_msec:Number = Math.max(0,this.current_collection.getNextDate().getTime() - new Date().getTime());
+			var timeout_msec:Number = Math.max(0,this.current_collection.nextDate.getTime() - new Date().getTime());
 			Application.application.log("Time till next collection - " + timeout_msec/1000 + " seconds.");
 			this.timeout_id = setTimeout(playNextCollection, timeout_msec);
 		}
@@ -116,7 +116,7 @@ package eu.screenwerk.components
 					continue;
 				}
 				
-				if (_collection.getNextDate().getTime() < this.next_collection.getNextDate().getTime() )
+				if (_collection.nextDate.getTime() < this.next_collection.nextDate.getTime() )
 				{
 					this.next_collection = _collection;
 				}
@@ -124,11 +124,12 @@ package eu.screenwerk.components
 				i++;
 			}
 
-			Application.application.log(this.current_collection.getNextDate().getTime() + ' -> ' + this.next_collection.getNextDate().getTime());
+			var _now_time:Number = new Date().getTime();
+			Application.application.log(_now_time + ' -> ' + this.next_collection.nextDate.getTime());
 			this.removeChild(this.current_collection);
 			this.current_collection = this.next_collection;
 			this.addChild(this.current_collection);
-			setTimeout(playNextCollection, Math.max(0,this.current_collection.getNextDate().getTime() - new Date().getTime()));
+			setTimeout(playNextCollection, Math.max(0,this.current_collection.nextDate.getTime() - _now_time));
 		}
 
 		public function resize():void
