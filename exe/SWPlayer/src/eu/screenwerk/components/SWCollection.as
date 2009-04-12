@@ -217,7 +217,7 @@ package eu.screenwerk.components
 			
 			var now:Date = new Date();
 			var now_J:uint = Math.floor( now.getTime() / 1000 / 60 / 60 / 24 );
-			var i_date:Date = new Date(Math.floor(now.getTime()/1000/60)*60*1000);
+			var i_date:Date = new Date(Math.ceil(now.getTime()/1000/60)*60*1000);
 
 			for (var i:uint=0;i<366;i++)
 			{
