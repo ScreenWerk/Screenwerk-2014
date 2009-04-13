@@ -43,6 +43,7 @@ package eu.screenwerk.player
 		private function _stop(event:Event):void
 		{
 			event.stopPropagation();
+			this.stop();
 			this.removeEventListener(Event.REMOVED, _stop);
 		}
 

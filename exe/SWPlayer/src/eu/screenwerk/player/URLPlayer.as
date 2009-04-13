@@ -45,7 +45,6 @@ package eu.screenwerk.player
 		{
 			event.stopPropagation();
 			this.removeEventListener(Event.REMOVED, stop);
-			this.is_playing = false;
 			trace( new Date().toString() + " Stop URL " + this.location);
 		}
 	}

@@ -10,7 +10,6 @@ package eu.screenwerk.player
 	public class ImagePlayer extends Image
 	{
 		private var sw_id:uint;
-		private var is_playing:Boolean = false;
 		
 		public function ImagePlayer(sw_id:uint) 
 		{
@@ -25,9 +24,6 @@ package eu.screenwerk.player
 			this.removeEventListener(Event.ADDED, play);
 			this.addEventListener(Event.REMOVED, stop, false, 0, true);
 
-			if (this.is_playing) return;
-			this.is_playing = true;
-
 			trace( new Date().toString() + " Start imageplayer " + this.sw_id
 				+	". Targeted " + event.currentTarget.toString());
 
@@ -35,11 +31,10 @@ package eu.screenwerk.player
 			this.y = 0;
 			this.width = parent.width;
 			this.height = parent.height;
+			this.maintainAspectRatio = false;
 			
 			var image_file:File = Application.application.sw_dir.resolvePath(this.sw_id + '.IMAGE');
-		
 			this.source = image_file.url;
-			this.maintainAspectRatio = false;
 		}
 		
 		private function stop(event:Event):void

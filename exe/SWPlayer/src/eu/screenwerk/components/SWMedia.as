@@ -13,7 +13,6 @@ package eu.screenwerk.components
 		public var sw_id:uint;
 		public var length:uint;
 		private var type:String;
-		private var media:DisplayObject;
 		private var is_playing:Boolean = false;
 		
 		
@@ -57,34 +56,21 @@ package eu.screenwerk.components
 			switch (this.type)
 			{
 				case 'URL':
-					this.media = new URLPlayer(this.sw_id);
-					this.addChild(this.media);
-					
+					var my_url_media:URLPlayer = new URLPlayer(this.sw_id);
+					this.addChild(my_url_media);
 					break;
 				case 'IMAGE':
-					this.media = new ImagePlayer(this.sw_id);
-					this.addChild(this.media);
+					var my_img_media:ImagePlayer = new ImagePlayer(this.sw_id);
+					this.addChild(my_img_media);
 					break;
 				case 'HTML':
 					//this.media = new HTMLPlayer(this.sw_id);
 					//this.addChild(this.media);
 					break;
 				case 'VIDEO':
-					var my_media:SWVideoPlayer = new SWVideoPlayer(this.sw_id);
-					this.addChild(my_media);
-					my_media.play();
-
-//					var mymedia:VideoDisplay = new VideoDisplay;
-//					mymedia.maintainAspectRatio = false;
-//					mymedia.height = this.height;
-//					mymedia.width = this.width;
-//					
-//					var video_file:File = Application.application.sw_dir.resolvePath(this.sw_id + '.VIDEO');
-//					mymedia.source = video_file.url; 
-//
-//					this.addChild(mymedia);
-//					mymedia.play();
-
+					var my_vid_media:SWVideoPlayer = new SWVideoPlayer(this.sw_id);
+					this.addChild(my_vid_media);
+					my_vid_media.play();
 					break;
 				case 'FLASH':
 					break;
@@ -101,8 +87,6 @@ package eu.screenwerk.components
 			this.removeEventListener(Event.REMOVED, stop);
 			this.is_playing = false;
 
-			Application.application.log(" Stop media " + this.sw_id + ". Targeted " + event.currentTarget.toString());
-				
 			while (this.numChildren > 0)
 			{
 				Application.application.log('RM@' + this.sw_id + '. ' + this.getChildAt(0).toString());
@@ -110,7 +94,7 @@ package eu.screenwerk.components
 				{
 					this.removeChildAt(0);
 				} catch (e:Error){
-					Application.application.log('RM@' + this.sw_id + '. ' + e.toString());
+					Application.application.log('Failed RM@' + this.sw_id + '. ' + e.toString());
 				}
 			}
 			
