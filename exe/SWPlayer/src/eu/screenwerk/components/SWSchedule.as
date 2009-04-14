@@ -51,7 +51,12 @@ package eu.screenwerk.components
 				{
 					this.SWChilds[collectionstring] = new SWCollection(collectionstring);
 					Application.application.log( 'Collection ' + this.SWChilds[collectionstring].sw_id + " loaded.");
-				} 
+				}
+				else
+				{
+					this.SWChilds[collectionstring].setLastDate();
+					this.SWChilds[collectionstring].setNextDate();
+				}
 	
 				_collection = this.SWChilds[collectionstring];
 

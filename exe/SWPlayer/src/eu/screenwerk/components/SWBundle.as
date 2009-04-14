@@ -88,7 +88,8 @@ package eu.screenwerk.components
 				Application.application.log('RM@' + this.sw_id + '. ' + this.getChildAt(0).toString());
 				this.removeChildAt(0);
 			}
-				
+			
+			this.current_media = null;
 		}
 
 

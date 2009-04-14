@@ -28,7 +28,6 @@ package eu.screenwerk.components
 			var layout_split:Array = layout_str.split(';');
 			//id;length;frequency;probability;valid_from_date;valid_to_date
 			this.sw_id = layout_split[0].replace(' ','');
-			trace ( new Date().toString() + " Create layout " + this.sw_id );
 			
 			this.length = layout_split[1].replace(' ','');
 			this.frequency = layout_split[2].replace(' ','');
@@ -58,9 +57,6 @@ package eu.screenwerk.components
 			
 			Application.application.log('play layout ' + this.sw_id);
 
-			trace( new Date().toString() + " Play layout " + this.sw_id
-				+	". Targeted " + event.currentTarget.toString());
-				
 			this.x = 0;
 			this.y = 0;
 			this.width = parent.width;
@@ -73,6 +69,7 @@ package eu.screenwerk.components
 		{
 			event.stopPropagation();
 			this.removeEventListener(Event.REMOVED, stop);
+			this.addEventListener(Event.ADDED, play, false, 0, true);
 
 			this.is_playing = false;
 
@@ -80,7 +77,6 @@ package eu.screenwerk.components
 				
 			while (this.numChildren > 0)
 			{
-				Application.application.log('RM@' + this.sw_id + '. ' + this.getChildAt(0).toString());
 				this.removeChildAt(0);
 			}
 				

@@ -160,7 +160,7 @@ package eu.screenwerk.components
 			this.layoutstrings = Application.application.readComponentData(this.sw_id+'.collection');
 		}
 			
-		private function setLastDate():void
+		public function setLastDate():void
 		{
 			var last_date:Date = null;
 			
@@ -217,7 +217,7 @@ package eu.screenwerk.components
 			this.last_date = null;
 		}
 		
-		private function setNextDate():void
+		public function setNextDate():void
 		{
 			var next_date:Date = null;
 			
