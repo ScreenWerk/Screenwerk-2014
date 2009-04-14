@@ -7,6 +7,7 @@ import flash.events.KeyboardEvent;
 import flash.filesystem.File;
 import flash.filesystem.FileMode;
 import flash.filesystem.FileStream;
+import flash.system.System;
 import flash.utils.Timer;
 
 import mx.controls.Alert;
@@ -148,7 +149,7 @@ private function toggleFullscreen(event:KeyboardEvent):void
 
 public function log(message:String):void
 {
-	var logstring:String = '"'+new Date().toString() + '" ' + message;
+	var logstring:String = '"'+new Date().toString() + '" ' + System.totalMemory + ' - ' + message;
 	trace ("Log message: " + logstring );
 
 	var log_file:File = this.sw_dir.resolvePath('screenlog');	

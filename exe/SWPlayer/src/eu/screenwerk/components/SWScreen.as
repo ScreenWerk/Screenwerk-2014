@@ -16,7 +16,7 @@ package eu.screenwerk.components
 		public function SWScreen(id:uint)
 		{
 			this.sw_id = id;
-			trace ( new Date().toString() + " Create screen " + this.sw_id );
+			Application.application.log("Create screen " + this.sw_id );
 
 			var schedules:Array = Application.application.readComponentData(this.sw_id+'.screen');
 			

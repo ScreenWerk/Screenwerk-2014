@@ -2,7 +2,6 @@ package eu.screenwerk.components
 {
 	import eu.screenwerk.player.*;
 	
-	import flash.display.DisplayObject;
 	import flash.events.Event;
 	
 	import mx.core.Application;
@@ -14,6 +13,8 @@ package eu.screenwerk.components
 		public var length:uint;
 		private var type:String;
 		private var is_playing:Boolean = false;
+		
+		private var SWChilds:Array = new Array;
 		
 		
 		public function SWMedia(media_str:String)
@@ -35,7 +36,6 @@ package eu.screenwerk.components
 			event.stopPropagation();
 			this.removeEventListener(Event.ADDED, play);
 			this.addEventListener(Event.REMOVED, stop, false, 0, true);
-
 			if (this.is_playing) return;
 			this.is_playing = true;
 
@@ -53,38 +53,40 @@ package eu.screenwerk.components
 				
 			Application.application.log('play ' + this.type + ' ' + this.sw_id);
 
-			switch (this.type)
+			if (this.SWChilds[this.sw_id] == null)
 			{
-				case 'URL':
-					var my_url_media:URLPlayer = new URLPlayer(this.sw_id);
-					this.addChild(my_url_media);
-					break;
-				case 'IMAGE':
-					var my_img_media:ImagePlayer = new ImagePlayer(this.sw_id);
-					this.addChild(my_img_media);
-					break;
-				case 'HTML':
-					//this.media = new HTMLPlayer(this.sw_id);
-					//this.addChild(this.media);
-					break;
-				case 'VIDEO':
-					var my_vid_media:SWVideoPlayer = new SWVideoPlayer(this.sw_id);
-					this.addChild(my_vid_media);
-					my_vid_media.play();
-					break;
-				case 'FLASH':
-					break;
-				case 'PDF':
-					break;
+				switch (this.type)
+				{
+					case 'URL':
+						this.SWChilds[this.sw_id] = new URLPlayer(this.sw_id);
+						break;
+					case 'IMAGE':
+						this.SWChilds[this.sw_id] = new ImagePlayer(this.sw_id);
+						break;
+					case 'VIDEO':
+						this.SWChilds[this.sw_id] = new SWVideoPlayer(this.sw_id);
+						break;
+					case 'HTML':
+						//this.media = new HTMLPlayer(this.sw_id);
+						//this.addChild(this.media);
+						break;
+					case 'FLASH':
+						break;
+					case 'PDF':
+						break;
+				}
+				Application.application.log( 'Media ' + this.sw_id + "." + this.type + " loaded.");
 			}
-			trace( new Date().toString() + ' ' + this.sw_id + "." + this.type
-				+	" loaded.");
+			this.addChild(this.SWChilds[this.sw_id]);
+			this.SWChilds[this.sw_id].play();
 		}
 		
 		private function stop(event:Event):void
 		{
 			event.stopPropagation();
 			this.removeEventListener(Event.REMOVED, stop);
+			this.addEventListener(Event.ADDED, play, false, 0, true);
+			if (!this.is_playing) return;
 			this.is_playing = false;
 
 			while (this.numChildren > 0)

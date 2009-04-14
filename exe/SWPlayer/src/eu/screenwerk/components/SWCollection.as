@@ -1,15 +1,15 @@
 package eu.screenwerk.components
 {
 	import flash.events.Event;
-	import flash.events.TimerEvent;
-	import flash.utils.Timer;
+	import flash.utils.clearTimeout;
+	import flash.utils.setTimeout;
 	
 	import mx.core.Application;
 	import mx.core.UIComponent;
 	
 	public class SWCollection extends UIComponent
 	{
-		private var sw_id:uint;
+		public var sw_id:uint;
 		private var cron_minute:String;
 		private var cron_hour:String;
 		private var cron_day:String;
@@ -20,9 +20,10 @@ package eu.screenwerk.components
 		private var valid_from_J:uint;
 		private var valid_to_J:uint;
 
-		private var _timer:Timer;
+		private var timeout_id:uint;
 		
 		private var layoutstrings:Array = new Array();
+		private var SWChilds:Array = new Array;
 		
 		private var current_layout:SWLayout;
 		private var is_playing:Boolean = false;
@@ -76,7 +77,8 @@ package eu.screenwerk.components
 		{
 			event.stopPropagation();
 			this.removeEventListener(Event.REMOVED, stop);
-			this.is_playing = false;
+
+			clearTimeout(this.timeout_id);
 
 			Application.application.log( "Stop collection "+this.sw_id + ". Targeted " + event.currentTarget.toString());
 								
@@ -88,6 +90,7 @@ package eu.screenwerk.components
 
 //			this.removeChild(this.current_layout);
 			this.current_layout = null; //TODO: remove this?
+
 		}
 		
 
@@ -110,29 +113,25 @@ package eu.screenwerk.components
 			Application.application.log( "Collection 1st run " + this.sw_id 
 				+ ", starting layout " + this.current_layout.sw_id 
 				+ ", stopping after " + this.current_layout.length + "sec." );
-			this._timer = new Timer(this.current_layout.length*1000, 1);
-			this._timer.addEventListener(TimerEvent.TIMER, playNextLayoutOnTimer, false, 0, true);
-			this._timer.start();
+
+			this.timeout_id = setTimeout(playNextLayoutOnTimer, this.current_layout.length*1000);
 
 			this.addChild(this.current_layout);
 		}
 		
-		private function playNextLayoutOnTimer(event:TimerEvent):void
+		private function playNextLayoutOnTimer():void
 		{
-			event.stopPropagation();
-			this._timer.stop();
-			this._timer = null;
+			clearTimeout(this.timeout_id);
 
 			this.removeChild(this.current_layout);
 
 			this.setNextLayout();
 
-			Application.application.log( "Collection " + this.sw_id + ", starting layout " + this.current_layout.sw_id 
-				+	", stopping after " + this.current_layout.length + "sec." );
+			Application.application.log( "Collection " + this.sw_id 
+				+ ", starting layout " + this.current_layout.sw_id 
+				+ ", stopping after " + this.current_layout.length + "sec." );
 
-			this._timer = new Timer(this.current_layout.length*1000, 1);
-			this._timer.addEventListener(TimerEvent.TIMER, playNextLayoutOnTimer, false, 0, true);
-			this._timer.start();
+			this.timeout_id = setTimeout(playNextLayoutOnTimer, this.current_layout.length*1000);
 
 			this.addChild(this.current_layout);
 		}		
@@ -146,7 +145,14 @@ package eu.screenwerk.components
 				this.loadLayouts();
 				layoutstring == this.layoutstrings.shift();
 			}
-			this.current_layout = new SWLayout(layoutstring);
+
+			if (this.SWChilds[layoutstring] == null)
+			{
+				this.SWChilds[layoutstring] = new SWLayout(layoutstring);
+				Application.application.log( 'Layout ' + this.SWChilds[layoutstring].sw_id + " loaded.");
+			} 
+
+			this.current_layout = this.SWChilds[layoutstring];
 		}
 
 		private function loadLayouts():void

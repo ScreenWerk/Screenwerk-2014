@@ -16,7 +16,8 @@ package eu.screenwerk.components
 		private var collections:Array;
 		private var current_collection:SWCollection;
 		private var next_collection:SWCollection;
-		private var is_playing:Boolean = false;
+
+		private var SWChilds:Array = new Array;
 
 		public function SWSchedule(id:uint)
 		{
@@ -33,9 +34,6 @@ package eu.screenwerk.components
 			this.removeEventListener(Event.ADDED, play);
 			this.addEventListener(Event.REMOVED, stop, false, 0, true);
 
-			if (this.is_playing) return;
-			this.is_playing = true;
-
 			Application.application.log(" Play schedule " + this.sw_id
 				+	". Targeted " + event.currentTarget.toString());
 				
@@ -48,7 +46,14 @@ package eu.screenwerk.components
 			{
 				var collectionstring:String = collectionstrings.shift();
 				if (collectionstring == '') continue;
-				_collection = new SWCollection(collectionstring);
+				
+				if (this.SWChilds[collectionstring] == null)
+				{
+					this.SWChilds[collectionstring] = new SWCollection(collectionstring);
+					Application.application.log( 'Collection ' + this.SWChilds[collectionstring].sw_id + " loaded.");
+				} 
+	
+				_collection = this.SWChilds[collectionstring];
 
 				if (i==0)
 				{
@@ -76,7 +81,6 @@ package eu.screenwerk.components
 		{
 			event.stopPropagation();
 			this.removeEventListener(Event.REMOVED, stop);
-			this.is_playing = false;
 			
 			Application.application.log("Stop schedule " + this.sw_id + ". Targeted " + event.currentTarget.toString());
 				
@@ -129,7 +133,7 @@ package eu.screenwerk.components
 			this.removeChild(this.current_collection);
 			this.current_collection = this.next_collection;
 			this.addChild(this.current_collection);
-			setTimeout(playNextCollection, Math.max(0,this.current_collection.nextDate.getTime() - _now_time));
+			this.timeout_id = setTimeout(playNextCollection, Math.max(0,this.current_collection.nextDate.getTime() - _now_time));
 		}
 
 		public function resize():void

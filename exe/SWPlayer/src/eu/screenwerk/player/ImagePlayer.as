@@ -15,17 +15,14 @@ package eu.screenwerk.player
 		{
 			this.sw_id = sw_id;
 
-			this.addEventListener(Event.ADDED, play, false, 0, true);
+			this.addEventListener(Event.ADDED, _play, false, 0, true);
+			this.addEventListener(Event.REMOVED, _stop, false, 0, true);
 		}
 
-		private function play(event:Event):void
+		private function _play(event:Event):void
 		{
 			event.stopPropagation();
 			this.removeEventListener(Event.ADDED, play);
-			this.addEventListener(Event.REMOVED, stop, false, 0, true);
-
-			trace( new Date().toString() + " Start imageplayer " + this.sw_id
-				+	". Targeted " + event.currentTarget.toString());
 
 			this.x = 0;
 			this.y = 0;
@@ -37,12 +34,12 @@ package eu.screenwerk.player
 			this.source = image_file.url;
 		}
 		
-		private function stop(event:Event):void
+		private function _stop(event:Event):void
 		{
 			event.stopPropagation();
-			this.removeEventListener(Event.REMOVED, stop);
-			trace( new Date().toString() + " Stop imageplayer for " + this.source
-				+	". Targeted " + event.currentTarget.toString());
 		}
+
+		public function play():void
+		{}
 	}
 }

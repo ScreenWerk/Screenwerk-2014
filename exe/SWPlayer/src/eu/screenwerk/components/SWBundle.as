@@ -10,7 +10,7 @@ package eu.screenwerk.components
 	public class SWBundle extends UIComponent
 	{
 		private var layout_duration:uint;
-		private var sw_id:uint;
+		public var sw_id:uint;
 		private var unscaled_x:uint;
 		private var unscaled_y:uint;
 		private var unscaled_width:uint;
@@ -23,6 +23,8 @@ package eu.screenwerk.components
 		
 		private var mediastrings:Array = new Array();
 		
+		private var SWChilds:Array = new Array;
+
 		private var current_media:SWMedia;
 		private var is_playing:Boolean = false;
 
@@ -58,9 +60,6 @@ package eu.screenwerk.components
 			this.removeEventListener(Event.ADDED, play);
 			this.addEventListener(Event.REMOVED, stop, false, 0, true);
 			
-			if (this.is_playing) return;
-			this.is_playing = true;
-
 			Application.application.log('play bundle ' + this.sw_id);
 
 			trace( new Date().toString() + " Play bundle " + this.sw_id
@@ -78,6 +77,7 @@ package eu.screenwerk.components
 		{
 			event.stopPropagation();
 			this.removeEventListener(Event.REMOVED, stop);
+			this.addEventListener(Event.ADDED, play, false, 0, true);
 			clearTimeout(this.delay_timeout_id);
 			clearTimeout(this.stop_timeout_id);
 				
@@ -123,26 +123,30 @@ package eu.screenwerk.components
 		
 		private function setNextMedia():void
 		{
-			if (this.mediastrings.length == 0) this.loadMedias();
+			if (this.mediastrings.length == 0)
+			{
+				this.mediastrings = Application.application.readComponentData(this.sw_id+'.bundle');
+			} 
 			var mediastring:String = this.mediastrings.shift();
 			if (mediastring == '')
 			{
-				this.loadMedias();
+				this.mediastrings = Application.application.readComponentData(this.sw_id+'.bundle');
 				mediastring = this.mediastrings.shift();
 			}
 			if (mediastring == '')
 			{
-				this.loadMedias();
+				this.mediastrings = Application.application.readComponentData(this.sw_id+'.bundle');
 				mediastring = this.mediastrings.shift();
 			}
-			this.current_media = new SWMedia(mediastring);
+
+			if (this.SWChilds[mediastring] == null)
+			{
+				this.SWChilds[mediastring] = new SWMedia(mediastring);
+				Application.application.log( 'Media ' + this.SWChilds[mediastring].sw_id + " loaded.");
+			}
+			this.current_media = SWMedia(this.SWChilds[mediastring]);
 		}
 		
-		private function loadMedias():void
-		{
-			this.mediastrings = Application.application.readComponentData(this.sw_id+'.bundle');
-		}
-
 		public function resize():void
 		{
 			this.x = this.unscaled_x * Application.application._x_coef;

@@ -1,6 +1,7 @@
 package eu.screenwerk.components
 {
 	import flash.events.Event;
+	import flash.system.System;
 	
 	import mx.core.Application;
 	import mx.core.UIComponent;
@@ -16,6 +17,8 @@ package eu.screenwerk.components
 
 		private var bundlestrings:Array;
 		
+		private var SWChilds:Array = new Array;
+
 		private var last_date:Date;
 		private var next_date:Date;
 		private var is_playing:Boolean = false;
@@ -44,10 +47,15 @@ package eu.screenwerk.components
 			event.stopPropagation();
 			this.removeEventListener(Event.ADDED, play);
 			this.addEventListener(Event.REMOVED, stop, false, 0, true);
+		
+			//
+			//
+			//
+			flash.system.System.gc();
+			//
+			//
+			//
 			
-			if (this.is_playing) return;
-			this.is_playing = true;
-
 			Application.application.log('play layout ' + this.sw_id);
 
 			trace( new Date().toString() + " Play layout " + this.sw_id
@@ -88,8 +96,13 @@ package eu.screenwerk.components
 				var bundle_string:String = bundlestrings.shift();
 				if (bundle_string == '') continue;
 				
-				var swbundle:SWBundle = new SWBundle(bundle_string, this.length);
-				this.addChild(swbundle);
+				if (this.SWChilds[bundle_string] == null)
+				{
+					this.SWChilds[bundle_string] = new SWBundle(bundle_string, this.length);
+					Application.application.log( 'Bundle ' + this.SWChilds[bundle_string].sw_id + " loaded.");
+				} 
+
+				this.addChild(this.SWChilds[bundle_string]);
 			}
 
 		}

@@ -15,14 +15,10 @@ package eu.screenwerk.player
 		
 		public function SWVideoPlayer(sw_id:uint) 
 		{
-
 			this.sw_id = sw_id;
 
-			this.x = 0;
-			this.y = 0;
-			this.maintainAspectRatio = false;
-
 			this.addEventListener(Event.ADDED, _play, false, 0, true);
+			this.addEventListener(Event.REMOVED, _stop, false, 0, true);
 		}
 
 		private function _play(event:Event):void
@@ -30,21 +26,19 @@ package eu.screenwerk.player
     		event.stopPropagation();
 			this.removeEventListener(Event.ADDED, _play);
 
+			this.x = 0;
+			this.y = 0;
 			this.width = parent.width;
 			this.height = parent.height;
+			this.maintainAspectRatio = false;
 			
 			var video_file:File = Application.application.sw_dir.resolvePath(this.sw_id + '.VIDEO');
 			this.source = video_file.url; 
-			//this.play();
-
-			this.addEventListener(Event.REMOVED, _stop, false, 0, true);
  		}
  		
 		private function _stop(event:Event):void
 		{
 			event.stopPropagation();
-			this.stop();
-			this.removeEventListener(Event.REMOVED, _stop);
 		}
 
 		override public function toString():String

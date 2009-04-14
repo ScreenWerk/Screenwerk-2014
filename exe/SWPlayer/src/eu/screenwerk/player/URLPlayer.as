@@ -20,20 +20,14 @@ package eu.screenwerk.player
 
 			this.location = url;
 			
-			this.addEventListener(Event.ADDED, play, false, 0, true);
+			this.addEventListener(Event.ADDED, _play, false, 0, true);
+			this.addEventListener(Event.REMOVED, _stop, false, 0, true);
 		}
 
-		private function play(event:Event):void
+		private function _play(event:Event):void
 		{
 			event.stopPropagation();
-			this.removeEventListener(Event.ADDED, play);
-			this.addEventListener(Event.REMOVED, stop, false, 0, true);
-
-			if (this.is_playing) return;
-			this.is_playing = true;
-
-			trace( new Date().toString() + " Play URL " + this.location
-				+	". Dimensions " + this.width + 'x' + this.height);
+			this.removeEventListener(Event.ADDED, _play);
 
 			this.x = 0;
 			this.y = 0;
@@ -41,11 +35,12 @@ package eu.screenwerk.player
 			this.height = parent.height;
 		}
 		
-		private function stop(event:Event):void
+		private function _stop(event:Event):void
 		{
 			event.stopPropagation();
-			this.removeEventListener(Event.REMOVED, stop);
-			trace( new Date().toString() + " Stop URL " + this.location);
 		}
+
+		public function play():void
+		{}
 	}
 }
