@@ -33,5 +33,5 @@ if (!empty($_FILES)) {
 	
 	move_uploaded_file($tempFile,$targetFile);
 }
-echo $_SERVER['DOCUMENT_ROOT'];
+echo 1;
 ?>
