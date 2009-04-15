@@ -45,6 +45,10 @@ case ${media_type} in
       master_media=${_DIR_MASTERS}/${media_id}.${media_type}
       cp ${original_media} ${master_media}
       ;;
+   SWF)
+      master_media=${_DIR_MASTERS}/${media_id}.${media_type}
+      cp ${original_media} ${master_media}
+      ;;
    *)       echo "Unsupported media type"
             exit 1;;
 esac
