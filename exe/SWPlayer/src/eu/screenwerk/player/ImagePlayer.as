@@ -22,7 +22,7 @@ package eu.screenwerk.player
 		private function _play(event:Event):void
 		{
 			event.stopPropagation();
-			this.removeEventListener(Event.ADDED, play);
+			this.removeEventListener(Event.ADDED, _play);
 
 			this.x = 0;
 			this.y = 0;
@@ -37,6 +37,7 @@ package eu.screenwerk.player
 		private function _stop(event:Event):void
 		{
 			event.stopPropagation();
+			this.removeEventListener(Event.REMOVED, _stop);
 		}
 
 		public function play():void

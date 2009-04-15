@@ -24,7 +24,7 @@
 	<name>ScreenWerk Player</name>
 
 	<!-- An application version designator (such as "v1", "2.5", or "Alpha 1"). Required. -->
-	<version>0.1.0.1</version>
+	<version>0.2.0</version>
 
 	<!-- Description, displayed in the AIR application installer. Optional. -->
 	<!-- <description></description> -->
@@ -39,7 +39,7 @@
 		<content>[This value will be overwritten by Flex Builder in the output app.xml]</content>
 		
 		<!-- The title of the main window. Optional. -->
-		<title>Digital signage made simple</title>
+		<title>ScreenWerk - where digital signage is made simple</title>
 
 		<!-- The type of system chrome to use (either "standard" or "none"). Optional. Default standard. -->
 		<!-- <systemChrome></systemChrome> -->

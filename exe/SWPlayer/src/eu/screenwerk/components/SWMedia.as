@@ -62,6 +62,7 @@ package eu.screenwerk.components
 						break;
 					case 'IMAGE':
 						this.SWChilds[this.sw_id] = new ImagePlayer(this.sw_id);
+						//this.SWChilds[this.sw_id] = new SWHImagePlayer(this.sw_id);
 						break;
 					case 'VIDEO':
 						this.SWChilds[this.sw_id] = new SWVideoPlayer(this.sw_id);
@@ -70,7 +71,8 @@ package eu.screenwerk.components
 						//this.media = new HTMLPlayer(this.sw_id);
 						//this.addChild(this.media);
 						break;
-					case 'FLASH':
+					case 'SWF':
+						this.SWChilds[this.sw_id] = new SWSWFPlayer(this.sw_id);
 						break;
 					case 'PDF':
 						break;
