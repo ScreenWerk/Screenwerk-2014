@@ -29,28 +29,21 @@ package eu.screenwerk.components
 			this.y = 0;
 			
 			this.addEventListener(Event.ADDED, play, false, 0, true);
+			this.addEventListener(Event.REMOVED, stop, false, 0, true);
 		}
 
 		private function play(event:Event):void
 		{
 			event.stopPropagation();
-			this.removeEventListener(Event.ADDED, play);
-			this.addEventListener(Event.REMOVED, stop, false, 0, true);
+
 			if (this.is_playing) return;
 			this.is_playing = true;
+
+//			this.removeEventListener(Event.ADDED, play);
 
 			this.width = parent.width;
 			this.height = parent.height;
 
-
-			trace( new Date().toString() + " Start media " + this.sw_id
-				+	". Targeted " + event.currentTarget.toString());
-				
-
-			
-			trace( new Date().toString() + " Play " + this.type
-				+	". Dimensions " + this.width + 'x' + this.height);
-				
 			Application.application.log('play ' + this.type + ' ' + this.sw_id);
 
 			if (this.SWChilds[this.sw_id] == null)
@@ -69,7 +62,6 @@ package eu.screenwerk.components
 						break;
 					case 'HTML':
 						//this.media = new HTMLPlayer(this.sw_id);
-						//this.addChild(this.media);
 						break;
 					case 'SWF':
 						this.SWChilds[this.sw_id] = new SWSWFPlayer(this.sw_id);
@@ -86,20 +78,20 @@ package eu.screenwerk.components
 		private function stop(event:Event):void
 		{
 			event.stopPropagation();
-			this.removeEventListener(Event.REMOVED, stop);
-			this.addEventListener(Event.ADDED, play, false, 0, true);
+
 			if (!this.is_playing) return;
 			this.is_playing = false;
+
+//			this.removeEventListener(Event.REMOVED, stop);
+//			this.addEventListener(Event.ADDED, play, false, 0, true);
+
+			Application.application.log("Stop media " + this.sw_id + ". Targeted " + event.currentTarget.toString());
 
 			while (this.numChildren > 0)
 			{
 				Application.application.log('RM@' + this.sw_id + '. ' + this.getChildAt(0).toString());
-				try
-				{
-					this.removeChildAt(0);
-				} catch (e:Error){
-					Application.application.log('Failed RM@' + this.sw_id + '. ' + e.toString());
-				}
+				try { this.removeChildAt(0); }
+				catch (e:Error) { Application.application.log('Failed RM@' + this.sw_id + '. ' + e.toString()); }
 			}
 			
 		}

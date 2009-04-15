@@ -86,7 +86,8 @@ package eu.screenwerk.components
 			while (this.numChildren > 0)
 			{
 				Application.application.log('RM@' + this.sw_id + '. ' + this.getChildAt(0).toString());
-				this.removeChildAt(0);
+				try { this.removeChildAt(0); }
+				catch (e:Error) { Application.application.log('Failed RM@' + this.sw_id + '. ' + e.toString()); }
 			}
 			
 			this.current_media = null;
@@ -104,15 +105,15 @@ package eu.screenwerk.components
 
 			this.delay_timeout_id = setTimeout(playNextMediaOnTimer, this.current_media.length*1000);
 
-			this.addChild(this.current_media);
-
-			try
+			if ( old_media != null && this.contains(old_media) )
 			{
-				this.removeChild(old_media);
+				Application.application.log('- NM@' + this.sw_id + '. ' + old_media.toString());
+				try { this.removeChild(old_media); }
+				catch (e:Error) { Application.application.log('Failed - NM@' + this.sw_id + '. ' + e.toString()); }
 			}
-			catch (err:Error) {
-				trace( "No previous media for bundle " + this.sw_id + "." );
-			}
+			
+			Application.application.log('+ NM@' + this.sw_id + '. ' + this.current_media.toString());
+			this.addChild(this.current_media);
 		}		
 
 		
