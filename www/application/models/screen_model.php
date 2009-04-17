@@ -66,6 +66,28 @@ class Screen_model extends Model {
 
 
 
+	function get_one_by_md5($screen_md5 = NULL) {
+		
+		$this->db->select('id, name, schedule_id, dimension_id, content_md5');
+		$this->db->from('screens');
+		$this->db->where('screen_md5', $screen_md5);
+		$this->db->limit(1);
+		$query = $this->db->get();
+
+		if($query->num_rows() > 0) {
+			$data = $query->row_array();
+		} else {
+			foreach($query->field_data() as $row) {
+				$data[$row->name] = NULL;
+			}
+		}
+		
+		return $data;
+		
+	}
+
+
+
 	function delete($id) {
       $this->delete_fs($id);
 		$this->db->where('id', $id);
