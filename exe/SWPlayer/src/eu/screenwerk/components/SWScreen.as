@@ -61,7 +61,6 @@ package eu.screenwerk.components
 				this.removeChildAt(0);
 			}
 
-			this.sw_schedule = null; // TODO: remove this?
 		}
 
 		public function resize():void

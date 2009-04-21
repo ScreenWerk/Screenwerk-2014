@@ -16,6 +16,18 @@ package eu.screenwerk.components
 		
 		private var SWChilds:Array = new Array;
 		
+		// Time in seconds that should be skipped on first run to make sure,
+		// that all screens would play synchronously even when started
+		// on different times.
+		private var _timeshift:Number;
+	    public function set timeshift(_set:Number):void
+	    {
+			this._timeshift = _set;
+	    }
+	    public function get timeshift():Number
+	    {
+			return this._timeshift;
+	    }
 		
 		public function SWMedia(media_str:String)
 		{

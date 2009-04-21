@@ -28,6 +28,18 @@ package eu.screenwerk.components
 		private var current_media:SWMedia;
 		private var is_playing:Boolean = false;
 
+		// Time in seconds that should be skipped on first run to make sure,
+		// that all screens would play synchronously even when started
+		// on different times.
+		private var _timeshift:Number;
+	    public function set timeshift(_set:Number):void
+	    {
+			this._timeshift = _set;
+	    }
+	    public function get timeshift():Number
+	    {
+			return this._timeshift;
+	    }
 		
 		public function SWBundle(layout_str:String, layout_duration:uint)
 		{
@@ -61,16 +73,26 @@ package eu.screenwerk.components
 			this.addEventListener(Event.REMOVED, stop, false, 0, true);
 			
 			Application.application.log('play bundle ' + this.sw_id);
+			this.stop_timeout_id = setTimeout(stopMedias, this.stop_sec*1000 - this.timeshift*1000);
 
-			trace( new Date().toString() + " Play bundle " + this.sw_id
-				+	". Start at " + this.start_sec + ", stopping at " + this.stop_sec
-				+	". Targeted " + event.currentTarget.toString());
-
-			trace( new Date().toString() + " Bundle " + this.sw_id
-				+	" dimensions " + this.width + 'x' + this.height );
-				
-			this.delay_timeout_id = setTimeout(playNextMediaOnTimer, this.start_sec*1000);
-			this.stop_timeout_id = setTimeout(stopMedias, this.stop_sec*1000);
+			if ( this.timeshift == 0 || this.timeshift < this.start_sec )
+			{
+				var _delay:Number = this.start_sec*1000 - this.timeshift*1000;
+				this.timeshift = 0;
+				this.delay_timeout_id = setTimeout(playNextMediaOnTimer, _delay);
+			}
+			else
+			{
+				Application.application.log('else:'+this.timeshift + '-' + this.start_sec);
+				this.timeshift = this.timeshift - this.start_sec;
+				while ( this.timeshift > 0 )
+				{
+					this.setNextMedia();
+					Application.application.log('loop:'+this.timeshift + '-' + this.current_media.length);
+					this.timeshift = Math.max(0,this.timeshift-this.current_media.length);
+				}
+				this.delay_timeout_id = setTimeout(playNextMediaOnTimer, 0);
+			}
 		}
 
 		private function stop(event:Event):void
@@ -103,7 +125,17 @@ package eu.screenwerk.components
 			
 			this.setNextMedia();
 
-			this.delay_timeout_id = setTimeout(playNextMediaOnTimer, this.current_media.length*1000);
+			if ( this.timeshift > this.current_media.length )
+			{
+				trace ( this.timeshift +'-' +this.current_media.length );
+				this.timeshift = this.timeshift - this.current_media.length;
+				return; 
+			}
+
+			this.delay_timeout_id = setTimeout(playNextMediaOnTimer, this.current_media.length*1000 - this.timeshift*1000);
+
+			this.timeshift = 0;
+			
 
 			if ( old_media != null && this.contains(old_media) )
 			{

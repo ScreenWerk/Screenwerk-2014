@@ -22,7 +22,6 @@ package eu.screenwerk.components
 		public function SWSchedule(id:uint)
 		{
 			this.sw_id = id;
-			trace ( new Date().toString() + " Create schedule " + this.sw_id );
 			
 			this.addEventListener(Event.ADDED, play, false, 0, true);
 
@@ -76,8 +75,9 @@ package eu.screenwerk.components
 
 			this.addChild(this.current_collection);
 			var _now:Number = new Date().getTime();
-			_now = new Date().getMilliseconds();
-			var timeout_msec:Number = Math.max(0,this.current_collection.nextDate.getTime() - new Date().getTime());
+			//_now = new Date().getMilliseconds();
+			var timeout_msec:Number = this.current_collection.nextDate.getTime() - _now;
+			Application.application.log("Time from collection start - " + (_now - this.current_collection.lastDate.getTime())/1000 + " seconds.");
 			Application.application.log("Time till next collection - " + timeout_msec/1000 + " seconds.");
 			this.timeout_id = setTimeout(playNextCollection, timeout_msec);
 		}

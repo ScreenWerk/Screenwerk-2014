@@ -22,6 +22,19 @@ package eu.screenwerk.components
 
 		private var timeout_id:uint;
 		
+		// Time in seconds that should be skipped on first run to make sure,
+		// that all screens would play synchronously even when started
+		// on different times.
+		private var _timeshift:Number;
+	    public function set timeshift(_set:Number):void
+	    {
+			this._timeshift = _set;
+	    }
+	    public function get timeshift():Number
+	    {
+			return this._timeshift;
+	    }
+		
 		private var layoutstrings:Array = new Array();
 		private var SWChilds:Array = new Array;
 		
@@ -65,6 +78,8 @@ package eu.screenwerk.components
 			Application.application.log( new Date().toString() + " Play collection " + this.sw_id
 				+	". Targeted " + event.currentTarget.toString());
 				
+			this.timeshift = (new Date().getTime() - this.lastDate.getTime()) / 1000;
+			
 			this.x = 0;
 			this.y = 0;
 			this.width = parent.width;
@@ -88,9 +103,6 @@ package eu.screenwerk.components
 				this.removeChildAt(0);
 			}
 
-//			this.removeChild(this.current_layout);
-			this.current_layout = null; //TODO: remove this?
-
 		}
 		
 
@@ -108,14 +120,27 @@ package eu.screenwerk.components
 		
 		private function playLayouts():void
 		{
-			this.setNextLayout();
+			if ( this.current_layout == null )
+			{
+				this.setNextLayout();
+				Application.application.log( "Collection 1st run " + this.sw_id 
+					+ ", evaluating layout " + this.current_layout.sw_id );
+			}
+			
+			while ( this.current_layout.length < this.timeshift )
+			{
+				this.timeshift = this.timeshift - this.current_layout.length;
+				this.setNextLayout();
+				Application.application.log( "... skipping layout " + this.current_layout.sw_id );
+			}
 
-			Application.application.log( "Collection 1st run " + this.sw_id 
-				+ ", starting layout " + this.current_layout.sw_id 
-				+ ", stopping after " + this.current_layout.length + "sec." );
+			Application.application.log( "... starting layout " + this.current_layout.sw_id 
+				+ ", stopping after " + (this.current_layout.length - this.timeshift) + "sec." );
 
-			this.timeout_id = setTimeout(playNextLayoutOnTimer, this.current_layout.length*1000);
+			this.timeout_id = setTimeout(playNextLayoutOnTimer, (this.current_layout.length - this.timeshift)*1000 );
 
+			this.current_layout.timeshift = this.timeshift;
+			this.timeshift = 0;
 			this.addChild(this.current_layout);
 		}
 		
@@ -326,6 +351,7 @@ package eu.screenwerk.components
 				this.getChildAt(i).height = this.height;
 			}
 		}
+
 		override public function toString():String
 		{
 			return this.sw_id + ':' + super.toString();

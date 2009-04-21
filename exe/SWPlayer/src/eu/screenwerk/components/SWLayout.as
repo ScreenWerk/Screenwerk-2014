@@ -23,6 +23,19 @@ package eu.screenwerk.components
 		private var next_date:Date;
 		private var is_playing:Boolean = false;
 
+		// Time in seconds that should be skipped on first run to make sure,
+		// that all screens would play synchronously even when started
+		// on different times.
+		private var _timeshift:Number;
+	    public function set timeshift(_set:Number):void
+	    {
+			this._timeshift = _set;
+	    }
+	    public function get timeshift():Number
+	    {
+			return this._timeshift;
+	    }
+
 		public function SWLayout(layout_str:String)
 		{
 			var layout_split:Array = layout_str.split(';');
@@ -63,6 +76,7 @@ package eu.screenwerk.components
 			this.height = parent.height;
 			
 			this.playBundles();
+			this.timeshift = 0;
 		}
 		
 		private function stop(event:Event):void
@@ -98,6 +112,7 @@ package eu.screenwerk.components
 					Application.application.log( 'Bundle ' + this.SWChilds[bundle_string].sw_id + " loaded.");
 				} 
 
+				SWBundle(this.SWChilds[bundle_string]).timeshift = this.timeshift;
 				this.addChild(this.SWChilds[bundle_string]);
 			}
 
