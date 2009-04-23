@@ -125,7 +125,7 @@ private function toggleFullscreen(event:KeyboardEvent):void
 	
 	if(this._is_fullscreen) 
 	{
-		stage.displayState = StageDisplayState.NORMAL;
+		Application.application.stage.displayState = StageDisplayState.NORMAL;
 		this._is_fullscreen = false;
 	}
 	else

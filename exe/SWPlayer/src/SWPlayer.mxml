@@ -7,8 +7,9 @@
 	showTitleBar="true"
 	showGripper="false"
 	applicationComplete="init()"
->
-			
+>		
+	<mx:Style source="astylesheet.css" />
+
 	<mx:Script source="ascript.as"/>
 
 </mx:WindowedApplication>
