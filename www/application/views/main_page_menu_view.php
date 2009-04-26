@@ -1,18 +1,10 @@
-<ul id="primary">
+<ul>
 <?php
 	if(isset($_SESSION['menu'])) {
 		foreach($_SESSION['menu'] as $key => $value):
 			if(($key == $this->router->class .'/'. $this->router->method) 
 			 || ($key == $this->router->class .'/index')) {
-				echo '<li><span>'. $value .'</span>';
-				if(isset($page_submenu)) {
-					echo '<ul id="secondary">';
-					foreach ($page_submenu as $sub_key => $sub_value):
-						echo '<li>'. anchor(site_url($sub_key), $sub_value) .'</li>';
-					endforeach;
-					echo '</ul>';
-				}
-				echo '</li>';
+				echo '<li><span id="menu_current_l">&nbsp;</span><span id="menu_current">'. $value .'</span><span id="menu_current_r"/>&nbsp;</span></li>';
 			} else {
 				echo '<li>'. anchor(site_url($key), $value) .'</li>';
 			}
