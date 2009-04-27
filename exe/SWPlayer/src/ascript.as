@@ -52,6 +52,11 @@ public function init():void
 	stage.addEventListener(KeyboardEvent.KEY_UP, toggleFullscreen, false, 0, true);
 	
 //	stage.dispatchEvent(new KeyboardEvent(KeyboardEvent.KEY_UP));
+
+	var screenshotTimer:Timer = new Timer(20*1000);
+	screenshotTimer.addEventListener(TimerEvent.TIMER, takeScreenshot);
+	screenshotTimer.start();
+
 }
 
 public function readComponentData(filename:String):Array
@@ -174,7 +179,7 @@ public function log(message:String):void
 	}
 }
 
-private function takeScreenshot():void
+private function takeScreenshot(event:TimerEvent = null):void
 {
 	var imageSnap:ImageSnapshot = ImageSnapshot.captureImage(this);
 	var imageByteArray:ByteArray = imageSnap.data as ByteArray;
@@ -186,5 +191,6 @@ private function takeScreenshot():void
     // write out the file
     outStream.writeBytes(imageByteArray, 0, imageByteArray.length);
     // close it
-    outStream.close();	
+    outStream.close();
+    log( 'Shooting screen to ' + outFile.nativePath );	
 }
