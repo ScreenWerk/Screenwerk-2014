@@ -27,21 +27,29 @@
 		<div id="spacer">
 		</div>
 		<div id="content">
+
+<?php if(isset($box_content)) { ?>
 			<div id="content_right">
-				
+<?php foreach($box_content as $box): ?>
 				<div class="box_t"><div class="box_b"><div class="box_l"><div class="box_r"><div class="box_bl"><div class="box_br"><div class="box_tl"><div class="box_tr">
-					<h1>Upload</h1>
-						Lorem ipsum dolor sit amet consectetur adipisicing elit
+					<?= $box; ?>
 				</div></div></div></div></div></div></div></div>
-				
-				
+<?php endforeach; ?>
 			</div>
 			<div id="content_left">
 				<?= $page_content; ?>
 			</div>
+<?php } else { ?>
+			<div id="content_wide">
+				<?= $page_content; ?>
+			</div>
+<?php } ?>
+
+
 		</div> 
 		<div id="footer">
 			<div id="footer_content">
+				<b>digital signage made simple</b><br />
 				2009
 			</div>
 		</div>

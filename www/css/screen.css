@@ -39,11 +39,16 @@ body, html {
     width: 900px;
 }
 
+#content_wide {
+	margin: 0px;
+	padding: 0px 1px 30px 1px;
+}
+
 #content_left {
     width: 550px;
 	float: left;
 	margin: 0px;
-	padding: 0px 1px;
+	padding: 0px 1px 30px 1px;
 }
 
 #content_right {
@@ -130,7 +135,11 @@ body, html {
 .box_bl {background: url('/images/box_bl.png') 0 100% no-repeat}
 .box_br {background: url('/images/box_br.png') 100% 100% no-repeat}
 .box_tl {background: url('/images/box_tl.png') 0 0 no-repeat}
-.box_tr {background: url('/images/box_tr.png') 100% 0 no-repeat; padding:10px}
+.box_tr {
+	background: url('/images/box_tr.png') 100% 0 no-repeat;
+	padding: 10px;
+	margin-bottom: 10px;
+}
 
 .box_t h1 {
 	font-size: 13px;
@@ -168,6 +177,33 @@ td {
 
 
 
+/* Left content */
+h1 {
+	font-size: 13px;
+	font-weight: bold;
+	padding: 0px 2px 2px 2px;
+	margin: 0px 0px 2px 0px;
+	display: block;
+	border-bottom: 1px solid #D1D1D1;
+}
+
+p {
+	text-align: justify;
+	margin: 0px 0px 30px 0px;
+}
+
+a {
+	text-decoration: none;
+	color: #2E2E2E; 
+}
+
+a:hover {
+	text-decoration: underline;
+	color: #2E2E2E; 
+}
+
+
+
 /* Forms */
 label{
 	float: left;
@@ -177,6 +213,7 @@ label{
 
 input, textarea, select{
 	margin-bottom: 5px;
+	border: 1px solid #D1D1D1;
 }
 
 textarea{

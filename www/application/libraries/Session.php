@@ -123,7 +123,7 @@ class CI_Session {
 //logib kasutaja välja
 	function logout() { 
 		$this->login();
-		redirect('user/login');
+		redirect('info');
 		exit();
 	}
 

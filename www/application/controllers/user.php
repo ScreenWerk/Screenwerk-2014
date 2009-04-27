@@ -19,7 +19,7 @@ class User extends Controller {
 
 			if($this->input->post('login')) {
 				$this->session->login($this->input->post('user_name'), md5($this->input->post('user_secret')));
-				redirect('');
+				redirect('screen');
 			}
 
 			$view['page_menu_code'] = 'user/login';
@@ -32,7 +32,7 @@ class User extends Controller {
 
 	function logout() {
 		$this->session->logout();
-		redirect('');
+		redirect('info');
 	}
 
 }
