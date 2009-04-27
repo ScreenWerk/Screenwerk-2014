@@ -1,14 +1,12 @@
 <h1>Upload</h1>
+Uploaded media will be processed by server and will be available after few moments.
+<br />
+<br />
 <center>
 <?= form_open_multipart('upload/do_upload'); ?>
-<?= form_upload(array('name'=>'upload_file', 'id'=>'upload_file')); ?><br />
+<?= form_upload(array('name'=>'upload_file', 'id'=>'upload_file')); ?>
 <?= form_close(); ?>
 </center>
-
-<?php if(isset($error)) echo $error; ?>
-<?php //if(isset($data)) { echo '<pre>'; print_r($data); echo '</pre>'; } ?>
-
-
 
 <script type="text/javascript">
 	$(document).ready(function(){

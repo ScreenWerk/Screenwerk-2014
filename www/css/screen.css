@@ -219,3 +219,29 @@ textarea{
 	width: 250px;
 	height: 150px;
 }
+
+
+
+/* Uploadify */
+.fileUploadQueueItem {
+	font-size: 10px;
+	text-align: left;
+	margin-top: 10px;
+	padding: 0px;
+	display: block;
+}
+.fileUploadQueueItem .cancel {
+	float: right;
+}
+.fileUploadProgress {
+	background-color: #FFFFFF;
+	border-top: 1px solid #D1D1D1;
+	border-left: 1px solid #D1D1D1;
+	border-right: 1px solid #D1D1D1;
+	border-bottom: 1px solid #D1D1D1;
+	margin: 10px 0px 0px -1px;
+	width: 100%;
+}
+.fileUploadProgressBar {
+	background-color: #0099FF;
+}
