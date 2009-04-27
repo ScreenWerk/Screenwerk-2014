@@ -189,8 +189,8 @@ class CI_Session {
 //kontrollib sessiooni
 	function _protection_check() {
 		
-		if(isset($_SESSION['forms'][$this->CI->router->class .'/'. $this->CI->router->method])) { //formi õiguse rida leiti
-			$vastus = TRUE;			
+		if(isset($_SESSION['forms'][$this->CI->router->class .'/'. $this->CI->router->method]) OR isset($_SESSION['forms'][$this->CI->router->class])) { //formi õiguse rida leiti
+			$vastus = TRUE;
 		} else { //formi õiguse rida ei leitud
 			$vastus = FALSE;
 		}
