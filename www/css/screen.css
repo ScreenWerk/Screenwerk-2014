@@ -7,12 +7,22 @@ body, html {
 	padding: 0px;
 }  
 
+
+
+/* Main parts */
+
 #header {
 	margin: 0px auto 0px auto;
 	padding: 17px 20px 23px 20px;
 	color: #ff7f00;
 	font-size: 26px;
 	font-weight: bold;
+    width: 900px;
+}
+
+#menu {
+	margin: 3px auto 0px auto;
+	padding: 0px 20px;
     width: 900px;
 }
 
@@ -30,7 +40,7 @@ body, html {
 }
 
 #content_left {
-    width: 600px;
+    width: 550px;
 	float: left;
 	margin: 0px;
 	padding: 0px 1px;
@@ -44,7 +54,7 @@ body, html {
 }
 
 #footer {
-	position: absolute;
+	position: fixed;
 	bottom: 0px;
 	left: 0px;
 	right: 0px;
@@ -57,13 +67,7 @@ body, html {
 
 
 
-
-
-#menu {
-	margin: 3px auto 0px auto;
-	padding: 0px 20px;
-    width: 900px;
-}
+/* Tabs */
 
 #menu ul {
 	display: block;
@@ -113,6 +117,9 @@ body, html {
 }
 
 
+
+/* Right Box */
+
 .box_t {
 	background: #F5F5F5 url('/images/box_dot.png') 0 0 repeat-x;
 	width: 100%;
@@ -136,41 +143,43 @@ body, html {
 
 
 
+/* Tables */
 
-.right_box_header {
-	padding: 0px;
-	margin: 0px;
-	font-size: 13px;
-	font-weight: bold;
-	background: #F5F5F5;
-	1color: #ff7f00;
-	display: block;
-	height: 25px;
+table {
+	width: 100%;
+	border-spacing: 0px;
 }
-.right_box_header_t{
-	padding: 3px 10px 4px 10px;
-	border-top: 1px solid #ff7f00;
+
+th {
 	border-bottom: 1px solid #D1D1D1;
+	padding: 3px 6px; 
 }
 
-.right_box_content {
-	border-left: 1px solid #ff7f00;
-	border-right: 1px solid #ff7f00;
-	padding: 10px;
-	margin-top: 0px;
-	min-height: 100px;
+td {
+	border-bottom: 1px solid #D1D1D1;
+	padding: 3px 6px; 
+}
+
+.selected_row {
+	border-bottom: 1px solid #D1D1D1;
+	padding: 3px 6px; 
 	background: #F5F5F5;
 }
 
-.right_box_footer {
-	padding: 0px;
-	margin: 0px;
-	background: #F5F5F5;
-	display: block;
-	height: 3px;
-}
-.right_box_footer_t{
-	border-bottom: 1px solid #ff7f00;
-	height: 2px;
+
+
+/* Forms */
+label{
+	float: left;
+	width: 90px;
+	font-weight: bold;
 }
 
+input, textarea, select{
+	margin-bottom: 5px;
+}
+
+textarea{
+	width: 250px;
+	height: 150px;
+}
