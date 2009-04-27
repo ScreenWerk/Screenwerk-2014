@@ -195,9 +195,9 @@ package eu.screenwerk.components
 
 			for (var i:uint=0; i<this.numChildren; i++)
 			{
-				SWMedia(this.getChildAt(i)).resize();
 				this.getChildAt(i).width = this.width;
 				this.getChildAt(i).height = this.height;
+				SWMedia(this.getChildAt(i)).resize();
 			}
 		}
 

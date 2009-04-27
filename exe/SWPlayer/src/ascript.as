@@ -8,10 +8,13 @@ import flash.filesystem.File;
 import flash.filesystem.FileMode;
 import flash.filesystem.FileStream;
 import flash.system.System;
+import flash.ui.Mouse;
+import flash.utils.ByteArray;
 import flash.utils.Timer;
 
 import mx.controls.Alert;
 import mx.core.Application;
+import mx.graphics.ImageSnapshot;
 
 private var _defined_screen_width:uint = 1680;
 private var _defined_screen_height:uint = 1050;
@@ -28,9 +31,10 @@ public var sw_dir:File = home_dir.resolvePath('screenwerk');
 
 public function init():void
 {
+	Mouse.hide();
 	this.readRcParams();
 
-
+	
 	trace (' xcoef:'+this._x_coef+'='+this.width+'/'+this._defined_screen_width
 	+ '; ycoef:'+this._y_coef+'='+this.height+'/'+this._defined_screen_height+'.');
 
@@ -44,6 +48,7 @@ public function init():void
 	sw_screen.height = this.height;
 
 	
+		
 	stage.addEventListener(KeyboardEvent.KEY_UP, toggleFullscreen, false, 0, true);
 	
 //	stage.dispatchEvent(new KeyboardEvent(KeyboardEvent.KEY_UP));
@@ -103,11 +108,13 @@ private function readRcParams():void
 	this._defined_screen_width = config_params['screen_width'];
 	this._defined_screen_height = config_params['screen_height'];
 
-//	this.width = this._defined_screen_width / 2;
-//	this.height = this._defined_screen_height / 2;
+	this.width = this._defined_screen_width / 2;
+	this.height = this._defined_screen_height / 2;
+	this.validateNow();
 
 	Application.application.stage.displayState = StageDisplayState.FULL_SCREEN_INTERACTIVE;
 	this._is_fullscreen = true;
+	this.validateNow();
 	
 	this._x_coef = this.width/this._defined_screen_width;
 	this._y_coef = this.height/this._defined_screen_height;
@@ -133,6 +140,8 @@ private function toggleFullscreen(event:KeyboardEvent):void
 		Application.application.stage.displayState = StageDisplayState.FULL_SCREEN_INTERACTIVE;
 		this._is_fullscreen = true;
 	}
+
+	this.validateNow();
 
 	this._x_coef = this.width/this._defined_screen_width;
 	this._y_coef = this.height/this._defined_screen_height;
@@ -165,3 +174,17 @@ public function log(message:String):void
 	}
 }
 
+private function takeScreenshot():void
+{
+	var imageSnap:ImageSnapshot = ImageSnapshot.captureImage(this);
+	var imageByteArray:ByteArray = imageSnap.data as ByteArray;
+
+	var outFile:File = this.sw_dir.resolvePath('screenshot');
+    var outStream:FileStream = new FileStream();
+    // open output file stream in WRITE mode
+    outStream.open(outFile, FileMode.WRITE);
+    // write out the file
+    outStream.writeBytes(imageByteArray, 0, imageByteArray.length);
+    // close it
+    outStream.close();	
+}
