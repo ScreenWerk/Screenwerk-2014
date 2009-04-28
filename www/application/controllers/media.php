@@ -24,5 +24,27 @@ class Media extends Controller {
 		$this->load->view('main_page_view', $view);
 	}
 
+	
+	
+	function thumbnail($media_id, $thumb_no = null) {
+
+		$this->load->helper('download');
+		$this->load->helper('file');
+		
+		$dir = DIR_FTP_THUMBS .'/';
+		
+		if($thumb_no) {
+			$file = $media_id .'_'. $thumb_no .'.png';
+		} else {
+			$file = $media_id .'.png';
+		}
+		
+		if(read_file($dir.$file)) {
+			header('Content-Type: image/png');
+			print(file_get_contents($dir.$file));
+		} else {
+			show_404('media/thumbnail');
+		}
+	}
 }
 ?>
