@@ -128,6 +128,7 @@ body, html {
 .box_t {
 	background: #F5F5F5 url('/images/box_dot.png') 0 0 repeat-x;
 	width: 100%;
+	overflow: hidden; 
 }
 .box_b {background: url('/images/box_dot.png') 0 100% repeat-x}
 .box_l {background: url('/images/box_dot.png') 0 0 repeat-y}
