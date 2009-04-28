@@ -22,6 +22,9 @@ class Media_model extends Model {
 				unset($data[$row['id']]['id']);
 				$data[$row['id']]['dimension'] = $this->dimension->get_name($row['dimension_id']);
 				unset($data[$row['id']]['dimension_id']);
+				$data[$row['id']]['length'] = $this->_secondsToWords($data[$row['id']]['length']);
+				if($data[$row['id']]['type'] != 'VIDEO') $data[$row['id']]['length'] = null;
+				if($data[$row['id']]['type'] != 'VIDEO' AND $data[$row['id']]['type'] != 'IMAGE') $data[$row['id']]['dimension'] = null;
 			}
 		} else {
 			$data = array();
@@ -75,6 +78,29 @@ class Media_model extends Model {
 		
 		return $result;
 	} 
+	
+	
+	
+	function _secondsToWords($secs) {
+		$vals = array('w' => (int) ($secs / 86400 / 7), 
+                      'd' => $secs / 86400 % 7, 
+                      'h' => $secs / 3600 % 24, 
+                      'm' => $secs / 60 % 60, 
+                      's' => $secs % 60); 
+ 
+        $ret = array(); 
+ 
+        $added = false; 
+        foreach ($vals as $k => $v) { 
+            if ($v > 0 || $added) { 
+                $added = true; 
+                $ret[] = $v . $k; 
+            } 
+        } 
+ 
+        return join(' ', $ret); 
+	
+	}
 
 }
 
