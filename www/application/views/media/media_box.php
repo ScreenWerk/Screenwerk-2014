@@ -10,8 +10,8 @@
 <script type="text/javascript">
 	$(document).ready(function(){
 		$("#row_<?= $id; ?>").click(function () {
-			$(".box_hidden").slideUp("slow");
-			$("#media_<?= $id; ?>").slideDown("slow");
+			$(".box_hidden").slideUp("normal");
+			$("#media_<?= $id; ?>").slideDown("normal");
 			$("tr").css("background","none");
 			$("#row_<?= $id; ?>").css("background","#D1DAF6");
 		});    
