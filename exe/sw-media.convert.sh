@@ -37,7 +37,7 @@ case ${media_type} in
       . /tmp/foo
       rm /tmp/foo
       framerate=`echo "scale=2; 20/$ID_LENGTH" | bc`
-      ffmpeg -i "${master_media}" -vframes 10 -r ${framerate} -s sqcif -y ${_DIR_THUMBS}/${media_id}_%d.png
+      ffmpeg -i "${master_media}" -vframes 20 -r ${framerate} -s sqcif -y ${_DIR_THUMBS}/${media_id}_%d.png
       ;;
    IMAGE)
       master_media=${_DIR_MASTERS}/${media_id}.${media_type}
