@@ -45,11 +45,14 @@ define('FOPEN_READ_WRITE_CREATE_STRICT',		'x+b');
 |
 */
 
-define('DIR_FTP_ROOT',                   '../media');
-define('DIR_FTP_INCOMING',               DIR_FTP_ROOT.'/incoming');
-define('DIR_FTP_MASTERS',                DIR_FTP_ROOT.'/masters');
-define('DIR_FTP_SCREENS',                DIR_FTP_ROOT.'/screens');
-define('DIR_FTP_SIGNALS',                DIR_FTP_ROOT.'/signals');
+define('DIR_FTP_ROOT',                  '../media');
+define('DIR_FTP_INCOMING',              DIR_FTP_ROOT.'/incoming');
+define('DIR_FTP_MASTERS',               DIR_FTP_ROOT.'/masters');
+define('DIR_FTP_ORIGINALS',             DIR_FTP_ROOT.'/originals');
+define('DIR_FTP_SCREENS',               DIR_FTP_ROOT.'/screens');
+define('DIR_FTP_SIGNALS',               DIR_FTP_ROOT.'/signals');
+define('DIR_FTP_THUMBS',                DIR_FTP_ROOT.'/thumbs');
+define('DIR_FTP_PLAYERS',               DIR_FTP_ROOT.'/players');
 
 
 /* End of file constants.php */
