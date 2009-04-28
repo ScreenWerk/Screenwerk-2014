@@ -12,3 +12,18 @@
 <?php endforeach; ?>
 
 </table>
+
+<map name="skimming">
+
+<?php
+
+	$count = 20;
+	$width = 250;
+	for ( $counter = ($width/$count); $counter <= $width; $counter += ($width/$count)) {
+		echo '<area shape="rect" coords="'. round($counter-$count-1) .',0,'. round($counter) .',250" alt="'. ($counter/($width/$count)) .'">';
+	}
+
+?>
+</map>
+
+
