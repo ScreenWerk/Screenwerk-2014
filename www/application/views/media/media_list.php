@@ -2,7 +2,7 @@
 
 <?php foreach($data as $row): ?>
 
-	<tr id="row_<?= $row['id']; ?>">
+	<tr id="row_<?= $row['id']; ?>" style="cursor: pointer;">
 		<td style=""><img src="<?= base_url(); ?>media/thumbnail/<?= $row['id']; ?>/1" width="16px" height="16px" /></td>
 		<td><b><?= $row['filename']; ?></b></td>
 		<td style="text-align:right;"><?= $row['length']; ?></td>
