@@ -32,6 +32,12 @@ case ${media_type} in
       master_media=${_DIR_MASTERS}/${media_id}.${media_type}
       ffmpeg -i "${original_media}" -an -vcodec flv -sameq -y "${master_media}.flv" #2&>1 1>/dev/null
       mv "${master_media}.flv" "${master_media}"
+
+      ${_DIR_EXE}/midentify.sh "${master_media}" > /tmp/foo
+      . /tmp/foo
+      rm /tmp/foo
+      framerate=`echo "scale=2; 20/$ID_LENGTH" | bc`
+      ffmpeg -i "${master_media}" -vframes 10 -r ${framerate} -s sqcif -y ${_DIR_THUMBS}/${media_id}_%d.png
       ;;
    IMAGE)
       master_media=${_DIR_MASTERS}/${media_id}.${media_type}
