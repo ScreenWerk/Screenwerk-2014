@@ -5,5 +5,5 @@
 <br />
 <br />
 <br />
-<?= mailto('info@screenwerk.eu', 'info@screenwerk.eu'); ?><br />
+<?= safe_mailto('info@screenwerk.eu', 'info@screenwerk.eu'); ?><br />
 +372 506 0000
