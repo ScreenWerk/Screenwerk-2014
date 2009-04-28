@@ -37,6 +37,7 @@ body, html {
 	margin: 0px auto 0px auto;
 	padding: 10px 20px;
     width: 900px;
+    min-height: 500px;
 }
 
 #content_wide {
@@ -59,16 +60,14 @@ body, html {
 }
 
 #footer {
-	position: fixed;
-	bottom: 0px;
-	left: 0px;
-	right: 0px;
+	margin: 0px auto 0px auto;
 	padding: 10px;
 	text-align: center;
 	font-size: 10px;
 	color: #ff7f00;
 	background: #ffffff;
-}
+	clear: both;
+'}
 
 
 
@@ -203,6 +202,10 @@ a {
 a:hover {
 	text-decoration: underline;
 	color: #2E2E2E; 
+}
+
+img {
+	border: none;
 }
 
 
