@@ -1,5 +1,4 @@
-<h1>Log In</h1>
-<?= form_open(site_url('user/login')); ?>
+<?= form_open(site_url('user/login'),  array('style' => 'margin-top:20px;')); ?>
 <?= form_label('Username', 'user_name'); ?>
 <?= form_input(array('name'=>'user_name')); ?><br />
 <?= form_label('Password', 'user_secret'); ?>

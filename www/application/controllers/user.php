@@ -23,7 +23,7 @@ class User extends Controller {
 			}
 
 			$view['page_menu_code'] = 'user/login';
-			$view['page_content'] = $this->load->view('user_login_view', $view, True);
+			$view['page_content'] = $this->load->view('user/loginform', $view, True);
 			$this->load->view('main_page_view', $view);
 
 	}
