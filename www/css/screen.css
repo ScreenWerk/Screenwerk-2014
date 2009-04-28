@@ -41,14 +41,14 @@ body, html {
 
 #content_wide {
 	margin: 0px;
-	padding: 0px 1px 30px 1px;
+	padding: 0px 1px 50px 1px;
 }
 
 #content_left {
-    width: 550px;
+    width: 580px;
 	float: left;
 	margin: 0px;
-	padding: 0px 1px 30px 1px;
+	padding: 0px 1px 50px 1px;
 }
 
 #content_right {
@@ -150,6 +150,9 @@ body, html {
 	border-bottom: 1px solid #D1D1D1;
 }
 
+.box_hidden {
+	display: none;
+}
 
 
 /* Tables */

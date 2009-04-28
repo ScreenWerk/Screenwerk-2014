@@ -28,11 +28,11 @@
 		</div>
 		<div id="content">
 
-<?php if(isset($box_content)) { ?>
+<?php if(isset($box)) { ?>
 			<div id="content_right">
-<?php foreach($box_content as $box): ?>
-				<div class="box_t"><div class="box_b"><div class="box_l"><div class="box_r"><div class="box_bl"><div class="box_br"><div class="box_tl"><div class="box_tr">
-					<?= $box; ?>
+<?php foreach($box as $box_id => $box_content): ?>
+				<div class="box_t <?= isset($box_content['hidden']) ? 'box_hidden' :  ''; ?>" id="<?= $box_id; ?>" style=""><div class="box_b"><div class="box_l"><div class="box_r"><div class="box_bl"><div class="box_br"><div class="box_tl"><div class="box_tr">
+					<?= $box_content['content']; ?>
 				</div></div></div></div></div></div></div></div>
 <?php endforeach; ?>
 			</div>
