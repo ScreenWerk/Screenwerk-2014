@@ -1,6 +1,6 @@
 <h1><?= $filename; ?></h1>
 <center>
-	<img src="<?= base_url(); ?>media/thumbnail/<?= $id; ?>/1" style="margin-bottom: 10px;" width="270px"/>
+	<img src="<?= base_url(); ?>media/thumbnail/<?= $id; ?>/1" style="margin-bottom: 5px;" width="250px"/>
 </center>
 <b>Length: </b><?= $length; ?><br />
 <b>Dimensions: </b><?= $dimension; ?><br />
@@ -10,8 +10,8 @@
 <script type="text/javascript">
 	$(document).ready(function(){
 		$("#row_<?= $id; ?>").click(function () {
-			$(".box_hidden").slideUp("normal");
-			$("#media_<?= $id; ?>").slideDown("normal");
+			$(".box_hidden").hide();
+			$("#media_<?= $id; ?>").fadeIn("normal");
 			$("tr").css("background","none");
 			$("#row_<?= $id; ?>").css("background","#D1DAF6");
 		});    
