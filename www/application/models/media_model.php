@@ -19,7 +19,6 @@ class Media_model extends Model {
 		if($query->num_rows() > 0) {
 			foreach($query->result_array() as $row) {
 				$data[$row['id']] = $row;
-				unset($data[$row['id']]['id']);
 				$data[$row['id']]['dimension'] = $this->dimension->get_name($row['dimension_id']);
 				unset($data[$row['id']]['dimension_id']);
 				$data[$row['id']]['length'] = $this->_secondsToWords($data[$row['id']]['length']);
