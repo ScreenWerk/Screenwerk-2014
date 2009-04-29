@@ -20,8 +20,14 @@ if(isset($filename)) {
 	<center>
 		<img id="media_img" src="<?= base_url(); ?>media/thumbnail/b/<?= $id; ?>" style="margin-bottom: 5px;" width="<?= $img_width ?>" height="<?= $img_height ?>" <?= $skimming ?> />
 	</center>
-	<b>Length: </b><?= $length; ?><br />
-	<b>Dimensions: </b><?= $dimension; ?><br />
+	<b>Type: </b><br /><?= $type; ?><br /><br />
+	<b>Length: </b><br /><?= $length; ?><br /><br />
+	<b>Dimensions: </b><br /><?= $dimension; ?><br /><br />
+	<b>Bundles: </b><br /><?= implode(', ', $bundles); ?><br /><br />
+	<b>Layouts: </b><br /><?= implode(', ', $layouts); ?><br /><br />
+	<b>Collections: </b><br /><?= implode(', ', $collections); ?><br /><br />
+	<b>Schedules: </b><br /><?= implode(', ', $schedules); ?><br /><br />
+	<b>Screens: </b><br /><?= implode(', ', $screens); ?><br /><br />
 
 	<map name="skimming">
 	
