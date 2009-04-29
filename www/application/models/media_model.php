@@ -10,7 +10,7 @@ class Media_model extends Model {
 
 
 	function get_list($id = NULL) {
-		$this->db->select('id, filename, length, type, dimension_id');
+		$this->db->select('id, filename, duration, type, dimension_id');
 		$this->db->from('medias');
 		$this->db->where('customer_id', $_SESSION['user']['customer_id']);
 		if ($id) $this->db->where('id', $id);
@@ -23,8 +23,8 @@ class Media_model extends Model {
 				$data[$row['id']] = $row;
 				$data[$row['id']]['dimension'] = $this->dimension->get_name($row['dimension_id']);
 				unset($data[$row['id']]['dimension_id']);
-				$data[$row['id']]['length'] = $this->_secondsToWords($data[$row['id']]['length']);
-				if($data[$row['id']]['type'] != 'VIDEO') $data[$row['id']]['length'] = null;
+				$data[$row['id']]['duration'] = $this->_secondsToWords($data[$row['id']]['duration']);
+				if($data[$row['id']]['type'] != 'VIDEO') $data[$row['id']]['duration'] = null;
 				if($data[$row['id']]['type'] != 'VIDEO' AND $data[$row['id']]['type'] != 'IMAGE') $data[$row['id']]['dimension'] = null;
 				$data[$row['id']]['bundles'] = $this->media_bundles($row['id']);
 				$data[$row['id']]['layouts'] = $this->media_layouts($row['id']);

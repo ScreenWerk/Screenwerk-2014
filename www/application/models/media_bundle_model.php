@@ -116,7 +116,7 @@ class Media_bundle_model extends Model {
       {
          return $this->MediasForBundle[$bundle_id];
       }
-		$this->db->select('mb.id, m.id as media_id, m.type, m.filename, m.length, mb.frequency, mb.appearances, mb.importance, mb.probability, mb.valid_from_date, mb.valid_to_date');
+		$this->db->select('mb.id, m.id as media_id, m.type, m.filename, m.duration, mb.frequency, mb.appearances, mb.importance, mb.probability, mb.valid_from_date, mb.valid_to_date');
 		$this->db->from('medias_bundles AS mb');
 		$this->db->join('medias AS m', 'm.id = mb.media_id');
 		$this->db->where('mb.customer_id', $_SESSION['user']['customer_id']);

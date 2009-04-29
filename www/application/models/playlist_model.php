@@ -162,11 +162,11 @@ class Playlist_model extends Model
          foreach( array_keys( $_bundles ) as $b_id )
          {
             $_bundle =& $_bundles[$b_id];
-            if( $_bundle['start_sec'] >= $layout['length'] ) continue;
+            if( $_bundle['start_sec'] >= $layout['duration'] ) continue;
             if( $_bundle['stop_sec'] > 0 )
-               $_bundle['stop_sec'] = min( $_bundle['stop_sec'], $layout['length'] );
+               $_bundle['stop_sec'] = min( $_bundle['stop_sec'], $layout['duration'] );
             else
-               $_bundle['stop_sec'] = $layout['length'];
+               $_bundle['stop_sec'] = $layout['duration'];
             
             $_bundle['start_time'] = $this->add_secs( $layout['start_time'], $_bundle['start_sec'] );
             $_bundle['end_time'] = $this->add_secs( $layout['start_time'], $_bundle['stop_sec'] );
@@ -205,7 +205,7 @@ class Playlist_model extends Model
          {
             unset( $this->current_PD->layouts[$key] );
             #print_r(array('L'=>$_last_layout,'C'=>$_current_layout));
-            $_last_layout['length'] += $_current_layout['length'];
+            $_last_layout['duration'] += $_current_layout['duration'];
             $_last_layout['end_time'] = $_current_layout['end_time'];
             #print_r(array('L'=>$_last_layout));
          }
@@ -239,7 +239,7 @@ class Playlist_model extends Model
 #               print_r($_media);
                if( !isset($m_count[$m_id]) ) $m_count[$m_id] = 0;
                if( ( $_media['appearances'] > 0 && $_media['appearances'] <= $m_count[$m_id] )
-                     || $_media['length'] <= 0 )
+                     || $_media['duration'] <= 0 )
                {
                   unset($_medias[$m_id]);
                   continue;
@@ -247,17 +247,17 @@ class Playlist_model extends Model
                if( $_secs >= $bundle['duration'] ) break;
                
                $_media['start_time'] = $this->add_secs( $bundle['start_time'], $_secs );
-               $_secs = $_secs + $_media['length'];
+               $_secs = $_secs + $_media['duration'];
                if( $_secs >= $bundle['duration'] )
                {
-                  $_media['length'] = $_media['length'] - ( $_secs - $bundle['duration'] );
-                  if( $_media['length'] <= 0 )
+                  $_media['duration'] = $_media['duration'] - ( $_secs - $bundle['duration'] );
+                  if( $_media['duration'] <= 0 )
                   {
                      unset($_medias[$m_id]);
                      continue;
                   }
                }
-               $_media['end_time'] = $this->add_secs( $_media['start_time'], $_media['length'] );
+               $_media['end_time'] = $this->add_secs( $_media['start_time'], $_media['duration'] );
                
                $this->current_PD->medias[] = $_media;
                
@@ -324,7 +324,7 @@ class Playlist_model extends Model
                $_layout['id'] = $l_id;
                if( !isset($lo_count[$l_id]) ) $lo_count[$l_id] = 0;
                if( ( $_layout['appearances'] > 0 && $_layout['appearances'] <= $lo_count[$l_id] )
-                     || $_layout['length'] <= 0 )
+                     || $_layout['duration'] <= 0 )
                {
                   unset($_layouts[$l_id]);
                   continue;
@@ -332,17 +332,17 @@ class Playlist_model extends Model
                if( $_secs >= $collection['duration'] ) break;
                
                $_layout['start_time'] = $this->add_secs( $collection['start_time'], $_secs );
-               $_secs = $_secs + $_layout['length'];
+               $_secs = $_secs + $_layout['duration'];
                if( $_secs >= $collection['duration'] )
                {
-                  $_layout['length'] = $_layout['length'] - ( $_secs - $collection['duration'] );
-                  if( $_layout['length'] <= 0 )
+                  $_layout['duration'] = $_layout['duration'] - ( $_secs - $collection['duration'] );
+                  if( $_layout['duration'] <= 0 )
                   {
                      unset($_layouts[$l_id]);
                      continue;
                   }
                }
-               $_layout['end_time'] = $this->add_secs( $_layout['start_time'], $_layout['length'] );
+               $_layout['end_time'] = $this->add_secs( $_layout['start_time'], $_layout['duration'] );
                
                $this->current_PD->layouts[] = $_layout;
                $lo_count[$l_id] ++;
@@ -355,7 +355,7 @@ class Playlist_model extends Model
    {
       /*
       *  Remove repeating collections.
-      *  Also get rid of 0-length collections.
+      *  Also get rid of 0-duration collections.
       */
       foreach( array_keys( $collections ) as $key )
       {

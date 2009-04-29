@@ -102,7 +102,7 @@ class Layout_collection_model extends Model {
       {
          return $this->LayoutsForCollection[$collection_id];
       }
-		$this->db->select('l.id, l.name, l.length, lc.frequency, lc.appearances, lc.importance, lc.probability, lc.valid_from_date, lc.valid_to_date');
+		$this->db->select('l.id, l.name, l.duration, lc.frequency, lc.appearances, lc.importance, lc.probability, lc.valid_from_date, lc.valid_to_date');
 		$this->db->from('layouts_collections AS lc');
 		$this->db->join('layouts AS l', 'l.id = lc.layout_id');
 		$this->db->where('lc.customer_id', $_SESSION['user']['customer_id']);

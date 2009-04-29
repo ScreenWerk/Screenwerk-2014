@@ -10,7 +10,7 @@ class Layout_model extends Model {
 
 
 	function get_list() {
-		$this->db->select('id, name, dimension_id, length');
+		$this->db->select('id, name, dimension_id, duration');
 		$this->db->from('layouts');
 		$this->db->where('customer_id', $_SESSION['user']['customer_id']);
 		$this->db->order_by('name'); 
@@ -34,7 +34,7 @@ class Layout_model extends Model {
 
 	function get_one($id = NULL) {
 	
-		$this->db->select('id, name, dimension_id, length');
+		$this->db->select('id, name, dimension_id, duration');
 		$this->db->from('layouts');
 		$this->db->where('customer_id', $_SESSION['user']['customer_id']);
 		$this->db->where('id', $id);
@@ -141,7 +141,7 @@ class Layout_model extends Model {
 		$data = array(
 			'name' => $this->input->post('name'),
 			'dimension_id' => $this->input->post('dimension'),
-			'length' => $this->input->post('length')
+			'duration' => $this->input->post('duration')
 		);
 		if($this->input->post('id') > 0) {
 			$this->db->where('id', $this->input->post('id'));
