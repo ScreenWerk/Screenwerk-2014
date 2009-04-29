@@ -9,10 +9,11 @@ class Media_model extends Model {
 
 
 
-	function get_list() {
+	function get_list($id = NULL) {
 		$this->db->select('id, filename, length, type, dimension_id');
 		$this->db->from('medias');
 		$this->db->where('customer_id', $_SESSION['user']['customer_id']);
+		if ($id) $this->db->where('id', $id);
 		$this->db->order_by('filename'); 
 		$query = $this->db->get();
 		
@@ -35,24 +36,8 @@ class Media_model extends Model {
 
 
 	function get_one($id = NULL) {
-	
-		$this->db->select('id, filename, length, type, dimension_id');
-		$this->db->from('medias');
-		$this->db->where('customer_id', $_SESSION['user']['customer_id']);
-		$this->db->where('id', $id);
-		$this->db->limit(1);
-		$query = $this->db->get();
-		
-		if($query->num_rows() > 0) {
-			$data = $query->row_array();
-		} else {
-			foreach($query->field_data() as $row) {
-				$data[$row->name] = NULL;
-			}
-		}
-		
-		return $data;
-		
+		$row = $this->get_list($id);
+		return $row[$id];	
 	}
 
 

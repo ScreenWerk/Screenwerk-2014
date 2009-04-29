@@ -21,16 +21,18 @@ class Media extends Controller {
 		$view['show_edit_link'] = isset($this->session->forms[$this->router->class .'']);
 		$view['page_content'] = $this->load->view('media/media_list', $view, True);
 		
-		foreach($view['data'] as $media_id => $media_content) {
-			$view['box']['media_'. $media_id]['hidden'] = TRUE;
-			$view['box']['media_'. $media_id]['content'] = $this->load->view('media/media_box', $media_content, True);
-		}
-		
+		$view['box']['media_box']['hidden'] = TRUE;
+		$view['box']['media_box']['content'] = $this->load->view('media/media_box', $view, True);
+
 		$view['box']['upload']['content'] = $this->load->view('media/media_upload', $view, True);
 		
 		$this->load->view('main_page_view', $view);
 	}
 
+	function view($id) {
+		$view = $this->media->get_one($id);
+		$this->load->view('media/media_box', $view);
+	}
 
 	
 	function thumbnail($media_id, $thumb_no = null) {

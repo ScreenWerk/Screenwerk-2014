@@ -8,6 +8,8 @@ Uploaded media will be processed by server and will be available after few momen
 <?= form_close(); ?>
 </center>
 
+
+
 <script type="text/javascript">
 	$(document).ready(function(){
 		$("#upload_file").fileUpload({
@@ -21,3 +23,4 @@ Uploaded media will be processed by server and will be available after few momen
 		});
 	});
 </script>
+
