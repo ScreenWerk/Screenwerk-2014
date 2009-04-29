@@ -51,10 +51,10 @@ class Media extends Controller {
 		}
 		
 		if(read_file($dir.$file)) {
-			header('Content-Type: image/jpeg');
+			header('Content-Type: image/png');
 			print(file_get_contents($dir.$file));
 		} else {
-			header('Content-Type: image/jpeg');
+			header('Content-Type: image/png');
 			print(file_get_contents('images/empty.png'));
 		}
 	}
