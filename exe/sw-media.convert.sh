@@ -41,12 +41,21 @@ case ${media_type} in
       h=`echo "scale=0; $ID_VIDEO_HEIGHT*$w/$ID_VIDEO_WIDTH/2" | bc`
       h=`echo "scale=0; $h*2" | bc`
       ffmpeg -i "${original_media}" -vframes 20 -r ${framerate} -s ${w}x${h} -y ${_DIR_THUMBS}/${media_id}_%d.png
-      ln -f ${_DIR_THUMBS}/${media_id}_2.png ${_DIR_THUMBS}/${media_id}.png
-      ln -f ${_DIR_THUMBS}/${media_id}_2.png ${_DIR_THUMBS}/${media_id}s.png
+      ln -f ${_DIR_THUMBS}/${media_id}_5.png ${_DIR_THUMBS}/${media_id}.png
+      ffmpeg -i ${_DIR_THUMBS}/${media_id}.png -s 16x16 -y ${_DIR_THUMBS}/${media_id}s.png
       ;;
    IMAGE)
       master_media=${_DIR_MASTERS}/${media_id}.${media_type}
       cp ${original_media} ${master_media}
+
+      ${_DIR_EXE}/midentify.sh "${original_media}" > /tmp/foo
+      . /tmp/foo
+      rm /tmp/foo
+      w=250
+      h=`echo "scale=0; $ID_VIDEO_HEIGHT*$w/$ID_VIDEO_WIDTH/2" | bc`
+      h=`echo "scale=0; $h*2" | bc`
+      ffmpeg -i "${original_media}" -s ${w}x${h} -y ${_DIR_THUMBS}/${media_id}.png
+      ffmpeg -i "${original_media}" -s 16x16 -y ${_DIR_THUMBS}/${media_id}s.png
       ;;
    HTML)   
       master_media=${_DIR_MASTERS}/${media_id}.${media_type}
