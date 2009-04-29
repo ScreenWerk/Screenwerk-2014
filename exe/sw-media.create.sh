@@ -84,12 +84,12 @@ DIMENSION_ID=`${_DIR_EXE}/sw-dimension.findcreate.sh ${ID_WIDTH} ${ID_HEIGHT}`
 if [ ! -n "${media_id}" ]
 then
    query="INSERT into ${_DB_TABLE_MEDIA}
-set filename='${1}', customer_id='${customer_id}', type='${media_type}', dimension_id=${DIMENSION_ID}, location='ORIGINAL', length=${ID_LENGTH};"
+set filename='${1}', customer_id='${customer_id}', type='${media_type}', dimension_id=${DIMENSION_ID}, location='ORIGINAL', duration=${ID_LENGTH};"
    echo $query
 
 mysql -u ${_DB_USER} --password="${_DB_PASSWORD}" -D ${_DB_SCHEMA} --host=${_DB_HOST} -sN --default-character-set=utf8<<EOFMYSQL
 INSERT into ${_DB_TABLE_MEDIA}
-set filename='${1}', customer_id='${customer_id}', type='${media_type}', dimension_id=${DIMENSION_ID}, location='ORIGINAL', length=${ID_LENGTH};
+set filename='${1}', customer_id='${customer_id}', type='${media_type}', dimension_id=${DIMENSION_ID}, location='ORIGINAL', duration=${ID_LENGTH};
 EOFMYSQL
 
    media_id=`${_DIR_EXE}/sw-media.find_by_filename_and_customer.sh "${1}" ${customer_id}`

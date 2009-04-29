@@ -14,7 +14,7 @@ _DB_HOST="d1647.mysql.zone.ee"
 _DB_TABLE_MEDIA=${_DB_PREFIX}medias
 
 
-_MAX_MCOLLECTION_LENGTH="86400" # max playlist length in sec's
+_MAX_MCOLLECTION_DURATION="86400" # max playlist duration in sec's
 
 #_DIR_TRUNK=/home/mihkel/Documents/Screenwerk/trunk
 _DIR_TRUNK=/swtrunk
