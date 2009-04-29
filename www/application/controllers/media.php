@@ -35,17 +35,19 @@ class Media extends Controller {
 	}
 
 	
-	function thumbnail($media_id, $thumb_no = null) {
+	function thumbnail($size, $media_id, $thumb_no = null) {
 
 		$this->load->helper('download');
 		$this->load->helper('file');
+		
+		if($size != 's') $size = '';
 
 		$dir = DIR_FTP_THUMBS .'/';
 		
 		if($thumb_no) {
-			$file = $media_id .'_'. $thumb_no .'.png';
+			$file = $media_id .'_'. $thumb_no . $size .'.png';
 		} else {
-			$file = $media_id .'.png';
+			$file = $media_id . $size .'.png';
 		}
 		
 		if(read_file($dir.$file)) {

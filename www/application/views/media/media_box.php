@@ -3,7 +3,7 @@
 <?php if(isset($filename)) { ?>
 	<h1><?= $filename; ?></h1>
 	<center>
-		<img id="media_img" src="<?= base_url(); ?>media/thumbnail/<?= $id; ?>/1" style="margin-bottom: 5px;" width="250px" <?= ($type=='VIDEO') ? 'usemap="#skimming"' : '' ?> />
+		<img id="media_img" src="<?= base_url(); ?>media/thumbnail/b/<?= $id; ?>" style="margin-bottom: 5px;" width="250px" <?= ($type=='VIDEO') ? 'usemap="#skimming"' : '' ?> />
 	</center>
 	<b>Length: </b><?= $length; ?><br />
 	<b>Dimensions: </b><?= $dimension; ?><br />
@@ -23,7 +23,7 @@
 
 <?php
 	for ( $counter = 1; $counter <= $count; $counter += 1) {
-		echo '<img id="media_img_'. $counter .'" src="'. base_url() .'media/thumbnail/'. $id .'/'. $counter .'" style="display: none;" >' ."\n";
+		echo '<img id="media_img_'. $counter .'" src="'. base_url() .'media/thumbnail/b/'. $id .'/'. $counter .'" style="display: none;" >' ."\n";
 	}
 ?>
 
