@@ -1,0 +1,11 @@
+#menu ul {
+	height: 19px;
+}
+
+#menu_current {
+	padding: 0px 0px 2px 3px;
+}
+
+#menu_current span {
+	padding: 0px 8px 2px 5px;
+}
