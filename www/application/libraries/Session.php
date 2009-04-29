@@ -164,7 +164,7 @@ class CI_Session {
 			$this->CI->db->where('sid', session_id());
 			$this->CI->db->where('user_id', $_SESSION['user']['id']);
 			$this->CI->db->where('ip', $_SERVER['REMOTE_ADDR']);
-			$this->CI->db->where('LEFT(os, 200) =', substr($_SERVER['HTTP_USER_AGENT'], 0, 200));
+			//$this->CI->db->where('LEFT(os, 200) =', substr($_SERVER['HTTP_USER_AGENT'], 0, 200));
 			$query = $this->CI->db->get();
 	
 			if($query->num_rows !=0 ) { //sessioni rida leiti ja uuendatakse kuupäeva
