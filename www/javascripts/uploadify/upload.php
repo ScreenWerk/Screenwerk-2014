@@ -25,7 +25,7 @@ THE SOFTWARE.
 
 if (!empty($_FILES)) {
 	$tempFile = $_FILES['Filedata']['tmp_name'];
-	$targetPath = $_SERVER['DOCUMENT_ROOT'] . '/../ftp/incoming/'. $_GET['folder'] . '/';
+	$targetPath = $_SERVER['DOCUMENT_ROOT'] . '/../media/incoming/'. $_GET['folder'] . '/';
 	$targetFile =  str_replace('//','/',$targetPath) . $_FILES['Filedata']['name'];
 	
 	// Uncomment the following line if you want to make the directory if it doesn't exist
