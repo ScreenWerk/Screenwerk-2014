@@ -1,9 +1,24 @@
 <div id="media_content">
 
-<?php if(isset($filename)) { ?>
+<?php 
+
+if(isset($filename)) {
+	
+	$skimming = '';
+	$img_width = '';
+	$img_height = '';
+	
+	if($type=='VIDEO') $skimming = 'usemap="#skimming"';
+	
+	$img_width = 250;
+	if(isset($dimension)) {
+		$dimensions = explode("x", $dimension);
+		$img_height = $img_width / ($dimensions[0] / $dimensions[1]);
+	}
+?>
 	<h1><?= $filename; ?></h1>
 	<center>
-		<img id="media_img" src="<?= base_url(); ?>media/thumbnail/b/<?= $id; ?>" style="margin-bottom: 5px;" width="250px" <?= ($type=='VIDEO') ? 'usemap="#skimming"' : '' ?> />
+		<img id="media_img" src="<?= base_url(); ?>media/thumbnail/b/<?= $id; ?>" style="margin-bottom: 5px;" width="<?= $img_width ?>" height="<?= $img_height ?>" <?= $skimming ?> />
 	</center>
 	<b>Length: </b><?= $length; ?><br />
 	<b>Dimensions: </b><?= $dimension; ?><br />
@@ -12,9 +27,8 @@
 	
 	<?php
 		$count = 20;
-		$width = 250;
-		$step = ($width/$count);
-		for ( $counter = ($width/$count); $counter <= $width; $counter += ($width/$count)) {
+		$step = ($img_width/$count);
+		for ( $counter = ($img_width/$count); $counter <= $img_width; $counter += ($img_width/$count)) {
 			echo '	<area shape="rect" coords="'. round($counter-$step) .',0,'. round($counter) .',250" alt="'. ($counter/$step) .'">' ."\n";
 		}
 	?>

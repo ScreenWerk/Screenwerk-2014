@@ -1,4 +1,4 @@
-<table class="data_table" style="width: 100%;">
+<table class="data_table" style="width: 100%;" cellpadding="0" cellspacing="0">
 
 <?php foreach($data as $row): ?>
 
