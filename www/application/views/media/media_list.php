@@ -11,7 +11,7 @@
 <table class="data_table" style="width: 100%; margin-bottom:20px;" cellpadding="0" cellspacing="0">
 
 <?php
-		} else {
+		}
 
 ?>
 
@@ -22,9 +22,6 @@
 		<td style="text-align:right;"><?= $row['length']; ?>&nbsp;</td>
 		<td style="text-align:right;"><?= $row['dimension']; ?>&nbsp;</td>
 	</tr>
-<?php
-		}
-?>
 
 <?php endforeach; ?>
 
