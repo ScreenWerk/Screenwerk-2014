@@ -6,11 +6,12 @@
 		<title>Screenwerk : <?= humanize(plural($this->router->class)); ?></title>
 		
 		<link rel="stylesheet" type="text/css" media="screen" href="<?= base_url(); ?>css/screen.css" />
+		<!--[if IE]>
+			<link rel="stylesheet" type="text/css" media="screen" href="<?= base_url(); ?>css/ie.css" />
+		<![endif]-->
 		
 		<script src="http://www.google.com/jsapi"></script>
 		<script>
-			//google.load("prototype", "1.6");
-			//google.load("scriptaculous", "1.8")
 			google.load("jquery", "1")
 		</script>
 		<script type="text/javascript" src="<?= base_url(); ?>javascripts/uploadify/jquery.uploadify.js"></script>
@@ -18,7 +19,7 @@
 	</head>
 	<body>
 		<div id="header">
-			<img src="<?= base_url(); ?>images/sw-p128.png" style="float:right;" width="64px" height="64px" />
+			<img src="<?= base_url(); ?>images/sw-p128.png" style="float:right;" width="64px" height="64px" alt="logo" />
 			Screenwerk
 		</div>
 		<div id="menu">
@@ -54,7 +55,7 @@
 		<div id="footer">
 			<div id="footer_content">
 				<b>digital signage made simple</b><br />
-				2009
+				<a href="http://validator.w3.org/check?uri=referer">2009</a>
 			</div>
 		</div>
 	</body>

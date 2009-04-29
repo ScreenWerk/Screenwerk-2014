@@ -73,57 +73,55 @@ body, html {
 
 /* Tabs */
 
+#menu  {
+
+}
+
 #menu ul {
 	display: block;
 	margin: 0px;
 	padding: 0px;
-	height: 23px;
+	height: 22px;
 }
 
-#menu li  {
+#menu li {
 	display: inline;
 	list-style: none;
-	padding: 2px 10px 0px 0px;
-	margin: 0px 5px 0px 0px;
-	height: 23px;
 }
 
 #menu a {
-	padding: 0px 0px ;
+	padding: 0px 10px ;
 	text-decoration: none;
 	font-size: 14px;
 	color: #ff7f00;
 }
 
-#menu_current, #menu_current_l, #menu_current_r {
-	padding: 3px 5px 6px 5px;
+#menu_current {
+	background: url('/images/menu_left_bg.png') left top no-repeat;
 	margin: 0px;
+	padding: 3px 0px 3px 3px;
 	font-size: 16px;
 	font-weight: bold;
-	background: #ff7f00;
-	color: #ffffff;
+	color: #fff;
 }
 
-#menu_current_l {
-	background-image: url('/images/menu_left_bg.png');
-	background-repeat: no-repeat;
-	background-position: top left;
-	padding-right: 0px;
-	padding-left: 0px;
+#menu_current span {
+	background: #ff7f00 url('/images/menu_right_bg.png') right top no-repeat;
+	margin: 0px;
+	padding: 3px 8px 3px 5px;
 }
 
-#menu_current_r {
-	background-image: url('/images/menu_right_bg.png');
-	background-repeat: no-repeat;
-	background-position: top right;
-	padding-right: 0px;
-	padding-left: 0px;
-}
+
+
+
 
 
 
 /* Right Box */
 
+.box {
+	margin-bottom: 10px;
+}
 .box_t {
 	background: #F5F5F5 url('/images/box_dot.png') 0 0 repeat-x;
 	width: 100%;
@@ -138,7 +136,6 @@ body, html {
 .box_tr {
 	background: url('/images/box_tr.png') 100% 0 no-repeat;
 	padding: 10px;
-	margin-bottom: 10px;
 }
 
 .box_t h1 {
