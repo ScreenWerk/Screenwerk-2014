@@ -1,13 +1,30 @@
 <table class="data_table" style="width: 100%;" cellpadding="0" cellspacing="0">
 
-<?php foreach($data as $row): ?>
+<?php
+		$type = '';
+	foreach($data as $row): 
+		if($type != $row['type']) {
+			$type = $row['type'];
+?>
+</table>
+<h1 style="margin-bottom: 0px;"><?= $row['type']; ?></h1>
+<table class="data_table" style="width: 100%; margin-bottom:20px;" cellpadding="0" cellspacing="0">
+
+<?php
+		} else {
+
+?>
+
 
 	<tr id="row_<?= $row['id']; ?>" style="cursor: pointer;" alt="<?= $row['id']; ?>">
 		<td style=""><img src="<?= base_url(); ?>media/thumbnail/s/<?= $row['id']; ?>" width="16px" height="16px" /></td>
 		<td><b><?= $row['filename']; ?></b></td>
-		<td style="text-align:right;"><?= $row['length']; ?></td>
-		<td style="text-align:right;"><?= $row['dimension']; ?></td>
+		<td style="text-align:right;"><?= $row['length']; ?>&nbsp;</td>
+		<td style="text-align:right;"><?= $row['dimension']; ?>&nbsp;</td>
 	</tr>
+<?php
+		}
+?>
 
 <?php endforeach; ?>
 
