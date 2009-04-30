@@ -1,0 +1,16 @@
+<h1>LIIKUV MEEDIUM -- DIGITAHVLID -- MIS SEE ON?</h1>
+<p>Üha rohkem ettevõtjaid täheldab, et liikuv digiteave kasvatab läbimüüki ja edendab tootja profiili. Sama meediakanalit pruugivad enda tutvustamiseks ühiskondlikus kontekstis piletimüüjad, mängusaalid, pangad ja paljude muude valdkondade esindajad. Maailmas põhjalikult analüüsitud tulemused tõestavad selgelt müügiedukust. Oluline on meeles pidada, et üleüldine hinnalangus on muutnud soodsamaks ka investeeringud riistvarasse. Meie pakutud tarkvara tagab esitletava teabe terviklikkuse; toode on alati uuendus- ja värskendusvalmis kiirel ja igaühele sobival viisil.<br />
+<br />
+Riistvaramüüjad ei väsi oma tooteid ja võimalusi ülistamast ning turge üha agaramalt haaramast. Reklaamitööstus põleb soovist pakkuda aina huvitavamaid ja mitmekülgsemaid lahendusi. Seetõttu suudab meie uus, riistvara ja reklaaminduse laiu võimalusi ühildav meedium tõhusalt kasutada kõiki tänapäevaseid vahendeid parimal moel ja vastavalt tellija soovidele.<br />
+<br />
+UUS MEEDIUM, nagu igasugune reklaamikanal, soovib luua lisaväärtust. Selles kontekstis on teave tehnikast tähtsam.</p>
+
+<h1>EESMÄRK</h1>
+<p>Tere jälgima uut meediakanalit!<br />
+<br />
+Aastaid tagasi oli võimalik osta leiba, mis oli lihtsalt leib. Tänapäeval müük enam selliselt ei toimi, elu on muutunud. Kliendi soovist on saanud tootja seadus; võitlus tarbijate tähelepanu pärast on kasvanud dramaatiliselt. Sellepärast ongi teabe edastamine tarbijateni kujunenud turul strateegiliselt võtmetähtsaks. Valmistajad ja edasimüüjad peavad mõistma ostjate vajadusi ning leidma samas tarbija eesmärkidele vastava ja kättesaadava teabeedastuse vormi. Näiteks on kaubamärkide tuntus viimasel ajal märgatavalt kasvanud. Kaubamärgi väärtus sünnib aga suuresti just aktiivse reklaami kaudu: õige teade peab jõudma tarbijani õigel ajal. See võib toimuda mitmel eri moel, aga aina rohkem on hakatud mõistma, kui tähtis on suunata klienti täpselt seal, kus ta otsuse langetab. Tänapäeva meediasupp tungib meieni muidugi kõikjal, seega mõjub suunatud teave hästi seal, kus tarbijad isiklikult liiguvad, see tähendab ostukeskustes, kohvikutes ja mujal ühiskondlikult aktiivselt külastatavates paikades, mida läbivate inimeste hulk on suur. Sellist käitumist võiks lennukalt nimetada ka “viimase meetri turunduseks”.<br />
+<br />
+Uue meediumi, liikuva meediakanali idee rajaneb tarbijate eelistuste vahetule suunamisele.</p>
+
+<h1>SCREENWERKI VÕIMALUSED</h1> 
+<p>Teabekuvarite hulk ja gabariidid paisuvad, nende kasutusalad laienevad viimasel ajal pidevalt ja väga aktiivselt; uuele, kasvavale meediumile lisandub pidevalt selle jaoks sobivaid uusi ja ootamatuid kasutusvälju. Liikuv digimeedium pakub palju eri võimalusi nii reklaamide kui suunatud ja üldise teabe edastamiseks ekraanidel. Lameekraan võimaldab kasutada häält, pilte ja filmi. Eksponeerija võib soovida teavet ööpäeva vältel kohandada, mistõttu meie lahendused võimaldavad seda hõlpsasti muuta sõltuvalt kellaajast, sagedusest, olulisusest ja koha vajadustest. Ekraane saab paigaldada praktiliselt kõikjale; selleks sobivad väga hästi kõikvõimalikud ühiskondlikud kohad linnaruumis, aga ka hotellid, ooteasutused (lennujaamad, riigi- ja raviasutused), ühistransport jne, jne.</p>
