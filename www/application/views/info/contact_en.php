@@ -1,5 +1,5 @@
-<h1>Tiiu JÃ¤rviste</h1>
-<img src="<?= base_url(); ?>images/tiiu.png" style="float:right">
+<h1>Tiiu Järviste</h1>
+<img src="<?= base_url(); ?>images/tiiu.png" style="float:right" alt="Tiiu" />
 <br />
 <br />
 <br />

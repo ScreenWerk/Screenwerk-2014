@@ -5,8 +5,8 @@
 		
 		<title>Screenwerk : <?= humanize(plural($this->router->class)); ?></title>
 		
-		<link rel="shortcut icon" href="<?= base_url(); ?>images/favicon.ico" >
-   		<link rel="icon" type="image/gif" href="<?= base_url(); ?>images/animated_favicon1.gif" >
+		<link rel="shortcut icon" href="<?= base_url(); ?>images/favicon.ico" />
+   		<link rel="icon" type="image/gif" href="<?= base_url(); ?>images/animated_favicon1.gif" />
 		
 		<link rel="stylesheet" type="text/css" media="screen" href="<?= base_url(); ?>css/screen.css" />
 		<!--[if IE]>
@@ -22,7 +22,7 @@
 	</head>
 	<body>
 		<div id="header">
-			<img src="<?= base_url(); ?>images/sw-p128.png" style="float:right;" width="64px" height="64px" alt="logo" alt="Logo" />
+			<img src="<?= base_url(); ?>images/sw-p128.png" style="float:right;" width="64px" height="64px" alt="Logo" />
 			Screenwerk
 		</div>
 		<div id="menu">
