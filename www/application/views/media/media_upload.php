@@ -2,11 +2,13 @@
 Uploaded media will be processed by server and will be available after few moments.
 <br />
 <br />
-<center>
+<div style="text-align: center;">
 <?= form_open_multipart('upload/do_upload'); ?>
+<?= form_fieldset(); ?>
 <?= form_upload(array('name'=>'upload_file', 'id'=>'upload_file')); ?>
+<?= form_fieldset_close(); ?>
 <?= form_close(); ?>
-</center>
+</div>
 
 
 

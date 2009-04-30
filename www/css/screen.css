@@ -204,6 +204,12 @@ img {
 
 
 /* Forms */
+fieldset {
+	border: none;
+	margin: 0px;
+	padding: 0px;
+}
+
 label{
 	float: left;
 	width: 90px;

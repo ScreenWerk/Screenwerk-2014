@@ -18,7 +18,7 @@ if(isset($filename)) {
 ?>
 	<h1><?= $filename; ?></h1>
 	<center>
-		<img id="media_img" src="<?= base_url(); ?>media/thumbnail/b/<?= $id; ?>" style="margin-bottom: 5px;" width="<?= $img_width ?>" height="<?= $img_height ?>" <?= $skimming ?> />
+		<img id="media_img" src="<?= base_url(); ?>media/thumbnail/b/<?= $id; ?>" style="margin-bottom: 5px;" width="<?= $img_width ?>" height="<?= $img_height ?>" <?= $skimming ?> alt="" />
 	</center>
 	<b>Type: </b><br /><?= $type; ?><br /><br />
 	<b>Duration: </b><br /><?= $duration; ?><br /><br />
