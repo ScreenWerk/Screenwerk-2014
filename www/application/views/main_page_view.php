@@ -13,8 +13,8 @@
 			<link rel="stylesheet" type="text/css" media="screen" href="<?= base_url(); ?>css/ie.css" />
 		<![endif]-->
 		
-		<script src="http://www.google.com/jsapi"></script>
-		<script>
+		<script src="http://www.google.com/jsapi" type="text/javascript"></script>
+		<script type="text/javascript">
 			google.load("jquery", "1")
 		</script>
 		<script type="text/javascript" src="<?= base_url(); ?>javascripts/uploadify/jquery.uploadify.js"></script>
