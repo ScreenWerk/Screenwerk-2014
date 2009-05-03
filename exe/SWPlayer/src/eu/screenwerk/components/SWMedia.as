@@ -79,6 +79,7 @@ package eu.screenwerk.components
 						this.SWChilds[this.sw_id] = new SWSWFPlayer(this.sw_id);
 						break;
 					case 'PDF':
+						this.SWChilds[this.sw_id] = new SWPDFPlayer(this.sw_id);
 						break;
 				}
 				Application.application.log( 'Media ' + this.sw_id + "." + this.type + " loaded.");

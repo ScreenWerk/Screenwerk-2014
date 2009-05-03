@@ -8,11 +8,12 @@ package eu.screenwerk.player
 	
 	public class URLPlayer extends HTML
 	{
+		private var sw_id:uint;
 		
-		private var is_playing:Boolean = false;
-
 		public function URLPlayer(id:uint)
 		{
+			this.sw_id = id;
+
 			var media_file:File = Application.application.sw_dir.resolvePath(id+'.URL');
 			var media_string:String = Application.application.readFileContents(media_file);
 			var media_split:Array = media_string.split("\n");
