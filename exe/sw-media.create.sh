@@ -74,6 +74,10 @@ case `echo ${media_type}|cut -d" " -f1` in
             ID_HEIGHT="0"
             ID_LENGTH=${_DEFAULT_URL_LENGTH}
             ;;
+   PDF)     ID_WIDTH="0"
+            ID_HEIGHT="0"
+            ID_LENGTH=${_DEFAULT_URL_LENGTH}
+            ;;
    *)       echo "Unsupported media type"; exit 1;;
 esac
 

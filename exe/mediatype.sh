@@ -9,9 +9,10 @@ help()
     echo "File should be one of following:"
     echo " - Video file - all formats are supported;"
     echo " - Image file - all formats except animated gif's are supported;"
-    echo " - SWF - animated gifs should be converted to swf."  
-    echo " - URL - ascii file named like \"linkname.url\" with single address line as contents."  
-    echo " - HTML - HTML have to be compressed in single archive. zip archives are supported;"
+    echo " - SWF - animated gifs should be converted to swf;"  
+    echo " - PDF;"
+    echo " - URL - ascii file named like \"linkname.url\" with single address line as contents;"  
+    echo " - HTML - HTML have to be compressed in single archive. zip archives are supported."
     echo "Outputs media type - VIDEO/IMAGE/HTML/URL."
     exit 0
 }
@@ -39,6 +40,7 @@ fi
 # Test by file extension, if it could be html package or plain url
 extension=${1/*./}
 case $extension in
+   pdf) echo "PDF"; exit 0;;
    swf) echo "SWF"; exit 0;;
    url) echo "URL"; exit 0;;
    zip) echo "HTML"; exit 0;;
