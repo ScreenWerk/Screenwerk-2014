@@ -32,6 +32,11 @@ if (!empty($_FILES)) {
 	// mkdir(str_replace('//','/',$targetPath), 0755, true);
 	
 	move_uploaded_file($tempFile,$targetFile);
+	
+	$fp = fopen('upload.log', 'a');
+	fwrite($fp, date('d.m.Y G:i:s') .' '. $_FILES['Filedata']['tmp_name']. ' to '. $targetFile ."\r\n");
+	fclose($fp);
+	
 }
 echo 1;
 ?>
