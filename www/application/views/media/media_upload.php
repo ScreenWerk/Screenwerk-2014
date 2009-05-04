@@ -1,5 +1,7 @@
 <h1>Upload</h1>
-Uploaded media will be processed by server and will be available after few moments.
+Uploaded media will be processed by server and will be available after few moments.<br />
+<br />
+Maximum file size is 60MB.
 <br />
 <br />
 <div style="text-align: center;">
@@ -21,6 +23,7 @@ Uploaded media will be processed by server and will be available after few momen
 			'auto'      : true,
 			'multi'     : true,
 			'buttonText': 'Select Files',
+			'sizeLimit' : '62914560',
 			'folder'    : '<?= $upload_folder; ?>'
 		});
 	});
