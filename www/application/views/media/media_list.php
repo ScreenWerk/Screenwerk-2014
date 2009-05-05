@@ -2,7 +2,8 @@
 	
 	$type = '';
 	$first = true;
-	foreach($data as $row): 
+	foreach($data as $row):
+	
 		if($type != $row['type']) {
 			$type = $row['type'];
 			if($first == true) {
@@ -26,6 +27,7 @@
 		<td><b><?= $row['filename']; ?></b></td>
 		<td style="text-align:right;"><?= $row['duration']; ?>&nbsp;</td>
 		<td style="text-align:right;"><?= isset($row['width']) ? $row['width'] .'x'. $row['height'] : '&nbsp;'; ?></td>
+		<td style="text-align:center; width:20px"><?= $row['status']; ?>&nbsp;</td>
 	</tr>
 
 <?php endforeach; ?>
