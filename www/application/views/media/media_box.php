@@ -11,9 +11,8 @@ if(isset($filename)) {
 	if($type=='VIDEO') $skimming = 'usemap="#skimming"';
 	
 	$img_width = 250;
-	if(isset($dimension)) {
-		$dimensions = explode("x", $dimension);
-		$img_height = $img_width / ($dimensions[0] / $dimensions[1]);
+	if(isset($width) AND isset($height)) {
+		$img_height = round($img_width / ($width / $height));
 	}
 ?>
 	<h1><?= $filename; ?></h1>
