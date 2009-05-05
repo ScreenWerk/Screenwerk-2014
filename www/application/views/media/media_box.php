@@ -22,7 +22,7 @@ if(isset($filename)) {
 	</center>
 	<b>Type: </b><br /><?= $type; ?><br /><br />
 	<b>Duration: </b><br /><?= $duration; ?><br /><br />
-	<b>Dimensions: </b><br /><?= $dimension; ?><br /><br />
+	<b>Dimensions: </b><br /><?= isset($width) ? $width .'x'. $height : ''; ?><br /><br />
 	<b>Bundles: </b><br /><?= implode(', ', $bundles); ?><br /><br />
 	<b>Layouts: </b><br /><?= implode(', ', $layouts); ?><br /><br />
 	<b>Collections: </b><br /><?= implode(', ', $collections); ?><br /><br />

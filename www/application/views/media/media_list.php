@@ -25,7 +25,7 @@
 		<td style="width:20px"><img src="<?= base_url(); ?>media/thumbnail/s/<?= $row['id']; ?>" width="16px" height="16px" alt="" /></td>
 		<td><b><?= $row['filename']; ?></b></td>
 		<td style="text-align:right;"><?= $row['duration']; ?>&nbsp;</td>
-		<td style="text-align:right;"><?= $row['dimension']; ?>&nbsp;</td>
+		<td style="text-align:right;"><?= isset($row['width']) ? $row['width'] .'x'. $row['height'] : '&nbsp;'; ?></td>
 	</tr>
 
 <?php endforeach; ?>

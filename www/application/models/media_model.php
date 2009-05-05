@@ -4,13 +4,12 @@ class Media_model extends Model {
 
 	function __construct() {
 		parent::Model();
-		$this->load->model('Dimension_model', 'dimension');
 	}
 
 
 
 	function get_list($id = NULL) {
-		$this->db->select('id, filename, duration, type, dimension_id');
+		$this->db->select('id, filename, duration, width, height, type');
 		$this->db->from('medias');
 		$this->db->where('customer_id', $_SESSION['user']['customer_id']);
 		if ($id) $this->db->where('id', $id);
@@ -21,8 +20,6 @@ class Media_model extends Model {
 		if($query->num_rows() > 0) {
 			foreach($query->result_array() as $row) {
 				$data[$row['id']] = $row;
-				$data[$row['id']]['dimension'] = $this->dimension->get_name($row['dimension_id']);
-				unset($data[$row['id']]['dimension_id']);
 				$data[$row['id']]['duration'] = $this->_secondsToWords($data[$row['id']]['duration']);
 				if($data[$row['id']]['type'] != 'VIDEO') $data[$row['id']]['duration'] = null;
 				if($data[$row['id']]['type'] != 'VIDEO' AND $data[$row['id']]['type'] != 'IMAGE') $data[$row['id']]['dimension'] = null;
