@@ -16,6 +16,8 @@ import mx.controls.Alert;
 import mx.core.Application;
 import mx.graphics.ImageSnapshot;
 
+private var _rc:Array = new Array();
+
 private var _defined_screen_width:uint = 1680;
 private var _defined_screen_height:uint = 1050;
 private var _screen_id:uint = 35;
@@ -105,13 +107,13 @@ private function readRcParams():void
         {
             var key:String = kvPair.substring(0,index);
             var value:String = kvPair.substring(index+1);
-            config_params[key] = value;
+        	this._rc[key] = value;
         }
 	}
 	
-	this._screen_id = config_params['screen_id'];
-	this._defined_screen_width = config_params['screen_width'];
-	this._defined_screen_height = config_params['screen_height'];
+	this._screen_id = this._rc['screen_id'];
+	this._defined_screen_width = this._rc['screen_width'];
+	this._defined_screen_height = this._rc['screen_height'];
 
 	this.width = this._defined_screen_width / 2;
 	this.height = this._defined_screen_height / 2;
@@ -194,3 +196,4 @@ private function takeScreenshot(event:TimerEvent = null):void
     outStream.close();
     log( 'Shooting screen to ' + outFile.nativePath );	
 }
+
