@@ -17,3 +17,13 @@
 <?php endforeach; ?>
 
 </table>
+
+<?php
+
+	if(isset($page_submenu)) {
+		foreach($page_submenu as $sub_key => $sub_value) {
+			echo '<br />'. anchor(site_url($sub_key), $sub_value);
+		}
+	}
+
+?>
