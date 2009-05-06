@@ -48,7 +48,7 @@ case $extension in
 esac
 
 # Test, if file could be a picture and output dimensions as well
-I=`identify ${1} 2>/dev/null`
+I=`identify "${1}" 2>/dev/null`
 # If it was anything else but image, error code >0 is returned
 if [ $? -eq 0 ]
 then
@@ -71,7 +71,7 @@ exit 0
 #      echo "ERROR: can not read $imgfile"
 #      continue
 #   fi
-#   geometry=`identify $imgfile | awk '{print $3}'`
+#   geometry=`identify "$imgfile" | awk '{print $3}'`
    # geometry can be 563x144+0+0 or 75x98
    # get rid of the +0+0
 #   echo $geometry
