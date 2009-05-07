@@ -37,6 +37,10 @@ class Info extends Controller {
 
 	}
 
+	function php() {
+		phpinfo();
+	}
+
 }	
 	
 ?>
