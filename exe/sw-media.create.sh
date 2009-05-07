@@ -72,11 +72,11 @@ case `echo ${media_type}|cut -d" " -f1` in
             ;;
    SWF)     ID_WIDTH="0"
             ID_HEIGHT="0"
-            ID_LENGTH=${_DEFAULT_URL_LENGTH}
+            ID_LENGTH=${_DEFAULT_SWF_LENGTH}
             ;;
    PDF)     ID_WIDTH="0"
             ID_HEIGHT="0"
-            ID_LENGTH=${_DEFAULT_URL_LENGTH}
+            ID_LENGTH=${_DEFAULT_PDF_LENGTH}
             ;;
    *)       echo "Unsupported media type"; exit 1;;
 esac
