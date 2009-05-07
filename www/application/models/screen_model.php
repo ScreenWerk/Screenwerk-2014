@@ -14,7 +14,7 @@ class Screen_model extends Model {
 
 		$this->db->select('id, name, schedule_id, dimension_id, content_md5');
 		$this->db->from('screens');
-		$this->db->where('customer_id', $_SESSION['user']['customer_id']);
+		$this->db->where('customer_id', $this->sess->customer_id);
 		$this->db->order_by('name'); 
 		$query = $this->db->get();
 		
@@ -47,7 +47,7 @@ class Screen_model extends Model {
 		
 		$this->db->select('id, name, schedule_id, dimension_id');
 		$this->db->from('screens');
-		$this->db->where('customer_id', $_SESSION['user']['customer_id']);
+		$this->db->where('customer_id', $this->sess->customer_id);
 		$this->db->where('id', $id);
 		$this->db->limit(1);
 		$query = $this->db->get();
@@ -107,7 +107,7 @@ class Screen_model extends Model {
 			$this->db->update('screens', $data);
 			$this->update_fs($this->input->post('id'));
 		} else {
-			$data['customer_id'] = $_SESSION['user']['customer_id'];
+			$data['customer_id'] = $this->sess->customer_id;
 			$data['screen_md5'] = md5(rand(1,999) . time());
 			$this->db->insert('screens', $data);
 		}

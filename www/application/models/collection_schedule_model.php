@@ -13,7 +13,7 @@ class Collection_schedule_model extends Model {
 	function get_list($collection_id = NULL, $schedule_id = NULL) {
 		$this->db->select('id, collection_id, schedule_id, cron_minute, cron_hour, cron_day, cron_month, cron_weekday, valid_from_date, valid_to_date');
 		$this->db->from('collections_schedules');
-		$this->db->where('customer_id', $_SESSION['user']['customer_id']);
+		$this->db->where('customer_id', $this->sess->customer_id);
 		if(isset($collection_id)) $this->db->where('collection_id', $collection_id);
 		if(isset($schedule_id)) $this->db->where('schedule_id', $schedule_id);
 		$query = $this->db->get();
@@ -83,7 +83,7 @@ class Collection_schedule_model extends Model {
 				$this->db->update('collections_schedules', $data);
 			} else {
 				if($collection_id[$key] != 0 AND $schedule_id[$key] != 0) {
-					$data['customer_id'] = $_SESSION['user']['customer_id'];
+					$data['customer_id'] = $this->sess->customer_id;
 					$this->db->insert('collections_schedules', $data);
 				}
 			}
@@ -107,7 +107,7 @@ class Collection_schedule_model extends Model {
 		$this->db->select('cs.id cs_id, c.id, c.name, cs.cron_minute, cs.cron_hour, cs.cron_day, cs.cron_month, cs.cron_weekday, cs.valid_from_date, cs.valid_to_date');
 		$this->db->from('collections_schedules AS cs');
 		$this->db->join('collections AS c', 'c.id = cs.collection_id');
-		$this->db->where('cs.customer_id', $_SESSION['user']['customer_id']);
+		$this->db->where('cs.customer_id', $this->sess->customer_id);
 		$this->db->where('cs.schedule_id', $schedule_id);
 		$this->db->order_by('c.name', 'asc'); 
 		$query = $this->db->get();

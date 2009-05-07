@@ -13,7 +13,7 @@ class Layout_collection_model extends Model {
 	function get_list($layout_id = NULL, $collection_id = NULL) {
 		$this->db->select('id, layout_id, collection_id, frequency, appearances, importance, probability, valid_from_date, valid_to_date');
 		$this->db->from('layouts_collections');
-		$this->db->where('customer_id', $_SESSION['user']['customer_id']);
+		$this->db->where('customer_id', $this->sess->customer_id);
 		if(isset($layout_id)) $this->db->where('layout_id', $layout_id);
 		if(isset($collection_id)) $this->db->where('collection_id', $collection_id);
 		$query = $this->db->get();
@@ -81,7 +81,7 @@ class Layout_collection_model extends Model {
 				$this->db->update('layouts_collections', $data);
 			} else {
 				if($layout_id[$key] != 0 AND $collection_id[$key] != 0) {
-					$data['customer_id'] = $_SESSION['user']['customer_id'];
+					$data['customer_id'] = $this->sess->customer_id;
 					$this->db->insert('layouts_collections', $data);
 				}
 			}
@@ -105,7 +105,7 @@ class Layout_collection_model extends Model {
 		$this->db->select('l.id, l.name, l.duration, lc.frequency, lc.appearances, lc.importance, lc.probability, lc.valid_from_date, lc.valid_to_date');
 		$this->db->from('layouts_collections AS lc');
 		$this->db->join('layouts AS l', 'l.id = lc.layout_id');
-		$this->db->where('lc.customer_id', $_SESSION['user']['customer_id']);
+		$this->db->where('lc.customer_id', $this->sess->customer_id);
 		$this->db->where('lc.collection_id', $collection_id);
 		$this->db->order_by('lc.importance', 'desc'); 
 		$query = $this->db->get();

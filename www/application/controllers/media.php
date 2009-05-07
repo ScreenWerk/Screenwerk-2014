@@ -13,7 +13,7 @@ class Media extends Controller {
 
 
 	function index() {
-		$view['upload_folder'] = '/'. $this->session->customer_id .'/';
+		$view['upload_folder'] = '/'. $this->sess->customer_id .'/';
 
 		$view['data'] = $this->media->get_list();
 		
@@ -59,7 +59,7 @@ class Media extends Controller {
 		} else {
 			$file = $media_id . $size .'.png';
 		}
-		
+
 		if(read_file($dir.$file)) {
 			header('Content-Type: image/png');
 			print(file_get_contents($dir.$file));
@@ -67,6 +67,7 @@ class Media extends Controller {
 			header('Content-Type: image/png');
 			print(file_get_contents('images/empty.png'));
 		}
+
 	}
 
 }

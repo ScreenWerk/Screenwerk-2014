@@ -234,13 +234,13 @@ $config['encryption_key'] = "";
 |
 */
 $config['sess_cookie_name']     = 'sw_session';
-$config['sess_expiration']      = 7200;
-$config['sess_encrypt_cookie']  = FALSE;
-$config['sess_use_database']    = FALSE;
-$config['sess_table_name']      = 'ci_sessions';
-$config['sess_match_ip']        = FALSE;
+$config['sess_expiration']      = 3600;
+$config['sess_encrypt_cookie']  = TRUE;
+$config['sess_use_database']    = TRUE;
+$config['sess_table_name']      = 'sessions';
+$config['sess_match_ip']        = TRUE;
 $config['sess_match_useragent'] = FALSE;
-$config['sess_time_to_update'] = 300;
+$config['sess_time_to_update']  = 300;
 
 /*
 |--------------------------------------------------------------------------

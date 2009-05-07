@@ -11,7 +11,7 @@ class Bundle_model extends Model {
 	function get_list() {
 		$this->db->select('id, name');
 		$this->db->from('bundles');
-		$this->db->where('customer_id', $_SESSION['user']['customer_id']);
+		$this->db->where('customer_id', $this->sess->customer_id);
 		$this->db->order_by('name'); 
 		$query = $this->db->get();
 		
@@ -33,7 +33,7 @@ class Bundle_model extends Model {
 	
 		$this->db->select('id, name');
 		$this->db->from('bundles');
-		$this->db->where('customer_id', $_SESSION['user']['customer_id']);
+		$this->db->where('customer_id', $this->sess->customer_id);
 		$this->db->where('id', $id);
 		$this->db->limit(1);
 		$query = $this->db->get();
@@ -144,7 +144,7 @@ class Bundle_model extends Model {
 			$this->db->update('bundles', $data);
 			$this->update_fs($this->input->post('id'));
 		} else {
-			$data['customer_id'] = $_SESSION['user']['customer_id'];
+			$data['customer_id'] = $this->sess->customer_id;
 			$this->db->insert('bundles', $data);
 		}
 	}

@@ -13,7 +13,7 @@ class Media_bundle_model extends Model {
 	function get_list($media_id = NULL, $bundle_id = NULL) {
 		$this->db->select('id, media_id, bundle_id, frequency, appearances, importance, probability, valid_from_date, valid_to_date');
 		$this->db->from('medias_bundles');
-		$this->db->where('customer_id', $_SESSION['user']['customer_id']);
+		$this->db->where('customer_id', $this->sess->customer_id);
 		if(isset($media_id)) $this->db->where('media_id', $media_id);
 		if(isset($bundle_id)) $this->db->where('bundle_id', $bundle_id);
 		$query = $this->db->get();
@@ -40,7 +40,7 @@ class Media_bundle_model extends Model {
 	
 		$this->db->select('id, media_id, bundle_id, frequency, appearances, importance, probability, valid_from_date, valid_to_date');
 		$this->db->from('medias_bundles');
-		$this->db->where('customer_id', $_SESSION['user']['customer_id']);
+		$this->db->where('customer_id', $this->sess->customer_id);
 		$this->db->where('id', $id);
 		$this->db->limit(1);
 		$query = $this->db->get();
@@ -100,7 +100,7 @@ class Media_bundle_model extends Model {
 				$this->db->update('medias_bundles', $data);
 			} else {
 				if($media_id[$key] != 0 AND $bundle_id[$key] != 0) {
-					$data['customer_id'] = $_SESSION['user']['customer_id'];
+					$data['customer_id'] = $this->sess->customer_id;
 					$this->db->insert('medias_bundles', $data);
 				}
 			}
@@ -119,7 +119,7 @@ class Media_bundle_model extends Model {
 		$this->db->select('mb.id, m.id as media_id, m.type, m.filename, m.duration, mb.frequency, mb.appearances, mb.importance, mb.probability, mb.valid_from_date, mb.valid_to_date');
 		$this->db->from('medias_bundles AS mb');
 		$this->db->join('medias AS m', 'm.id = mb.media_id');
-		$this->db->where('mb.customer_id', $_SESSION['user']['customer_id']);
+		$this->db->where('mb.customer_id', $this->sess->customer_id);
 		$this->db->where('mb.bundle_id', $bundle_id);
 		$this->db->order_by('mb.importance', 'desc'); 
 		$query = $this->db->get();

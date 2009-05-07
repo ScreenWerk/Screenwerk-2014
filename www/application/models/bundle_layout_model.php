@@ -14,7 +14,7 @@ class Bundle_layout_model extends Model {
 	function get_list($bundle_id = NULL, $layout_id = NULL) {
 		$this->db->select('id, bundle_id, layout_id, dimension_id, position_x, position_y, position_z, start_sec, stop_sec');
 		$this->db->from('bundles_layouts');
-		$this->db->where('customer_id', $_SESSION['user']['customer_id']);
+		$this->db->where('customer_id', $this->sess->customer_id);
 		if(isset($bundle_id)) $this->db->where('bundle_id', $bundle_id);
 		if(isset($layout_id)) $this->db->where('layout_id', $layout_id);
 		$query = $this->db->get();
@@ -81,7 +81,7 @@ class Bundle_layout_model extends Model {
 				$this->db->update('bundles_layouts', $data);
 			} else {
 				if($bundle_id[$key] != 0 AND $layout_id[$key] != 0) {
-					$data['customer_id'] = $_SESSION['user']['customer_id'];
+					$data['customer_id'] = $this->sess->customer_id;
 					$this->db->insert('bundles_layouts', $data);
 				}
 			}
@@ -106,7 +106,7 @@ class Bundle_layout_model extends Model {
 		$this->db->from('bundles_layouts AS bl');
 		$this->db->join('bundles AS b', 'b.id = bl.bundle_id');
 		$this->db->join('dimensions AS d', 'd.id = bl.dimension_id');
-		$this->db->where('bl.customer_id', $_SESSION['user']['customer_id']);
+		$this->db->where('bl.customer_id', $this->sess->customer_id);
 		$this->db->where('bl.layout_id', $layout_id);
 		$this->db->order_by('bl.start_sec', 'asc'); 
 		$this->db->order_by('bl.position_y', 'asc'); // why?

@@ -26,7 +26,7 @@
 			Screenwerk
 		</div>
 		<div id="menu">
-			<?php $this->load->view('main_page_menu_view'); ?>
+			<?php $this->load->view('menu'); ?>
 		</div>
 		<div id="spacer">
 		</div>

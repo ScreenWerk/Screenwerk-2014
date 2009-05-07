@@ -18,8 +18,14 @@ class User extends Controller {
 	function login() {
 
 			if($this->input->post('login')) {
-				$this->session->login($this->input->post('user_name'), md5($this->input->post('user_secret')));
-				redirect('screen');
+				$this->sess->login($this->input->post('user_name'), md5($this->input->post('user_secret')));
+				$url = $this->session->userdata('redirect_url');
+				if($url == FALSE) {
+					redirect(key($this->sess->menu));
+				} else {
+					$this->session->unset_userdata('redirect_url');
+					redirect($url);
+				}
 			}
 
 			$view['page_menu_code'] = 'user/login';
@@ -31,8 +37,8 @@ class User extends Controller {
 
 
 	function logout() {
-		$this->session->logout();
-		redirect('info');
+		$this->sess->logout();
+		redirect('');
 	}
 
 }
