@@ -15,11 +15,8 @@
 	if(isset($_SESSION['forms'][$this->router->class .'/edit'])) {
 		echo '<td>'. anchor(site_url($this->router->class .'/edit/'.  $row_id), 'Edit') .'</td>';
 	}
-	if(isset($_SESSION['forms'][$this->router->class .'/generate_playlist']))
-	{
 	   if( $row_value['synchronized'] == 'No' )
    		echo '<td>'. anchor(site_url($this->router->class .'/generate_playlist/'.  $row_id), 'Generate Playlist') .'</td>';
-	}
 ?>
 	</tr>
 
