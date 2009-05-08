@@ -32,8 +32,8 @@ public var sw_dir:File = home_dir.resolvePath('screenwerk');
 public function init():void
 {
 	this.readMD5();
-	this.checkMD5OnDir('media');
 	this.checkMD5OnDir('structure');
+	this.checkMD5OnDir('media');
 }
 
 private function checkMD5OnDir(dir:String):void
@@ -42,27 +42,28 @@ private function checkMD5OnDir(dir:String):void
 	var dirNodes:Array = MD5_dir.getDirectoryListing();
 	for (var i:uint=0;i<dirNodes.length;i++)
 	{
-		this.log('In '+dir+' we found '+dirNodes[i].name);
+		var _file:File = MD5_dir.resolvePath(dirNodes[i].name);
+		var _fileMD5:String = this.getFileMD5(_file);
+		log ("MD5 for " + _file.nativePath + ": " + _fileMD5 );
+		//this.log('In '+dir+' we found '+_file.nativePath+'. MD5: '+this.getFileMD5(_file));
 	}
 }
 
 public function getFileMD5(file:File):String
 {
-	trace ("Calculating MD5 from " + file.nativePath);
-	var md5hash:String = '';
+	var md5hash:String = 'foo';
 	
 	var fileStream:FileStream = new FileStream();
 	try {
 		fileStream.open(file, FileMode.READ);
-		var fileBytes:ByteArray;
+		var fileBytes:ByteArray = new ByteArray();
 		fileStream.readBytes( fileBytes );
 		md5hash = MD5.hashBinary(fileBytes);
 		fileStream.close();
 	}
 	catch(errObject:Error) {
-		Alert.show("Please make sure You have data file available at \n"+file.nativePath,
-		"Missing data file",4,null,NativeApplication.nativeApplication.exit);
-		Application.application.exit();
+		trace(errObject.toString()+
+		"Problem with \n"+file.nativePath);
 	}
 	return md5hash;
 }
