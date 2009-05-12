@@ -112,11 +112,13 @@ class Screen extends Controller {
 		$this->load->helper('download');
 		$this->load->helper('file');
 		
-		$md5 = $this->screen->md5($screen_id);
+		$screen = $this->screen->get_one($screen_id);
+		
+		$md5 = $screen['screen_md5'];
 
 		$dir = DIR_FTP_PLAYERS .'/';
 		$source_player = $dir .'SWPlayer.air';
-		$screen_player = $dir . $md5 .'.air';
+		$screen_player = $dir .'/for_screens/SWPlayer_'. $screen_id .'.air';
 		
 		copy($source_player, $screen_player);
 		
@@ -128,6 +130,7 @@ class Screen extends Controller {
 		} else {
 			echo 'Download failed!';
 		}
+
 
 	}
 	

@@ -45,7 +45,7 @@ class Screen_model extends Model {
 
 	function get_one($id = NULL) {
 		
-		$this->db->select('id, name, schedule_id, dimension_id');
+		$this->db->select('id, name, schedule_id, dimension_id, screen_md5');
 		$this->db->from('screens');
 		$this->db->where('customer_id', $this->sess->customer_id);
 		$this->db->where('id', $id);
