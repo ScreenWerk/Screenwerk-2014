@@ -105,5 +105,31 @@ class Screen extends Controller {
 
    }
 
+
+
+	function get_player($screen_id) {
+		
+		$this->load->helper('download');
+		$this->load->helper('file');
+		
+		$md5 = $this->screen->md5($screen_id);
+
+		$dir = DIR_FTP_PLAYERS .'/';
+		$source_player = $dir .'SWPlayer.air';
+		$screen_player = $dir . $md5 .'.air';
+		
+		copy($source_player, $screen_player);
+		
+		$zip = new ZipArchive;
+		if ($zip->open($screen_player) === TRUE) {
+			$zip->addFromString('screen.md5', $md5);
+			$zip->close();
+			force_download('SWPlayer.air', file_get_contents($screen_player));
+		} else {
+			echo 'Download failed!';
+		}
+
+	}
+	
 }
 ?>
