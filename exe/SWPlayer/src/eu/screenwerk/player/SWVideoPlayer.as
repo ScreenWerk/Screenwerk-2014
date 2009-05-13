@@ -32,7 +32,7 @@ package eu.screenwerk.player
 			this.height = parent.height;
 			this.maintainAspectRatio = false;
 			
-			var video_file:File = Application.application.sw_dir.resolvePath(this.sw_id + '.VIDEO');
+			var video_file:File = Application.application.media_dir.resolvePath(this.sw_id + '.VIDEO');
 			this.source = video_file.url; 
  		}
  		

@@ -14,7 +14,7 @@ package eu.screenwerk.player
 		{
 			this.sw_id = id;
 
-			var media_file:File = Application.application.sw_dir.resolvePath(id+'.URL');
+			var media_file:File = Application.application.media_dir.resolvePath(id+'.URL');
 			var media_string:String = Application.application.readFileContents(media_file);
 			var media_split:Array = media_string.split("\n");
 			var url:String = media_split.shift();

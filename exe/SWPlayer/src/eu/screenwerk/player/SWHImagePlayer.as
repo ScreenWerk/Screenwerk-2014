@@ -39,7 +39,7 @@ package eu.screenwerk.player
 		{
 			var content : String = '';
 
-			var image_file:File = Application.application.sw_dir.resolvePath(this.sw_id + '.IMAGE');
+			var image_file:File = Application.application.media_dir.resolvePath(this.sw_id + '.IMAGE');
 			content = '<IMG src="' + image_file.url + '" width="100%" height="100%"/>';
 			
 //			content = '<HTML><HEAD></HEAD><BODY>' + content + '</BODY></HTML>';

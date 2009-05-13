@@ -11,7 +11,7 @@ package eu.screenwerk.player
 		
 		public function HTMLPlayer(id:uint)
 		{
-			var media_file:File = Application.application.sw_dir.resolvePath(id+'.html');
+			var media_file:File = Application.application.media_dir.resolvePath(id+'.html');
 			var media_string:String = Application.application.readFileContents(media_file);
 			var media_split:Array = media_string.split("\n");
 			var url:String = media_split.shift();

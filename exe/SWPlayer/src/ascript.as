@@ -1,5 +1,6 @@
 
 
+import eu.screenwerk.*;
 import eu.screenwerk.components.*;
 import eu.screenwerk.player.*;
 
@@ -26,14 +27,25 @@ public var _x_coef:Number;
 public var _y_coef:Number;
 private var _is_fullscreen:Boolean = true;
 private var _timer:Timer;
+private var _swagent:SWAgent;
 
 private var home_dir:File = File.userDirectory;
 public var sw_dir:File = home_dir.resolvePath('screenwerk');
+public var structure_dir:File = sw_dir.resolvePath('structure');
+public var media_dir:File = sw_dir.resolvePath('media');
 
 
 public function init():void
 {
 	Mouse.hide();
+
+	// make sure directories exist
+	this.sw_dir.createDirectory(); 
+	this.structure_dir.createDirectory();
+	this.media_dir.createDirectory();
+	
+	this._swagent = new SWAgent();
+
 	this.readRcParams();
 
 	
@@ -51,7 +63,7 @@ public function init():void
 
 	
 		
-	stage.addEventListener(KeyboardEvent.KEY_UP, toggleFullscreen, false, 0, true);
+//	stage.addEventListener(KeyboardEvent.KEY_UP, toggleFullscreen, false, 0, true);
 	
 //	stage.dispatchEvent(new KeyboardEvent(KeyboardEvent.KEY_UP));
 
@@ -63,7 +75,7 @@ public function init():void
 
 public function readComponentData(filename:String):Array
 {
-	var component_file:File = this.sw_dir.resolvePath(filename);
+	var component_file:File = this.structure_dir.resolvePath(filename);
 	var component_string:String = this.readFileContents(component_file);
 	var component_split:Array = component_string.split("\n");
 	trace( "Discarding 1st line: " + component_split.shift() ); // discard first line with column descriptors
@@ -93,7 +105,7 @@ public function readFileContents(file:File):String
 
 private function readRcParams():void
 {
-	var config_file:File = this.sw_dir.resolvePath('screenrc');
+	var config_file:File = this.structure_dir.resolvePath('screenrc');
 	var config_string:String = this.readFileContents(config_file);
 
     var config_params:Array = config_string.split("\n");
@@ -103,12 +115,12 @@ private function readRcParams():void
 		if (kvPair == "") continue;
 		
 		var index:uint;
-        if ((index = kvPair.indexOf("=")) > 0)
-        {
-            var key:String = kvPair.substring(0,index);
-            var value:String = kvPair.substring(index+1);
-        	this._rc[key] = value;
-        }
+		if ((index = kvPair.indexOf("=")) > 0)
+		{
+		    var key:String = kvPair.substring(0,index);
+		    var value:String = kvPair.substring(index+1);
+			this._rc[key] = value;
+		}
 	}
 	
 	this._screen_id = this._rc['screen_id'];

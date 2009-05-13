@@ -37,7 +37,7 @@ package eu.screenwerk.player
 
 		public function play():void
 		{
-			var swf_file:File = Application.application.sw_dir.resolvePath(this.sw_id + '.SWF');
+			var swf_file:File = Application.application.media_dir.resolvePath(this.sw_id + '.SWF');
 			this.source = swf_file.url;
 		}
 	}

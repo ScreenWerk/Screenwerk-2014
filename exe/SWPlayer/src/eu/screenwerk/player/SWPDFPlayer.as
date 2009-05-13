@@ -37,7 +37,7 @@ package eu.screenwerk.player
 
 		public function play():void
 		{
-			var media_file:File = Application.application.sw_dir.resolvePath(this.sw_id+'.PDF');
+			var media_file:File = Application.application.media_dir.resolvePath(this.sw_id+'.PDF');
 
 //			var content:String = '<html><body><object id="PDFObj" data="' + media_file.url + '" type="application/pdf" width="100%" height="100%"></object></body></html>';
 			var content:String = '<embed src="' + media_file.url + '#toolbar=0&navpanes=0&scrollbar=0" width="100%" height="100%">';

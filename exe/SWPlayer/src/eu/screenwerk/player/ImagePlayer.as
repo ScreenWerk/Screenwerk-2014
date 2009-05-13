@@ -30,7 +30,7 @@ package eu.screenwerk.player
 			this.height = parent.height;
 			this.maintainAspectRatio = false;
 			
-			var image_file:File = Application.application.sw_dir.resolvePath(this.sw_id + '.IMAGE');
+			var image_file:File = Application.application.media_dir.resolvePath(this.sw_id + '.IMAGE');
 			this.source = image_file.url;
 		}
 		

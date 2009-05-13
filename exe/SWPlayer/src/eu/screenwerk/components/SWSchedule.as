@@ -103,13 +103,14 @@ package eu.screenwerk.components
 		{
 			clearTimeout(this.timeout_id);
 			
-			var schedule_file:File = Application.application.sw_dir.resolvePath(this.sw_id+'.schedule');
-			var schedule_string:String = Application.application.readFileContents(schedule_file);
-			var collectionstrings:Array = schedule_string.split("\n");
-			var columns:String = collectionstrings.shift(); // discard first line with column descriptors
-
+//			var schedule_file:File = Application.application.structure_dir.resolvePath(this.sw_id+'.schedule');
+//			var schedule_string:String = Application.application.readFileContents(schedule_file);
+//			var collectionstrings:Array = schedule_string.split("\n");
+//			var columns:String = collectionstrings.shift(); // discard first line with column descriptors
+//
 			var _collection:SWCollection;
 			
+			var collectionstrings:Array = Application.application.readComponentData(this.sw_id+'.schedule');
 			var i:uint = 0;
 			while ( collectionstrings.length > 0 )
 			{
