@@ -55,13 +55,13 @@ class Media extends Controller {
 		$dir = DIR_FTP_THUMBS .'/';
 		
 		if($thumb_no) {
-			$file = $media_id .'_'. $thumb_no . $size .'.png';
+			$file = $media_id .'_'. $thumb_no . $size .'.jpg';
 		} else {
-			$file = $media_id . $size .'.png';
+			$file = $media_id . $size .'.jpg';
 		}
 
 		if(read_file($dir.$file)) {
-			header('Content-Type: image/png');
+			header('Content-Type: image/jpeg');
 			print(file_get_contents($dir.$file));
 		} else {
 			header('Content-Type: image/png');
