@@ -62,20 +62,20 @@ case `echo ${media_type}|cut -d" " -f1` in
             ID_LENGTH=${_DEFAULT_IMAGE_LENGTH}
             media_type=`echo ${media_type}|cut -d" " -f1`
             ;;
-   HTML)    ID_WIDTH="0"
-            ID_HEIGHT="0"
+   HTML)    ID_WIDTH=null
+            ID_HEIGHT=null
             ID_LENGTH=${_DEFAULT_HTML_LENGTH}
             ;;
-   URL)     ID_WIDTH="0"
-            ID_HEIGHT="0"
+   URL)     ID_WIDTH=null
+            ID_HEIGHT=null
             ID_LENGTH=${_DEFAULT_URL_LENGTH}
             ;;
-   SWF)     ID_WIDTH="0"
-            ID_HEIGHT="0"
+   SWF)     ID_WIDTH=null
+            ID_HEIGHT=null
             ID_LENGTH=${_DEFAULT_SWF_LENGTH}
             ;;
-   PDF)     ID_WIDTH="0"
-            ID_HEIGHT="0"
+   PDF)     ID_WIDTH=null
+            ID_HEIGHT=null
             ID_LENGTH=${_DEFAULT_PDF_LENGTH}
             ;;
    *)       echo "Unsupported media type"; exit 1;;
