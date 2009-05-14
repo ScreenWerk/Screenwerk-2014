@@ -46,20 +46,19 @@ public function init():void
 	
 	this._swagent = new SWAgent();
 
-	this.readRcParams();
+//	this.readRcParams();
 
 	
-	trace (' xcoef:'+this._x_coef+'='+this.width+'/'+this._defined_screen_width
-	+ '; ycoef:'+this._y_coef+'='+this.height+'/'+this._defined_screen_height+'.');
+	//trace (' xcoef:'+this._x_coef+'='+this.width+'/'+this._defined_screen_width + '; ycoef:'+this._y_coef+'='+this.height+'/'+this._defined_screen_height+'.');
 
  
 
-	var sw_screen:SWScreen = new SWScreen(this._screen_id);
-	this.addChild(sw_screen);
-	sw_screen.x = 0;
-	sw_screen.y = 0;
-	sw_screen.width = this.width;
-	sw_screen.height = this.height;
+//	var sw_screen:SWScreen = new SWScreen(this._screen_id);
+//	this.addChild(sw_screen);
+//	sw_screen.x = 0;
+//	sw_screen.y = 0;
+//	sw_screen.width = this.width;
+//	sw_screen.height = this.height;
 
 	
 		
