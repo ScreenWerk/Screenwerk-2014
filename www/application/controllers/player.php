@@ -9,6 +9,7 @@ class Player extends Controller {
 		$this->load->helper('file');
 		
 		$this->load->model('Screen_model', 'screen');
+		$this->load->model('Log_model', 'log');
 
 		//$this->output->enable_profiler(TRUE);      
 
@@ -18,6 +19,7 @@ class Player extends Controller {
 	function get_list($screen_md5 = null, $player_md5 = null) {
 		
 		$data = $this->screen->get_one_by_md5($screen_md5);
+		$message = 'OK';
 		
 		if($data['id']) {
 			$dir = DIR_FTP_SCREENS .'/'. $data['id'] .'/';
@@ -27,12 +29,15 @@ class Player extends Controller {
 					echo $file .';'. md5_file($dir.$file) .';'. filesize($dir.$file) ."\n";
 				}
 			} else {
-				echo 'ERROR - No Files';
+				echo $message = 'ERROR - No Files';
 			}
 		} else {
-			echo 'ERROR - No Screen';
-		}	
+			echo $message = 'ERROR - No Screen';
+		}
 		
+		$this->log->write($message);
+		$this->screen->update_last_seen($data['id']);
+
 	}
 
 
@@ -40,6 +45,7 @@ class Player extends Controller {
 	function get_file($screen_md5 = null, $player_md5 = null, $file = null) {
 
 		$data = $this->screen->get_one_by_md5($screen_md5);
+		$message = 'OK';
 		
 		if($data['id']) {
 			$dir = DIR_FTP_SCREENS .'/'. $data['id'] .'/';
@@ -48,12 +54,15 @@ class Player extends Controller {
 			if(read_file($dir.$file)) {
 				force_download($file, file_get_contents($dir.$file));		
 			} else {
-				echo 'ERROR - No File';
+				echo $message = 'ERROR - No File';
 			}
 		} else {
-			echo 'ERROR - No Screen';
+			echo $message = 'ERROR - No Screen';
 		}	
 
+		$this->log->write($message);
+		$this->screen->update_last_seen($data['id']);
+		
 	}	
 
 

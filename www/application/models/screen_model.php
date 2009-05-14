@@ -115,6 +115,14 @@ class Screen_model extends Model {
 
 
 
+	function update_last_seen($id) {
+		$this->db->set('last_seen', 'NOW()', FALSE);
+		$this->db->where('id', $id);
+		$this->db->update('screens');
+	}
+	
+	
+	
 	function delete_fs($screen_id) {
 	   //TODO: right now orphan layout files are remaining,
 	   // plan is to remove all related layout files and refresh them
