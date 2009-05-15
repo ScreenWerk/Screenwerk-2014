@@ -15,6 +15,7 @@ import flash.utils.Timer;
 
 import mx.controls.Alert;
 import mx.core.Application;
+import mx.events.FlexEvent;
 import mx.graphics.ImageSnapshot;
 
 private var _rc:Array = new Array();
@@ -45,21 +46,7 @@ public function init():void
 	this.media_dir.createDirectory();
 	
 	this._swagent = new SWAgent();
-
-//	this.readRcParams();
-
-	
-	//trace (' xcoef:'+this._x_coef+'='+this.width+'/'+this._defined_screen_width + '; ycoef:'+this._y_coef+'='+this.height+'/'+this._defined_screen_height+'.');
-
- 
-
-//	var sw_screen:SWScreen = new SWScreen(this._screen_id);
-//	this.addChild(sw_screen);
-//	sw_screen.x = 0;
-//	sw_screen.y = 0;
-//	sw_screen.width = this.width;
-//	sw_screen.height = this.height;
-
+	this._swagent.addEventListener(FlexEvent.UPDATE_COMPLETE,play);
 	
 		
 //	stage.addEventListener(KeyboardEvent.KEY_UP, toggleFullscreen, false, 0, true);
@@ -70,6 +57,20 @@ public function init():void
 	screenshotTimer.addEventListener(TimerEvent.TIMER, takeScreenshot);
 	screenshotTimer.start();
 
+}
+
+private function play(flex_event:FlexEvent):void
+{
+	this.readRcParams();
+	
+	trace (' xcoef:'+this._x_coef+'='+this.width+'/'+this._defined_screen_width + '; ycoef:'+this._y_coef+'='+this.height+'/'+this._defined_screen_height+'.');
+
+	var sw_screen:SWScreen = new SWScreen(this._screen_id);
+	this.addChild(sw_screen);
+	sw_screen.x = 0;
+	sw_screen.y = 0;
+	sw_screen.width = this.width;
+	sw_screen.height = this.height;
 }
 
 public function readComponentData(filename:String):Array
