@@ -23,6 +23,7 @@ private var _rc:Array = new Array();
 private var _defined_screen_width:uint = 1680;
 private var _defined_screen_height:uint = 1050;
 private var _screen_id:uint = 35;
+private var _sw_screen:SWScreen;
 
 public var _x_coef:Number;
 public var _y_coef:Number;
@@ -40,13 +41,17 @@ public function init():void
 {
 	Mouse.hide();
 
+	Application.application.stage.displayState = StageDisplayState.FULL_SCREEN_INTERACTIVE;
+	this._is_fullscreen = true;
+
 	// make sure directories exist
 	this.sw_dir.createDirectory(); 
 	this.structure_dir.createDirectory();
 	this.media_dir.createDirectory();
 	
 	this._swagent = new SWAgent();
-	this._swagent.addEventListener(FlexEvent.UPDATE_COMPLETE,play);
+	this._swagent.addEventListener(FlexEvent.VALID, playValid);
+	this._swagent.addEventListener(FlexEvent.UPDATE_COMPLETE, playUpdated);
 	
 		
 //	stage.addEventListener(KeyboardEvent.KEY_UP, toggleFullscreen, false, 0, true);
@@ -59,18 +64,35 @@ public function init():void
 
 }
 
-private function play(flex_event:FlexEvent):void
+private function playValid(flex_event:FlexEvent):void
+{
+	if (this._sw_screen == null)
+	{
+		this.play();
+	}
+}
+
+private function playUpdated(flex_event:FlexEvent):void
+{
+	if (this._sw_screen != null)
+	{
+		this.removeChild(this._sw_screen);
+	}
+	this.play();
+}
+
+private function play():void
 {
 	this.readRcParams();
 	
 	trace (' xcoef:'+this._x_coef+'='+this.width+'/'+this._defined_screen_width + '; ycoef:'+this._y_coef+'='+this.height+'/'+this._defined_screen_height+'.');
 
-	var sw_screen:SWScreen = new SWScreen(this._screen_id);
-	this.addChild(sw_screen);
-	sw_screen.x = 0;
-	sw_screen.y = 0;
-	sw_screen.width = this.width;
-	sw_screen.height = this.height;
+	this._sw_screen = new SWScreen(this._screen_id);
+	this.addChild(this._sw_screen);
+	this._sw_screen.x = 0;
+	this._sw_screen.y = 0;
+	this._sw_screen.width = this.width;
+	this._sw_screen.height = this.height;
 }
 
 public function readComponentData(filename:String):Array
@@ -124,15 +146,10 @@ private function readRcParams():void
 	}
 	
 	this._screen_id = this._rc['screen_id'];
+
 	this._defined_screen_width = this._rc['screen_width'];
 	this._defined_screen_height = this._rc['screen_height'];
 
-	this.width = this._defined_screen_width / 2;
-	this.height = this._defined_screen_height / 2;
-	this.validateNow();
-
-	Application.application.stage.displayState = StageDisplayState.FULL_SCREEN_INTERACTIVE;
-	this._is_fullscreen = true;
 	this.validateNow();
 	
 	this._x_coef = this.width/this._defined_screen_width;

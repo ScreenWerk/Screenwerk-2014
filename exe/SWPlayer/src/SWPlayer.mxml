@@ -12,4 +12,6 @@
 
 	<mx:Script source="ascript.as"/>
 
+	<mx:Label id="progresslabel" text="Hello AIR" horizontalCenter="0" verticalCenter="0"/>
+
 </mx:WindowedApplication>

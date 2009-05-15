@@ -43,7 +43,9 @@ package eu.screenwerk
 		private var _sync_interval_ms:uint = 60000;
 		
 		private var _files_to_sync:Array = new Array();
+		private var _files_to_move:Array = new Array();
 		private var _current_download:File;
+		private var _bytes_to_download:uint = 0;
 		
 		private var _media_types_a:Array = new Array('VIDEO','IMAGE','PDF','SWF','URL','HTML');
 		private var _binary_media_types_a:Array = new Array('VIDEO','IMAGE','PDF','SWF','HTML');
@@ -134,7 +136,8 @@ package eu.screenwerk
 
 				if (_file_size != _file_size_local || _file_md5 != _file_md5_local)
 				{
-					this._files_to_sync.push(_file);
+					this._files_to_sync.push(this.tmp_dir.resolvePath(_file_name));
+					this._bytes_to_download += _file_size;
 					Application.application.log('Scheduled ' + _file.name + ' for syncronization.');
 				}
 			}
@@ -142,12 +145,13 @@ package eu.screenwerk
 			if (this._files_to_sync.length > 0)
 			{
 				this._current_download = this._files_to_sync.pop();
+				this.dispatchEvent(new FlexEvent(FlexEvent.INVALID));
 				this.download(this._current_download.name);
 			}
 			else
 			{
 				this._next_sync_timeout_id = setTimeout(synchronise, this._sync_interval_ms);
-				this.dispatchEvent(new FlexEvent(FlexEvent.UPDATE_COMPLETE));
+				this.dispatchEvent(new FlexEvent(FlexEvent.VALID));
 			}
 		}
 		
@@ -190,7 +194,6 @@ package eu.screenwerk
         }
         private function completeHandler(event:Event):void {
             var loader:URLLoader = URLLoader(event.target);
-            trace("completeHandler: " + this._current_download.nativePath + ' ' + loader.bytesTotal + ' bytes.');
             
 			var _fileStream:FileStream = new FileStream();
 			try {
@@ -205,6 +208,9 @@ package eu.screenwerk
 						break;					
 				}
 				_fileStream.close();
+	            trace("completeHandler: " + this._current_download.nativePath + ' ' + this._current_download.size + ' bytes.');
+	            this._bytes_to_download -= this._current_download.size;
+				this._files_to_move.push(this._current_download);
 			}
 			catch(errObject:Error) {
 				Application.application.log(errObject.message);
@@ -217,6 +223,22 @@ package eu.screenwerk
 			}
 			else
 			{
+				while (this._files_to_move.length > 0)
+				{
+					this._current_download = this._files_to_move.pop();
+
+					var _target_file:File;
+					var _file_split:Array = this._current_download.name.split('.');
+					if ( this._media_types_a.indexOf(_file_split[1]) == -1 )
+					{
+						_target_file = Application.application.structure_dir.resolvePath(this._current_download.name);
+					}
+					else
+					{
+						_target_file = Application.application.media_dir.resolvePath(this._current_download.name);
+					}
+					this._current_download.moveTo(_target_file,true);
+				}
 				this._next_sync_timeout_id = setTimeout(synchronise, this._sync_interval_ms);
 				this.dispatchEvent(new FlexEvent(FlexEvent.UPDATE_COMPLETE));
 			}
@@ -225,7 +247,7 @@ package eu.screenwerk
             trace("openHandler: " + event);
         }
         private function progressHandler(event:ProgressEvent):void {
-            //Application.application.log("progressHandler loaded:" + event.bytesLoaded + " total: " + event.bytesTotal);
+            Application.application.progresslabel.text = this._bytes_to_download - event.bytesLoaded;
         }
         private function securityErrorHandler(event:SecurityErrorEvent):void {
             trace("securityErrorHandler: " + event);
