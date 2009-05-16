@@ -168,35 +168,35 @@ class Layout_model extends Model {
 
 
 	function update_fs($layout_id) {
-      if($layout_id==0) return;
-      
-      $bundles = $this->get_bundles($layout_id);
-      $contents[] = implode(';', array_keys(current($bundles)));
-      foreach($bundles as $bundle) {
-         $contents[] = implode(';', $bundle);
-      }
+		if($layout_id==0) return;
+
+		$bundles = $this->get_bundles($layout_id);
+		$contents[] = implode(';', array_keys(current($bundles)));
+		foreach($bundles as $bundle) {
+			$contents[] = implode(';', $bundle);
+		}
 		$master_layout_file = DIR_FTP_SCREENS."/$layout_id.layout";
 		if (file_exists($master_layout_file)) {
-         unlink($master_layout_file);
-      }
-	   file_put_contents($master_layout_file, implode("\n", $contents));
+			unlink($master_layout_file);
+		}
+		file_put_contents($master_layout_file, implode("\n", $contents));
 
-	   $screens = $this->get_screens($layout_id);
-	   foreach($screens as $screen_id => $screen) {
-         if (!file_exists(DIR_FTP_SCREENS."/$screen_id")) {
-            mkdir(DIR_FTP_SCREENS."/$screen_id");
-         } else if (!is_dir(DIR_FTP_SCREENS."/$screen_id")) {
-            unlink(DIR_FTP_SCREENS."/$screen_id");
-            mkdir(DIR_FTP_SCREENS."/$screen_id");
-         }
+		$screens = $this->get_screens($layout_id);
+		foreach($screens as $screen_id => $screen) {
+			if (!file_exists(DIR_FTP_SCREENS."/$screen_id")) {
+				mkdir(DIR_FTP_SCREENS."/$screen_id");
+			} else if (!is_dir(DIR_FTP_SCREENS."/$screen_id")) {
+				unlink(DIR_FTP_SCREENS."/$screen_id");
+				mkdir(DIR_FTP_SCREENS."/$screen_id");
+			}
 
-   		$layout_file = DIR_FTP_SCREENS."/$screen_id/$layout_id.layout";
-	      if (file_exists($layout_file)) {
-	         unlink($layout_file);
-         }
-	      link($master_layout_file, $layout_file);
-      }
-      unlink($master_layout_file);
+			$layout_file = DIR_FTP_SCREENS."/$screen_id/$layout_id.layout";
+			if (file_exists($layout_file)) {
+				unlink($layout_file);
+			}
+			link($master_layout_file, $layout_file);
+		}
+		unlink($master_layout_file);
 	}
 
 

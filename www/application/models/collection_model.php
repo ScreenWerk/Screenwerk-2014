@@ -101,13 +101,16 @@ class Collection_model extends Model {
 
 	function get_layouts($collection_id) {	
 		$this->db->select('layouts.id,
-                         layouts.duration,
-		                   layouts_collections.frequency,
-		                   layouts_collections.probability,
-		                   layouts_collections.valid_from_date,
-		                   layouts_collections.valid_to_date');
+				layouts.duration,
+				dimensions.dimension_x width,
+				dimensions.dimension_y height,
+				layouts_collections.frequency,
+				layouts_collections.probability,
+				layouts_collections.valid_from_date,
+				layouts_collections.valid_to_date');
 		$this->db->from('layouts');
 		$this->db->join('layouts_collections', 'layouts_collections.layout_id = layouts.id', 'left');
+		$this->db->join('dimensions', 'layouts.dimension_id = dimensions.id', 'left');
 		$this->db->where(array('layouts_collections.collection_id' => $collection_id));
 		$query = $this->db->get();
 		
@@ -162,35 +165,35 @@ class Collection_model extends Model {
 
 
 	function update_fs($collection_id) {
-      if($collection_id==0) return;
-      
-      $layouts = $this->get_layouts($collection_id);
-      $contents[] = implode(';', array_keys(current($layouts)));
-      foreach($layouts as $layout) {
-         $contents[] = implode(';', $layout);
-      }
+		if($collection_id==0) return;
+
+		$layouts = $this->get_layouts($collection_id);
+		$contents[] = implode(';', array_keys(current($layouts)));
+		foreach($layouts as $layout) {
+			$contents[] = implode(';', $layout);
+		}
 		$master_collection_file = DIR_FTP_SCREENS."/$collection_id.collection";
 		if (file_exists($master_collection_file)) {
-         unlink($master_collection_file);
-      }
-	   file_put_contents($master_collection_file, implode("\n", $contents));
+			unlink($master_collection_file);
+		}
+		file_put_contents($master_collection_file, implode("\n", $contents));
 
-	   $screens = $this->get_screens($collection_id);
-	   foreach($screens as $screen_id => $screen) {
-         if (!file_exists(DIR_FTP_SCREENS."/$screen_id")) {
-            mkdir(DIR_FTP_SCREENS."/$screen_id");
-         } else if (!is_dir(DIR_FTP_SCREENS."/$screen_id")) {
-            unlink(DIR_FTP_SCREENS."/$screen_id");
-            mkdir(DIR_FTP_SCREENS."/$screen_id");
-         }
+		$screens = $this->get_screens($collection_id);
+		foreach($screens as $screen_id => $screen) {
+			if (!file_exists(DIR_FTP_SCREENS."/$screen_id")) {
+				mkdir(DIR_FTP_SCREENS."/$screen_id");
+			} else if (!is_dir(DIR_FTP_SCREENS."/$screen_id")) {
+				unlink(DIR_FTP_SCREENS."/$screen_id");
+				mkdir(DIR_FTP_SCREENS."/$screen_id");
+			}
 
-   		$collection_file = DIR_FTP_SCREENS."/$screen_id/$collection_id.collection";
-	      if (file_exists($collection_file)) {
-	         unlink($collection_file);
-         }
-	      link($master_collection_file, $collection_file);
-      }
-      unlink($master_collection_file);
+			$collection_file = DIR_FTP_SCREENS."/$screen_id/$collection_id.collection";
+			if (file_exists($collection_file)) {
+				unlink($collection_file);
+			}
+			link($master_collection_file, $collection_file);
+		}
+		unlink($master_collection_file);
 	}
 
 
