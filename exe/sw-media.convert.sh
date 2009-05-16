@@ -42,7 +42,7 @@ case ${media_type} in
       h=`echo "scale=0; $h*2" | bc`
       ffmpeg -i "${original_media}" -vframes 20 -r ${framerate} -s ${w}x${h} -y ${_DIR_THUMBS}/${media_id}_%d.jpg
       ln -f ${_DIR_THUMBS}/${media_id}_5.jpg ${_DIR_THUMBS}/${media_id}.jpg
-      ffmpeg -i ${_DIR_THUMBS}/${media_id}.jpg -s 16x16 -y ${_DIR_THUMBS}/${media_id}s.jpg
+      convert -scale 16x16 ${_DIR_THUMBS}/${media_id}.jpg ${_DIR_THUMBS}/${media_id}s.jpg
       ;;
    IMAGE)
       master_media=${_DIR_MASTERS}/${media_id}.${media_type}
@@ -54,8 +54,8 @@ case ${media_type} in
       w=250
       h=`echo "scale=0; $ID_VIDEO_HEIGHT*$w/$ID_VIDEO_WIDTH/2" | bc`
       h=`echo "scale=0; $h*2" | bc`
-      ffmpeg -i "${original_media}" -s ${w}x${h} -y ${_DIR_THUMBS}/${media_id}.jpg
-      ffmpeg -i "${original_media}" -s 16x16 -y ${_DIR_THUMBS}/${media_id}s.jpg
+      convert -scale ${w}x${h} "${original_media}" ${_DIR_THUMBS}/${media_id}.jpg
+      convert -scale 16x16 "${original_media}" ${_DIR_THUMBS}/${media_id}s.jpg
       ;;
    HTML)   
       master_media=${_DIR_MASTERS}/${media_id}.${media_type}
@@ -72,6 +72,8 @@ case ${media_type} in
    PDF)
       master_media=${_DIR_MASTERS}/${media_id}.${media_type}
       cp ${original_media} ${master_media}
+      convert -scale 250x250 "${original_media}" ${_DIR_THUMBS}/${media_id}.jpg
+      convert -scale 16x16 "${original_media}" ${_DIR_THUMBS}/${media_id}s.jpg
       ;;
    *)       echo "Unsupported media type"
             exit 1;;
