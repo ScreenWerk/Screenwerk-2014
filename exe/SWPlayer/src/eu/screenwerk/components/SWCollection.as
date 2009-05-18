@@ -127,17 +127,17 @@ package eu.screenwerk.components
 					+ ", evaluating layout " + this.current_layout.sw_id );
 			}
 			
-			while ( this.current_layout.length < this.timeshift )
+			while ( this.current_layout.duration < this.timeshift )
 			{
-				this.timeshift = this.timeshift - this.current_layout.length;
+				this.timeshift = this.timeshift - this.current_layout.duration;
 				this.setNextLayout();
 				Application.application.log( "... skipping layout " + this.current_layout.sw_id );
 			}
 
 			Application.application.log( "... starting layout " + this.current_layout.sw_id 
-				+ ", stopping after " + (this.current_layout.length - this.timeshift) + "sec." );
+				+ ", stopping after " + (this.current_layout.duration - this.timeshift) + "sec." );
 
-			this.timeout_id = setTimeout(playNextLayoutOnTimer, (this.current_layout.length - this.timeshift)*1000 );
+			this.timeout_id = setTimeout(playNextLayoutOnTimer, (this.current_layout.duration - this.timeshift)*1000 );
 
 			this.current_layout.timeshift = this.timeshift;
 			this.timeshift = 0;
@@ -154,9 +154,9 @@ package eu.screenwerk.components
 
 			Application.application.log( "Collection " + this.sw_id 
 				+ ", starting layout " + this.current_layout.sw_id 
-				+ ", stopping after " + this.current_layout.length + "sec." );
+				+ ", stopping after " + this.current_layout.duration + "sec." );
 
-			this.timeout_id = setTimeout(playNextLayoutOnTimer, this.current_layout.length*1000);
+			this.timeout_id = setTimeout(playNextLayoutOnTimer, this.current_layout.duration*1000);
 
 			this.addChild(this.current_layout);
 		}		

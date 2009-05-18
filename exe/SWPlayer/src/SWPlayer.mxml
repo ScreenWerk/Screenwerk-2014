@@ -12,6 +12,14 @@
 
 	<mx:Script source="ascript.as"/>
 
-	<mx:Label id="progresslabel" text="Hello AIR" horizontalCenter="0" verticalCenter="0"/>
+    <mx:HTML 
+      id="htmlContent"
+      location="http://screenwerk.eu/custom_html/screenwerk/sw.html" 
+      paintsDefaultBackground="false"  
+      backgroundAlpha="0"
+      bottom="0" top="0" left="0" right="0"/>
+
+	<mx:Canvas id="mycanvas" backgroundColor="#000000"/>
+	<mx:Label id="progresslabel" text="..." horizontalCenter="0" verticalCenter="0" color="#FFFFFF"/>
 
 </mx:WindowedApplication>

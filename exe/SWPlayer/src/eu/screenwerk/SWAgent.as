@@ -12,6 +12,7 @@ package eu.screenwerk
 	import flash.filesystem.File;
 	import flash.filesystem.FileMode;
 	import flash.filesystem.FileStream;
+	import flash.net.FileFilter;
 	import flash.net.URLLoader;
 	import flash.net.URLLoaderDataFormat;
 	import flash.net.URLRequest;
@@ -138,7 +139,7 @@ package eu.screenwerk
 				{
 					this._files_to_sync.push(this.tmp_dir.resolvePath(_file_name));
 					this._bytes_to_download += _file_size;
-					Application.application.log('Scheduled ' + _file.name + ' for syncronization.');
+					Application.application.log('Scheduled ' + _file.name + ' for syncronization. Remote size ' +_file_size + ' should match local size ' + _file_size_local + ' and remote md5 ' + _file_md5 + ' should match local md5 ' + _file_md5_local + '.');
 				}
 			}
 			
@@ -298,7 +299,7 @@ package eu.screenwerk
 				_fileStream.close();
 			}
 			catch(errObject:Error) {
-				this.log(errObject.toString()+
+				Application.application.log(errObject.toString()+
 				"Problem with \n"+file.nativePath);
 			}
 		
@@ -323,7 +324,18 @@ package eu.screenwerk
 			
 			var fileStream:FileStream = new FileStream();
 
-			if (md5_target_file.exists == false || md5_target_file.size != 32)
+			if (md5_target_file.exists && md5_target_file.size == 32)
+			{
+				try {
+					fileStream.open(md5_target_file, FileMode.READ);
+					this._screen_md5_string = fileStream.readUTFBytes(32);
+					fileStream.close();
+				} catch(errObject:Error) {
+					Alert.show("Your screen signature is corrupted. Please download new player. Running anonymous screen till then.",
+					"Corrupted MD5 signature file",4,null,NativeApplication.nativeApplication.exit);
+				}
+			}
+			else
 			{
 				try {
 					fileStream.open(md5_source_file, FileMode.READ);
@@ -334,20 +346,20 @@ package eu.screenwerk
 					fileStream.writeUTFBytes(this._screen_md5_string);
 					fileStream.close();
 				} catch(errObject:Error) {
-					Alert.show('MD5 signature file for screen not accessible.',
-					'File not accessible',4,null,NativeApplication.nativeApplication.exit);
+					var _md5_filter:FileFilter = new FileFilter("MD5", "*.md5");
+					md5_source_file.browseForOpen('Provide downloaded MD5 file',[_md5_filter]);
+				    md5_source_file.addEventListener(Event.SELECT, screenMD5FileSelected);
 				}
 			}
 
-			try {
-				fileStream.open(md5_source_file, FileMode.READ);
-				this._screen_md5_string = fileStream.readUTFBytes(32);
-				fileStream.close();
-			} catch(errObject:Error) {
-				Alert.show("Download new player. Running anonymous screen till then.",
-				"Missing MD5 signature file",4,null,NativeApplication.nativeApplication.exit);
-			}
 		}
+		
+		private function screenMD5FileSelected(event:Event):void 
+		{
+		    var stream:FileStream = new FileStream();
+		    File(event.target).copyTo(Application.application.sw_dir.resolvePath('screen.md5'));
+		}
+
 		private function set_player_MD5():void
 		{
 			var md5_file:File = Application.application.sw_dir.resolvePath('player.md5');

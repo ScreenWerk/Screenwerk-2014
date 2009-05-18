@@ -88,11 +88,11 @@ private function play():void
 	trace (' xcoef:'+this._x_coef+'='+this.width+'/'+this._defined_screen_width + '; ycoef:'+this._y_coef+'='+this.height+'/'+this._defined_screen_height+'.');
 
 	this._sw_screen = new SWScreen(this._screen_id);
-	this.addChild(this._sw_screen);
 	this._sw_screen.x = 0;
 	this._sw_screen.y = 0;
 	this._sw_screen.width = this.width;
 	this._sw_screen.height = this.height;
+	this.addChild(this._sw_screen);
 }
 
 public function readComponentData(filename:String):Array
@@ -100,14 +100,14 @@ public function readComponentData(filename:String):Array
 	var component_file:File = this.structure_dir.resolvePath(filename);
 	var component_string:String = this.readFileContents(component_file);
 	var component_split:Array = component_string.split("\n");
-	trace( "Discarding 1st line: " + component_split.shift() ); // discard first line with column descriptors
-	trace( "Component data: " + component_split.toString() ); 
+	component_split.shift();
+//	trace( "Component data: " + component_split.toString() ); 
 	return component_split;
 }
 
 public function readFileContents(file:File):String
 {
-	trace ("Reading from " + file.nativePath);
+//	trace ("Reading from " + file.nativePath);
 
 	var file_contents:String = "";
 	
@@ -225,4 +225,3 @@ private function takeScreenshot(event:TimerEvent = null):void
     outStream.close();
     log( 'Shooting screen to ' + outFile.nativePath );	
 }
-

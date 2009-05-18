@@ -9,7 +9,9 @@ package eu.screenwerk.components
 	public class SWLayout extends UIComponent
 	{
 		public var sw_id:uint;
-		public var length:uint;
+		public var duration:uint;
+		private var design_width:uint;
+		private var design_height:uint;
 		private var frequency:uint;
 		private var probability:uint;
 		private var valid_from_date:Date;
@@ -39,15 +41,17 @@ package eu.screenwerk.components
 		public function SWLayout(layout_str:String)
 		{
 			var layout_split:Array = layout_str.split(';');
-			//id;length;frequency;probability;valid_from_date;valid_to_date
+			//id;duration;width;height;frequency;probability;valid_from_date;valid_to_date
 			this.sw_id = layout_split[0].replace(' ','');
 			
-			this.length = layout_split[1].replace(' ','');
-			this.frequency = layout_split[2].replace(' ','');
-			this.probability = layout_split[3].replace(' ','');
-			var from_split:Array = layout_split[4].toString().split('-');
+			this.duration = layout_split[1].replace(' ','');
+			this.design_width = layout_split[2].replace(' ','');
+			this.design_height = layout_split[3].replace(' ','');
+			this.frequency = layout_split[4].replace(' ','');
+			this.probability = layout_split[5].replace(' ','');
+			var from_split:Array = layout_split[6].toString().split('-');
 			this.valid_from_date = new Date(from_split[0], from_split[1], from_split[2]);
-			var to_split:Array = layout_split[4].toString().split('-');
+			var to_split:Array = layout_split[7].toString().split('-');
 			this.valid_to_date = new Date(to_split[0], to_split[1], to_split[2]);
 
 			this.addEventListener(Event.ADDED, play, false, 0, true);
@@ -74,6 +78,8 @@ package eu.screenwerk.components
 			this.y = 0;
 			this.width = parent.width;
 			this.height = parent.height;
+			Application.application._x_coef = this.width/this.design_width;
+			Application.application._y_coef = this.height/this.design_height;
 			
 			this.playBundles();
 			this.timeshift = 0;
@@ -108,7 +114,7 @@ package eu.screenwerk.components
 				
 				if (this.SWChilds[bundle_string] == null)
 				{
-					this.SWChilds[bundle_string] = new SWBundle(bundle_string, this.length);
+					this.SWChilds[bundle_string] = new SWBundle(bundle_string, this.duration);
 					Application.application.log( 'Bundle ' + this.SWChilds[bundle_string].sw_id + " loaded.");
 				} 
 
