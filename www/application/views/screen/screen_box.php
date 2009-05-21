@@ -12,14 +12,21 @@
 	<b>Collections: </b><br /><?= implode(', ', $collections); ?><br /><br />
 	<b>Schedule: </b><br /><?= $schedule; ?><br /><br />
 	
+<?php if(!$synchronized) { ?>
+	<button id="generate-playlist" class="ui-button ui-state-default ui-corner-all" style="outline: 0; margin:0; padding: .4em 1em .5em; text-decoration:none;  !important; cursor:pointer; position: relative; text-align: center;">Generate Playlist</button>
+<?php } ?>
 	<button id="download-player" class="ui-button ui-state-default ui-corner-all" style="outline: 0; margin:0; padding: .4em 1em .5em; text-decoration:none;  !important; cursor:pointer; position: relative; text-align: center;">Download Player</button>
 
 	<script type="text/javascript">
 
+		$('#generate-playlist').click(function() {
+			top.location.href = '<?= site_url('/screen/generate_playlist/'. $id); ?>';
+		});
 		$('#download-player').click(function() {
 			top.location.href = '<?= site_url('/screen/get_player/'. $id); ?>';
-		})
-		.hover(
+		});
+		
+		$('button').hover(
 			function(){ 
 				$(this).addClass("ui-state-hover"); 
 			},

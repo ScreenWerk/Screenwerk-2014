@@ -18,7 +18,6 @@ class Screen extends Controller {
 	function index() {
 		$view['data'] = $this->screen->get_list();
 		$view['page_menu_code'] = 'screen';
-		$view['page_submenu'] = array($this->router->class .'/add'=>'Add New '. humanize($this->router->class));
 		$view['page_content'] = $this->load->view('screen/screen_list', $view, True);
 
 		$view['box']['screen_box']['hidden'] = TRUE;
@@ -112,7 +111,6 @@ class Screen extends Controller {
       $this->screen->db->where( 'id', $screen_id );
       $this->screen->db->update( 'screens', $data );
       
-		redirect( $this->uri->segment( 1 ) );
       return;
 
    }
