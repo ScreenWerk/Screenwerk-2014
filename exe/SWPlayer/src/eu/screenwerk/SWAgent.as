@@ -12,7 +12,6 @@ package eu.screenwerk
 	import flash.filesystem.File;
 	import flash.filesystem.FileMode;
 	import flash.filesystem.FileStream;
-	import flash.net.FileFilter;
 	import flash.net.URLLoader;
 	import flash.net.URLLoaderDataFormat;
 	import flash.net.URLRequest;
@@ -53,22 +52,18 @@ package eu.screenwerk
 		public var _screen_md5_string:String = 'guest screen';
 		public var _player_md5_string:String = '';
 		
-		
 		public function SWAgent()
 		{
-			this.md5_dir.createDirectory();
-			this.tmp_dir.createDirectory();
-			this.set_screen_MD5();
-			this.set_player_MD5();
+			this._listing_service.addEventListener(FaultEvent.FAULT, listingFault);
+			this._listing_service.addEventListener(ResultEvent.RESULT, listingResult);
 			
 //			this.checkMD5OnDir(this.structure_dir);
 //			this.checkMD5OnDir(this.media_dir);
-			
-			this._listing_service.addEventListener(FaultEvent.FAULT, listingFault);
-			this._listing_service.addEventListener(ResultEvent.RESULT, listingResult);
 		
-			this._next_sync_timeout_id = setTimeout(synchronise, this._sync_interval_ms);
-			this.synchronise();
+			this.md5_dir.createDirectory();
+			this.tmp_dir.createDirectory();
+
+			this.setScreenMD5();
 		}
 
 		private function checkMD5OnDir(MD5_dir:File):void
@@ -317,50 +312,40 @@ package eu.screenwerk
 			return _md5_hash;
 		}
 			
-		private function set_screen_MD5():void
+		private function setScreenMD5():void
 		{
 			var md5_source_file:File = File.applicationDirectory.resolvePath('screen.md5');
-			var md5_target_file:File = Application.application.sw_dir.resolvePath('screen.md5');
 			
 			var fileStream:FileStream = new FileStream();
 
-			if (md5_target_file.exists && md5_target_file.size == 32)
+			if (!md5_source_file.exists)
 			{
-				try {
-					fileStream.open(md5_target_file, FileMode.READ);
-					this._screen_md5_string = fileStream.readUTFBytes(32);
-					fileStream.close();
-				} catch(errObject:Error) {
-					Alert.show("Your screen signature is corrupted. Please download new player. Running anonymous screen till then.",
-					"Corrupted MD5 signature file",4,null,NativeApplication.nativeApplication.exit);
-				}
+				Alert.show("Your screen signature is missing. Download new player.",
+							"Missing MD5 signature file",4,null,NativeApplication.nativeApplication.exit);
 			}
-			else
+							
+			if (md5_source_file.size != 33)
 			{
-				try {
-					fileStream.open(md5_source_file, FileMode.READ);
-					this._screen_md5_string = fileStream.readUTFBytes(32);
-					fileStream.close();
-					
-					fileStream.open(md5_target_file, FileMode.WRITE);
-					fileStream.writeUTFBytes(this._screen_md5_string);
-					fileStream.close();
-				} catch(errObject:Error) {
-					var _md5_filter:FileFilter = new FileFilter("MD5", "*.md5");
-					md5_source_file.browseForOpen('Provide downloaded MD5 file',[_md5_filter]);
-				    md5_source_file.addEventListener(Event.SELECT, screenMD5FileSelected);
-				}
+				Alert.show("Your screen signature is c0rrupted (" + md5_source_file.size + "bytes). Download new player.",
+							"Missing MD5 signature file",4,null,NativeApplication.nativeApplication.exit);
 			}
 
-		}
-		
-		private function screenMD5FileSelected(event:Event):void 
-		{
-		    var stream:FileStream = new FileStream();
-		    File(event.target).copyTo(Application.application.sw_dir.resolvePath('screen.md5'));
+			try {
+				fileStream.open(md5_source_file, FileMode.READ);
+				this._screen_md5_string = fileStream.readUTFBytes(32);
+				fileStream.close();
+			} catch(errObject:Error) {
+				Alert.show("Unexpected error with screen signature file. " + errObject.message + "\nDownload new player.",
+				"Unexpected error",4,null,NativeApplication.nativeApplication.exit);
+			}
+			
+			this.setPlayerMD5();
+			
+			this._next_sync_timeout_id = setTimeout(synchronise, this._sync_interval_ms);
+			this.synchronise();
 		}
 
-		private function set_player_MD5():void
+		private function setPlayerMD5():void
 		{
 			var md5_file:File = Application.application.sw_dir.resolvePath('player.md5');
 			var fileStream:FileStream = new FileStream();

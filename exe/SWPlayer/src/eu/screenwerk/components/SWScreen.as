@@ -8,17 +8,16 @@ package eu.screenwerk.components
 	
 	public class SWScreen extends UIComponent
 	{
-		public var sw_id:uint;
+		//public var sw_id:uint;
 		private var sw_schedule:SWSchedule;
 		private var schedule_id:uint;
 		private var is_playing:Boolean = false;
 
-		public function SWScreen(id:uint)
+		public function SWScreen()
 		{
-			this.sw_id = id;
-			Application.application.log("Create screen " + this.sw_id );
+			Application.application.log("Create screen" );
 
-			var schedules:Array = Application.application.readComponentData(this.sw_id+'.screen');
+			var schedules:Array = Application.application.readComponentData('screen.rc');
 			
 			var schedule_str:String = schedules.shift();
 			var schedule_a:Array = schedule_str.split(';');
@@ -36,8 +35,7 @@ package eu.screenwerk.components
 			if (this.is_playing) return;
 			this.is_playing = true;
 
-			trace (new Date().toString() + " Play screen " + this.sw_id
-				+	". Targeted " + event.currentTarget.toString());
+			trace (new Date().toString() + " Targeted " + event.currentTarget.toString());
 
 
 			this.sw_schedule = new SWSchedule(this.schedule_id);
@@ -53,11 +51,11 @@ package eu.screenwerk.components
 			event.stopPropagation();
 			this.removeEventListener(Event.REMOVED, stop);
 
-			Application.application.log("Stop screen " + this.sw_id + ". Targeted " + event.currentTarget.toString());
+			Application.application.log("Stop screen. Targeted " + event.currentTarget.toString());
 			
 			while (this.numChildren>0)
 			{
-				Application.application.log('RM@' + this.sw_id + '. ' + this.getChildAt(0).toString());
+				Application.application.log('RM. ' + this.getChildAt(0).toString());
 				this.removeChildAt(0);
 			}
 
@@ -74,7 +72,7 @@ package eu.screenwerk.components
 		}
 		override public function toString():String
 		{
-			return this.sw_id + ':' + super.toString();
+			return 'screen:' + super.toString();
 		}
 
 	}

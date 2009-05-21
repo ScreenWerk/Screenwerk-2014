@@ -39,8 +39,6 @@ public var media_dir:File = sw_dir.resolvePath('media');
 
 public function init():void
 {
-	Mouse.hide();
-
 	Application.application.stage.displayState = StageDisplayState.FULL_SCREEN_INTERACTIVE;
 	this._is_fullscreen = true;
 
@@ -55,7 +53,6 @@ public function init():void
 	
 		
 //	stage.addEventListener(KeyboardEvent.KEY_UP, toggleFullscreen, false, 0, true);
-	
 //	stage.dispatchEvent(new KeyboardEvent(KeyboardEvent.KEY_UP));
 
 	var screenshotTimer:Timer = new Timer(20*1000);
@@ -83,11 +80,11 @@ private function playUpdated(flex_event:FlexEvent):void
 
 private function play():void
 {
-	this.readRcParams();
-	
+	Mouse.hide();
+
 	trace (' xcoef:'+this._x_coef+'='+this.width+'/'+this._defined_screen_width + '; ycoef:'+this._y_coef+'='+this.height+'/'+this._defined_screen_height+'.');
 
-	this._sw_screen = new SWScreen(this._screen_id);
+	this._sw_screen = new SWScreen();
 	this._sw_screen.x = 0;
 	this._sw_screen.y = 0;
 	this._sw_screen.width = this.width;
@@ -101,7 +98,7 @@ public function readComponentData(filename:String):Array
 	var component_string:String = this.readFileContents(component_file);
 	var component_split:Array = component_string.split("\n");
 	component_split.shift();
-//	trace( "Component data: " + component_split.toString() ); 
+	trace( "Component data: " + component_split.toString() ); 
 	return component_split;
 }
 
@@ -125,37 +122,6 @@ public function readFileContents(file:File):String
 	return file_contents;
 }
 
-private function readRcParams():void
-{
-	var config_file:File = this.structure_dir.resolvePath('screenrc');
-	var config_string:String = this.readFileContents(config_file);
-
-    var config_params:Array = config_string.split("\n");
-    
-	while ( config_params.length > 0 ) {
-		var kvPair:String = config_params.shift();
-		if (kvPair == "") continue;
-		
-		var index:uint;
-		if ((index = kvPair.indexOf("=")) > 0)
-		{
-		    var key:String = kvPair.substring(0,index);
-		    var value:String = kvPair.substring(index+1);
-			this._rc[key] = value;
-		}
-	}
-	
-	this._screen_id = this._rc['screen_id'];
-
-	this._defined_screen_width = this._rc['screen_width'];
-	this._defined_screen_height = this._rc['screen_height'];
-
-	this.validateNow();
-	
-	this._x_coef = this.width/this._defined_screen_width;
-	this._y_coef = this.height/this._defined_screen_height;
-    
-}
 
 private function stopResizeListeners():void
 {
