@@ -40,7 +40,7 @@ class Media_model extends Model {
 
 	function get_one($id = NULL) {
 		$row = $this->get_list($id);
-		return $row[$id];	
+		if(count($row) > 0) return $row[$id];	
 	}
 
 

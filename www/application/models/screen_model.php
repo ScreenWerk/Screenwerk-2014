@@ -33,7 +33,6 @@ class Screen_model extends Model {
 				$data[$row['id']]['synchronized'] = ($data[$row['id']]['content_md5'] == $this->md5($row['id'])) ? TRUE : FALSE; 
 
 				unset( $data[$row['id']]['content_md5'] );
-            
 			}
 		} else {
 			$data = array();
@@ -47,14 +46,14 @@ class Screen_model extends Model {
 
 	function get_one($id = NULL) {
 		$row = $this->get_list($id);
-		return $row[key($row)];	
+		if(count($row) > 0) return $row[key($row)];	
 	}
 
 
 
 	function get_one_by_md5($screen_md5 = NULL) {
 		$row = $this->get_list(NULL, $screen_md5);
-		return $row[key($row)];	
+		if(count($row) > 0) return $row[key($row)];	
 	}
 
 
