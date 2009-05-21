@@ -85,8 +85,8 @@ class Player extends Controller {
 
 	}
 
-	
-	
+
+
 	function get_player_md5_list() {
 
 		$data = $this->screen->get_list();
