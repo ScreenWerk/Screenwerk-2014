@@ -15,10 +15,13 @@ class Screen_model extends Model {
 		$this->db->select('screens.id, screens.name, screens.schedule_id, schedules.name AS schedule, screens.width, screens.height, screens.screen_md5, screens.content_md5, TIMESTAMPDIFF(SECOND,screens.last_seen,NOW())+1 last_seen');
 		$this->db->from('screens');
 		$this->db->join('schedules', 'schedules.id = screens.schedule_id');
-		$this->db->where('screens.customer_id', $this->sess->customer_id);
-		$this->db->where('schedules.customer_id', $this->sess->customer_id);
-		if ($id) $this->db->where('screens.id', $id);
-		if ($screen_md5) $this->db->where('screens.screen_md5', $screen_md5);
+		if ($id) {
+			$this->db->where('screens.customer_id', $this->sess->customer_id);
+			$this->db->where('schedules.customer_id', $this->sess->customer_id);
+			$this->db->where('screens.id', $id);
+		} else {
+			$this->db->where('screens.screen_md5', $screen_md5);
+		}
 		$this->db->order_by('name'); 
 		$query = $this->db->get();
 		
@@ -33,6 +36,7 @@ class Screen_model extends Model {
 				$data[$row['id']]['synchronized'] = ($data[$row['id']]['content_md5'] == $this->md5($row['id'])) ? TRUE : FALSE; 
 
 				unset( $data[$row['id']]['content_md5'] );
+            
 			}
 		} else {
 			$data = array();
@@ -59,7 +63,7 @@ class Screen_model extends Model {
 
 
 	function delete($id) {
-      $this->delete_fs($id);
+		$this->delete_fs($id);
 		$this->db->where('id', $id);
 		$this->db->delete('screens');
 	}
