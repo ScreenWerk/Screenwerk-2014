@@ -8,6 +8,7 @@
 		<link rel="shortcut icon" href="<?= base_url(); ?>images/favicon.ico" />
    		<link rel="icon" type="image/gif" href="<?= base_url(); ?>images/animated_favicon1.gif" />
 		
+		<link rel="stylesheet" type="text/css" media="screen" href="<?= base_url(); ?>css/smoothness/jquery-ui-1.7.1.custom.css" />	
 		<link rel="stylesheet" type="text/css" media="screen" href="<?= base_url(); ?>css/screen.css" />
 		<!--[if IE]>
 			<link rel="stylesheet" type="text/css" media="screen" href="<?= base_url(); ?>css/ie.css" />
@@ -15,7 +16,8 @@
 		
 		<script src="http://www.google.com/jsapi" type="text/javascript"></script>
 		<script type="text/javascript">
-			google.load("jquery", "1")
+			google.load("jquery", "1");
+			google.load("jqueryui", "1");
 		</script>
 		<script type="text/javascript" src="<?= base_url(); ?>javascripts/uploadify/jquery.uploadify.js"></script>
 
