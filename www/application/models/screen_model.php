@@ -248,7 +248,7 @@ class Screen_model extends Model {
          mkdir(DIR_FTP_SCREENS."/$screen_id");
       }
 
-		$screen_file = DIR_FTP_SCREENS."/$screen_id/screen";
+		$screen_file = DIR_FTP_SCREENS."/$screen_id/screen.rc";
 		if (file_exists($screen_file)) {
          unlink($screen_file);
       }
