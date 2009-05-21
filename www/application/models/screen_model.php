@@ -10,27 +10,29 @@ class Screen_model extends Model {
 
 
 
-	function get_list() {
+	function get_list($id = NULL, $screen_md5 = NULL) {
 
-		$this->db->select('id, name, schedule_id, dimension_id, content_md5');
+		$this->db->select('screens.id, screens.name, screens.schedule_id, schedules.name AS schedule, screens.width, screens.height, screens.screen_md5, screens.content_md5, TIMESTAMPDIFF(SECOND,screens.last_seen,NOW())+1 last_seen');
 		$this->db->from('screens');
-		$this->db->where('customer_id', $this->sess->customer_id);
+		$this->db->join('schedules', 'schedules.id = screens.schedule_id');
+		$this->db->where('screens.customer_id', $this->sess->customer_id);
+		$this->db->where('schedules.customer_id', $this->sess->customer_id);
+		if ($id) $this->db->where('screens.id', $id);
+		if ($screen_md5) $this->db->where('screens.screen_md5', $screen_md5);
 		$this->db->order_by('name'); 
 		$query = $this->db->get();
 		
 		if($query->num_rows() > 0) {
 			foreach($query->result_array() as $row) {
 				$data[$row['id']] = $row;
-				$data[$row['id']]['dimension'] = $this->dimension->get_name($row['dimension_id']);
-				$data[$row['id']]['schedule'] = $this->schedule->get_name($row['schedule_id']);
-				unset($data[$row['id']]['dimension_id']);
-				unset($data[$row['id']]['schedule_id']);
-				unset($data[$row['id']]['id']);
+				$data[$row['id']]['last_seen_inwords'] = $this->_secondsToWords($data[$row['id']]['last_seen']);
+				$data[$row['id']]['media'] = $this->screen_media($row['id']);
+				$data[$row['id']]['bundles'] = $this->screen_bundles($row['id']);
+				$data[$row['id']]['layouts'] = $this->screen_layouts($row['id']);
+				$data[$row['id']]['collections'] = $this->screen_collections($row['id']);
+				$data[$row['id']]['synchronized'] = ($data[$row['id']]['content_md5'] == $this->md5($row['id'])) ? TRUE : FALSE; 
 
-				$data[$row['id']]['synchronized'] =
-				    ( $data[$row['id']]['content_md5'] == $this->md5( $row['id'] ) ) ?
-				    'Yes' : 'No'; 
-            unset( $data[$row['id']]['content_md5'] );
+				unset( $data[$row['id']]['content_md5'] );
             
 			}
 		} else {
@@ -44,46 +46,15 @@ class Screen_model extends Model {
 
 
 	function get_one($id = NULL) {
-		
-		$this->db->select('id, name, schedule_id, dimension_id, screen_md5');
-		$this->db->from('screens');
-		$this->db->where('customer_id', $this->sess->customer_id);
-		$this->db->where('id', $id);
-		$this->db->limit(1);
-		$query = $this->db->get();
-
-		if($query->num_rows() > 0) {
-			$data = $query->row_array();
-		} else {
-			foreach($query->field_data() as $row) {
-				$data[$row->name] = NULL;
-			}
-		}
-		
-		return $data;
-		
+		$row = $this->get_list($id);
+		return $row[key($row)];	
 	}
 
 
 
 	function get_one_by_md5($screen_md5 = NULL) {
-		
-		$this->db->select('id, name, schedule_id, dimension_id, content_md5');
-		$this->db->from('screens');
-		$this->db->where('screen_md5', $screen_md5);
-		$this->db->limit(1);
-		$query = $this->db->get();
-
-		if($query->num_rows() > 0) {
-			$data = $query->row_array();
-		} else {
-			foreach($query->field_data() as $row) {
-				$data[$row->name] = NULL;
-			}
-		}
-		
-		return $data;
-		
+		$row = $this->get_list(NULL, $screen_md5);
+		return $row[key($row)];	
 	}
 
 
@@ -120,9 +91,137 @@ class Screen_model extends Model {
 		$this->db->where('id', $id);
 		$this->db->update('screens');
 	}
+
+
+
+	function screen_media($screen_id) {
+		$this->db->select('medias.id, medias.filename AS name');
+		$this->db->from('medias');
+		$this->db->join('medias_bundles', 'medias_bundles.media_id = medias.id');
+		$this->db->join('bundles_layouts', 'bundles_layouts.bundle_id = medias_bundles.bundle_id');
+		$this->db->join('layouts_collections', 'layouts_collections.layout_id = bundles_layouts.layout_id');
+		$this->db->join('collections_schedules', 'collections_schedules.collection_id = layouts_collections.collection_id');
+		$this->db->join('screens', 'collections_schedules.schedule_id = screens.schedule_id');
+		$this->db->where('medias.customer_id', $this->sess->customer_id);
+		$this->db->where('medias_bundles.customer_id', $this->sess->customer_id);
+		$this->db->where('bundles_layouts.customer_id', $this->sess->customer_id);
+		$this->db->where('layouts_collections.customer_id', $this->sess->customer_id);
+		$this->db->where('collections_schedules.customer_id', $this->sess->customer_id);
+		$this->db->where('screens.customer_id', $this->sess->customer_id);
+		$this->db->where('screens.id', $screen_id);
+		$this->db->order_by('medias.filename');
+		$query = $this->db->get();
+		
+		if($query->num_rows() > 0) {
+			foreach($query->result_array() as $row) {
+				$data[$row['id']] = $row['name'];
+			}
+		} else {
+			$data = array();
+		}
+
+		return $data;
+	}
+
+
+
+	function screen_bundles($screen_id) {
+		$this->db->select('bundles.id, bundles.name');
+		$this->db->from('bundles');
+		$this->db->join('bundles_layouts', 'bundles_layouts.bundle_id = bundles.id');
+		$this->db->join('layouts_collections', 'layouts_collections.layout_id = bundles_layouts.layout_id');
+		$this->db->join('collections_schedules', 'collections_schedules.collection_id = layouts_collections.collection_id');
+		$this->db->join('screens', 'collections_schedules.schedule_id = screens.schedule_id');
+		$this->db->where('bundles.customer_id', $this->sess->customer_id);
+		$this->db->where('bundles_layouts.customer_id', $this->sess->customer_id);
+		$this->db->where('layouts_collections.customer_id', $this->sess->customer_id);
+		$this->db->where('collections_schedules.customer_id', $this->sess->customer_id);
+		$this->db->where('screens.customer_id', $this->sess->customer_id);
+		$this->db->where('screens.id', $screen_id);
+		$this->db->order_by('bundles.name'); 
+		$query = $this->db->get();
+		
+		if($query->num_rows() > 0) {
+			foreach($query->result_array() as $row) {
+				$data[$row['id']] = $row['name'];
+			}
+		} else {
+			$data = array();
+		}
+
+		return $data;
+	}
+
 	
 	
 	
+	function screen_layouts($screen_id) {
+		$this->db->select('layouts.id, layouts.name');
+		$this->db->from('layouts');
+		$this->db->join('layouts_collections', 'layouts_collections.layout_id = layouts.id');
+		$this->db->join('collections_schedules', 'collections_schedules.collection_id = layouts_collections.collection_id');
+		$this->db->join('screens', 'collections_schedules.schedule_id = screens.schedule_id');
+		$this->db->where('layouts.customer_id', $this->sess->customer_id);
+		$this->db->where('layouts_collections.customer_id', $this->sess->customer_id);
+		$this->db->where('collections_schedules.customer_id', $this->sess->customer_id);
+		$this->db->where('screens.customer_id', $this->sess->customer_id);
+		$this->db->where('screens.id', $screen_id);
+		$this->db->order_by('layouts.name'); 
+		$query = $this->db->get();
+		
+		if($query->num_rows() > 0) {
+			foreach($query->result_array() as $row) {
+				$data[$row['id']] = $row['name'];
+			}
+		} else {
+			$data = array();
+		}
+
+		return $data;
+	}
+
+	
+	
+	
+	function screen_collections($screen_id) {
+		$this->db->select('collections.id, collections.name');
+		$this->db->from('collections');
+		$this->db->join('collections_schedules', 'collections_schedules.collection_id = collections.id');
+		$this->db->join('screens', 'collections_schedules.schedule_id = screens.schedule_id');
+		$this->db->where('collections.customer_id', $this->sess->customer_id);
+		$this->db->where('collections_schedules.customer_id', $this->sess->customer_id);
+		$this->db->where('screens.customer_id', $this->sess->customer_id);
+		$this->db->where('screens.id', $screen_id);
+		$this->db->order_by('collections.name'); 
+		$query = $this->db->get();
+		
+		if($query->num_rows() > 0) {
+			foreach($query->result_array() as $row) {
+				$data[$row['id']] = $row['name'];
+			}
+		} else {
+			$data = array();
+		}
+
+		return $data;
+	}
+
+	
+	
+	
+
+	
+	
+	
+
+
+
+
+
+
+
+
+
 	function delete_fs($screen_id) {
 	   //TODO: right now orphan layout files are remaining,
 	   // plan is to remove all related layout files and refresh them
@@ -194,6 +293,28 @@ class Screen_model extends Model {
 		
 		return md5($md5_string);
 		
+	}
+
+
+
+	function _secondsToWords($secs) {
+		$vals = array('w' => (int) ($secs / 604800), 
+                      'd' => $secs / 86400 % 7, 
+                      'h' => $secs / 3600 % 24, 
+                      'm' => $secs / 60 % 60, 
+                      's' => $secs % 60); 
+ 
+        $ret = array(); 
+ 
+        $added = false; 
+        foreach ($vals as $k => $v) { 
+            if ($v > 0 || $added) { 
+                $added = true; 
+                $ret[] = $v . $k; 
+            } 
+        } 
+ 
+        return join(' ', $ret); 
 	}
 
 }

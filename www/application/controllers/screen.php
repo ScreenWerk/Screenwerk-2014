@@ -20,7 +20,19 @@ class Screen extends Controller {
 		$view['page_menu_code'] = 'screen';
 		$view['page_submenu'] = array($this->router->class .'/add'=>'Add New '. humanize($this->router->class));
 		$view['page_content'] = $this->load->view('screen/screen_list', $view, True);
+
+		$view['box']['screen_box']['hidden'] = TRUE;
+		$view['box']['screen_box']['content'] = $this->load->view('screen/screen_box', $view, True);
+
 		$this->load->view('main_page_view', $view);
+	}
+
+
+
+	function view($id) {
+		$view = $this->screen->get_one($id);
+		//print_r($view);
+		$this->load->view('screen/screen_box', $view);
 	}
 
 
@@ -126,13 +138,34 @@ class Screen extends Controller {
 		if ($zip->open($screen_player) === TRUE) {
 			$zip->addFromString('screen.md5', $md5);
 			$zip->close();
-			force_download('SWPlayer.air', file_get_contents($screen_player));
+			force_download('SWPlayer for '. $screen['name'] .'.air', file_get_contents($screen_player));
 		} else {
 			echo 'Download failed!';
 		}
+	
+	}
 
+
+	function status($screen_id) {
+
+		$this->load->helper('file');
+		
+		$screen = $this->screen->get_one($screen_id);
+		
+		$dir = 'images/';
+		
+		$file = 'status_red.png';
+		if($screen['last_seen'] < 300) $file = 'status_yellow.png';
+		if($screen['last_seen'] < 60) $file = 'status_green.png';
+		if($screen['last_seen'] < 1) $file = 'empty.png';
+
+		if(read_file($dir.$file)) {
+			header('Content-Type: image/png');
+			print(file_get_contents($dir.$file));
+		}
 
 	}
 	
+
 }
 ?>
