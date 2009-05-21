@@ -52,8 +52,7 @@ class Player extends Controller {
 			$file = str_replace('/', '', $file);
 
 			if(read_file($dir.$file)) {
-				header('Content-Type: '. mime_content_type($dir.$file));
-				print(file_get_contents($dir.$file));
+				force_download($file, file_get_contents($dir.$file));		
 			} else {
 				echo $message = 'ERROR - No File';
 			}
@@ -85,6 +84,21 @@ class Player extends Controller {
 		}
 
 	}
+
+	
+	
+	function get_player_md5_list() {
+
+		$data = $this->screen->get_list();
+
+		foreach($data as $row) {
+			echo $row['screen_md5'] ."\n";
+		}
+
+	}
+
+
+
 }
 
 ?>
