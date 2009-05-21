@@ -129,21 +129,16 @@ class Screen extends Controller {
 		$md5 = $screen['screen_md5'];
 
 		$dir = DIR_FTP_PLAYERS .'/';
-		$source_player = $dir .'SWPlayer.air';
-		$screen_player = $dir .'/for_screens/SWPlayer_'. $screen_id .'.air';
+		$screen_player = $dir .'/for_screens/'. $md5;
 		
-		copy($source_player, $screen_player);
-		
-		$zip = new ZipArchive;
-		if ($zip->open($screen_player) === TRUE) {
-			$zip->addFromString('screen.md5', $md5);
-			$zip->close();
+		if(read_file($screen_player)) {
 			force_download('SWPlayer for '. $screen['name'] .'.air', file_get_contents($screen_player));
 		} else {
-			echo 'Download failed!';
+			show_404('screen/get_player');
 		}
 	
 	}
+
 
 
 	function status($screen_id) {
