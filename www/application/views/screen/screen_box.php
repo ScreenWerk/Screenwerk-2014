@@ -13,7 +13,7 @@
 	if(count($layouts)>0) echo '<b>Layouts: </b><br />'. implode(', ', $layouts) .'<br /><br />';
 	if(count($collections)>0) echo '<b>Collections: </b><br />'. implode(', ', $collections) .'<br /><br />';
 	if(isset($schedule)) echo '<b>Schedule: </b><br />'. $schedule .'<br /><br />';
-	if($synchronized) echo '<button id="generate-playlist" class="ui-button ui-state-default ui-corner-all" style="float:right;">Generate Playlist</button>';
+	if(!$synchronized) echo '<button id="generate-playlist" class="ui-button ui-state-default ui-corner-all" style="float:right;">Generate Playlist</button>';
 ?>
 	
 	<button id="download-player" class="ui-button ui-state-default ui-corner-all">Download Player</button>

@@ -47,7 +47,7 @@ class Media extends Controller {
 		if($view['type'] == 'URL') {
 			$file = DIR_FTP_MASTERS .'/'. $view['id'] .'.URL';
 			$url = read_file($file);
-			if($url) $view['url'] = $url;
+			if($url) $view['url'] = trim($url);
 		}
 
 
