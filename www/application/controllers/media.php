@@ -40,7 +40,17 @@ class Media extends Controller {
 	}
 
 	function view($id) {
+		$this->load->helper('file');
+
 		$view = $this->media->get_one($id);
+
+		if($view['type'] == 'URL') {
+			$file = DIR_FTP_MASTERS .'/'. $view['id'] .'.URL';
+			$url = read_file($file);
+			if($url) $view['url'] = $url;
+		}
+
+
 		$this->load->view('media/media_box', $view);
 	}
 

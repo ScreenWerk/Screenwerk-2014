@@ -20,14 +20,17 @@ if(isset($filename)) {
 		<img id="media_img" src="<?= base_url(); ?>media/thumbnail/b/<?= $id; ?>" style="margin-bottom: 5px;" width="<?= $img_width ?>" height="<?= $img_height ?>" <?= $skimming ?> alt="" />
 	</center>
 	<b>Type: </b><br /><?= $type; ?><br /><br />
-	<b>Duration: </b><br /><?= $duration; ?><br /><br />
-	<b>Dimensions: </b><br /><?= isset($width) ? $width .'x'. $height : ''; ?><br /><br />
-	<b>Bundles: </b><br /><?= implode(', ', $bundles); ?><br /><br />
-	<b>Layouts: </b><br /><?= implode(', ', $layouts); ?><br /><br />
-	<b>Collections: </b><br /><?= implode(', ', $collections); ?><br /><br />
-	<b>Schedules: </b><br /><?= implode(', ', $schedules); ?><br /><br />
-	<b>Screens: </b><br /><?= implode(', ', $screens); ?><br /><br />
 
+<?php 
+	if(isset($duration)) echo '<b>Duration: </b><br />'. $duration .'<br /><br />';
+	if(isset($width)) echo '<b>Dimensions: </b><br />'. $width .'x'. $height .'<br /><br />';
+	if(isset($url)) echo '<b>URL: </b><br />'. anchor($url, $url) .'<br /><br />';
+	if(count($bundles)>0) echo '<b>Bundles: </b><br />'. implode(', ', $bundles) .'<br /><br />';
+	if(count($layouts)>0) echo '<b>Layouts: </b><br />'. implode(', ', $layouts) .'<br /><br />';
+	if(count($collections)>0) echo '<b>Collections: </b><br />'. implode(', ', $collections) .'<br /><br />';
+	if(count($schedules)>0) echo '<b>Schedules: </b><br />'. implode(', ', $schedules) .'<br /><br />';
+	if(count($screens)>0) echo '<b>Screens: </b><br />'. implode(', ', $screens) .'<br /><br />';
+?>
 	<map name="skimming">
 	
 	<?php
