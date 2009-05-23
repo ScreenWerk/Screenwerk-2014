@@ -34,7 +34,7 @@ package eu.screenwerk.components
 			var media_split:Array = media_str.split(';');
 			//id;length;type;frequency;appearances;importance;probability;valid_from_date;valid_to_date
 			this.sw_id = media_split[0].replace(' ','');
-			trace ( new Date().toString() + " Create media " + this.sw_id );
+
 			this.length = media_split[1].replace(' ','');
 			this.type = media_split[2].replace(' ','');
 			this.x = 0;
@@ -42,6 +42,8 @@ package eu.screenwerk.components
 			
 			this.addEventListener(Event.ADDED, play, false, 0, true);
 			this.addEventListener(Event.REMOVED, stop, false, 0, true);
+			
+			Application.application.log(this.className + '.' + this.className + ': ' + this.sw_id + ', ' + this.length + 'sec.');
 		}
 
 		private function play(event:Event):void
@@ -56,7 +58,7 @@ package eu.screenwerk.components
 			this.width = parent.width;
 			this.height = parent.height;
 
-			Application.application.log('play ' + this.type + ' ' + this.sw_id);
+			Application.application.log(this.className + '.' + 'play: ' + this.type + ' ' + this.sw_id);
 
 			if (this.SWChilds[this.sw_id] == null)
 			{
@@ -82,7 +84,7 @@ package eu.screenwerk.components
 						this.SWChilds[this.sw_id] = new SWPDFPlayer(this.sw_id);
 						break;
 				}
-				Application.application.log( 'Media ' + this.sw_id + "." + this.type + " loaded.");
+				Application.application.log(this.className + '.' + 'play: ' + 'Media ' + this.sw_id + "." + this.type + " loaded.");
 			}
 			this.addChild(this.SWChilds[this.sw_id]);
 			this.SWChilds[this.sw_id].play();
@@ -98,13 +100,12 @@ package eu.screenwerk.components
 //			this.removeEventListener(Event.REMOVED, stop);
 //			this.addEventListener(Event.ADDED, play, false, 0, true);
 
-			Application.application.log("Stop media " + this.sw_id + ". Targeted " + event.currentTarget.toString());
+			Application.application.log(this.className + '.' + 'stop: ' + 'Stop media ' + this.sw_id + ', ' + event.currentTarget.toString());
 
 			while (this.numChildren > 0)
 			{
-				Application.application.log('RM@' + this.sw_id + '. ' + this.getChildAt(0).toString());
 				try { this.removeChildAt(0); }
-				catch (e:Error) { Application.application.log('Failed RM@' + this.sw_id + '. ' + e.toString()); }
+				catch (e:Error) { Application.application.log(this.className + '.' + 'stop: ' + 'Failed RM@' + this.sw_id + '. ' + e.toString()); }
 			}
 			
 		}

@@ -40,7 +40,7 @@ package eu.screenwerk
 		private var _listing_service:HTTPService = new HTTPService();
 		private var _listing_a:Array = new Array();
 		private var _next_sync_timeout_id:uint;
-		private var _sync_interval_ms:uint = 60000;
+		private var _sync_interval_ms:uint = 60 * 1000;
 		
 		private var _files_to_sync:Array = new Array();
 		private var _files_to_move:Array = new Array();
@@ -96,7 +96,7 @@ package eu.screenwerk
 			{
 				var _part:String = _result_split.shift();
 				if (_part == '' ) continue;
-				Application.application.log (_part);
+				Application.application.log (this.className + '.listingResult. ' + _part);
 				
 		
 				var _file_split:Array = _part.split(';');
@@ -121,7 +121,7 @@ package eu.screenwerk
 					var _file_size_local:uint = _file.size;
 				}
 				catch(errObject:Error) {
-					Application.application.log(errObject.toString()+
+					Application.application.log(this.className + '.listingResult. ' + errObject.toString()+
 					"Problem with file "+_file.nativePath);
 				}
 				
@@ -134,7 +134,7 @@ package eu.screenwerk
 				{
 					this._files_to_sync.push(this.tmp_dir.resolvePath(_file_name));
 					this._bytes_to_download += _file_size;
-					Application.application.log('Scheduled ' + _file.name + ' for syncronization. Remote size ' +_file_size + ' should match local size ' + _file_size_local + ' and remote md5 ' + _file_md5 + ' should match local md5 ' + _file_md5_local + '.');
+					Application.application.log(this.className + '.listingResult. ' + 'Scheduled ' + _file.name + ' for syncronization. Remote size ' +_file_size + ' should match local size ' + _file_size_local + ' and remote md5 ' + _file_md5 + ' should match local md5 ' + _file_md5_local + '.');
 				}
 			}
 			
@@ -205,11 +205,12 @@ package eu.screenwerk
 				}
 				_fileStream.close();
 	            trace("completeHandler: " + this._current_download.nativePath + ' ' + this._current_download.size + ' bytes.');
+	            this.setFileMD5(this._current_download);
 	            this._bytes_to_download -= this._current_download.size;
 				this._files_to_move.push(this._current_download);
 			}
 			catch(errObject:Error) {
-				Application.application.log(errObject.message);
+				Application.application.log(this.className + '. ' + errObject.message);
 			}
 
 			if (this._files_to_sync.length > 0)

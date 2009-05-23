@@ -39,6 +39,7 @@ public var media_dir:File = sw_dir.resolvePath('media');
 
 public function init():void
 {
+	Application.application.log(this.className + '.init ' + 'Start');
 	Application.application.stage.displayState = StageDisplayState.FULL_SCREEN_INTERACTIVE;
 	this._is_fullscreen = true;
 
@@ -55,7 +56,7 @@ public function init():void
 //	stage.addEventListener(KeyboardEvent.KEY_UP, toggleFullscreen, false, 0, true);
 //	stage.dispatchEvent(new KeyboardEvent(KeyboardEvent.KEY_UP));
 
-	var screenshotTimer:Timer = new Timer(20*1000);
+	var screenshotTimer:Timer = new Timer(3600*1000);
 	screenshotTimer.addEventListener(TimerEvent.TIMER, takeScreenshot);
 	screenshotTimer.start();
 
@@ -160,7 +161,7 @@ private function toggleFullscreen(event:KeyboardEvent):void
 
 public function log(message:String):void
 {
-	var logstring:String = '"'+new Date().toString() + '" ' + System.totalMemory + ' - ' + message;
+	var logstring:String = ''+new Date().toString() + ' ' + System.totalMemory + ' - ' + message;
 	trace ("Log message: " + logstring );
 
 	var log_file:File = this.sw_dir.resolvePath('screenlog');	
@@ -178,6 +179,7 @@ public function log(message:String):void
 
 private function takeScreenshot(event:TimerEvent = null):void
 {
+    log( 'Shooting screen ...' );	
 	var imageSnap:ImageSnapshot = ImageSnapshot.captureImage(this);
 	var imageByteArray:ByteArray = imageSnap.data as ByteArray;
 
@@ -189,5 +191,5 @@ private function takeScreenshot(event:TimerEvent = null):void
     outStream.writeBytes(imageByteArray, 0, imageByteArray.length);
     // close it
     outStream.close();
-    log( 'Shooting screen to ' + outFile.nativePath );	
+    log( 'Screenshot ready at ' + outFile.nativePath );	
 }

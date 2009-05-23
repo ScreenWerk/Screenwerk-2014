@@ -45,7 +45,6 @@ package eu.screenwerk.components
 		{
 			var cronline_a:Array = collectionstring.split(';');
 			this.sw_id = cronline_a[0].replace(' ','');
-			Application.application.log ( new Date().toString() + " Create collection " + this.sw_id );
 			
 			this.cron_minute = cronline_a[1].replace(' ','');
 			this.cron_hour = cronline_a[2].replace(' ','');
@@ -64,9 +63,9 @@ package eu.screenwerk.components
 			this.setLastDate();
 			this.setNextDate();
 
-			Application.application.log( "Created collection " + this.sw_id + ' - ' + this.lastDate.toTimeString() + '..' + this.nextDate.toTimeString() );
-
 			this.addEventListener(Event.ADDED, play, false, 0, true);
+
+			Application.application.log(this.className + '.' + this.className + ': ' + this.sw_id + ' - ' + this.lastDate.toTimeString() + '..' + this.nextDate.toTimeString() );
 		}
 		
 		public function play(event:Event):void
@@ -75,8 +74,7 @@ package eu.screenwerk.components
 			this.removeEventListener(Event.ADDED, play);
 			this.addEventListener(Event.REMOVED, stop, false, 0, true);
 			
-			Application.application.log( new Date().toString() + " Play collection " + this.sw_id
-				+	". Targeted " + event.currentTarget.toString());
+			Application.application.log(this.className + '.play: ' + 'Play collection ' + this.sw_id + ', ' + event.currentTarget.toString());
 				
 			this.timeshift = (new Date().getTime() - this.lastDate.getTime()) / 1000;
 			
@@ -95,11 +93,10 @@ package eu.screenwerk.components
 
 			clearTimeout(this.timeout_id);
 
-			Application.application.log( "Stop collection "+this.sw_id + ". Targeted " + event.currentTarget.toString());
+			Application.application.log(this.className + '.play: ' + 'Stop collection ' + this.sw_id + ', ' + event.currentTarget.toString());
 								
 			while (this.numChildren>0)
 			{
-				Application.application.log('RM@' + this.sw_id + '. ' + this.getChildAt(0).toString());
 				this.removeChildAt(0);
 			}
 
@@ -123,19 +120,19 @@ package eu.screenwerk.components
 			if ( this.current_layout == null )
 			{
 				this.setNextLayout();
-				Application.application.log( "Collection 1st run " + this.sw_id 
-					+ ", evaluating layout " + this.current_layout.sw_id );
+				Application.application.log(this.className + '.playLayouts: ' + 'Collection 1st run ' + this.sw_id 
+					+ ', evaluating layout ' + this.current_layout.sw_id );
 			}
 			
 			while ( this.current_layout.duration < this.timeshift )
 			{
 				this.timeshift = this.timeshift - this.current_layout.duration;
 				this.setNextLayout();
-				Application.application.log( "... skipping layout " + this.current_layout.sw_id );
+				//Application.application.log(this.className + '.playLayouts: ' + '... skipping layout ' + this.current_layout.sw_id );
 			}
 
-			Application.application.log( "... starting layout " + this.current_layout.sw_id 
-				+ ", stopping after " + (this.current_layout.duration - this.timeshift) + "sec." );
+			Application.application.log(this.className + '.playLayouts: ' + '... starting layout ' + this.current_layout.sw_id 
+				+ ', stopping after ' + (this.current_layout.duration - this.timeshift) + 'sec.' );
 
 			this.timeout_id = setTimeout(playNextLayoutOnTimer, (this.current_layout.duration - this.timeshift)*1000 );
 
@@ -152,9 +149,9 @@ package eu.screenwerk.components
 
 			this.setNextLayout();
 
-			Application.application.log( "Collection " + this.sw_id 
-				+ ", starting layout " + this.current_layout.sw_id 
-				+ ", stopping after " + this.current_layout.duration + "sec." );
+			Application.application.log(this.className + '.playNextLayoutOnTimer: ' + 'Collection ' + this.sw_id 
+				+ ', starting layout ' + this.current_layout.sw_id 
+				+ ', stopping after ' + this.current_layout.duration + 'sec.' );
 
 			this.timeout_id = setTimeout(playNextLayoutOnTimer, this.current_layout.duration*1000);
 
@@ -174,7 +171,7 @@ package eu.screenwerk.components
 			if (this.SWChilds[layoutstring] == null)
 			{
 				this.SWChilds[layoutstring] = new SWLayout(layoutstring);
-				Application.application.log( 'Layout ' + this.SWChilds[layoutstring].sw_id + " loaded.");
+				Application.application.log(this.className + '.setNextLayout: ' + 'Layout ' + this.SWChilds[layoutstring].sw_id + ' loaded.');
 			} 
 
 			this.current_layout = this.SWChilds[layoutstring];

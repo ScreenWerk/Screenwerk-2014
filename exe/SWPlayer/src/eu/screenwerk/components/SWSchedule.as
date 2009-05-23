@@ -24,7 +24,7 @@ package eu.screenwerk.components
 			this.sw_id = id;
 			
 			this.addEventListener(Event.ADDED, play, false, 0, true);
-
+			Application.application.log(this.className + '.' + this.className + ': ' + this.sw_id );
 		}
 		
 		private function play(event:Event):void
@@ -33,8 +33,7 @@ package eu.screenwerk.components
 			this.removeEventListener(Event.ADDED, play);
 			this.addEventListener(Event.REMOVED, stop, false, 0, true);
 
-			Application.application.log(" Play schedule " + this.sw_id
-				+	". Targeted " + event.currentTarget.toString());
+			Application.application.log(this.className + '.play: ' + 'Play schedule ' + this.sw_id + ", " + event.currentTarget.toString());
 				
 			var collectionstrings:Array = Application.application.readComponentData(this.sw_id+'.schedule');
 
@@ -49,7 +48,7 @@ package eu.screenwerk.components
 				if (this.SWChilds[collectionstring] == null)
 				{
 					this.SWChilds[collectionstring] = new SWCollection(collectionstring);
-					Application.application.log( 'Collection ' + this.SWChilds[collectionstring].sw_id + " loaded.");
+					Application.application.log(this.className + '.play: ' + 'Collection ' + this.SWChilds[collectionstring].sw_id + " loaded.");
 				}
 				else
 				{
@@ -75,10 +74,11 @@ package eu.screenwerk.components
 
 			this.addChild(this.current_collection);
 			var _now:Number = new Date().getTime();
-			//_now = new Date().getMilliseconds();
+
 			var timeout_msec:Number = this.current_collection.nextDate.getTime() - _now;
-			Application.application.log("Time from collection start - " + (_now - this.current_collection.lastDate.getTime())/1000 + " seconds.");
-			Application.application.log("Time till next collection - " + timeout_msec/1000 + " seconds.");
+			Application.application.log(this.className + '.play: ' 
+				+ 'Time from collection start - ' + uint((_now - this.current_collection.lastDate.getTime())/1000) + ' seconds, '
+				+ 'time till next collection - ' + uint(timeout_msec/1000) + ' seconds.');
 			this.timeout_id = setTimeout(playNextCollection, timeout_msec);
 		}
 
@@ -87,15 +87,13 @@ package eu.screenwerk.components
 			event.stopPropagation();
 			this.removeEventListener(Event.REMOVED, stop);
 			
-			Application.application.log("Stop schedule " + this.sw_id + ". Targeted " + event.currentTarget.toString());
+			Application.application.log(this.className + '.stop: ' + "Stop schedule " + this.sw_id + ", " + event.currentTarget.toString());
 				
 			while (this.numChildren>0)
 			{
-				Application.application.log('RM@' + this.sw_id + '. ' + this.getChildAt(0).toString());
 				this.removeChildAt(0);
 			}
 
-//			this.removeChild(this.current_collection);
 			this.current_collection = null; // TODO: remove this?
 		}
 		
@@ -103,11 +101,6 @@ package eu.screenwerk.components
 		{
 			clearTimeout(this.timeout_id);
 			
-//			var schedule_file:File = Application.application.structure_dir.resolvePath(this.sw_id+'.schedule');
-//			var schedule_string:String = Application.application.readFileContents(schedule_file);
-//			var collectionstrings:Array = schedule_string.split("\n");
-//			var columns:String = collectionstrings.shift(); // discard first line with column descriptors
-//
 			var _collection:SWCollection;
 			
 			var collectionstrings:Array = Application.application.readComponentData(this.sw_id+'.schedule');
@@ -135,7 +128,7 @@ package eu.screenwerk.components
 			}
 
 			var _now_time:Number = new Date().getTime();
-			Application.application.log(_now_time + ' -> ' + this.next_collection.nextDate.getTime());
+
 			this.removeChild(this.current_collection);
 			this.current_collection = this.next_collection;
 			this.addChild(this.current_collection);

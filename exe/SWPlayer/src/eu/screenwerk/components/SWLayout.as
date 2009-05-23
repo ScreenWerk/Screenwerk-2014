@@ -55,6 +55,8 @@ package eu.screenwerk.components
 			this.valid_to_date = new Date(to_split[0], to_split[1], to_split[2]);
 
 			this.addEventListener(Event.ADDED, play, false, 0, true);
+			
+			Application.application.log(this.className + '.' + this.className + ': ' + this.sw_id + ' - ' + this.design_width + 'X' + this.design_height );
 		}
 
 
@@ -72,7 +74,7 @@ package eu.screenwerk.components
 			//
 			//
 			
-			Application.application.log('play layout ' + this.sw_id);
+			Application.application.log(this.className + '.play: ' + 'Play layout ' + this.sw_id);
 
 			this.x = 0;
 			this.y = 0;
@@ -93,7 +95,7 @@ package eu.screenwerk.components
 
 			this.is_playing = false;
 
-			Application.application.log("Stop layout " + this.sw_id + ". Targeted " + event.currentTarget.toString());
+			Application.application.log(this.className + '.stop: ' + ' Stop layout ' + this.sw_id + ', ' + event.currentTarget.toString());
 				
 			while (this.numChildren > 0)
 			{
@@ -115,7 +117,7 @@ package eu.screenwerk.components
 				if (this.SWChilds[bundle_string] == null)
 				{
 					this.SWChilds[bundle_string] = new SWBundle(bundle_string, this.duration);
-					Application.application.log( 'Bundle ' + this.SWChilds[bundle_string].sw_id + " loaded.");
+					Application.application.log(this.className + '.playBundles: ' + ' Bundle ' + this.SWChilds[bundle_string].sw_id + " loaded.");
 				} 
 
 				SWBundle(this.SWChilds[bundle_string]).timeshift = this.timeshift;

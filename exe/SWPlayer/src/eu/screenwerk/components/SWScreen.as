@@ -15,8 +15,6 @@ package eu.screenwerk.components
 
 		public function SWScreen()
 		{
-			Application.application.log("Create screen" );
-
 			var schedules:Array = Application.application.readComponentData('screen.rc');
 			
 			var schedule_str:String = schedules.shift();
@@ -24,19 +22,20 @@ package eu.screenwerk.components
 			this.schedule_id = schedule_a[0];
 			
 			this.addEventListener(Event.ADDED, play, false, 0, true);
+			
+			Application.application.log(this.className + '.' + this.className + '.' );
 		}
 		
 		private function play(event:Event):void
 		{
 			event.stopPropagation();
-			this.removeEventListener(Event.ADDED, stop);
+			this.removeEventListener(Event.ADDED, play);
 			this.addEventListener(Event.REMOVED, stop, false, 0, true);
 
 			if (this.is_playing) return;
 			this.is_playing = true;
 
-			trace (new Date().toString() + " Targeted " + event.currentTarget.toString());
-
+			Application.application.log(this.className + '.play: ' + 'Play screen ' + event.currentTarget.toString());
 
 			this.sw_schedule = new SWSchedule(this.schedule_id);
 			this.sw_schedule.x = 0;
@@ -51,11 +50,10 @@ package eu.screenwerk.components
 			event.stopPropagation();
 			this.removeEventListener(Event.REMOVED, stop);
 
-			Application.application.log("Stop screen. Targeted " + event.currentTarget.toString());
+			Application.application.log(this.className + '.stop: ' + 'Stop screen ' + event.currentTarget.toString());
 			
 			while (this.numChildren>0)
 			{
-				Application.application.log('RM. ' + this.getChildAt(0).toString());
 				this.removeChildAt(0);
 			}
 

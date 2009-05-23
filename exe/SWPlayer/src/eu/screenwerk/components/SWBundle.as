@@ -47,7 +47,6 @@ package eu.screenwerk.components
 			var bundle_split:Array = layout_str.split(';');
 			//id;position_x;position_y;position_z;dimension_x;dimension_y;start_sec;stop_sec
 			this.sw_id = bundle_split[0].replace(' ','');
-			trace ( new Date().toString() + " Create bundle " + this.sw_id );
 			
 			this.unscaled_x = bundle_split[1].replace(' ','');
 			this.unscaled_y = bundle_split[2].replace(' ','');
@@ -62,8 +61,10 @@ package eu.screenwerk.components
 			this.stop_sec = bundle_split[7].replace(' ','');
 			if (this.stop_sec == 0) this.stop_sec = layout_duration;
 			
-			
 			this.addEventListener(Event.ADDED, play, false, 0, true);
+			
+			Application.application.log(this.className + '.' + this.className + ': ' + this.sw_id + ', ' 
+					+ this.unscaled_width + 'x' + this.unscaled_height + '+' + this.unscaled_x + '+' + this.unscaled_y);
 		}
 
 		private function play(event:Event):void
@@ -72,7 +73,7 @@ package eu.screenwerk.components
 			this.removeEventListener(Event.ADDED, play);
 			this.addEventListener(Event.REMOVED, stop, false, 0, true);
 			
-			Application.application.log('play bundle ' + this.sw_id);
+			Application.application.log(this.className + '.' + 'play: ' + 'Play bundle ' + this.sw_id);
 			this.stop_timeout_id = setTimeout(stopMedias, this.stop_sec*1000 - this.timeshift*1000);
 
 			if ( this.timeshift == 0 || this.timeshift < this.start_sec )
@@ -83,12 +84,12 @@ package eu.screenwerk.components
 			}
 			else
 			{
-				Application.application.log('else:'+this.timeshift + '-' + this.start_sec);
+				//Application.application.log(this.className + '.' + 'play: ' + 'else:'+this.timeshift + '-' + this.start_sec);
 				this.timeshift = this.timeshift - this.start_sec;
 				while ( this.timeshift > 0 )
 				{
 					this.setNextMedia();
-					Application.application.log('loop:'+this.timeshift + '-' + this.current_media.length);
+					//Application.application.log(this.className + '.' + 'play: ' + 'loop:'+this.timeshift + '-' + this.current_media.length);
 					this.timeshift = Math.max(0,this.timeshift-this.current_media.length);
 				}
 				this.delay_timeout_id = setTimeout(playNextMediaOnTimer, 0);
@@ -103,13 +104,12 @@ package eu.screenwerk.components
 			clearTimeout(this.delay_timeout_id);
 			clearTimeout(this.stop_timeout_id);
 				
-			Application.application.log("Stop bundle " + this.sw_id + ". Targeted " + event.currentTarget.toString());
+			Application.application.log(this.className + '.' + 'stop: ' + 'Stop bundle ' + this.sw_id + ', ' + event.currentTarget.toString());
 			
 			while (this.numChildren > 0)
 			{
-				Application.application.log('RM@' + this.sw_id + '. ' + this.getChildAt(0).toString());
 				try { this.removeChildAt(0); }
-				catch (e:Error) { Application.application.log('Failed RM@' + this.sw_id + '. ' + e.toString()); }
+				catch (e:Error) { Application.application.log(this.className + '.' + 'stop: ' + 'Failed RM@' + this.sw_id + '. ' + e.toString()); }
 			}
 			
 			this.current_media = null;
@@ -127,7 +127,6 @@ package eu.screenwerk.components
 
 			if ( this.timeshift > this.current_media.length )
 			{
-				trace ( this.timeshift +'-' +this.current_media.length );
 				this.timeshift = this.timeshift - this.current_media.length;
 				return; 
 			}
@@ -139,12 +138,12 @@ package eu.screenwerk.components
 
 			if ( old_media != null && this.contains(old_media) )
 			{
-				Application.application.log('- NM@' + this.sw_id + '. ' + old_media.toString());
+				Application.application.log(this.className + '.' + 'playNextMediaOnTimer: ' + '- NM@' + this.sw_id + '. ' + old_media.toString());
 				try { this.removeChild(old_media); }
 				catch (e:Error) { Application.application.log('Failed - NM@' + this.sw_id + '. ' + e.toString()); }
 			}
 			
-			Application.application.log('+ NM@' + this.sw_id + '. ' + this.current_media.toString());
+			Application.application.log(this.className + '.' + 'playNextMediaOnTimer: ' + '+ NM@' + this.sw_id + '. ' + this.current_media.toString());
 			this.addChild(this.current_media);
 		}		
 
@@ -176,7 +175,6 @@ package eu.screenwerk.components
 			if (this.SWChilds[mediastring] == null)
 			{
 				this.SWChilds[mediastring] = new SWMedia(mediastring);
-				Application.application.log( 'Media ' + this.SWChilds[mediastring].sw_id + " loaded.");
 			}
 			this.current_media = SWMedia(this.SWChilds[mediastring]);
 		}
@@ -187,11 +185,6 @@ package eu.screenwerk.components
 			this.y = this.unscaled_y * Application.application._y_coef;
 			this.width = this.unscaled_width * Application.application._x_coef;
 			this.height = this.unscaled_height * Application.application._y_coef;
-
-			trace( new Date().toString() + " Bundle " + this.sw_id
-				+	" resized to "
-				+	this.width + 'x' + this.height
-				 );
 
 			for (var i:uint=0; i<this.numChildren; i++)
 			{
