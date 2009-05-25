@@ -111,6 +111,8 @@ class Screen extends Controller {
       $this->screen->db->where( 'id', $screen_id );
       $this->screen->db->update( 'screens', $data );
       
+	  echo 'Playlist generated';
+	  
       return;
 
    }

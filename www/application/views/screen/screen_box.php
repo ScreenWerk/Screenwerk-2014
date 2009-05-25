@@ -18,10 +18,14 @@
 	
 	<button id="download-player" class="ui-button ui-state-default ui-corner-all">Download Player</button>
 
+	<div id="playlist-updated" style="margin-top: 20px; display:none; color:red"></div>
+
 	<script type="text/javascript">
 
 		$('#generate-playlist').click(function() {
-			top.location.href = '<?= site_url('/screen/generate_playlist/'. $id); ?>';
+			$("#playlist-updated").load("<?= site_url('/screen/generate_playlist/'. $id); ?>");
+			$("#playlist-updated").fadeIn("slow");
+
 		});
 		$('#download-player').click(function() {
 			top.location.href = '<?= site_url('/screen/get_player/'. $id); ?>';
