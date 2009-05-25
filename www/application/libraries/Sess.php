@@ -107,14 +107,15 @@ class Sess {
 //kontrollib sessiooni
 	function _protection_check() {
 		
-		$url = $this->CI->router->class .'/'. $this->CI->router->method;
+		$url = '';
+		if($this->CI->router->class .'/'. $this->CI->router->method != 'user/login') $url = current_url();
 		
-		if(isset($this->forms[$url]) OR isset($this->forms[$this->CI->router->class])) { //formi õiguse rida leiti
+		if(isset($this->forms[$this->CI->router->class .'/'. $this->CI->router->method]) OR isset($this->forms[$this->CI->router->class])) { //formi õiguse rida leiti
 			//print_r($this->forms);
 			//echo $url;
 		
 		} else { //formi õiguse rida ei leitud
-			$this->CI->session->set_userdata('redirect_url', str_replace('/index', '', $url));
+			$this->CI->session->set_userdata('redirect_url', $url);
 			$this->_trunc_data();
 			redirect('user/login');
 			exit;
@@ -138,8 +139,8 @@ class Sess {
 
 	}
 
-	
-	
+
+
 //salvestab kasutaja väärtused sessiooni
 	function _save_data() { 
 		
@@ -156,8 +157,8 @@ class Sess {
 
 	}
 
-	
-	
+
+
 //kustutab kasutaja väärtused
 	function _trunc_data() { 
 		
