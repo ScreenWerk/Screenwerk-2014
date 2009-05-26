@@ -261,7 +261,6 @@ package eu.screenwerk
 		private function listingFault(event:FaultEvent):void {
 		    var faultstring:String = event.fault.faultString;
 		    Application.application.log(faultstring);
-		    Alert.show(faultstring,"HTTP fault",4,null,NativeApplication.nativeApplication.exit);
 		
 			this._next_sync_timeout_id = setTimeout(synchronise, this._sync_interval_ms);
 		}
