@@ -34,8 +34,8 @@ package eu.screenwerk
 		public var structure_dir:File = Application.application.structure_dir;
 		public var media_dir:File = Application.application.media_dir;
 
-		private var _get_list_controller:String = 'http://www.screenwerk.eu/player/get_list/';
-		private var _get_file_controller:String = 'http://www.screenwerk.eu/player/get_file/';
+		private var _get_list_controller:String = 'http://www.screenwerk.eu/player/get_list';
+		private var _get_file_controller:String = 'http://www.screenwerk.eu/player/get_file';
 
 		private var _listing_service:HTTPService = new HTTPService();
 		private var _listing_a:Array = new Array();
@@ -83,7 +83,7 @@ package eu.screenwerk
 		{
 			clearTimeout(this._next_sync_timeout_id);
 		
-			this._listing_service.url = this._get_list_controller + this._screen_md5_string + '/';
+			this._listing_service.url = this._get_list_controller + '/' + this._screen_md5_string + '/' + this._player_md5_string + '/';
 			this._listing_service.method = HTTPRequestMessage.GET_METHOD;
 			this._listing_service.send();
 		
@@ -155,7 +155,7 @@ package eu.screenwerk
 /*  */ 
 		private function download(_file_name:String):void
 		{
-			var _remote_url:String = this._get_file_controller + this._screen_md5_string + '/' + this._player_md5_string + '/' + _file_name;
+			var _remote_url:String = this._get_file_controller + '/' + this._screen_md5_string + '/' + this._player_md5_string + '/' + _file_name;
 			trace("download: " + _remote_url);
 
 			var _loader:URLLoader = new URLLoader();
