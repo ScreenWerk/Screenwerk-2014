@@ -26,11 +26,12 @@ class Screen_model extends Model {
 			foreach($query->result_array() as $row) {
 				$data[$row['id']] = $row;
 				$data[$row['id']]['last_seen_inwords'] = $this->_secondsToWords($data[$row['id']]['last_seen']);
-				$data[$row['id']]['media'] = $this->screen_media($row['id']);
-				$data[$row['id']]['bundles'] = $this->screen_bundles($row['id']);
-				$data[$row['id']]['layouts'] = $this->screen_layouts($row['id']);
-				$data[$row['id']]['collections'] = $this->screen_collections($row['id']);
-				$data[$row['id']]['synchronized'] = ($data[$row['id']]['content_md5'] == $this->md5($row['id'])) ? TRUE : FALSE; 
+				if($id) $data[$row['id']]['media'] = $this->screen_media($row['id']);
+				if($id) $data[$row['id']]['bundles'] = $this->screen_bundles($row['id']);
+				if($id) $data[$row['id']]['layouts'] = $this->screen_layouts($row['id']);
+				if($id) $data[$row['id']]['collections'] = $this->screen_collections($row['id']);
+				if($id) $data[$row['id']]['players'] = $this->screen_players($row['id']);
+				if($id) $data[$row['id']]['synchronized'] = ($data[$row['id']]['content_md5'] == $this->md5($row['id'])) ? TRUE : FALSE; 
 
 				unset( $data[$row['id']]['content_md5'] );
             
@@ -97,18 +98,9 @@ class Screen_model extends Model {
 	function screen_media($screen_id) {
 		$this->db->select('medias.id, medias.filename AS name');
 		$this->db->from('medias');
-		$this->db->join('medias_bundles', 'medias_bundles.media_id = medias.id');
-		$this->db->join('bundles_layouts', 'bundles_layouts.bundle_id = medias_bundles.bundle_id');
-		$this->db->join('layouts_collections', 'layouts_collections.layout_id = bundles_layouts.layout_id');
-		$this->db->join('collections_schedules', 'collections_schedules.collection_id = layouts_collections.collection_id');
-		$this->db->join('screens', 'collections_schedules.schedule_id = screens.schedule_id');
+		$this->db->join('v_relations', 'v_relations.media_id = medias.id');
 		$this->db->where('medias.customer_id', $this->sess->customer_id);
-		$this->db->where('medias_bundles.customer_id', $this->sess->customer_id);
-		$this->db->where('bundles_layouts.customer_id', $this->sess->customer_id);
-		$this->db->where('layouts_collections.customer_id', $this->sess->customer_id);
-		$this->db->where('collections_schedules.customer_id', $this->sess->customer_id);
-		$this->db->where('screens.customer_id', $this->sess->customer_id);
-		$this->db->where('screens.id', $screen_id);
+		$this->db->where('v_relations.screen_id', $screen_id);
 		$this->db->order_by('medias.filename');
 		$query = $this->db->get();
 		
@@ -128,16 +120,9 @@ class Screen_model extends Model {
 	function screen_bundles($screen_id) {
 		$this->db->select('bundles.id, bundles.name');
 		$this->db->from('bundles');
-		$this->db->join('bundles_layouts', 'bundles_layouts.bundle_id = bundles.id');
-		$this->db->join('layouts_collections', 'layouts_collections.layout_id = bundles_layouts.layout_id');
-		$this->db->join('collections_schedules', 'collections_schedules.collection_id = layouts_collections.collection_id');
-		$this->db->join('screens', 'collections_schedules.schedule_id = screens.schedule_id');
+		$this->db->join('v_relations', 'v_relations.bundle_id = bundles.id');
 		$this->db->where('bundles.customer_id', $this->sess->customer_id);
-		$this->db->where('bundles_layouts.customer_id', $this->sess->customer_id);
-		$this->db->where('layouts_collections.customer_id', $this->sess->customer_id);
-		$this->db->where('collections_schedules.customer_id', $this->sess->customer_id);
-		$this->db->where('screens.customer_id', $this->sess->customer_id);
-		$this->db->where('screens.id', $screen_id);
+		$this->db->where('v_relations.screen_id', $screen_id);
 		$this->db->order_by('bundles.name'); 
 		$query = $this->db->get();
 		
@@ -152,20 +137,14 @@ class Screen_model extends Model {
 		return $data;
 	}
 
-	
-	
-	
+
+
 	function screen_layouts($screen_id) {
 		$this->db->select('layouts.id, layouts.name');
 		$this->db->from('layouts');
-		$this->db->join('layouts_collections', 'layouts_collections.layout_id = layouts.id');
-		$this->db->join('collections_schedules', 'collections_schedules.collection_id = layouts_collections.collection_id');
-		$this->db->join('screens', 'collections_schedules.schedule_id = screens.schedule_id');
+		$this->db->join('v_relations', 'v_relations.layout_id = layouts.id');
 		$this->db->where('layouts.customer_id', $this->sess->customer_id);
-		$this->db->where('layouts_collections.customer_id', $this->sess->customer_id);
-		$this->db->where('collections_schedules.customer_id', $this->sess->customer_id);
-		$this->db->where('screens.customer_id', $this->sess->customer_id);
-		$this->db->where('screens.id', $screen_id);
+		$this->db->where('v_relations.screen_id', $screen_id);
 		$this->db->order_by('layouts.name'); 
 		$query = $this->db->get();
 		
@@ -186,12 +165,9 @@ class Screen_model extends Model {
 	function screen_collections($screen_id) {
 		$this->db->select('collections.id, collections.name');
 		$this->db->from('collections');
-		$this->db->join('collections_schedules', 'collections_schedules.collection_id = collections.id');
-		$this->db->join('screens', 'collections_schedules.schedule_id = screens.schedule_id');
+		$this->db->join('v_relations', 'v_relations.collection_id = collections.id');
 		$this->db->where('collections.customer_id', $this->sess->customer_id);
-		$this->db->where('collections_schedules.customer_id', $this->sess->customer_id);
-		$this->db->where('screens.customer_id', $this->sess->customer_id);
-		$this->db->where('screens.id', $screen_id);
+		$this->db->where('v_relations.screen_id', $screen_id);
 		$this->db->order_by('collections.name'); 
 		$query = $this->db->get();
 		
@@ -206,7 +182,23 @@ class Screen_model extends Model {
 		return $data;
 	}
 
-	
+
+
+	function screen_players($screen_id) {
+		$data = array();
+
+		$this->db->select('player_md5, last_seen, ip, os, country');
+		$this->db->from('v_players');
+		$this->db->where('screen_id', $screen_id);
+		$query = $this->db->get();
+		
+		$data = $query->result_array();
+
+		return $data;
+	}
+
+
+
 	
 	
 
