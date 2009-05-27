@@ -53,12 +53,18 @@ package eu.screenwerk.components
 			this.cron_weekday = cronline_a[5].replace(' ','');
 
 			var from_split:Array = cronline_a[6].toString().split('-');
-			this.valid_from_date = new Date(from_split[0], from_split[1], from_split[2]);
-			this.valid_from_J = Math.floor( this.valid_from_date.getTime() / 1000 / 60 / 60 / 24 );
+			this.valid_from_date = new Date(from_split[0], from_split[1]-1, from_split[2]);
+			this.valid_from_J = Math.floor( 
+				( this.valid_from_date.getTime() / 1000 / 60 
+					- this.valid_from_date.getTimezoneOffset() )
+				/ 60 / 24 );
 
 			var to_split:Array = cronline_a[7].toString().split('-');
-			this.valid_to_date = new Date(to_split[0], to_split[1], to_split[2]);
-			this.valid_to_J = Math.floor( this.valid_to_date.getTime() / 1000 / 60 / 60 / 24 );
+			this.valid_to_date = new Date(to_split[0], to_split[1]-1, to_split[2], 0, 0, 0 );
+			this.valid_to_J = Math.floor(
+				( this.valid_to_date.getTime() / 1000 / 60
+					- this.valid_to_date.getTimezoneOffset() )
+				/ 60 / 24 );
 			
 			this.setLastDate();
 			this.setNextDate();
@@ -102,7 +108,6 @@ package eu.screenwerk.components
 
 		}
 		
-
 		private var last_date:Date;
 	    public function get lastDate():Date
 	    {
