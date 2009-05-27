@@ -17,15 +17,6 @@ class Media extends Controller {
 
 		$view['data'] = $this->media->get_list();
 		
-		foreach($view['data'] as $row_id => $row) {
-			$view['data'][$row_id]['status'] = '';
-			if($row['bundles']) $view['data'][$row_id]['status'] = 'B';
-			if($row['layouts']) $view['data'][$row_id]['status'] = 'L';
-			if($row['collections']) $view['data'][$row_id]['status'] = 'C';
-			if($row['schedules']) $view['data'][$row_id]['status'] = 'S';
-			if($row['screens']) $view['data'][$row_id]['status'] = '<b style="color: red;">S</b>';
-		}
-		
 		$view['page_menu_code'] = 'media';
 		$view['page_menu_code'] = 'media';
 		$view['show_edit_link'] = isset($this->session->forms[$this->router->class .'']);
