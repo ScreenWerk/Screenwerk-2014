@@ -15,6 +15,7 @@ package eu.screenwerk
 	import flash.net.URLLoader;
 	import flash.net.URLLoaderDataFormat;
 	import flash.net.URLRequest;
+	import flash.net.URLRequestDefaults;
 	import flash.utils.ByteArray;
 	import flash.utils.clearTimeout;
 	import flash.utils.setTimeout;
@@ -62,6 +63,11 @@ package eu.screenwerk
 		
 			this.md5_dir.createDirectory();
 			this.tmp_dir.createDirectory();
+
+			var descriptor:XML = NativeApplication.nativeApplication.applicationDescriptor;
+			var ns:Namespace = descriptor.namespaceDeclarations()[0];
+			var version:String = descriptor.ns::version;
+			URLRequestDefaults.userAgent = descriptor.ns::id + ' ' + descriptor.ns::version + ' ' + URLRequestDefaults.userAgent;
 
 			this.setScreenMD5();
 		}
