@@ -13,6 +13,13 @@
 	if(count($layouts)>0) echo '<b>Layouts: </b><br />'. implode(', ', $layouts) .'<br /><br />';
 	if(count($collections)>0) echo '<b>Collections: </b><br />'. implode(', ', $collections) .'<br /><br />';
 	if(isset($schedule)) echo '<b>Schedule: </b><br />'. $schedule .'<br /><br />';
+	if(count($players)>0) {
+		echo '<b>Players: </b><br />';
+		foreach($players as $player) {	
+			echo date('d.m.y H:i', strtotime($player['last_seen'])) .' '. substr($player['player_md5'], 0, 20) .'...<br />';
+		}
+	}
+	
 	if(!$synchronized) echo '<button id="generate-playlist" class="ui-button ui-state-default ui-corner-all" style="float:right;">Publish</button>';
 ?>
 	

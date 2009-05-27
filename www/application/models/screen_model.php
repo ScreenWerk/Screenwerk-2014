@@ -14,7 +14,7 @@ class Screen_model extends Model {
 
 		$this->db->select('screens.id, screens.name, screens.schedule_id, schedules.name AS schedule, screens.width, screens.height, screens.screen_md5, screens.content_md5, TIMESTAMPDIFF(SECOND,screens.last_seen,NOW())+1 last_seen');
 		$this->db->from('screens');
-		$this->db->join('schedules', 'schedules.id = screens.schedule_id');
+		$this->db->join('schedules', 'schedules.id = screens.schedule_id', 'left');
 		if($screen_md5) $this->db->where('screens.screen_md5', $screen_md5);
 		if($id) $this->db->where('screens.customer_id', $this->sess->customer_id);
 		if($id) $this->db->where('schedules.customer_id', $this->sess->customer_id);
