@@ -18,6 +18,7 @@
 		foreach($players as $player) {	
 			echo date('d.m.y H:i', strtotime($player['last_seen'])) .' '. substr($player['player_md5'], 0, 20) .'...<br />';
 		}
+		echo '<br />';
 	}
 	
 	if(!$synchronized) echo '<button id="generate-playlist" class="ui-button ui-state-default ui-corner-all" style="float:right;">Publish</button>';
