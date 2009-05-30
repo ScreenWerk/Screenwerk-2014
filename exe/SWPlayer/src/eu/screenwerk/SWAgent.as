@@ -67,7 +67,7 @@ package eu.screenwerk
 			var descriptor:XML = NativeApplication.nativeApplication.applicationDescriptor;
 			var ns:Namespace = descriptor.namespaceDeclarations()[0];
 			var version:String = descriptor.ns::version;
-			URLRequestDefaults.userAgent = descriptor.ns::id + ' ' + descriptor.ns::version + ' ' + URLRequestDefaults.userAgent;
+			URLRequestDefaults.userAgent = descriptor.ns::id + '/' + descriptor.ns::version + ' ' + URLRequestDefaults.userAgent;
 
 			this.setScreenMD5();
 		}

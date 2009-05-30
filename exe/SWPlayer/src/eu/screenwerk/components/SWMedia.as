@@ -10,9 +10,25 @@ package eu.screenwerk.components
 	public class SWMedia extends UIComponent
 	{
 		public var sw_id:uint;
-		public var length:uint;
+		private var _duration:uint;
+	    public function get duration():Number
+	    {
+			return this._duration;
+	    }
+		
 		private var type:String;
 		private var is_playing:Boolean = false;
+		
+		private var _valid_from:Date;
+		public function get valid_from_date():Date
+		{
+			return this._valid_from;
+		}
+		private var _valid_to:Date;
+		public function get valid_to_date():Date
+		{
+			return this._valid_to;
+		}
 		
 		private var SWChilds:Array = new Array;
 		
@@ -35,15 +51,20 @@ package eu.screenwerk.components
 			//id;length;type;frequency;appearances;importance;probability;valid_from_date;valid_to_date
 			this.sw_id = media_split[0].replace(' ','');
 
-			this.length = media_split[1].replace(' ','');
+			this._duration = media_split[1].replace(' ','');
 			this.type = media_split[2].replace(' ','');
 			this.x = 0;
 			this.y = 0;
 			
+			var t_split:Array = String(media_split[7]).split('-');
+			if (t_split.length == 3) this._valid_from = new Date(t_split[0],t_split[1]-1,t_split[2]);
+			t_split = String(media_split[8]).split('-');
+			if (t_split.length == 3) this._valid_to = new Date(t_split[0],t_split[1]-1,t_split[2]);
+			
 			this.addEventListener(Event.ADDED, play, false, 0, true);
 			this.addEventListener(Event.REMOVED, stop, false, 0, true);
 			
-			Application.application.log(this.className + '.' + this.className + ': ' + this.sw_id + ', ' + this.length + 'sec.');
+			Application.application.log(this.className + '.' + this.className + ': ' + this.sw_id + ', ' + this.duration + 'sec.');
 		}
 
 		private function play(event:Event):void

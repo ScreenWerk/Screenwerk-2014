@@ -90,7 +90,7 @@ package eu.screenwerk.components
 				{
 					this.setNextMedia();
 					//Application.application.log(this.className + '.' + 'play: ' + 'loop:'+this.timeshift + '-' + this.current_media.length);
-					this.timeshift = Math.max(0,this.timeshift-this.current_media.length);
+					this.timeshift = Math.max(0,this.timeshift-this.current_media.duration);
 				}
 				this.delay_timeout_id = setTimeout(playNextMediaOnTimer, 0);
 			}
@@ -125,13 +125,13 @@ package eu.screenwerk.components
 			
 			this.setNextMedia();
 
-			if ( this.timeshift > this.current_media.length )
+			if ( this.timeshift > this.current_media.duration )
 			{
-				this.timeshift = this.timeshift - this.current_media.length;
+				this.timeshift = this.timeshift - this.current_media.duration;
 				return; 
 			}
 
-			this.delay_timeout_id = setTimeout(playNextMediaOnTimer, this.current_media.length*1000 - this.timeshift*1000);
+			this.delay_timeout_id = setTimeout(playNextMediaOnTimer, this.current_media.duration*1000 - this.timeshift*1000);
 
 			this.timeshift = 0;
 			
@@ -166,17 +166,26 @@ package eu.screenwerk.components
 				this.mediastrings = Application.application.readComponentData(this.sw_id+'.bundle');
 				mediastring = this.mediastrings.shift();
 			}
-			if (mediastring == '')
-			{
-				this.mediastrings = Application.application.readComponentData(this.sw_id+'.bundle');
-				mediastring = this.mediastrings.shift();
-			}
 
 			if (this.SWChilds[mediastring] == null)
 			{
 				this.SWChilds[mediastring] = new SWMedia(mediastring);
 			}
-			this.current_media = SWMedia(this.SWChilds[mediastring]);
+			
+			if ( 
+				( SWMedia(this.SWChilds[mediastring]).valid_from_date == null
+				  || SWMedia(this.SWChilds[mediastring]).valid_from_date.getTime() < new Date().getTime() )
+				&&
+				( SWMedia(this.SWChilds[mediastring]).valid_from_date == null
+				  || SWMedia(this.SWChilds[mediastring]).valid_to_date.getTime() + 24*60*60*1000 > new Date().getTime() )
+			)
+			{
+				this.current_media = SWMedia(this.SWChilds[mediastring]);
+			}
+			else
+			{
+				this.setNextMedia();
+			}
 		}
 		
 		public function resize():void
