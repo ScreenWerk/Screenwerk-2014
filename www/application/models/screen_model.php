@@ -60,6 +60,30 @@ class Screen_model extends Model {
 
 
 
+	function get_status($id) {
+	
+		$status = NULL;
+		
+		$this->db->select('TIMESTAMPDIFF(SECOND,screens.last_seen,NOW()) last_seen');
+		$this->db->from('screens');
+		$this->db->where('customer_id', $this->sess->customer_id);
+		$this->db->where('screens.id', $id);
+		$query = $this->db->get();
+		
+		$row = $query->row();
+		
+		if($query->num_rows() > 0) {
+			if($row->last_seen > 300) $status = 'red';
+			if($row->last_seen <= 300) $status = 'yellow';
+			if($row->last_seen <= 60) $status = 'green';
+			if($row->last_seen < 1) $status = NULL;
+		}
+		
+		return $status;	
+	}
+
+
+
 	function delete($id) {
 		$this->delete_fs($id);
 		$this->db->where('id', $id);
