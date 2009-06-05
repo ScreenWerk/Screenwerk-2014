@@ -193,3 +193,4 @@ private function takeScreenshot(event:TimerEvent = null):void
     outStream.close();
     log( 'Screenshot ready at ' + outFile.nativePath );	
 }
+

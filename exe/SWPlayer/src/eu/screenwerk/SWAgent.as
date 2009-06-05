@@ -67,7 +67,9 @@ package eu.screenwerk
 			var descriptor:XML = NativeApplication.nativeApplication.applicationDescriptor;
 			var ns:Namespace = descriptor.namespaceDeclarations()[0];
 			var version:String = descriptor.ns::version;
-			URLRequestDefaults.userAgent = descriptor.ns::id + '/' + descriptor.ns::version + ' ' + URLRequestDefaults.userAgent;
+			URLRequestDefaults.userAgent = URLRequestDefaults.userAgent + ' ' + descriptor.ns::id + '/' + descriptor.ns::version;
+			
+			Application.application.versionlabel.text = descriptor.ns::id + '/' + descriptor.ns::version;
 
 			this.setScreenMD5();
 		}
@@ -250,7 +252,22 @@ package eu.screenwerk
             trace("openHandler: " + event);
         }
         private function progressHandler(event:ProgressEvent):void {
-            Application.application.progresslabel.text = this._bytes_to_download - event.bytesLoaded;
+        	if (this._bytes_to_download > 1024*1024*10 )
+        	{
+	            Application.application.progresslabel.text 
+	            = this.Aformat(event.bytesLoaded/1024/1024,2,'.')
+	            + ' / '
+	            + this.Aformat(this._bytes_to_download/1024/1024,2,'.')
+				+ 'MB';
+        	}
+        	else
+        	{
+	            Application.application.progresslabel.text 
+	            = this.Aformat(event.bytesLoaded/1024,0,'.')
+	            + ' / '
+	            + this.Aformat(this._bytes_to_download/1024,0,'.')
+				+ 'kB';
+        	}
         }
         private function securityErrorHandler(event:SecurityErrorEvent):void {
             trace("securityErrorHandler: " + event);
@@ -271,7 +288,12 @@ package eu.screenwerk
 			this._next_sync_timeout_id = setTimeout(synchronise, this._sync_interval_ms);
 		}
 		
-		
+// extend the Math object with our new function 
+		private function Aformat( num:Number, precision:uint, splitCharacter:String){
+			if((precision = Math.abs(precision)) == 0) return Math.round(num);
+			if(splitCharacter == null) splitCharacter = ".";
+        	return  Math.round(num) + splitCharacter + Math.round(num * Math.pow( 10, precision)).toString().substr(-precision);	
+		}		
 		
 		
 		private function getFileMD5(file:File):String

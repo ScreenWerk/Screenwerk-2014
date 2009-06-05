@@ -20,6 +20,7 @@
       bottom="0" top="0" left="0" right="0"/>
 
 	<mx:Canvas id="mycanvas" backgroundColor="#000000"/>
-	<mx:Label id="progresslabel" text="..." horizontalCenter="0" verticalCenter="0" color="#FFFFFF"/>
+	<mx:Label id="progresslabel" text="" horizontalCenter="0" verticalCenter="0" color="#FFFFFF"/>
+	<mx:Label id="versionlabel" text="" left="0" bottom="0" color="#FFFFFF"/>
 
 </mx:WindowedApplication>
