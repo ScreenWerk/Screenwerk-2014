@@ -35,7 +35,7 @@ class Player extends Controller {
 			echo $message = 'ERROR - No Screen';
 		}
 		
-		$this->log->write($message);
+		$this->log->write('player_get_list', $data['id'], $message);
 		$this->screen->update_last_seen($data['id']);
 
 	}
@@ -51,16 +51,16 @@ class Player extends Controller {
 			$dir = DIR_FTP_SCREENS .'/'. $data['id'] .'/';
 			$file = str_replace('/', '', $file);
 
-			if(read_file($dir.$file)) {
+			//if(read_file($dir.$file)) {
 				force_download($file, file_get_contents($dir.$file));		
-			} else {
-				echo $message = 'ERROR - No File';
-			}
+			//} else {
+			//	echo $message = 'ERROR - No File';
+			//}
 		} else {
 			echo $message = 'ERROR - No Screen';
 		}	
 
-		$this->log->write($message);
+		$this->log->write('player_get_file', $data['id'], $message);
 		$this->screen->update_last_seen($data['id']);
 		
 	}	
