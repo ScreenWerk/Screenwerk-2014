@@ -16,27 +16,35 @@
 	if(count($players)>0) {
 		echo '<b>Players: </b><br />';
 		foreach($players as $player) {	
-			echo date('d.m.y H:i', strtotime($player['last_seen'])) .' '. substr($player['player_md5'], 0, 20) .'...<br />';
+			echo '<span title="'. $player['ip'] .' ('. $player['country'] .') - '.$player['player_version'] .' - '.$player['os'] .'">'. date('d.m.y H:i', strtotime($player['last_seen'])) .' '. substr($player['player_md5'], 0, 20) .'...<br /></span>';
 		}
 		echo '<br />';
 	}
-	
-	if(!$synchronized) echo '<button id="generate-playlist" class="ui-button ui-state-default ui-corner-all" style="float:right;">Publish</button>';
+	//$sync_state = (!$synchronized) ? 'ui-state-default' : 'ui-state-disabled';
 ?>
+	<div style="text-align: center;">
+		<button id="download" class="ui-button ui-state-default ui-corner-left">Get Player</button>
+		<button id="publish" class="ui-button ui-state-default <? $sync_state; ?>" style="margin-left: -5px;">Publish</button>
+		<button id="edit" class="ui-button ui-state-default ui-corner-right" style="margin-left: -5px;">Edit</button>
+	</div>
 	
-	<button id="download-player" class="ui-button ui-state-default ui-corner-all">Download Player</button>
-
 	<div id="playlist-updated" style="margin-top: 20px; display:none; color:red"></div>
 
 	<script type="text/javascript">
 
-		$('#generate-playlist').click(function() {
+		$('#publish').click(function() {
 			$("#playlist-updated").load("<?= site_url('/screen/generate_playlist/'. $id); ?>");
 			$("#playlist-updated").fadeIn("slow");
 
 		});
-		$('#download-player').click(function() {
+		$('#download').click(function() {
 			top.location.href = '<?= site_url('/screen/get_player/'. $id); ?>';
+		});
+		
+		$('#delete').click(function() {
+			if(confirm("Do you really want to delete this screen?")==true) {
+				top.location.href = '<?= site_url('/screen/delete/'. $id); ?>';
+			}
 		});
 		
 		$('button').hover(

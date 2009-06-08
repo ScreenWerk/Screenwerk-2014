@@ -211,7 +211,7 @@ class Screen_model extends Model {
 	function screen_players($screen_id) {
 		$data = array();
 
-		$this->db->select('player_md5, last_seen, ip, os, country');
+		$this->db->select('player_md5, player_version, last_seen, ip, os, country');
 		$this->db->from('v_players');
 		$this->db->where('screen_id', $screen_id);
 		$query = $this->db->get();
