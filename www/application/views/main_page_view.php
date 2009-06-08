@@ -23,6 +23,7 @@
 
 	</head>
 	<body>
+		<div  style="left: px0; right: 0px; bottom: 0px; background: #151515;">
 		<div id="header">
 			<img src="<?= base_url(); ?>images/sw-p128.png" style="float:right;" width="64px" height="64px" alt="Logo" />
 			Screenwerk
@@ -30,33 +31,35 @@
 		<div id="menu">
 			<?php $this->load->view('menu'); ?>
 		</div>
-		<div id="spacer">
+		</div> 
+		<div class="spacer" style="clear:both;">
 		</div>
 		<div id="content">
 
 <?php if(isset($box)) { ?>
-			<div id="content_right">
+		<div id="content_right">
 <?php foreach($box as $box_id => $box_content): ?>
-				<div id="<?= $box_id; ?>" class="box <?= isset($box_content['hidden']) ? 'box_hidden' :  ''; ?>" >
-					<div class="box_t" ><div class="box_b"><div class="box_l"><div class="box_r"><div class="box_bl"><div class="box_br"><div class="box_tl"><div class="box_tr">
+			<div id="<?= $box_id; ?>" class="box <?= isset($box_content['hidden']) ? 'box_hidden' :  ''; ?>" >
+				<div class="box_t" ><div class="box_b"><div class="box_l"><div class="box_r"><div class="box_bl"><div class="box_br"><div class="box_tl"><div class="box_tr">
+				
+						<?= $box_content['content']; ?>
 					
-							<?= $box_content['content']; ?>
-						
-					</div></div></div></div></div></div></div></div>
-				</div>
+				</div></div></div></div></div></div></div></div>
+			</div>
 <?php endforeach; ?>
-			</div>
-			<div id="content_left">
-				<?= $page_content; ?>
-			</div>
+		</div>
+		<div id="content_left">
+			<?= $page_content; ?>
+		</div>
 <?php } else { ?>
-			<div id="content_wide">
-				<?= $page_content; ?>
-			</div>
+		<div id="content_wide">
+			<?= $page_content; ?>
+		</div>
 <?php } ?>
 
 
 		</div> 
+		<div style="clear:both;"></div>
 		<div id="footer">
 			<div id="footer_content">
 				<b>digital signage made simple</b><br />

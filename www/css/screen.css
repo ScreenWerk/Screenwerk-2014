@@ -26,7 +26,7 @@ body, html {
     width: 900px;
 }
 
-#spacer {
+.spacer {
 	background: #ff7f00;
     width: 100%;
 	height: 2px;
@@ -37,12 +37,14 @@ body, html {
 	margin: 0px auto 0px auto;
 	padding: 10px 20px;
     width: 900px;
-    min-height: 500px;
+    min-height: 700px;
+	position: relative;
 }
 
 #content_wide {
 	margin: 0px;
 	padding: 0px 1px 50px 1px;
+	position: relative;
 }
 
 #content_left {
@@ -50,6 +52,7 @@ body, html {
 	float: left;
 	margin: 0px;
 	padding: 0px 1px 50px 1px;
+	position: relative;
 }
 
 #content_right {
@@ -57,16 +60,15 @@ body, html {
 	float: right;
 	margin: 0px;
 	padding: 0px 0px;
+	position: relative;
 }
 
 #footer {
 	margin: 0px auto 0px auto;
-	padding: 10px;
+	padding: 5px;
 	text-align: center;
 	font-size: 10px;
 	color: #ff7f00;
-	background: #ffffff;
-	clear: both;
 }
 
 
@@ -102,7 +104,7 @@ body, html {
 	padding: 3px 0px 3px 3px;
 	font-size: 16px;
 	font-weight: bold;
-	color: #fff;
+	color: #FFE8D1;
 }
 
 #menu_current span {
