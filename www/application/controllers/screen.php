@@ -41,8 +41,13 @@ class Screen extends Controller {
 	function edit($id = NULL) {
 		
 		if($this->input->post('save') AND $this->input->post('name') AND $this->input->post('schedule')) {
-			$this->screen->update();
+			$id = $this->screen->update();
+			if(!$this->input->post('id') AND isset($id)) {
+				$screen = $this->screen->get_one($id);
+				exec(DIR_FTP_PLAYERS .'/sign-player-installer.sh '. $screen['screen_md5']);
+			}
 		}
+			
 		if($this->input->post('delete')) {
 			$this->screen->delete($this->input->post('id'));
 		}

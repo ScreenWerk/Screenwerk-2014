@@ -106,7 +106,10 @@ class Screen_model extends Model {
 			$data['customer_id'] = $this->sess->customer_id;
 			$data['screen_md5'] = md5(rand(1,999) . time());
 			$this->db->insert('screens', $data);
+			$id = $this->db->insert_id();
+			return $id;
 		}
+		
 	}
 
 
