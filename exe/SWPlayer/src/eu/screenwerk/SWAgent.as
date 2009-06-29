@@ -289,8 +289,8 @@ package eu.screenwerk
 		}
 		
 // extend the Math object with our new function 
-		private function Aformat( num:Number, precision:uint, splitCharacter:String){
-			if((precision = Math.abs(precision)) == 0) return Math.round(num);
+		private function Aformat( num:Number, precision:uint, splitCharacter:String):String{
+			if((precision = Math.abs(precision)) == 0) return Math.round(num).toString();
 			if(splitCharacter == null) splitCharacter = ".";
         	return  Math.round(num) + splitCharacter + Math.round(num * Math.pow( 10, precision)).toString().substr(-precision);	
 		}		

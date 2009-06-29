@@ -4,6 +4,7 @@ package eu.screenwerk.components
 	
 	import mx.core.Application;
 	import mx.core.UIComponent;
+	import mx.events.FlexEvent;
 	
 	
 	public class SWScreen extends UIComponent
@@ -21,21 +22,26 @@ package eu.screenwerk.components
 			var schedule_a:Array = schedule_str.split(';');
 			this.schedule_id = schedule_a[0];
 			
-			this.addEventListener(Event.ADDED, play, false, 0, true);
+			this.addEventListener(Event.ADDED, addedHandler, false, 0, true);
 			
 			Application.application.log(this.className + '.' + this.className + '.' );
 		}
 		
-		private function play(event:Event):void
+		private function addedHandler(event:Event):void
 		{
 			event.stopPropagation();
 			this.removeEventListener(Event.ADDED, play);
 			this.addEventListener(Event.REMOVED, stop, false, 0, true);
 
+			this.play();
+		}
+		
+		private function play():void
+		{
 			if (this.is_playing) return;
 			this.is_playing = true;
 
-			Application.application.log(this.className + '.play: ' + 'Play screen ' + event.currentTarget.toString());
+			Application.application.log(this.className + '.play: ' + this.toString());
 
 			this.sw_schedule = new SWSchedule(this.schedule_id);
 			this.sw_schedule.x = 0;
