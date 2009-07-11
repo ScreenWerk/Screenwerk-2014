@@ -18,16 +18,40 @@ import mx.core.Application;
 import mx.events.FlexEvent;
 import mx.graphics.ImageSnapshot;
 
+
+
 private var _rc:Array = new Array();
 
-private var _defined_screen_width:uint = 1680;
-private var _defined_screen_height:uint = 1050;
-private var _screen_id:uint = 35;
+private var _defined_screen_width:uint = 800;
+private var _defined_screen_height:uint = 600;
+
+public function set _fullscreen (value:Boolean):void
+{
+	if(value)
+	{
+		Application.application.stage.displayState = StageDisplayState.FULL_SCREEN_INTERACTIVE;
+		this._is_fullscreen = true;
+	}
+	else 
+	{
+		Application.application.stage.displayState = StageDisplayState.NORMAL;
+		Application.application.width = 800;
+		Application.application.height = 600;
+		this._is_fullscreen = false;
+	}
+}
+public function get _fullscreen ():Boolean
+{
+	return this._is_fullscreen;
+}
+private var _is_fullscreen:Boolean = false;
+
+
+//private var _screen_id:uint = 35;
 private var _sw_screen:SWScreen;
 
 public var _x_coef:Number;
 public var _y_coef:Number;
-private var _is_fullscreen:Boolean = true;
 private var _timer:Timer;
 private var _swagent:SWAgent;
 
@@ -40,8 +64,7 @@ public var media_dir:File = sw_dir.resolvePath('media');
 public function init():void
 {
 	Application.application.log(this.className + '.init ' + 'Start');
-	Application.application.stage.displayState = StageDisplayState.FULL_SCREEN_INTERACTIVE;
-	this._is_fullscreen = true;
+	this._fullscreen = true;
 
 	// make sure directories exist
 	this.sw_dir.createDirectory(); 
@@ -52,13 +75,14 @@ public function init():void
 	this._swagent.addEventListener(FlexEvent.VALID, playValid);
 	this._swagent.addEventListener(FlexEvent.UPDATE_COMPLETE, playUpdated);
 	
+
 		
-//	stage.addEventListener(KeyboardEvent.KEY_UP, toggleFullscreen, false, 0, true);
+	stage.addEventListener(KeyboardEvent.KEY_UP, toggleFullscreen, false, 0, true);
 //	stage.dispatchEvent(new KeyboardEvent(KeyboardEvent.KEY_UP));
 
-	var screenshotTimer:Timer = new Timer(3600*1000);
-	screenshotTimer.addEventListener(TimerEvent.TIMER, takeScreenshot);
-	screenshotTimer.start();
+//	var screenshotTimer:Timer = new Timer(3600*1000);
+//	screenshotTimer.addEventListener(TimerEvent.TIMER, takeScreenshot);
+//	screenshotTimer.start();
 
 }
 
@@ -133,30 +157,19 @@ private function toggleFullscreen(event:KeyboardEvent):void
 {
 	event.stopPropagation();
 	
-	if(this._is_fullscreen) 
-	{
-		Application.application.stage.displayState = StageDisplayState.NORMAL;
-		this._is_fullscreen = false;
-	}
-	else
-	{
-		Application.application.stage.displayState = StageDisplayState.FULL_SCREEN_INTERACTIVE;
-		this._is_fullscreen = true;
-	}
+	this._fullscreen = ! this._fullscreen;
 
-	this.validateNow();
+//	this.validateNow();
+//
+//	this._x_coef = this.width/this._defined_screen_width;
+//	this._y_coef = this.height/this._defined_screen_height;
+//
+//	this._sw_screen.width = this.width;
+//	this._sw_screen.height = this.height;
+//	this._sw_screen.resize();
 
-	this._x_coef = this.width/this._defined_screen_width;
-	this._y_coef = this.height/this._defined_screen_height;
-
-	for (var i:uint=0; i<this.numChildren; i++)
-	{
-		SWScreen(this.getChildAt(i)).resize();
-		this.getChildAt(i).width = this.width;
-		this.getChildAt(i).height = this.height;
-	}
-
-	this.validateNow();
+//
+//	this.validateNow();
 }
 
 public function log(message:String):void

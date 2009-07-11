@@ -46,6 +46,7 @@ package eu.screenwerk
 		private var _files_to_sync:Array = new Array();
 		private var _files_to_move:Array = new Array();
 		private var _current_download:File;
+		private var _bytes_downloaded:uint = 0;
 		private var _bytes_to_download:uint = 0;
 		
 		private var _media_types_a:Array = new Array('VIDEO','IMAGE','PDF','SWF','URL','HTML');
@@ -135,7 +136,12 @@ package eu.screenwerk
 				
 				if (_file_size == _file_size_local)
 				{
-					var _file_md5_local:String = this.getFileMD5(_file);
+					var _file_md5_local:String = _file_md5;
+					// Only check for MD5 on smaller files 
+					if (_file_size < 1024*1024)
+					{
+						_file_md5_local:String = this.getFileMD5(_file);
+					}
 				}
 
 				if (_file_size != _file_size_local || _file_md5 != _file_md5_local)
@@ -214,7 +220,7 @@ package eu.screenwerk
 				_fileStream.close();
 	            trace("completeHandler: " + this._current_download.nativePath + ' ' + this._current_download.size + ' bytes.');
 	            this.setFileMD5(this._current_download);
-	            this._bytes_to_download -= this._current_download.size;
+	            this._bytes_downloaded += this._current_download.size;
 				this._files_to_move.push(this._current_download);
 			}
 			catch(errObject:Error) {
@@ -252,22 +258,22 @@ package eu.screenwerk
             trace("openHandler: " + event);
         }
         private function progressHandler(event:ProgressEvent):void {
-        	if (this._bytes_to_download > 1024*1024*10 )
-        	{
+//        	if (this._bytes_to_download > 1024*1024*10 )
+//        	{
+//	            Application.application.progresslabel.text 
+//	            = this.Aformat((this._bytes_downloaded+event.bytesLoaded)/1024/1024,2,'.')
+//	            + ' / '
+//	            + this.Aformat(this._bytes_to_download/1024/1024,2,'.')
+//				+ 'MB';
+//        	}
+//        	else
+//        	{
 	            Application.application.progresslabel.text 
-	            = this.Aformat(event.bytesLoaded/1024/1024,2,'.')
-	            + ' / '
-	            + this.Aformat(this._bytes_to_download/1024/1024,2,'.')
-				+ 'MB';
-        	}
-        	else
-        	{
-	            Application.application.progresslabel.text 
-	            = this.Aformat(event.bytesLoaded/1024,0,'.')
+	            = this.Aformat((this._bytes_downloaded+event.bytesLoaded)/1024,0,'.')
 	            + ' / '
 	            + this.Aformat(this._bytes_to_download/1024,0,'.')
 				+ 'kB';
-        	}
+//        	}
         }
         private function securityErrorHandler(event:SecurityErrorEvent):void {
             trace("securityErrorHandler: " + event);
@@ -288,8 +294,7 @@ package eu.screenwerk
 			this._next_sync_timeout_id = setTimeout(synchronise, this._sync_interval_ms);
 		}
 		
-// extend the Math object with our new function 
-		private function Aformat( num:Number, precision:uint, splitCharacter:String):String{
+		private function Aformat( num:Number, precision:uint, splitCharacter:String):String {
 			if((precision = Math.abs(precision)) == 0) return Math.round(num).toString();
 			if(splitCharacter == null) splitCharacter = ".";
         	return  Math.round(num) + splitCharacter + Math.round(num * Math.pow( 10, precision)).toString().substr(-precision);	
