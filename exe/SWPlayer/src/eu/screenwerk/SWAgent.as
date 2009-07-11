@@ -140,7 +140,7 @@ package eu.screenwerk
 					// Only check for MD5 on smaller files 
 					if (_file_size < 1024*1024)
 					{
-						_file_md5_local:String = this.getFileMD5(_file);
+						_file_md5_local = this.getFileMD5(_file);
 					}
 				}
 
