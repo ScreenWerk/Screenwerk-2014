@@ -176,7 +176,7 @@ package eu.screenwerk.components
 				( SWMedia(this.SWChilds[mediastring]).valid_from_date == null
 				  || SWMedia(this.SWChilds[mediastring]).valid_from_date.getTime() < new Date().getTime() )
 				&&
-				( SWMedia(this.SWChilds[mediastring]).valid_from_date == null
+				( SWMedia(this.SWChilds[mediastring]).valid_to_date == null
 				  || SWMedia(this.SWChilds[mediastring]).valid_to_date.getTime() + 24*60*60*1000 > new Date().getTime() )
 			)
 			{
