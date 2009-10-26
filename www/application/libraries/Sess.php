@@ -2,7 +2,7 @@
 
 /*
 
-Sessioonihalduse, kasutajate õiguste, sisselogimise jm toimingute klass. Asendab CI enda session klassi
+Sessioonihalduse, kasutajate õiguste, sisselogimise jm toimingute klass. Sesiooni hoidmiseks kasutab CI enda session klassi!
 
 */
 
