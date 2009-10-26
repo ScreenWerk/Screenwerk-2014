@@ -25,12 +25,15 @@ fi
 
 
 media_id=`${_DIR_EXE}/sw-media.find_by_filename_and_customer.sh "${1}" ${2}`
+echo -n "Detecting media type ... "
 media_type=`${_DIR_EXE}/mediatype.sh "${original_media}"|cut -d" " -f1`
+echo ${media_type}
 
 case ${media_type} in
    VIDEO)
       master_media=${_DIR_MASTERS}/${media_id}.${media_type}
-      ffmpeg -i "${original_media}" -an -vcodec flv -sameq -y "${master_media}.flv" #2&>1 1>/dev/null
+#      ffmpeg -i "${original_media}" -an -vcodec flv -sameq -y "${master_media}.flv" #2&>1 1>/dev/null
+      ffmpeg -i "${original_media}" -an -vcodec flv -qmin 1 -qmax 3 -y "${master_media}.flv" #2&>1 1>/dev/null
       mv "${master_media}.flv" "${master_media}"
 
       ${_DIR_EXE}/midentify.sh "${original_media}" > /tmp/foo
@@ -46,16 +49,23 @@ case ${media_type} in
       ;;
    IMAGE)
       master_media=${_DIR_MASTERS}/${media_id}.${media_type}
+      echo -n "copy ${original_media} to ${master_media} ... "
       cp ${original_media} ${master_media}
+      echo "done"
 
+      echo -n "Identifying dimensions (${_DIR_EXE}/midentify.sh \"${original_media}\") ... "
       ${_DIR_EXE}/midentify.sh "${original_media}" > /tmp/foo
       . /tmp/foo
       rm /tmp/foo
+      echo "${ID_VIDEO_WIDTH}X${ID_VIDEO_HEIGHT}"
+
+      echo -n "Creating thumbnails ... "
       w=250
       h=`echo "scale=0; $ID_VIDEO_HEIGHT*$w/$ID_VIDEO_WIDTH/2" | bc`
       h=`echo "scale=0; $h*2" | bc`
       convert -scale ${w}x${h} "${original_media}" ${_DIR_THUMBS}/${media_id}.jpg
       convert -scale 16x16 "${original_media}" ${_DIR_THUMBS}/${media_id}s.jpg
+      echo "done"
       ;;
    HTML)   
       master_media=${_DIR_MASTERS}/${media_id}.${media_type}
