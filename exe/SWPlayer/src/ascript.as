@@ -5,6 +5,7 @@ import eu.screenwerk.components.*;
 import eu.screenwerk.player.*;
 
 import flash.events.KeyboardEvent;
+import flash.events.MouseEvent;
 import flash.filesystem.File;
 import flash.filesystem.FileMode;
 import flash.filesystem.FileStream;
@@ -21,22 +22,25 @@ import mx.graphics.ImageSnapshot;
 
 
 private var _rc:Array = new Array();
+private var startupargs:Array = new Array();
 
-private var _defined_screen_width:uint = 800;
-private var _defined_screen_height:uint = 600;
+private var _defined_screen_width:uint = 840;
+private var _defined_screen_height:uint = 525;
 
 public function set _fullscreen (value:Boolean):void
 {
 	if(value)
 	{
+		Application.application.log(this.className + '.fullscreen ' + 'set state');
 		Application.application.stage.displayState = StageDisplayState.FULL_SCREEN_INTERACTIVE;
+		Application.application.log(this.className + '.fullscreen ' + 'state set');
 		this._is_fullscreen = true;
 	}
 	else 
 	{
 		Application.application.stage.displayState = StageDisplayState.NORMAL;
-		Application.application.width = 800;
-		Application.application.height = 600;
+		Application.application.width = 840;
+		Application.application.height = 525;
 		this._is_fullscreen = false;
 	}
 }
@@ -66,18 +70,24 @@ public function init():void
 	Application.application.log(this.className + '.init ' + 'Start');
 	this._fullscreen = true;
 
+	//register for the Invoke Event, called whenever
+	//the app is launched or called from the command line
+	addEventListener(InvokeEvent.INVOKE, onInvoke);
+
 	// make sure directories exist
 	this.sw_dir.createDirectory(); 
 	this.structure_dir.createDirectory();
 	this.media_dir.createDirectory();
 	
+
 	this._swagent = new SWAgent();
-	this._swagent.addEventListener(FlexEvent.VALID, playValid);
-	this._swagent.addEventListener(FlexEvent.UPDATE_COMPLETE, playUpdated);
+	this._swagent.addEventListener(FlexEvent.VALID, onPlaylistValid);
+	this._swagent.addEventListener(FlexEvent.UPDATE_COMPLETE, onPlaylistUpdated);
 	
 
 		
 	stage.addEventListener(KeyboardEvent.KEY_UP, toggleFullscreen, false, 0, true);
+	stage.addEventListener(MouseEvent.MOUSE_MOVE, onMouseMove, false, 0, true);
 //	stage.dispatchEvent(new KeyboardEvent(KeyboardEvent.KEY_UP));
 
 //	var screenshotTimer:Timer = new Timer(3600*1000);
@@ -86,7 +96,7 @@ public function init():void
 
 }
 
-private function playValid(flex_event:FlexEvent):void
+private function onPlaylistValid(flex_event:FlexEvent):void
 {
 	if (this._sw_screen == null)
 	{
@@ -94,7 +104,7 @@ private function playValid(flex_event:FlexEvent):void
 	}
 }
 
-private function playUpdated(flex_event:FlexEvent):void
+private function onPlaylistUpdated(flex_event:FlexEvent):void
 {
 	if (this._sw_screen != null)
 	{
@@ -146,7 +156,6 @@ public function readFileContents(file:File):String
 	}
 	return file_contents;
 }
-
 
 private function stopResizeListeners():void
 {
@@ -207,3 +216,19 @@ private function takeScreenshot(event:TimerEvent = null):void
     log( 'Screenshot ready at ' + outFile.nativePath );	
 }
 
+private function onMouseMove(event:MouseEvent):void
+{
+	event.stopPropagation();
+	if ( this.startupargs.indexOf('musophobic') != -1 )
+	{
+		this.log( 'Huh, mouse! Yuck!' );
+		Application.application.exit();
+	}
+}
+
+
+private function onInvoke(event:InvokeEvent):void
+{
+	this.startupargs = event.arguments;
+	Application.application.log("Invoke arguments: " + this.startupargs.toString());
+}

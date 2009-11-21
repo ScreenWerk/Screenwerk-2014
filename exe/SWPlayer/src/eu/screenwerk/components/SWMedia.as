@@ -24,11 +24,22 @@ package eu.screenwerk.components
 		{
 			return this._valid_from;
 		}
+		
 		private var _valid_to:Date;
 		public function get valid_to_date():Date
 		{
 			return this._valid_to;
 		}
+		
+		private var _play_with_audio:Boolean;
+//		public function get play_with_audio():Boolean
+//		{
+//			return this._play_with_audio;
+//		}
+//		public function set play_with_audio(value:String):void
+//		{
+//			this._play_with_audio = ( value == 'y');
+//		}
 		
 		private var SWChilds:Array = new Array;
 		
@@ -48,7 +59,7 @@ package eu.screenwerk.components
 		public function SWMedia(media_str:String)
 		{
 			var media_split:Array = media_str.split(';');
-			//id;length;type;frequency;appearances;importance;probability;valid_from_date;valid_to_date
+			//id;duration;type;frequency;appearances;importance;probability;valid_from_date;valid_to_date;audio_yn
 			this.sw_id = media_split[0].replace(' ','');
 
 			this._duration = media_split[1].replace(' ','');
@@ -60,6 +71,8 @@ package eu.screenwerk.components
 			if (t_split.length == 3) this._valid_from = new Date(t_split[0],t_split[1]-1,t_split[2]);
 			t_split = String(media_split[8]).split('-');
 			if (t_split.length == 3) this._valid_to = new Date(t_split[0],t_split[1]-1,t_split[2]);
+			
+			this._play_with_audio = (String(media_split[9]) == 'y');
 			
 			this.addEventListener(Event.ADDED, play, false, 0, true);
 			this.addEventListener(Event.REMOVED, stop, false, 0, true);
@@ -94,6 +107,14 @@ package eu.screenwerk.components
 						break;
 					case 'VIDEO':
 						this.SWChilds[this.sw_id] = new SWVideoPlayer(this.sw_id);
+						if ( this._play_with_audio )
+						{
+							SWVideoPlayer(this.SWChilds[this.sw_id]).volume = 1;
+						}
+						else
+						{
+							SWVideoPlayer(this.SWChilds[this.sw_id]).volume = 0;
+						}
 						break;
 					case 'HTML':
 						//this.media = new HTMLPlayer(this.sw_id);

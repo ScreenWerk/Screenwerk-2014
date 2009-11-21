@@ -41,7 +41,7 @@ package eu.screenwerk
 		private var _listing_service:HTTPService = new HTTPService();
 		private var _listing_a:Array = new Array();
 		private var _next_sync_timeout_id:uint;
-		private var _sync_interval_ms:uint = 60 * 1000;
+		private var _sync_interval_ms:uint = 60 * 60 * 1000;
 		
 		private var _files_to_sync:Array = new Array();
 		private var _files_to_move:Array = new Array();
@@ -75,7 +75,7 @@ package eu.screenwerk
 			this.setScreenMD5();
 		}
 
-		private function checkMD5OnDir(MD5_dir:File):void
+/* 		private function checkMD5OnDir(MD5_dir:File):void
 		{
 			MD5_dir.createDirectory();
 			var dirNodes:Array = MD5_dir.getDirectoryListing();
@@ -86,7 +86,7 @@ package eu.screenwerk
 				Application.application.log ("MD5 for " + _file.nativePath + ": " + _fileMD5 );
 			}
 		}
-		
+ */		
 		
 		private function synchronise():void
 		{
@@ -134,11 +134,12 @@ package eu.screenwerk
 					"Problem with file "+_file.nativePath);
 				}
 				
+				var _file_md5_local:String = '';
 				if (_file_size == _file_size_local)
 				{
-					var _file_md5_local:String = _file_md5;
+					_file_md5_local = _file_md5;
 					// Only check for MD5 on smaller files 
-					if (_file_size < 1024*1024)
+					if (_file_size < 1024)
 					{
 						_file_md5_local = this.getFileMD5(_file);
 					}
@@ -219,7 +220,7 @@ package eu.screenwerk
 				}
 				_fileStream.close();
 	            trace("completeHandler: " + this._current_download.nativePath + ' ' + this._current_download.size + ' bytes.');
-	            this.setFileMD5(this._current_download);
+	            //this.setFileMD5(this._current_download);
 	            this._bytes_downloaded += this._current_download.size;
 				this._files_to_move.push(this._current_download);
 			}
