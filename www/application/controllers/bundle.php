@@ -70,6 +70,10 @@ class Bundle extends Controller {
 					$row['media']['list'][$media_key] = $media_value;
 				}
 				unset($row['media_id']);
+				$row['audio']['value'] = $row['audio_yn'];
+				$row['audio']['list']['n'] = 'No';
+				$row['audio']['list']['y'] = 'Yes';
+				unset($row['audio_yn']);
 			endforeach;
 			
 			$data_m2m['layout'] = $this->bundle_layout->get_list($id, NULL);

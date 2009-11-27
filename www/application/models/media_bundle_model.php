@@ -11,7 +11,7 @@ class Media_bundle_model extends Model {
 
 
 	function get_list($media_id = NULL, $bundle_id = NULL) {
-		$this->db->select('id, media_id, bundle_id, frequency, appearances, importance, probability, valid_from_date, valid_to_date');
+		$this->db->select('id, media_id, bundle_id, frequency, appearances, importance, probability, valid_from_date, valid_to_date, audio_yn');
 		$this->db->from('medias_bundles');
 		$this->db->where('customer_id', $this->sess->customer_id);
 		if(isset($media_id)) $this->db->where('media_id', $media_id);
@@ -38,7 +38,7 @@ class Media_bundle_model extends Model {
 
 	function get_one($id = NULL) {
 	
-		$this->db->select('id, media_id, bundle_id, frequency, appearances, importance, probability, valid_from_date, valid_to_date');
+		$this->db->select('id, media_id, bundle_id, frequency, appearances, importance, probability, valid_from_date, valid_to_date, audio_yn');
 		$this->db->from('medias_bundles');
 		$this->db->where('customer_id', $this->sess->customer_id);
 		$this->db->where('id', $id);
@@ -82,6 +82,7 @@ class Media_bundle_model extends Model {
 		$probability = $this->input->post('probability');
 		$valid_from_date = $this->input->post('valid_from_date');
 		$valid_to_date = $this->input->post('valid_to_date');
+		$audio_yn = $this->input->post('audio_id');
 		
 		foreach($id as $key => $value) {
 			$data = array(
@@ -90,7 +91,8 @@ class Media_bundle_model extends Model {
 				'frequency' => $frequency[$key],
 				'appearances' => $appearances[$key],
 				'importance' => $importance[$key],
-				'probability' => $probability[$key]
+				'probability' => $probability[$key],
+				'audio_yn' => $audio_yn[$key]
 			);
 			if($valid_from_date[$key]) $data['valid_from_date'] = date('Y-m-d', strtotime($valid_from_date[$key]));
 			if($valid_to_date[$key]) $data['valid_to_date'] = date('Y-m-d', strtotime($valid_to_date[$key]));
