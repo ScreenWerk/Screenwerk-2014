@@ -11,7 +11,8 @@ class Media_bundle_model extends Model {
 
 
 	function get_list($media_id = NULL, $bundle_id = NULL) {
-		$this->db->select('id, media_id, bundle_id, frequency, appearances, importance, probability, valid_from_date, valid_to_date, audio_yn');
+		$this->db->select('id, media_id, bundle_id, frequency, appearances,
+				 importance, probability, valid_from_date, valid_to_date, audio_yn');
 		$this->db->from('medias_bundles');
 		$this->db->where('customer_id', $this->sess->customer_id);
 		if(isset($media_id)) $this->db->where('media_id', $media_id);
@@ -38,7 +39,8 @@ class Media_bundle_model extends Model {
 
 	function get_one($id = NULL) {
 	
-		$this->db->select('id, media_id, bundle_id, frequency, appearances, importance, probability, valid_from_date, valid_to_date, audio_yn');
+		$this->db->select('id, media_id, bundle_id, frequency, appearances,
+				 importance, probability, valid_from_date, valid_to_date, audio_yn');
 		$this->db->from('medias_bundles');
 		$this->db->where('customer_id', $this->sess->customer_id);
 		$this->db->where('id', $id);
@@ -118,7 +120,9 @@ class Media_bundle_model extends Model {
       {
          return $this->MediasForBundle[$bundle_id];
       }
-		$this->db->select('mb.id, m.id as media_id, m.type, m.filename, m.duration, mb.frequency, mb.appearances, mb.importance, mb.probability, mb.valid_from_date, mb.valid_to_date');
+		$this->db->select('mb.id, m.id as media_id, m.type, m.filename, m.duration,
+					 mb.frequency, mb.appearances, mb.importance, mb.probability,
+					 mb.valid_from_date, mb.valid_to_date, mb.audio_yn');
 		$this->db->from('medias_bundles AS mb');
 		$this->db->join('medias AS m', 'm.id = mb.media_id');
 		$this->db->where('mb.customer_id', $this->sess->customer_id);
