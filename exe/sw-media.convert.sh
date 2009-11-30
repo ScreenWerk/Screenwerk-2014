@@ -33,7 +33,8 @@ case ${media_type} in
    VIDEO)
       master_media=${_DIR_MASTERS}/${media_id}.${media_type}
 #      ffmpeg -i "${original_media}" -an -vcodec flv -sameq -y "${master_media}.flv" #2&>1 1>/dev/null
-      ffmpeg -i "${original_media}" -an -vcodec flv -qmin 1 -qmax 3 -y "${master_media}.flv" #2&>1 1>/dev/null
+#      ffmpeg -i "${original_media}" -an -vcodec flv -qmin 1 -qmax 3 -y "${master_media}.flv" #2&>1 1>/dev/null
+      ffmpeg -i "${original_media}" -acodec aac -ab 192k -vcodec flv -qmin 1 -qmax 3 -y "${master_media}.flv" #2&>1 1>/dev/null
       mv "${master_media}.flv" "${master_media}"
 
       ${_DIR_EXE}/midentify.sh "${original_media}" > /tmp/foo
