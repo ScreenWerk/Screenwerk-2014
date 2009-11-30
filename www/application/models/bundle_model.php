@@ -107,7 +107,8 @@ class Bundle_model extends Model {
 		                   medias_bundles.importance,
 		                   medias_bundles.probability,
 		                   medias_bundles.valid_from_date,
-		                   medias_bundles.valid_to_date');
+		                   medias_bundles.valid_to_date,
+		                   medias_bundles.audio_yn');
 		$this->db->from('medias');
 		$this->db->join('medias_bundles', 'medias_bundles.media_id = medias.id', 'left');
 		$this->db->where(array('medias_bundles.bundle_id' => $bundle_id));
