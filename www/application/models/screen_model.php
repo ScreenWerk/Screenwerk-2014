@@ -26,10 +26,10 @@ class Screen_model extends Model {
 			foreach($query->result_array() as $row) {
 				$data[$row['id']] = $row;
 				$data[$row['id']]['last_seen_inwords'] = $this->_secondsToWords($data[$row['id']]['last_seen']);
-				if($id) $data[$row['id']]['media'] = $this->screen_media($row['id']);
-				if($id) $data[$row['id']]['bundles'] = $this->screen_bundles($row['id']);
-				if($id) $data[$row['id']]['layouts'] = $this->screen_layouts($row['id']);
-				if($id) $data[$row['id']]['collections'] = $this->screen_collections($row['id']);
+				$data[$row['id']]['media'] = $this->screen_media($row['id']);
+				$data[$row['id']]['bundles'] = $this->screen_bundles($row['id']);
+				$data[$row['id']]['layouts'] = $this->screen_layouts($row['id']);
+				$data[$row['id']]['collections'] = $this->screen_collections($row['id']);
 				if($id) $data[$row['id']]['players'] = $this->screen_players($row['id']);
 				if($id) $data[$row['id']]['synchronized'] = ($data[$row['id']]['content_md5'] == $this->md5($row['id'])) ? TRUE : FALSE; 
 
@@ -126,7 +126,7 @@ class Screen_model extends Model {
 		$this->db->select('medias.id, medias.filename AS name');
 		$this->db->from('medias');
 		$this->db->join('v_relations', 'v_relations.media_id = medias.id');
-		$this->db->where('medias.customer_id', $this->sess->customer_id);
+		//$this->db->where('medias.customer_id', $this->sess->customer_id);
 		$this->db->where('v_relations.screen_id', $screen_id);
 		$this->db->order_by('medias.filename');
 		$query = $this->db->get();
@@ -148,7 +148,7 @@ class Screen_model extends Model {
 		$this->db->select('bundles.id, bundles.name');
 		$this->db->from('bundles');
 		$this->db->join('v_relations', 'v_relations.bundle_id = bundles.id');
-		$this->db->where('bundles.customer_id', $this->sess->customer_id);
+		//$this->db->where('bundles.customer_id', $this->sess->customer_id);
 		$this->db->where('v_relations.screen_id', $screen_id);
 		$this->db->order_by('bundles.name'); 
 		$query = $this->db->get();
@@ -170,7 +170,7 @@ class Screen_model extends Model {
 		$this->db->select('layouts.id, layouts.name');
 		$this->db->from('layouts');
 		$this->db->join('v_relations', 'v_relations.layout_id = layouts.id');
-		$this->db->where('layouts.customer_id', $this->sess->customer_id);
+		//$this->db->where('layouts.customer_id', $this->sess->customer_id);
 		$this->db->where('v_relations.screen_id', $screen_id);
 		$this->db->order_by('layouts.name'); 
 		$query = $this->db->get();
@@ -193,7 +193,7 @@ class Screen_model extends Model {
 		$this->db->select('collections.id, collections.name');
 		$this->db->from('collections');
 		$this->db->join('v_relations', 'v_relations.collection_id = collections.id');
-		$this->db->where('collections.customer_id', $this->sess->customer_id);
+		//$this->db->where('collections.customer_id', $this->sess->customer_id);
 		$this->db->where('v_relations.screen_id', $screen_id);
 		$this->db->order_by('collections.name'); 
 		$query = $this->db->get();

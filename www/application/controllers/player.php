@@ -9,6 +9,7 @@ class Player extends Controller {
 		$this->load->helper('file');
 		
 		$this->load->model('Screen_model', 'screen');
+		$this->load->model('media_model', 'media');
 		$this->load->model('Log_model', 'log');
 
 		//$this->output->enable_profiler(TRUE);      
@@ -22,11 +23,29 @@ class Player extends Controller {
 		$message = 'OK';
 		
 		if($data['id']) {
+			
+			$allowedfile[] = 'screen.rc';
+			$allowedfile[] = $data['id'] .'.screen';
+			$allowedfile[] = $data['schedule_id'] .'.schedule';
+			foreach(array_keys($data['media']) as $id) {
+				$media = $this->media->get_one($id);
+				$allowedfile[] = $id .'.'. $media['type'];
+			}
+			foreach(array_keys($data['bundles']) as $id) {
+				$allowedfile[] = $id .'.bundle';
+			}
+			foreach(array_keys($data['layouts']) as $id) {
+				$allowedfile[] = $id .'.layout';
+			}
+			foreach(array_keys($data['collections']) as $id) {
+				$allowedfile[] = $id .'.collection';
+			}
+			
 			$dir = DIR_FTP_SCREENS .'/'. $data['id'] .'/';
 
 			if(is_array(get_filenames($dir))) {
 				foreach(get_filenames($dir) as $file) {
-					echo $file .';'. md5_file($dir.$file) .';'. filesize($dir.$file) ."\n";
+					if(in_array($file, $allowedfile)) echo $file .';'. md5_file($dir.$file) .';'. filesize($dir.$file) ."\n";
 				}
 			} else {
 				echo $message = 'ERROR - No Files';

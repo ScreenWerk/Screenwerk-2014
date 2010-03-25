@@ -11,7 +11,7 @@ class Media_model extends Model {
 	function get_list($id = NULL) {
 		$this->db->select('id, filename, duration, width, height, type');
 		$this->db->from('medias');
-		$this->db->where('customer_id', $this->sess->customer_id);
+		if(!$id) $this->db->where('customer_id', $this->sess->customer_id);
 		if ($id) $this->db->where('id', $id);
 		$this->db->order_by('type'); 
 		$this->db->order_by('filename'); 
