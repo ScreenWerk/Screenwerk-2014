@@ -1,0 +1,19 @@
+{
+  "name": "ScreenWerk-2014",
+  "main": "index.html",
+  "window": {
+    "icon": "imgs/sw-p128.png",
+    "show_in_taskbar": true,
+    "fullscreen": false,
+    "toolbar": false,
+    "frame": true,
+    "show": true,
+    "position": "center",
+    "width": 500,
+    "height": 500
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/argoroots/entu.git"
+  }
+}

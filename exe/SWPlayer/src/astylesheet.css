@@ -1,6 +1,0 @@
-ScrollBar {
- 	up-arrow-skin: ClassReference(null);
- 	down-arrow-skin: ClassReference(null);
- 	thumbSkin: ClassReference(null);
- 	trackSkin: ClassReference(null);
-}
