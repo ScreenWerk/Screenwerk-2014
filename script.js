@@ -22,7 +22,9 @@ var util    = require("util")
 var https   = require('https')
 var events  = require('events')
 var fs      = require('fs')
-var sw      = require('./elements')
+
+var sw_ele  = require('./elements')
+var sw_play = require('./player')
 var numlenf	= 6
 
 
@@ -57,7 +59,7 @@ function EntityFetcher () {
 	fetcher.process_id = Number(0)
 
 	this.fetch = function(entity_id, relatives, controller) {
-		console.log({'eid':entity_id, 'relatives':relatives, 'controller':controller})
+		// console.log({'eid':entity_id, 'relatives':relatives, 'controller':controller})
 		var process_id = ++fetcher.process_id
 		// var entity_id = entity_id
 		fetcher.emit('start',
@@ -87,12 +89,10 @@ function EntityFetcher () {
 				if (typeof controller === 'undefined') {
 					// var entity_id = data.result.id
 					var definition = data.result.definition_keyname
-					sw_elements.register(entity_id, definition, data.result)
+					sw_elements.register({'entity_id':entity_id, 'definition':definition, 'relatives':relatives}, data.result)
 					switch(definition) {
 						case 'sw-screen':
 							fetcher.fetch(data.result.properties['screen-group'].values[0].db_value, {'parent':entity_id})
-							// sw_elements.by_eid[entity_id].data.data.properties['last-check'].values = 'Foo'
-							// sw_elements.by_eid[entity_id].data.data.properties['last-update'].values = 'Foo'
 						break;
 						case 'sw-screen-group':
 							fetcher.fetch(data.result.properties['configuration'].values[0].db_value, {'parent':entity_id})
@@ -120,25 +120,20 @@ function EntityFetcher () {
 							if (['Video','Image','Flash','Audio'].indexOf(media_type) >= 0) {
 								f_fetcher.fetch(data.result.properties['file'].values[0].db_value)
 						    	} else {
-						    		null
-						    		// console.log("Not found " + media_type);
+						    		null // Not going to fetch URL's
 						    	}
-							// console.log('Media ' + util.inspect(data.result.properties.type.values[0].value, { showHidden: true, depth: null }))
-							// e_fetcher.fetch(data.result.id, 'childs')
 						break;
 					}
-					// console.log(definition + ' (' + entity_id + ') fetched.')
-					fetcher.emit(definition, data)
 
-					// save the file
+					// save the meta file for debugging purposes
 					fs.writeFile(META_DIR + '/' + entity_id + '.' + definition + '.json'
-						, JSON.stringify(data, null, '\t'))
+						, stringifier(data))
 				} else if (controller === 'childs') {
 					for (var chdef in data.result) {
 						// console.log(chdef + ' has ' + util.inspect(data.count) + ' childs.')
 						for (;data.result[chdef].entities.length > 0;) {
 							var child = data.result[chdef].entities.pop()
-							fetcher.fetch(child.id)
+							fetcher.fetch(child.id, {'parent':entity_id})
 						}
 					}
 				}
@@ -212,38 +207,76 @@ FileFetcher.prototype.__proto__ = events.EventEmitter.prototype
 
 var e_fetcher = new EntityFetcher()
 var f_fetcher = new FileFetcher()
-var sw_elements = new sw.SwElements()
+var sw_elements = new sw_ele.SwElements()
+var sw_player = new sw_play.SwPlayer(SCREEN_ID)
 
 var sw_emitter = new events.EventEmitter()
 var total_fetchers = 0
 
 e_fetcher.on('start', function (data) {
-	console.log('Fetchers engaged: ' + ('  +E ' + (++total_fetchers)).slice(-numlenf) + ' ' + util.inspect(data))
+	++total_fetchers
+	// console.log('Fetchers engaged: ' + ('  +E ' + (total_fetchers)).slice(-numlenf) + ' ' + util.inspect(data))
 })
 e_fetcher.on('end', function (data) {
-	console.log('Fetchers engaged: ' + ('  -E ' + (--total_fetchers)).slice(-numlenf) + ' ' + util.inspect(data))
-	fs.writeFile(META_DIR + '/full_meta.json', JSON.stringify(sw_elements, null, '\t'))
+	--total_fetchers
+	// console.log('Fetchers engaged: ' + ('  -E ' + (total_fetchers)).slice(-numlenf) + ' ' + util.inspect(data))
+	// overwrite full meta file for debugging purposes
+	fs.writeFile(META_DIR + '/full_meta.json', stringifier(sw_elements))
 	if (total_fetchers === 0) sw_emitter.emit('silence')
 })
 f_fetcher.on('start', function (data) {
-	console.log('Fetchers engaged: ' + ('  +F ' + (++total_fetchers)).slice(-numlenf) + ' ' + util.inspect(data))
+	++total_fetchers
+	// console.log('Fetchers engaged: ' + ('  +F ' + (total_fetchers)).slice(-numlenf) + ' ' + util.inspect(data))
 })
 f_fetcher.on('end', function (data) {
-	console.log('Fetchers engaged: ' + ('  -F ' + (--total_fetchers)).slice(-numlenf) + ' ' + util.inspect(data))
+	--total_fetchers
+	// console.log('Fetchers engaged: ' + ('  -F ' + (total_fetchers)).slice(-numlenf) + ' ' + util.inspect(data))
 	if (total_fetchers === 0) sw_emitter.emit('silence')
 })
 
 
-// var sw_screen = null
-e_fetcher.fetch(SCREEN_ID)
-sw_emitter.on('silence', function() {
-	null
-	fs.writeFile(META_DIR + '/full_meta.json', JSON.stringify(sw_elements, null, '\t'))
-	gui.App.quit()
-	// console.log(JSON.stringify(sw_elements, null, '   '))
+/*
+ * Start the action
+ */
+document.write('foo')
+
+console.log('Fetching meta and media for screen ' + SCREEN_ID)
+e_fetcher.fetch(SCREEN_ID) // Start recursive fetching of screen's metadata and media
+
+sw_emitter.on('silence', function() { // 'silence' event happens whenever last fetcher finishes its work
+	console.log('Fetching meta and media for screen ' + SCREEN_ID + ' finished')
+	console.log('Restarting player')
+	sw_player.restart(sw_elements)
 })
 
 
+
+
+
+var stringifier = function(o) {
+	var cache = [];
+	return JSON.stringify(o, function(key, value) {
+		// console.log('Key: ' + key + ', Value ' + (typeof value) )
+	    if (typeof value === 'object' && value !== null) {
+	        if (cache.indexOf(value) !== -1) {
+	            // Circular reference found, replace key
+	            return 'Circular reference to: ' + key;
+	        }
+	        // Store value in our collection
+	        cache.push(value);
+	    }
+	    return value;
+	}, '\t')
+}
+
+process.on('exit', function(code) {
+  console.log('About to exit with code:', code);
+});
 // var os = require('os')
 // document.write('OUR computer is: ', os.platform())
 // gui.App.quit()
+
+process.on('uncaughtException', function ( err ) {
+    console.error('An uncaughtException was found, the program will end.')
+    process.exit(1)
+})

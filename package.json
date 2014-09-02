@@ -8,9 +8,9 @@
     "toolbar": false,
     "frame": true,
     "show": true,
-    "position": "center",
-    "width": 500,
-    "height": 500
+    "position": "right",
+    "width": 640,
+    "height": 360
   },
   "repository": {
     "type": "git",
