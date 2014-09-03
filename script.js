@@ -238,15 +238,19 @@ f_fetcher.on('end', function (data) {
 /*
  * Start the action
  */
-document.write('foo')
+// document.write('foo')
+
 
 console.log('Fetching meta and media for screen ' + SCREEN_ID)
+
+
 e_fetcher.fetch(SCREEN_ID) // Start recursive fetching of screen's metadata and media
 
 sw_emitter.on('silence', function() { // 'silence' event happens whenever last fetcher finishes its work
 	console.log('Fetching meta and media for screen ' + SCREEN_ID + ' finished')
 	console.log('Restarting player')
-	sw_player.restart(sw_elements)
+	sw_player.restart(sw_elements.by_eid[SCREEN_ID])
+	fs.writeFile(META_DIR + '/SwPlayer.json', stringifier(sw_player.sw_screen))
 })
 
 
@@ -276,7 +280,7 @@ process.on('exit', function(code) {
 // document.write('OUR computer is: ', os.platform())
 // gui.App.quit()
 
-process.on('uncaughtException', function ( err ) {
-    console.error('An uncaughtException was found, the program will end.')
-    process.exit(1)
-})
+// process.on('uncaughtException', function ( err ) {
+//     console.error('An uncaughtException was found, the program will end.')
+//     process.exit(1)
+// })

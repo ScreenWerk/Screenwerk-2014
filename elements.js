@@ -31,6 +31,7 @@ SwElements.prototype.register = function(options, data) {
 			i++
 		}
 	}
+	// element.data = data
 
 	switch (definition) {
 		case 'sw-screen':
