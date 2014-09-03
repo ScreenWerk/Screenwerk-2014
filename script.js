@@ -250,6 +250,7 @@ sw_emitter.on('silence', function() { // 'silence' event happens whenever last f
 	console.log('Fetching meta and media for screen ' + SCREEN_ID + ' finished')
 	console.log('Restarting player')
 	sw_player.restart(sw_elements.by_eid[SCREEN_ID])
+	fs.writeFile(META_DIR + '/full_meta.json', stringifier(sw_elements.by_eid[SCREEN_ID]))
 	fs.writeFile(META_DIR + '/SwPlayer.json', stringifier(sw_player.sw_screen))
 })
 
