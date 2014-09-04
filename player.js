@@ -37,7 +37,7 @@ SwScreen.prototype.play = function() {
 	dom_element.appendChild(document.createTextNode('SwScreen: ' + this.id))
 	dom_element.setAttribute('class', 'SwScreen')
 	dom_element.setAttribute('id', this.id)
-	dom_element.setAttribute('style', 'padding-left:2px; background-color:red;')
+	dom_element.setAttribute('style', 'left:0px; top:0px; width:100%; height:100%; position:fixed; background-color:red;')
 	document.body.appendChild(dom_element)
 	for (id in this.screen_groups) {
 		this.screen_groups[id].play()
@@ -60,7 +60,7 @@ SwScreenGroup.prototype.play = function() {
 	dom_element.appendChild(document.createTextNode('SwScreenGroup: ' + this.id))
 	dom_element.setAttribute('class', 'SwScreenGroup')
 	dom_element.setAttribute('id', this.id)
-	dom_element.setAttribute('style', 'padding-left:2px; background-color:green;')
+	dom_element.setAttribute('style', 'padding:2px; background-color:green;')
 	document.getElementById(this.parent.id).appendChild(dom_element)
 	for (id in this.configurations) {
 		this.configurations[id].play()
@@ -71,10 +71,10 @@ SwScreenGroup.prototype.play = function() {
 function SwConfiguration(parent, element) {
 	this.parent = parent
 	this.id = element.id
+	this.properties = element.properties
 	this.schedules = {}
 	for (id in element.childs) {
 		this.schedules[id] = new SwSchedule(this, element.childs[id])
-		// console.log('Added to schedules ' + id)
 	}
 }
 SwConfiguration.prototype.play = function() {
@@ -83,21 +83,40 @@ SwConfiguration.prototype.play = function() {
 	dom_element.appendChild(document.createTextNode('SwConfiguration: ' + this.id))
 	dom_element.setAttribute('class', 'SwConfiguration')
 	dom_element.setAttribute('id', this.id)
-	dom_element.setAttribute('style', 'padding-left:2px; background-color:white;')
+	dom_element.setAttribute('style', 'padding:2px; background-color:white;')
 	document.getElementById(this.parent.id).appendChild(dom_element)
+	//
+	// !NB: if multiple schedules are configured to exact same time, then start just one of them
+	var schedule_event_times = {}
 	for (id in this.schedules) {
-		this.schedules[id].play()
+		if (!is_current(this.schedules[id]))
+			continue
+		schedule_event_times[this.schedules[id].prev_event_time()] = id
+		schedule_event_times[this.schedules[id].next_event_time()] = id
 	}
+	dom_element.appendChild(document.createTextNode('schedule_event_times: ' + schedule_event_times))
+	console.log(util.inspect(schedule_event_times))
+	schedule_event_times.sort()
+	dom_element.appendChild(document.createTextNode('schedule_event_times: ' + schedule_event_times))
+	console.log(util.inspect(schedule_event_times))
 }
 
 function SwSchedule(parent, element) {
 	this.parent = parent
 	this.id = element.id
+	this.properties = element.properties
 	this.layouts = {}
 	for (id in element.childs) {
 		this.layouts[id] = new SwLayout(this, element.childs[id])
-		// console.log('Added to layouts ' + id)
 	}
+}
+SwSchedule.prototype.prev_event_time = function() {
+	if (typeof this.properties['valid-from'].values !== undefined)
+		null;
+	// if this.properties['valid-from'].values[0]
+}
+SwSchedule.prototype.next_event_time = function() {
+	null
 }
 SwSchedule.prototype.play = function() {
 	var document = window.document
@@ -105,7 +124,7 @@ SwSchedule.prototype.play = function() {
 	dom_element.appendChild(document.createTextNode('SwSchedule: ' + this.id))
 	dom_element.setAttribute('class', 'SwSchedule')
 	dom_element.setAttribute('id', this.id)
-	dom_element.setAttribute('style', 'padding-left:2px; background-color:yellow;')
+	dom_element.setAttribute('style', 'padding:2px; background-color:yellow;')
 	document.getElementById(this.parent.id).appendChild(dom_element)
 	for (id in this.layouts) {
 		this.layouts[id].play()
@@ -127,7 +146,7 @@ SwLayout.prototype.play = function() {
 	dom_element.appendChild(document.createTextNode('SwLayout: ' + this.id))
 	dom_element.setAttribute('class', 'SwLayout')
 	dom_element.setAttribute('id', this.id)
-	dom_element.setAttribute('style', 'padding-left:2px; background-color:gray;')
+	dom_element.setAttribute('style', 'padding:2px; background-color:gray;')
 	document.getElementById(this.parent.id).appendChild(dom_element)
 	for (id in this.layout_playlists) {
 		this.layout_playlists[id].play()
@@ -149,7 +168,7 @@ SwLayoutPlaylist.prototype.play = function() {
 	dom_element.appendChild(document.createTextNode('SwLayoutPlaylist: ' + this.id))
 	dom_element.setAttribute('class', 'SwLayoutPlaylist')
 	dom_element.setAttribute('id', this.id)
-	dom_element.setAttribute('style', 'padding-left:2px; background-color:brown;')
+	dom_element.setAttribute('style', 'padding:2px; background-color:brown;')
 	document.getElementById(this.parent.id).appendChild(dom_element)
 	for (id in this.playlists) {
 		this.playlists[id].play()
@@ -171,7 +190,7 @@ SwPlaylist.prototype.play = function() {
 	dom_element.appendChild(document.createTextNode('SwPlaylist: ' + this.id))
 	dom_element.setAttribute('class', 'SwPlaylist')
 	dom_element.setAttribute('id', this.id)
-	dom_element.setAttribute('style', 'padding-left:2px; background-color:cyan;')
+	dom_element.setAttribute('style', 'padding:2px; background-color:cyan;')
 	document.getElementById(this.parent.id).appendChild(dom_element)
 	for (id in this.playlist_medias) {
 		this.playlist_medias[id].play()
@@ -193,7 +212,7 @@ SwPlaylistMedia.prototype.play = function() {
 	dom_element.appendChild(document.createTextNode('SwPlaylistMedia: ' + this.id))
 	dom_element.setAttribute('class', 'SwPlaylistMedia')
 	dom_element.setAttribute('id', this.id)
-	dom_element.setAttribute('style', 'padding-left:2px; background-color:pink;')
+	dom_element.setAttribute('style', 'padding:2px; background-color:pink;')
 	document.getElementById(this.parent.id).appendChild(dom_element)
 	for (id in this.medias) {
 		this.medias[id].play()
@@ -211,8 +230,28 @@ SwMedia.prototype.play = function() {
 	dom_element.appendChild(document.createTextNode('SwMedia: ' + this.id))
 	dom_element.setAttribute('class', 'SwMedia')
 	dom_element.setAttribute('id', this.id)
-	dom_element.setAttribute('style', 'padding-left:2px; background-color:purple;')
+	dom_element.setAttribute('style', 'padding:2px; background-color:purple;')
 	document.getElementById(this.parent.id).appendChild(dom_element)
+}
+
+var is_current = function(element) {
+	var now = new Date()
+	console.log('now: ' + util.inspect(now))
+	var from_date = new Date()
+	var to_date = new Date()
+	if (typeof element.properties['valid-from'].values !== undefined)
+		from_date = new Date(element.properties['valid-from'].values[0])
+	console.log('from_date: ' + util.inspect(from_date))
+	if (now < from_date)
+		return false
+
+	if (typeof element.properties['valid-to'].values !== undefined)
+		to_date = new Date(element.properties['valid-to'].values[0])
+	console.log('to_date: ' + util.inspect(to_date))
+	if (now > to_date)
+		return false
+
+	return true
 }
 
 exports.SwPlayer = SwPlayer

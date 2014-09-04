@@ -4,9 +4,9 @@
   "window": {
     "icon": "imgs/sw-p128.png",
     "show_in_taskbar": true,
-    "fullscreen": false,
+    "fullscreen": true,
     "toolbar": false,
-    "frame": true,
+    "frame": false,
     "show": true,
     "position": "right",
     "width": 640,
