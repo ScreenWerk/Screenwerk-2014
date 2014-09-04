@@ -1,5 +1,7 @@
 var util    = require("util")
+var later   = require("later")
 // var gui     = require('nw.gui')
+// later.date.localTime();
 
 
 function SwPlayer(screen_id) {
@@ -87,18 +89,21 @@ SwConfiguration.prototype.play = function() {
 	document.getElementById(this.parent.id).appendChild(dom_element)
 	//
 	// !NB: if multiple schedules are configured to exact same time, then start just one of them
-	var schedule_event_times = {}
+	var current_schedule_events = {}
 	for (id in this.schedules) {
 		if (!is_current(this.schedules[id]))
 			continue
-		schedule_event_times[this.schedules[id].prev_event_time()] = id
-		schedule_event_times[this.schedules[id].next_event_time()] = id
+		var cronSched = later.parse.cron(this.schedules[id].properties.crontab.values[0])
+		var prev = new Date(later.schedule(cronSched).prev(1, new Date()))
+		current_schedule_events[prev] = id
 	}
-	dom_element.appendChild(document.createTextNode('schedule_event_times: ' + schedule_event_times))
-	console.log(util.inspect(schedule_event_times))
-	schedule_event_times.sort()
-	dom_element.appendChild(document.createTextNode('schedule_event_times: ' + schedule_event_times))
-	console.log(util.inspect(schedule_event_times))
+	var keys = Object.keys(current_schedule_events)
+	keys.reverse()
+	current_schedule_event = this.schedules[current_schedule_events[keys[0]]]
+	console.log('current_schedule_event: ' + current_schedule_event)
+	console.log(util.inspect(current_schedule_events))
+	dom_element.appendChild(document.createTextNode(' Currently playing schedule : ' + current_schedule_events[keys[0]] + ' started at ' + keys[0]))
+	current_schedule_event.play()
 }
 
 function SwSchedule(parent, element) {
@@ -111,8 +116,6 @@ function SwSchedule(parent, element) {
 	}
 }
 SwSchedule.prototype.prev_event_time = function() {
-	if (typeof this.properties['valid-from'].values !== undefined)
-		null;
 	// if this.properties['valid-from'].values[0]
 }
 SwSchedule.prototype.next_event_time = function() {
@@ -236,21 +239,24 @@ SwMedia.prototype.play = function() {
 
 var is_current = function(element) {
 	var now = new Date()
-	console.log('now: ' + util.inspect(now))
-	var from_date = new Date()
-	var to_date = new Date()
-	if (typeof element.properties['valid-from'].values !== undefined)
+	var from_date = now
+	var to_date = now
+	// console.log('now[' + element.id + ']: ' + util.inspect(now))
+	if (typeof element.properties['valid-from'].values !== 'undefined'){
+		console.log(typeof element.properties['valid-from'].values)
 		from_date = new Date(element.properties['valid-from'].values[0])
-	console.log('from_date: ' + util.inspect(from_date))
+	}
+	// console.log('from_date[' + element.id + ']: ' + util.inspect(from_date))
 	if (now < from_date)
 		return false
 
-	if (typeof element.properties['valid-to'].values !== undefined)
+	if (typeof element.properties['valid-to'].values !== 'undefined')
 		to_date = new Date(element.properties['valid-to'].values[0])
-	console.log('to_date: ' + util.inspect(to_date))
+	// console.log('to_date[' + element.id + ']: ' + util.inspect(to_date))
 	if (now > to_date)
 		return false
 
+	// console.log(util.inspect(true))
 	return true
 }
 
