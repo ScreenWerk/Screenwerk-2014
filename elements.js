@@ -7,7 +7,7 @@ function SwElements() {
 SwElements.prototype.register = function(options, data) {
 	var eid = options.entity_id
 	var definition = options.definition
-	console.log('Registering ' + util.inspect(options))
+	// console.log('Registering ' + util.inspect(options))
 	var element = {'id': eid}
 	element.definition = definition
 	element.properties = {}

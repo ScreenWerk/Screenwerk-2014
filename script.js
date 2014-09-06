@@ -157,7 +157,7 @@ function FileFetcher () {
 	this.fetch = function(file_id) {
 		var filename = file_id
 		if (fs.existsSync(MEDIA_DIR + '/' + file_id)) {
-			console.log('File ' + MEDIA_DIR + '/' + file_id + ' allready fetched. Skipping.')
+			// console.log('File ' + MEDIA_DIR + '/' + file_id + ' allready fetched. Skipping.')
 			return
 		}
 		console.log('File ' + MEDIA_DIR + '/' + file_id + ' missing. Fetch!')
@@ -187,7 +187,7 @@ function FileFetcher () {
 
 			// var filename = file_id + '.' + response.headers['content-disposition'].split('=')[1].split('"')[1]
 			if (fs.existsSync(MEDIA_DIR + '/' + filename)) {
-				console.log('File ' + MEDIA_DIR + '/' + filename + ' allready fetched. Skipping.')
+				// console.log('File ' + MEDIA_DIR + '/' + filename + ' allready fetched. Skipping.')
 				fetcher.emit('end',
 						 {'process_count': ('   - ' + (--fetcher.process_count)).slice(-numlenf),
 						  'process_id': ('   -F ' + process_id).slice(-numlenf)})
