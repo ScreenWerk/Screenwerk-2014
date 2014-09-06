@@ -32,7 +32,7 @@ SwElements.prototype.register = function(options, data) {
 		}
 	}
 	// element.data = data
-
+	// Validators
 	switch (definition) {
 		case 'sw-screen':
 			// element.data = new SwScreen(data)
@@ -44,7 +44,16 @@ SwElements.prototype.register = function(options, data) {
 			// element.data = new SwConfiguration(data)
 		break;
 		case 'sw-schedule':
-			// element.data = new SwSchedule(data)
+			if (element.properties.crontab.values === undefined) {
+				console.error('Schedule ' + element.id + ' without crontab. rescheduling to midnight, February 30, Sunday')
+				element.properties.crontab.values = ['0 0 30 2 0'] // Midnight, February 30, Sunday
+			}
+			if (element.properties.cleanup.values === undefined) {
+				element.properties.cleanup.values = ['0']
+			}
+			if (element.properties.ordinal.values === undefined) {
+				element.properties.ordinal.values = ['0']
+			}
 		break;
 		case 'sw-layout':
 			// element.data = new SwLayout(data)

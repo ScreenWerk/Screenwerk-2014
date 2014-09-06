@@ -39,7 +39,7 @@ fs.lstat(META_DIR, function(err, stats) {
 		console.log('Creating folder for ' + META_DIR + '.')
 		fs.mkdir(META_DIR)
     }
-});
+})
 fs.lstat(MEDIA_DIR, function(err, stats) {
 	if (err) {
 		console.log('Creating folder for ' + MEDIA_DIR + '.')
@@ -51,7 +51,7 @@ fs.lstat(MEDIA_DIR, function(err, stats) {
 		console.log('Creating folder for ' + MEDIA_DIR + '.')
 		fs.mkdir(MEDIA_DIR)
     }
-});
+})
 
 function EntityFetcher () {
 	var fetcher = this
@@ -155,6 +155,12 @@ function FileFetcher () {
 	fetcher.process_id = Number(0)
 
 	this.fetch = function(file_id) {
+		var filename = file_id
+		if (fs.existsSync(MEDIA_DIR + '/' + file_id)) {
+			console.log('File ' + MEDIA_DIR + '/' + file_id + ' allready fetched. Skipping.')
+			return
+		}
+		console.log('File ' + MEDIA_DIR + '/' + file_id + ' missing. Fetch!')
 		var process_id = ++fetcher.process_id
 		fetcher.emit('start',
 				 {'process_count': ('   + ' + (++fetcher.process_count)).slice(-numlenf),
@@ -168,9 +174,20 @@ function FileFetcher () {
 		var request = https.request(options)
 		request.on('response', function response_handler( response ) {
 			var filesize = response.headers['content-length']
-			var filename = file_id + '.' + response.headers['content-disposition'].split('=')[1].split('"')[1]
+			if (typeof response.headers['content-disposition'] === 'undefined') {
+				var headers = JSON.stringify(response.headers);
+				console.log('Missing content-disposition in HEADERS: ' + headers);
+				fetcher.emit('end',
+						 {'process_count': ('   - ' + (--fetcher.process_count)).slice(-numlenf),
+						  'process_id': ('   -F ' + process_id).slice(-numlenf)})
+				fetcher.fetch(file_id)
+				request.end()
+				return
+			}
+
+			// var filename = file_id + '.' + response.headers['content-disposition'].split('=')[1].split('"')[1]
 			if (fs.existsSync(MEDIA_DIR + '/' + filename)) {
-				// console.log('File ' + filename + ' allready fetched. Skipping.')
+				console.log('File ' + MEDIA_DIR + '/' + filename + ' allready fetched. Skipping.')
 				fetcher.emit('end',
 						 {'process_count': ('   - ' + (--fetcher.process_count)).slice(-numlenf),
 						  'process_id': ('   -F ' + process_id).slice(-numlenf)})
@@ -181,8 +198,6 @@ function FileFetcher () {
 			fetcher.bytes_to_go += Number(filesize)
 			console.log('Start fetching ' + file_id + '. Bytes to go: ' + fetcher.bytes_to_go)
 			console.log('STATUS: ' + response.statusCode);
-			var headers = JSON.stringify(response.headers);
-			console.log('HEADERS: ' + headers);
 
 			var file = fs.createWriteStream(MEDIA_DIR + '/' + filename + '.download');
 			response.on('data', function(chunk){
@@ -265,18 +280,18 @@ var stringifier = function(o) {
 	    if (typeof value === 'object' && value !== null) {
 	        if (cache.indexOf(value) !== -1) {
 	            // Circular reference found, replace key
-	            return 'Circular reference to: ' + key;
+	            return 'Circular reference to: ' + key
 	        }
 	        // Store value in our collection
-	        cache.push(value);
+	        cache.push(value)
 	    }
-	    return value;
+	    return value
 	}, '\t')
 }
 
 process.on('exit', function(code) {
-  console.log('About to exit with code:', code);
-});
+  console.log('About to exit with code:', code)
+})
 // var os = require('os')
 // document.write('OUR computer is: ', os.platform())
 // gui.App.quit()
