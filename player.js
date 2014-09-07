@@ -22,13 +22,13 @@ function SwScreen(element) {
 	var is_playing = this.is_playing = false
 	var class_name = 'SwScreen'
 	var dom_element = document.createElement('div')
-	dom_element.appendChild(document.createTextNode(class_name + ': ' + this.id))
+	dom_element.appendChild(document.createTextNode(class_name + ': ' + element.id))
 	dom_element.setAttribute('class', class_name)
-	dom_element.setAttribute('id', this.id)
+	dom_element.setAttribute('id', element.id)
 	dom_element.setAttribute('style', 'left:0px; top:0px; width:100%; height:100%; position:fixed; background-color:red;')
 	dom_element.style.display = 'none'
 	document.body.appendChild(dom_element)
-	// console.log('New ' + class_name + ' ' + this.id + ' Style: ' + util.inspect(dom_element.style))
+	// console.log('New ' + class_name + ' ' + element.id + ' Style: ' + util.inspect(dom_element.style))
 
 	for (id in element.childs) {
 		screen_groups.push({'id':id, 'element':new SwScreenGroup(this, element.childs[id])})
@@ -77,15 +77,15 @@ function SwScreenGroup(parent, element) {
 	var is_playing = this.is_playing = false
 	var class_name = 'SwScreenGroup'
 	var dom_element = document.createElement('div')
-	dom_element.appendChild(document.createTextNode(class_name + ': ' + this.id))
+	dom_element.appendChild(document.createTextNode(class_name + ': ' + element.id))
 	dom_element.setAttribute('class', class_name)
-	dom_element.setAttribute('id', this.id)
+	dom_element.setAttribute('id', element.id)
 	dom_element.setAttribute('style', 'left:0px; top:0px; width:100%; height:100%; padding:2px; background-color:green;')
 	dom_element.style.display = 'none'
 	dom_element.style.opacity = 0.8
 	dom_element.style.position = 'relative'
 	document.getElementById(this.parent.id).appendChild(dom_element)
-	// console.log('New ' + class_name + ' ' + this.id + ' Style: ' + util.inspect(dom_element.style))
+	// console.log('New ' + class_name + ' ' + element.id + ' Style: ' + util.inspect(dom_element.style))
 
 	for (id in element.childs) {
 		configurations.push({'id':id, 'element':new SwConfiguration(this, element.childs[id])})
@@ -134,15 +134,15 @@ function SwConfiguration(parent, element) {
 	var is_playing = this.is_playing = false
 	var class_name = 'SwConfiguration'
 	var dom_element = document.createElement('div')
-	dom_element.appendChild(document.createTextNode(class_name + ': ' + this.id))
+	dom_element.appendChild(document.createTextNode(class_name + ': ' + element.id))
 	dom_element.setAttribute('class', class_name)
-	dom_element.setAttribute('id', this.id)
+	dom_element.setAttribute('id', element.id)
 	dom_element.setAttribute('style', 'left:0px; top:0px; width:100%; height:100%; padding:2px; background-color:white;')
 	dom_element.style.display = 'none'
 	dom_element.style.opacity = 0.8
 	dom_element.style.position = 'relative'
 	document.getElementById(this.parent.id).appendChild(dom_element)
-	// console.log('New ' + class_name + ' ' + this.id + ' Style: ' + util.inspect(dom_element.style))
+	// console.log('New ' + class_name + ' ' + element.id + ' Style: ' + util.inspect(dom_element.style))
 
 	for (id in element.childs) {
 		schedules.push({'id':id, 'element':new SwSchedule(this, element.childs[id])})
@@ -168,7 +168,7 @@ function SwConfiguration(parent, element) {
 					return 1
 				return 0
 			})
-			console.log(util.inspect({'schedules: ': schedules}, {depth: 6}))
+			// console.log(util.inspect({'schedules: ': schedules}, {depth: 6}))
 			schedules.forEach(function(schedule){
 				console.log('There are ' + schedule.element.layouts().length + ' layouts to initialize for schedule: ' + schedule.id)
 				schedule.element.playLayouts()
@@ -217,7 +217,7 @@ function SwSchedule(parent, element) {
 	dom_element.style.opacity = 0.8
 	dom_element.style.position = 'relative'
 	document.getElementById(this.parent.id).appendChild(dom_element)
-	// console.log('New ' + class_name + ' ' + this.id + ' Style: ' + util.inspect(dom_element.style))
+	// console.log('New ' + class_name + ' ' + element.id + ' Style: ' + util.inspect(dom_element.style))
 
 	var cronSched = this.cronSched = later.parse.cron(this.properties.crontab.values[0])
 	if (this.properties['valid-from'].values !== undefined) {
@@ -300,15 +300,15 @@ function SwLayout(parent, element) {
 	var is_playing = this.is_playing = false
 	var class_name = 'SwLayout'
 	var dom_element = document.createElement('div')
-	dom_element.appendChild(document.createTextNode(class_name + ': ' + this.id))
+	dom_element.appendChild(document.createTextNode(class_name + ': ' + element.id))
 	dom_element.setAttribute('class', class_name)
-	dom_element.setAttribute('id', this.id)
+	dom_element.setAttribute('id', element.id)
 	dom_element.setAttribute('style', 'left:0px; top:0px; width:100%; height:100%; padding:2px; background-color:gray;')
 	dom_element.style.display = 'none'
 	dom_element.style.opacity = 0.8
 	dom_element.style.position = 'relative'
 	document.getElementById(this.parent.id).appendChild(dom_element)
-	// console.log('New ' + class_name + ' ' + this.id + ' Style: ' + util.inspect(dom_element.style))
+	// console.log('New ' + class_name + ' ' + element.id + ' Style: ' + util.inspect(dom_element.style))
 
 	for (id in element.childs) {
 		layout_playlists.push({'id' : id, 'element' : new SwLayoutPlaylist(this, element.childs[id])})
@@ -422,19 +422,38 @@ function SwPlaylist(parent, element) {
 	var is_playing = this.is_playing = false
 	var class_name = 'SwPlaylist'
 	var dom_element = document.createElement('div')
-	dom_element.appendChild(document.createTextNode(class_name + ': ' + this.id))
+	dom_element.appendChild(document.createTextNode(class_name + ': ' + element.id))
 	dom_element.setAttribute('class', class_name)
-	dom_element.setAttribute('id', this.id)
+	dom_element.setAttribute('id', element.id)
 	dom_element.setAttribute('style', 'padding:2px; background-color:cyan; width=100%; height=100%;')
 	dom_element.style.display = 'none'
 	dom_element.style.opacity = 0.8
 	dom_element.style.position = 'relative'
 	document.getElementById(this.parent.id).appendChild(dom_element)
-	// console.log('New ' + class_name + ' ' + this.id + ' Style: ' + util.inspect(dom_element.style))
+	// console.log('New ' + class_name + ' ' + element.id + ' Style: ' + util.inspect(dom_element.style))
 
 	for (id in element.childs) {
 		playlist_medias.push({'id' : id, 'element' : new SwPlaylistMedia(this, element.childs[id])})
 	}
+	playlist_medias.sort(function compare(a,b) {
+		if (a.element.ordinal() < b.element.ordinal())
+			return -1
+		if (a.element.ordinal() > b.element.ordinal())
+			return 1
+		return 0
+	})
+	for (var i = 0; i < playlist_medias.length; i++) {
+		playlist_medias[i].element.prev(playlist_medias[(i === 0) ? playlist_medias.length - 1 : i - 1])
+		playlist_medias[i].element.next(playlist_medias[(i === playlist_medias.length - 1) ? 0 : i + 1])
+	}
+	i = 0
+	// playlist_medias.forEach(function(playlist_media) {
+	// 	console.log('AFTER sort[' + i++ + ']: playlist_media[' + playlist_media.id
+	// 	 + '].ordinal: ' + playlist_media.element.ordinal()
+	// 	 + ', prev:' + util.inspect(playlist_media.element.prev().id)
+	// 	 + ', next:' + util.inspect(playlist_media.element.next().id)
+	// 	 )
+	// })
 	return {
 		play: function() {
 			if (is_playing) {
@@ -474,6 +493,7 @@ function SwPlaylistMedia(parent, element) {
 	this.parent = parent
 	this.id = element.id
 	this.properties = element.properties
+	// this.temp_ordinal = element.properties.ordinal.values[0]
 	var medias = this.medias = []
 	var document = window.document
 	var is_playing = this.is_playing = false
@@ -488,6 +508,7 @@ function SwPlaylistMedia(parent, element) {
 	dom_element.style.position = 'relative'
 	document.getElementById(this.parent.id).appendChild(dom_element)
 	// console.log('New ' + class_name + ' ' + element.id + ' Style: ' + util.inspect(dom_element.style))
+
 
 	for (id in element.childs) {
 		medias.push({'id' : id, 'element' : new SwMedia(this, element.childs[id])})
@@ -522,6 +543,23 @@ function SwPlaylistMedia(parent, element) {
 		},
 		medias: function() {
 			return medias
+		},
+		ordinal: function() {
+			return element.properties.ordinal.values === undefined ? 0 : element.properties.ordinal.values[0]
+		},
+		next: function(next) {
+			if (next === undefined)
+				return element.next
+			else {
+				element.next = next
+			}
+		},
+		prev: function(prev) {
+			if (prev === undefined)
+				return element.prev
+			else {
+				element.prev = prev
+			}
 		}
 	}
 }
@@ -535,15 +573,15 @@ function SwMedia(parent, element) {
 	var is_playing = this.is_playing = false
 	var class_name = 'SwMedia'
 	var dom_element = document.createElement('div')
-	dom_element.appendChild(document.createTextNode(class_name + ': ' + this.id))
+	dom_element.appendChild(document.createTextNode(class_name + ': ' + element.id))
 	dom_element.setAttribute('class', class_name)
-	dom_element.setAttribute('id', this.id)
+	dom_element.setAttribute('id', element.id)
 	dom_element.setAttribute('style', 'padding:2px; background-color:purple;')
 	dom_element.style.display = 'none'
 	dom_element.style.opacity = 0.8
 	dom_element.style.position = 'relative'
 	document.getElementById(this.parent.id).appendChild(dom_element)
-	// console.log('New ' + class_name + ' ' + this.id + ' Style: ' + util.inspect(dom_element.style))
+	// console.log('New ' + class_name + ' ' + element.id + ' Style: ' + util.inspect(dom_element.style))
 
 	return {
 		play: function() {
