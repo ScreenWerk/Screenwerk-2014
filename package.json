@@ -5,12 +5,12 @@
     "icon": "imgs/sw-p512.png",
     "show_in_taskbar": true,
     "fullscreen": false,
-    "toolbar": false,
-    "frame": false,
+    "toolbar": true,
+    "frame": true,
     "show": true,
     "position": "right",
-    "width": 640,
-    "height": 360
+    "width": 320,
+    "height": 180
   },
   "repository": {
     "type": "git",

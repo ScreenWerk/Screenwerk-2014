@@ -15,7 +15,7 @@ assert.ok(Number(gui.App.argv[0]) > 0
 
 var SCREEN_ID = Number(gui.App.argv[0])
 var META_DIR = 'sw-meta'
-var MEDIA_DIR = 'sw-media'
+window.MEDIA_DIR = 'sw-media'
 
 
 var util    = require("util")
@@ -118,7 +118,7 @@ function EntityFetcher () {
 						case 'sw-media':
 							var media_type = data.result.properties.type.values[0].value
 							if (['Video','Image','Flash','Audio'].indexOf(media_type) >= 0) {
-								f_fetcher.fetch(data.result.properties['file'].values[0].db_value)
+								f_fetcher.fetch(entity_id, data.result.properties['file'].values[0].db_value)
 						    	} else {
 						    		null // Not going to fetch URL's
 						    	}
@@ -153,14 +153,20 @@ function FileFetcher () {
 	fetcher.bytes_to_go = Number(0)
 	fetcher.bytes_downloaded = Number(0)
 	fetcher.process_id = Number(0)
+	var fetching = []
 
-	this.fetch = function(file_id) {
-		var filename = file_id
-		if (fs.existsSync(MEDIA_DIR + '/' + file_id)) {
-			// console.log('File ' + MEDIA_DIR + '/' + file_id + ' allready fetched. Skipping.')
+	this.fetch = function(entity_id, file_id) {
+		var filename = entity_id
+		if (fetching.indexOf(entity_id) >= 0) {
+			console.log('File ' + MEDIA_DIR + '/' + entity_id + ' allready fetching. Skipping.')
 			return
 		}
-		console.log('File ' + MEDIA_DIR + '/' + file_id + ' missing. Fetch!')
+		if (fs.existsSync(MEDIA_DIR + '/' + entity_id)) {
+			// console.log('File ' + MEDIA_DIR + '/' + entity_id + ' allready fetched. Skipping.')
+			return
+		}
+		fetching.push(entity_id)
+		console.log('File ' + MEDIA_DIR + '/' + entity_id + ' missing. Fetch!')
 		var process_id = ++fetcher.process_id
 		fetcher.emit('start',
 				 {'process_count': ('   + ' + (++fetcher.process_count)).slice(-numlenf),
@@ -180,12 +186,12 @@ function FileFetcher () {
 				fetcher.emit('end',
 						 {'process_count': ('   - ' + (--fetcher.process_count)).slice(-numlenf),
 						  'process_id': ('   -F ' + process_id).slice(-numlenf)})
-				fetcher.fetch(file_id)
+				fetcher.fetch(entity_id, file_id)
 				request.end()
 				return
 			}
 
-			// var filename = file_id + '.' + response.headers['content-disposition'].split('=')[1].split('"')[1]
+			// var filename = entity_id + '.' + response.headers['content-disposition'].split('=')[1].split('"')[1]
 			if (fs.existsSync(MEDIA_DIR + '/' + filename)) {
 				// console.log('File ' + MEDIA_DIR + '/' + filename + ' allready fetched. Skipping.')
 				fetcher.emit('end',
@@ -196,8 +202,8 @@ function FileFetcher () {
 			}
 
 			fetcher.bytes_to_go += Number(filesize)
-			console.log('Start fetching ' + file_id + '. Bytes to go: ' + fetcher.bytes_to_go)
-			console.log('STATUS: ' + response.statusCode);
+			console.log('Start fetching ' + entity_id + '. Bytes to go: ' + fetcher.bytes_to_go)
+			// console.log('STATUS: ' + response.statusCode);
 
 			var file = fs.createWriteStream(MEDIA_DIR + '/' + filename + '.download');
 			response.on('data', function(chunk){

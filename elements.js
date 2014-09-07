@@ -59,6 +59,9 @@ SwElements.prototype.register = function(options, data) {
 			// element.data = new SwLayout(data)
 		break;
 		case 'sw-layout-playlist':
+			if (element.properties.zindex.values === undefined) {
+				element.properties.zindex.values = ['1']
+			}
 			// element.data = new SwLayoutPlaylist(data)
 		break;
 		case 'sw-playlist':
@@ -68,6 +71,8 @@ SwElements.prototype.register = function(options, data) {
 			// element.data = new SwPlaylistMedia(data)
 		break;
 		case 'sw-media':
+			element.properties.type.values[0] = data.properties.type.values[0].value
+			element.properties.filepath = {'values': [window.MEDIA_DIR + '/' + eid]}
 			// element.data = new SwMedia(data)
 		break;
 	}
