@@ -31,6 +31,7 @@ SwElements.prototype.register = function(options, data) {
 			i++
 		}
 	}
+	// console.log('Registering ' + util.inspect(element))
 	// element.data = data
 	// Validators
 	switch (definition) {
@@ -82,6 +83,8 @@ SwElements.prototype.register = function(options, data) {
 		// console.log(util.inspect(options.relatives))
 		for (relative in options.relatives) {
 			var relative_eid = options.relatives[relative]
+			// console.log(util.inspect({'options.relatives':options.relatives}))
+			// console.log(util.inspect({'relative_eid':relative_eid}))
 			// console.log(relative)
 			var tick = 0
 			var max_ticks = 10000000
@@ -92,7 +95,7 @@ SwElements.prototype.register = function(options, data) {
 			if (typeof this.by_eid[relative_eid] !== 'undefined')
 				this.relate(relative, relative_eid, eid)
 			else
-				console.log('Entity ' + relative_eid + ' didnot appeared in time.')
+				console.log('Entity ' + relative_eid + ' did not appeared in time.')
 		}
 	}
 }
@@ -100,6 +103,9 @@ SwElements.prototype.register = function(options, data) {
 
 
 SwElements.prototype.relate = function(relationship, left_eid, right_eid) {
+	// console.log(util.inspect({'left_eid':left_eid}))
+	// console.log(util.inspect({'right_eid':right_eid}))
+	// console.log(util.inspect({'this.by_eid':this.by_eid}))
 	switch(relationship) {
 		case 'parent':
 			this.by_eid[right_eid].parents[left_eid] = this.by_eid[left_eid]
@@ -111,6 +117,7 @@ SwElements.prototype.relate = function(relationship, left_eid, right_eid) {
 			this.by_eid[left_eid].next = this.by_eid[right_eid]
 		break
 	}
+	// console.log(util.inspect({'this.by_eid':this.by_eid}))
 }
 
 

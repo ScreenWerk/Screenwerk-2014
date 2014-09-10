@@ -145,6 +145,8 @@ function SwConfiguration(parent, element) {
 	for (id in element.childs) {
 		schedules.push({'id':id, 'element':new SwSchedule(this, element.childs[id])})
 	}
+	console.log(util.inspect({'schedules':schedules}))
+
 
 	return {
 		play: function() {
@@ -200,8 +202,8 @@ function SwSchedule(parent, element) {
 	this.id = element.id
 	this.properties = element.properties
 	var timer = null
-	var cleanupLayer = this.cleanupLayer = this.properties['ordinal'].values[0]
-	var cleanup = this.cleanup = this.properties['cleanup'].values[0]
+	var cleanupLayer = element.properties['ordinal'].values[0]
+	var cleanup = this.cleanup = element.properties['cleanup'].values[0]
 	var layouts = this.layouts = []
 	var document = window.document
 	var is_playing = this.is_playing = false
@@ -231,7 +233,7 @@ function SwSchedule(parent, element) {
 	for (id in element.childs) {
 		layouts.push({'id':id, 'element': new SwLayout(this, element.childs[id])})
 	}
-	console.log('There are ' + layouts.length + ' layouts in schedule ' + element.id)
+	// console.log('There are ' + layouts.length + ' layouts in schedule ' + element.id)
 	var playLayouts = function playLayouts() {
 		layouts.forEach( function(layout) {
 			layout.element.play()
@@ -241,8 +243,13 @@ function SwSchedule(parent, element) {
 		if (cleanup === 1) {
 			// console.log(util.inspect(parent, {depth:6}))
 			parent.schedules.forEach(function(schedule){
-				if (schedule.cleanupLayer <= cleanupLayer) {
-					schedule.stop()
+				// console.log(util.inspect(schedule,{depth:6}))
+				console.log('Schedule ' + util.inspect(element.id) + ' cleanupLayer ' + cleanupLayer + ' checking for cleanup of schedule ' + util.inspect(schedule.id) + ' schedule.cleanupLayer ' + schedule.element.cleanupLayer())
+				if (schedule.element.cleanupLayer() <= cleanupLayer) {
+					if (element.id != schedule.id) {
+						console.log('Schedule ' + element.id + ' cleaning up schedule ' + schedule.id)
+						schedule.element.stop()
+					}
 				}
 			})
 		}
@@ -265,9 +272,11 @@ function SwSchedule(parent, element) {
 			is_playing = false
 			dom_element.style.display = 'none'
 			console.log('stop ' + class_name + ' ' + element.id + ' css.display: ' + dom_element.style.display)
-			for (layout in layouts) {
+			// console.log(util.inspect(layouts,{depth:6}))
+			layouts.forEach(function(layout){
+				// console.log(util.inspect(layout,{depth:6}))
 				layout.element.stop()
-			}
+			})
 		},
 		clear: function() {
 			timer.clear()
@@ -277,6 +286,9 @@ function SwSchedule(parent, element) {
 		},
 		layouts: function() {
 			return layouts
+		},
+		cleanupLayer: function() {
+			return cleanupLayer
 		},
 		prev: function() {
 			return later.schedule(cronSched).prev(1);
@@ -326,7 +338,7 @@ function SwLayout(parent, element) {
 				return
 			}
 			is_playing = false
-			this.timer.clear()
+			// this.timer.clear()
 			dom_element.style.display = 'none'
 			console.log('stop ' + class_name + ' ' + element.id + ' css.display: ' + dom_element.style.display)
 			layout_playlists.forEach(function(layout_playlist) {
@@ -412,6 +424,7 @@ function SwPlaylist(parent, element) {
 	this.parent = parent
 	this.id = element.id
 	this.properties = element.properties
+	var loop = parent.properties.loop.values !== undefined ? parent.properties.loop.values[0] : 0
 	var playlist_medias = this.playlist_medias = []
 	var document = window.document
 	var is_playing = this.is_playing = false
@@ -437,8 +450,16 @@ function SwPlaylist(parent, element) {
 		return 0
 	})
 	for (var i = 0; i < playlist_medias.length; i++) {
-		playlist_medias[i].element.prev(playlist_medias[(i === 0) ? playlist_medias.length - 1 : i - 1])
-		playlist_medias[i].element.next(playlist_medias[(i === playlist_medias.length - 1) ? 0 : i + 1])
+		if (loop === 1) {
+			if (i === 0) {
+				playlist_medias[0].element.prev(playlist_medias[playlist_medias.length - 1])
+			} else if (i === playlist_medias.length - 1) {
+				playlist_medias[0].element.next(playlist_medias[0])
+			}
+		} else {
+			playlist_medias[i].element.prev(playlist_medias[i - 1])
+			playlist_medias[i].element.next(playlist_medias[i + 1])
+		}
 	}
 	i = 0
 	// playlist_medias.forEach(function(playlist_media) {
@@ -516,8 +537,9 @@ function SwPlaylistMedia(parent, element) {
 		is_playing = false
 		dom_element.style.display = 'none'
 		console.log('stop ' + class_name + ' ' + element.id)// + ' style: ' + util.inspect(dom_element.style))
-		element.next.element.play()
-		medias.forEach(function(media){
+		if (element.next !== undefined)
+			element.next.element.play()
+		medias.forEach(function(media) {
 			media.element.stop()
 		})
 	}
@@ -529,22 +551,23 @@ function SwPlaylistMedia(parent, element) {
 			is_playing = true
 			dom_element.style.display = 'block'
 			console.log('play ' + class_name + ' ' + element.id)// + ' style: ' + util.inspect(dom_element.style))
-			medias.forEach(function(media){
-				media.element.play()
-				// console.log('setTimeout STOP for media ' + media.id + ' at ' + util.inspect(media.element.stopDate()))
-				setTimeout(media.element.stop, media.element.stopDate() - Date.now())
-			})
-			var stopDate = new Date()
-			medias.forEach(function(media){
-				stopDate = (stopDate > media.element.stopDate()) ? stopDate : media.element.stopDate()
-			})
+			console.log(util.inspect({'medias[0].element.mediatype()':medias[0].element.mediatype()}))
+
+			var media_dom_element = medias[0].element.play()
+			console.log(util.inspect(media_dom_element.style))
+			if (medias[0].element.mediatype() === 'Video') {
+				// console.log(util.inspect(media_dom_element))
+				media_dom_element.addEventListener('pause', function() {
+					window.alert(util.inspect(element.next.element))
+					element.next.element.play()
+				})
+			}
+
 			// console.log('setTimeout STOP this ' + element.id + ' and PLAY next ' + element.next.id + ' playlist_media at ' + util.inspect(stopDate))
 			// console.log(util.inspect(element.next.element))
 			// setTimeout(console.log('got to PLAY ' + element.next.id), stopDate - Date.now)
-			setTimeout(element.next.element.play, stopDate - Date.now())
-			setTimeout(stop, stopDate - Date.now())
-
-
+			// setTimeout(element.next.element.play, stopDate - Date.now())
+			// setTimeout(stop, stopDate - Date.now())
 		},
 		stop: function() {
 			return stop()
@@ -588,17 +611,28 @@ function SwMedia(parent, element) {
 	this.parent = parent
 	this.id = element.id
 	this.properties = element.properties
+	var mediatype = element.properties.type.values[0]
 	var document = window.document
 	var is_playing = this.is_playing = false
 	var class_name = 'SwMedia'
 	var dom_element
-	if (element.properties.type.values[0] === 'Video') {
+	if (mediatype === 'Video') {
 		dom_element = document.createElement('video')
-		dom_element.autoplay = true
+		dom_element.autoplay = false
+		dom_element.controls = true
+		dom_element.preload = 'auto'
+		dom_element.width = '100'
+		dom_element.height = '100'
 		var source_element = document.createElement('source')
 		source_element.type = 'video/webm'
 		source_element.src = element.properties.filepath.values[0]
 		dom_element.appendChild(source_element)
+		// dom_element.addEventListener('pause', function() {
+		// 	dom_element.currentTime = 0
+		// })
+		// dom_element.addEventListener('ended', function() {
+		// 	dom_element.currentTime = 0
+		// })
 	} else {
 		dom_element = document.createElement('div')
 		dom_element.appendChild(document.createTextNode(class_name + ': ' + element.id))
@@ -618,12 +652,15 @@ function SwMedia(parent, element) {
 	return {
 		play: function() {
 			if (is_playing) {
-				return
+				return dom_element
 			}
 			is_playing = true
 			dom_element.style.display = 'block'
-			console.log('play ' + class_name + ' ' + element.id)// + ' style: ' + util.inspect(dom_element.style))
-			stopDate = new Date(Date.now() + 60000)
+			console.log('play ' + class_name + ' ' + element.id + ' style: ' + util.inspect(dom_element.style))
+			if (mediatype === 'Video') {
+				dom_element.play()
+			}
+			return dom_element
 		},
 		stop: function() {
 			if (!is_playing) {
@@ -632,9 +669,15 @@ function SwMedia(parent, element) {
 			is_playing = false
 			dom_element.style.display = 'none'
 			console.log('stop ' + class_name + ' ' + element.id)// + ' style: ' + util.inspect(dom_element.style))
+			if (mediatype === 'Video') {
+				dom_element.pause()
+			}
 		},
 		stopDate: function() {
 			return stopDate
+		},
+		mediatype: function() {
+			return mediatype
 		}
 		// clear: function() {}
 	}
