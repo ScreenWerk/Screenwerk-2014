@@ -60,27 +60,28 @@ fs.lstat(constants().MEDIA_DIR(), function(err, stats) {
 
 var loadersEngaged = []
 var fetchersEngaged = []
+var bytes_to_go = bytes_downloaded = 0
 
 swEmitter.on('loader-start', function(data) {
 	if (loadersEngaged.indexOf(data.I) === -1) {
 		loadersEngaged.push(data.I)
-		console.log(loadersEngaged.length + ' +  Start loading ' + util.inspect(data))
+		console.log(fetchersEngaged.length + loadersEngaged.length + ' +  Start loading ' + util.inspect(data))
 	} else {
-		console.log(loadersEngaged.length + ' + Resume loading ' + util.inspect(data))
+		console.log(fetchersEngaged.length + loadersEngaged.length + ' + Resume loading ' + util.inspect(data))
 	}
 })
 swEmitter.on('loader-stop', function(data) {
 	if (loadersEngaged.indexOf(data.I) === -1)
 		return
 	loadersEngaged.splice(loadersEngaged.indexOf(data.I),1)
-	console.log((loadersEngaged.length) + ' -   Stop loading ' + util.inspect(data))
-	if (loadersEngaged.length + fetchersEngaged.length === 0)
+	console.log((fetchersEngaged.length + loadersEngaged.length) + ' -   Stop loading ' + util.inspect(data))
+	if (fetchersEngaged.length + loadersEngaged.length + fetchersEngaged.length + loadersEngaged.length === 0)
 		swEmitter.emit('init-ready')
 })
 swEmitter.on('fetcher-start', function(data) {
 	if (fetchersEngaged.indexOf(data.I) === -1) {
 		fetchersEngaged.push(data.I)
-		console.log(fetchersEngaged.length + ' +  Start fetching ' + util.inspect(data))
+		console.log(fetchersEngaged.length + loadersEngaged.length + ' +  Start fetching ' + util.inspect(data))
 	} else {
 		throw ('Duplicate fetcher tried to launch for ' + data.I)
 	}
@@ -89,16 +90,15 @@ swEmitter.on('fetcher-stop', function(data) {
 	if (fetchersEngaged.indexOf(data.I) === -1)
 		throw ('Fetcher should not exist ' + data.I)
 	fetchersEngaged.splice(fetchersEngaged.indexOf(data.I),1)
-	console.log((fetchersEngaged.length) + ' -   Stop fetching ' + util.inspect(data))
-	if (loadersEngaged.length + fetchersEngaged.length === 0)
+	console.log((fetchersEngaged.length + loadersEngaged.length) + ' -   Stop fetching ' + util.inspect(data))
+	if (fetchersEngaged.length + loadersEngaged.length + fetchersEngaged.length + loadersEngaged.length === 0)
 		swEmitter.emit('init-ready')
 })
 
 swEmitter.on('init-ready', function() {
 	var filename = constants().META_DIR() + '/elements.json'
-	console.log(util.inspect(l.swElements()))
 	fs.writeFileSync(filename, stringifier(l.swElements()))
-
+	gui.App.quit()
 })
 // console.log(constants().META_DIR() + '/' + constants().SCREEN_ID() + '.sw-screen.json')
 
@@ -106,7 +106,51 @@ var swLoader = function swLoader(screenEid) {
 	var swElements = []
 	swLoadScreen(constants().SCREEN_ID())
 
-	function swFetch(callback, options) {
+	function swMediaFetch(entity_id, file_id) {
+		if (fetchersEngaged.indexOf(entity_id + '_' + file_id) !== -1) {
+			console.log('Fetcher allready started for ' + util.inspect(fetchersEngaged[fetchersEngaged.indexOf(entity_id + '_' + file_id)]))
+			return
+		}
+		var filename = constants().MEDIA_DIR() + '/' + entity_id
+		if (fs.existsSync(filename)) {
+			return
+		}
+		// indexOfElement(entity_id)
+		var element = swElements[indexOfElement(entity_id)].element
+		swEmitter.emit('fetcher-start', {'D':element.definition_keyname,'I':entity_id + '_' + file_id})
+		console.log('File ' + filename + ' missing. Fetch!')
+		var options = {
+			hostname: 'piletilevi.entu.ee',
+		 	port: 443,
+			path: '/api2/file-' + file_id,
+			method: 'GET'
+		}
+		var request = https.request(options)
+		request.on('response', function response_handler( response ) {
+			var filesize = response.headers['content-length']
+
+			bytes_to_go += Number(filesize)
+			console.log('Start fetching media for ' + entity_id + '. Bytes to go: ' + bytes_to_go)
+			// console.log('STATUS: ' + response.statusCode);
+
+			var file = fs.createWriteStream(filename + '.download');
+			response.on('data', function(chunk){
+				bytes_downloaded += chunk.length
+				file.write(chunk)
+			})
+			response.on('end', function() {
+				console.log('Media for ' + entity_id + ' (' + element.properties.file.values[0].value + ') fetched.')
+				console.log('TOTAL:' + bytes_downloaded + '/' + bytes_to_go
+					+ ' LEFT:' + (bytes_to_go - bytes_downloaded))
+				file.end()
+				fs.rename(filename + '.download', filename)
+				swEmitter.emit('fetcher-stop', {'D':options.sw_def,'I':entity_id + '_' + file_id})
+			})
+		})
+		request.end()
+	}
+
+	function swMetaFetch(callback, options) {
 		if (fetchersEngaged.indexOf(options.eid) !== -1) {
 			console.log('Fetcher allready started for ' + util.inspect(fetchersEngaged[fetchersEngaged.indexOf(options.eid)]))
 			return
@@ -166,7 +210,7 @@ var swLoader = function swLoader(screenEid) {
 			if (err) {
 				if (err.code === 'ENOENT') {
 					console.log(filename + ' not present. Fetching from Entu.')
-					swFetch(swLoadScreen, {'eid':screen_eid, 'sw_def':sw_def})
+					swMetaFetch(swLoadScreen, {'eid':screen_eid, 'sw_def':sw_def})
 					return
 				} else throw err
 			}
@@ -187,7 +231,7 @@ var swLoader = function swLoader(screenEid) {
 			if (err) {
 				if (err.code === 'ENOENT') {
 					console.log(filename + ' not present. Fetching from Entu.')
-					swFetch(swLoadScreengroup, {'eid':screengroup_eid, 'sw_def':sw_def})
+					swMetaFetch(swLoadScreengroup, {'eid':screengroup_eid, 'sw_def':sw_def})
 					return
 				} else throw err
 			}
@@ -208,7 +252,7 @@ var swLoader = function swLoader(screenEid) {
 			if (err) {
 				if (err.code === 'ENOENT') {
 					console.log(filename + ' not present. Fetching from Entu.')
-					swFetch(swLoadConfiguration, {'eid':configuration_eid, 'sw_def':sw_def, 'sw_child_def':sw_child_def})
+					swMetaFetch(swLoadConfiguration, {'eid':configuration_eid, 'sw_def':sw_def, 'sw_child_def':sw_child_def})
 					return
 				} else throw err
 			}
@@ -230,7 +274,7 @@ var swLoader = function swLoader(screenEid) {
 			if (err) {
 				if (err.code === 'ENOENT') {
 					console.log(filename + ' not present. Fetching from Entu.')
-					swFetch(swLoadSchedule, {'eid':schedule_eid, 'sw_def':sw_def})
+					swMetaFetch(swLoadSchedule, {'eid':schedule_eid, 'sw_def':sw_def})
 					return
 				} else throw err
 			}
@@ -251,7 +295,7 @@ var swLoader = function swLoader(screenEid) {
 			if (err) {
 				if (err.code === 'ENOENT') {
 					console.log(filename + ' not present. Fetching from Entu.')
-					swFetch(swLoadLayout, {'eid':layout_eid, 'sw_def':sw_def, 'sw_child_def':sw_child_def})
+					swMetaFetch(swLoadLayout, {'eid':layout_eid, 'sw_def':sw_def, 'sw_child_def':sw_child_def})
 					return
 				} else throw err
 			}
@@ -273,7 +317,7 @@ var swLoader = function swLoader(screenEid) {
 			if (err) {
 				if (err.code === 'ENOENT') {
 					console.log(filename + ' not present. Fetching from Entu.')
-					swFetch(swLoadLayoutPlaylist, {'eid':layout_playlist_eid, 'sw_def':sw_def})
+					swMetaFetch(swLoadLayoutPlaylist, {'eid':layout_playlist_eid, 'sw_def':sw_def})
 					return
 				} else throw err
 			}
@@ -294,7 +338,7 @@ var swLoader = function swLoader(screenEid) {
 			if (err) {
 				if (err.code === 'ENOENT') {
 					console.log(filename + ' not present. Fetching from Entu.')
-					swFetch(swLoadPlaylist, {'eid':playlist_eid, 'sw_def':sw_def, 'sw_child_def':sw_child_def})
+					swMetaFetch(swLoadPlaylist, {'eid':playlist_eid, 'sw_def':sw_def, 'sw_child_def':sw_child_def})
 					return
 				} else throw err
 			}
@@ -316,7 +360,7 @@ var swLoader = function swLoader(screenEid) {
 			if (err) {
 				if (err.code === 'ENOENT') {
 					console.log(filename + ' not present. Fetching from Entu.')
-					swFetch(swLoadPlaylistMedia, {'eid':playlist_media_eid, 'sw_def':sw_def})
+					swMetaFetch(swLoadPlaylistMedia, {'eid':playlist_media_eid, 'sw_def':sw_def})
 					return
 				} else throw err
 			}
@@ -336,12 +380,17 @@ var swLoader = function swLoader(screenEid) {
 			if (err) {
 				if (err.code === 'ENOENT') {
 					console.log(filename + ' not present. Fetching from Entu.')
-					swFetch(swLoadMedia, {'eid':media_eid, 'sw_def':sw_def})
+					swMetaFetch(swLoadMedia, {'eid':media_eid, 'sw_def':sw_def})
 					return
 				} else throw err
 			}
 			swElement = JSON.parse(data)
 			swSet(swElement)
+			if (swElement.properties.file.values === undefined) {
+				// console.log(util.inspect(swElement.properties))
+			} else {
+				swMediaFetch(media_eid, swElement.properties.file.values[0].db_value)
+			}
 			swEmitter.emit('loader-stop', {'D':sw_def,'I':media_eid})
 		})
 	}
@@ -360,10 +409,22 @@ var swLoader = function swLoader(screenEid) {
 		// console.log(util.inspect({'element':swElement}))
 		swElements.push({'id':swElement.id, 'element':swElement})
 	}
+	function indexOfElement(eid) {
+		for (e in swElements) {
+			// console.log(util.inspect([swElements[e].id, eid]))
+			if (swElements[e].id === eid) {
+				// console.log(swElements[e].element.id + ' Found')
+				return e
+			}
+		}
+	}
 
 	return {
 		swElements: function () {
 			return swElements
+		},
+		indexOfElement: function (eid) {
+			return indexOfElement(eid)
 		}
 	}
 }
