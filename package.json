@@ -9,8 +9,8 @@
     "frame": true,
     "show": true,
     "position": "right",
-    "width": 320,
-    "height": 180
+    "width": 800,
+    "height": 972
   },
   "repository": {
     "type": "git",

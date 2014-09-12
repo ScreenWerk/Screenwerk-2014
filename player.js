@@ -3,36 +3,35 @@ var later   = require("later")
 // var gui     = require('nw.gui')
 
 
-function SwPlayer(screen_id) {
+function  SwPlayer(screen_id) {
 	this.screen_id = screen_id
 }
-SwPlayer.prototype.restart = function(screen_element) {
+SwPlayer.prototype.restart = function(screen_entity) {
 	console.log('Starting ScreenWerk player for screen ' + this.screen_id)
-	this.sw_screen = new SwScreen(screen_element)
-	// window.document.body.setAttribute('style', 'width:100%; height:100%; margin:20px; padding:20px; background-color:blue; border:2px;')
-	this.sw_screen.play()
+	screen_entity.player = new SwScreen(screen_entity)
+	screen_entity.player.play()
 }
 
 
-function SwScreen(element) {
-	this.id = element.id
-	this.properties = element.properties
-	var screen_groups = this.screen_groups = []
+function SwScreen(entity) {
 	var document = window.document
 	var is_playing = this.is_playing = false
 	var class_name = 'SwScreen'
-	var dom_element = document.createElement('div')
-	dom_element.appendChild(document.createTextNode(class_name + ': ' + element.id))
-	dom_element.setAttribute('class', class_name)
-	dom_element.setAttribute('id', element.id)
-	dom_element.setAttribute('style', 'position:fixed; background-color:red;')
-	dom_element.style.display = 'none'
-	document.body.appendChild(dom_element)
-	// console.log('New ' + class_name + ' ' + element.id + ' Style: ' + util.inspect(dom_element.style))
+	entity.dom_element = document.createElement('div')
+	// console.log(util.inspect(entity.dom_element))
+	entity.dom_element.appendChild(document.createTextNode(class_name + ': ' + entity.id))
+	entity.dom_element.setAttribute('class', class_name)
+	entity.dom_element.setAttribute('id', entity.id)
+	entity.dom_element.setAttribute('style', 'position:fixed; background-color:red;')
+	entity.dom_element.style.display = 'none'
+	document.body.appendChild(entity.dom_element)
+	// console.log('New ' + class_name + ' ' + entity.id + ' Style: ' + util.inspect(dom_element.style))
 
-	for (id in element.childs) {
-		screen_groups.push({'id':id, 'element':new SwScreenGroup(this, element.childs[id])})
-	}
+	entity.element.childs.forEach(function(child_entity) {
+		// console.log(util.inspect(child_entity.element.parents[0]))
+		child_entity.player = new SwScreenGroup(child_entity)
+	})
+	// console.log(util.inspect(entity))
 	return {
 		play: function() {
 			if (is_playing) {
@@ -40,7 +39,7 @@ function SwScreen(element) {
 			}
 			is_playing = true
 			dom_element.style.display = 'block'
-			console.log('play ' + class_name + ' ' + element.id + ' css.display: ' + dom_element.style.display)
+			console.log('play ' + class_name + ' ' + entity.id + ' css.display: ' + dom_element.style.display)
 			screen_groups.forEach(function(screen_group){
 				screen_group.element.play()
 			})
@@ -51,7 +50,7 @@ function SwScreen(element) {
 			}
 			is_playing = false
 			dom_element.style.display = 'none'
-			console.log('stop ' + class_name + ' ' + element.id + ' css.display: ' + dom_element.style.display)
+			console.log('stop ' + class_name + ' ' + entity.id + ' css.display: ' + dom_element.style.display)
 			screen_groups.forEach(function(screen_group){
 				screen_group.element.stop()
 			})
@@ -68,27 +67,24 @@ function SwScreen(element) {
 }
 
 
-function SwScreenGroup(parent, element) {
-	this.parent = parent
-	this.id = element.id
-	this.properties = element.properties
-	var configurations = this.configurations = []
+function SwScreenGroup(entity) {
 	var document = window.document
 	var is_playing = this.is_playing = false
 	var class_name = 'SwScreenGroup'
-	var dom_element = document.createElement('div')
-	dom_element.appendChild(document.createTextNode(class_name + ': ' + element.id))
-	dom_element.setAttribute('class', class_name)
-	dom_element.setAttribute('id', element.id)
-	dom_element.setAttribute('style', 'background-color:green;')
-	dom_element.style.display = 'none'
-	dom_element.style.position = 'fixed'
-	document.getElementById(this.parent.id).appendChild(dom_element)
-	// console.log('New ' + class_name + ' ' + element.id + ' Style: ' + util.inspect(dom_element.style))
+	entity.dom_element = document.createElement('div')
+	entity.dom_element.appendChild(document.createTextNode(class_name + ': ' + entity.id))
+	entity.dom_element.setAttribute('class', class_name)
+	entity.dom_element.setAttribute('id', entity.id)
+	entity.dom_element.setAttribute('style', 'background-color:green;')
+	entity.dom_element.style.display = 'none'
+	entity.dom_element.style.position = 'fixed'
 
-	for (id in element.childs) {
-		configurations.push({'id':id, 'element':new SwConfiguration(this, element.childs[id])})
-	}
+	entity.element.parents.forEach(function(parent_entity) {
+		parent_entity.dom_element.appendChild(entity.dom_element)
+	})
+	entity.element.childs.forEach(function(child_entity) {
+		child_entity.player = new SwConfiguration(child_entity)
+	})
 	return {
 		play: function() {
 			if (is_playing) {
@@ -96,7 +92,7 @@ function SwScreenGroup(parent, element) {
 			}
 			is_playing = true
 			dom_element.style.display = 'block'
-			console.log('play ' + class_name + ' ' + element.id + ' css.display: ' + dom_element.style.display)
+			console.log('play ' + class_name + ' ' + entity.id + ' css.display: ' + dom_element.style.display)
 			configurations.forEach(function(configuration){
 				configuration.element.play()
 			})
@@ -107,7 +103,7 @@ function SwScreenGroup(parent, element) {
 			}
 			is_playing = false
 			dom_element.style.display = 'none'
-			console.log('stop ' + class_name + ' ' + element.id + ' css.display: ' + dom_element.style.display)
+			console.log('stop ' + class_name + ' ' + entity.id + ' css.display: ' + dom_element.style.display)
 			configurations.forEach(function(configuration){
 				configuration.element.stop()
 			})
@@ -124,29 +120,25 @@ function SwScreenGroup(parent, element) {
 }
 
 
-function SwConfiguration(parent, element) {
-	this.parent = parent
-	this.id = element.id
-	this.properties = element.properties
-	var schedules = this.schedules = []
+function SwConfiguration(entity) {
 	var document = window.document
 	var is_playing = this.is_playing = false
 	var class_name = 'SwConfiguration'
-	var dom_element = document.createElement('div')
-	dom_element.appendChild(document.createTextNode(class_name + ': ' + element.id))
-	dom_element.setAttribute('class', class_name)
-	dom_element.setAttribute('id', element.id)
-	dom_element.setAttribute('style', 'background-color:white;')
-	dom_element.style.display = 'none'
-	dom_element.style.position = 'fixed'
-	document.getElementById(this.parent.id).appendChild(dom_element)
-	// console.log('New ' + class_name + ' ' + element.id + ' Style: ' + util.inspect(dom_element.style))
+	entity.dom_element = document.createElement('div')
+	entity.dom_element.appendChild(document.createTextNode(class_name + ': ' + entity.id))
+	entity.dom_element.setAttribute('class', class_name)
+	entity.dom_element.setAttribute('id', entity.id)
+	entity.dom_element.setAttribute('style', 'background-color:white;')
+	entity.dom_element.style.display = 'none'
+	entity.dom_element.style.position = 'fixed'
+	console.log('New ' + class_name + ' ' + entity.id) // + ' Style: ' + util.inspect(entity.dom_element.style))
 
-	for (id in element.childs) {
-		schedules.push({'id':id, 'element':new SwSchedule(this, element.childs[id])})
-	}
-	console.log(util.inspect({'schedules':schedules}))
-
+	entity.element.parents.forEach(function(parent_entity) {
+		parent_entity.dom_element.appendChild(entity.dom_element)
+	})
+	entity.element.childs.forEach(function(child_entity) {
+		child_entity.player = new SwSchedule(child_entity)
+	})
 
 	return {
 		play: function() {
@@ -155,7 +147,7 @@ function SwConfiguration(parent, element) {
 			}
 			is_playing = true
 			dom_element.style.display = 'block'
-			console.log('play ' + class_name + ' ' + element.id + ' css.display: ' + dom_element.style.display)
+			console.log('play ' + class_name + ' ' + entity.id + ' css.display: ' + dom_element.style.display)
 			schedules.forEach(function(schedule){
 				schedule.element.play()
 			})
@@ -180,7 +172,7 @@ function SwConfiguration(parent, element) {
 			}
 			is_playing = false
 			dom_element.style.display = 'none'
-			console.log('stop ' + class_name + ' ' + element.id + ' css.display: ' + dom_element.style.display)
+			console.log('stop ' + class_name + ' ' + entity.id + ' css.display: ' + dom_element.style.display)
 			schedules.forEach(function(schedule){
 				schedule.element.stop()
 			})
@@ -197,43 +189,44 @@ function SwConfiguration(parent, element) {
 }
 
 
-function SwSchedule(parent, element) {
-	this.parent = parent
-	this.id = element.id
-	this.properties = element.properties
+function SwSchedule(entity) {
 	var timer = null
+	var element = entity.element
 	var cleanupLayer = element.properties['ordinal'].values[0]
 	var cleanup = this.cleanup = element.properties['cleanup'].values[0]
-	var layouts = this.layouts = []
 	var document = window.document
 	var is_playing = this.is_playing = false
 	var class_name = 'SwSchedule'
-	var dom_element = document.createElement('div')
-	dom_element.appendChild(document.createTextNode(class_name + ': ' + element.id))
-	dom_element.setAttribute('class', class_name)
-	dom_element.setAttribute('id', element.id)
-	dom_element.setAttribute('style', 'background-color:yellow;')
-	dom_element.style.display = 'none'
-	dom_element.style.position = 'fixed'
-	document.getElementById(this.parent.id).appendChild(dom_element)
-	// console.log('New ' + class_name + ' ' + element.id + ' Style: ' + util.inspect(dom_element.style))
+	entity.dom_element = document.createElement('div')
+	entity.dom_element.appendChild(document.createTextNode(class_name + ': ' + entity.id))
+	entity.dom_element.setAttribute('class', class_name)
+	entity.dom_element.setAttribute('id', entity.id)
+	entity.dom_element.setAttribute('style', 'background-color:yellow;')
+	entity.dom_element.style.display = 'none'
+	entity.dom_element.style.position = 'fixed'
+	console.log('New ' + class_name + ' ' + entity.id) // + ' Style: ' + util.inspect(entity.dom_element.style))
 
-	var cronSched = this.cronSched = later.parse.cron(this.properties.crontab.values[0])
-	if (this.properties['valid-from'].values !== undefined) {
-		var startDate = this.properties['valid-from'].values[0]
+	// console.log(util.inspect(entity.element.properties.crontab.values[0]))
+	var cronSched = this.cronSched = later.parse.cron(entity.element.properties.crontab.values[0].db_value)
+	// console.log(util.inspect(cronSched))
+	if (entity.element.properties['valid-from'].values !== undefined) {
+		var startDate = entity.element.properties['valid-from'].values[0]
 		var startTime = (startDate.getTime());
 		cronSched.schedules[0].fd_a = [startTime];
 	}
-	if (this.properties['valid-to'].values !== undefined) {
-		var endDate = this.properties['valid-to'].values[0]
+	if (entity.element.properties['valid-to'].values !== undefined) {
+		var endDate = entity.element.properties['valid-to'].values[0]
 		var endTime = (endDate.getTime());
 		cronSched.schedules[0].fd_b = [endTime];
 	}
 
-	for (id in element.childs) {
-		layouts.push({'id':id, 'element': new SwLayout(this, element.childs[id])})
-	}
-	// console.log('There are ' + layouts.length + ' layouts in schedule ' + element.id)
+	entity.element.parents.forEach(function(parent_entity) {
+		parent_entity.dom_element.appendChild(entity.dom_element)
+	})
+	entity.element.childs.forEach(function(child_entity) {
+		child_entity.player = new SwLayout(child_entity)
+	})
+	// console.log('There are ' + layouts.length + ' layouts in schedule ' + entity.id)
 	var playLayouts = function playLayouts() {
 		layouts.forEach( function(layout) {
 			layout.element.play()
@@ -244,10 +237,10 @@ function SwSchedule(parent, element) {
 			// console.log(util.inspect(parent, {depth:6}))
 			parent.schedules.forEach(function(schedule){
 				// console.log(util.inspect(schedule,{depth:6}))
-				console.log('Schedule ' + util.inspect(element.id) + ' cleanupLayer ' + cleanupLayer + ' checking for cleanup of schedule ' + util.inspect(schedule.id) + ' schedule.cleanupLayer ' + schedule.element.cleanupLayer())
+				console.log('Schedule ' + util.inspect(entity.id) + ' cleanupLayer ' + cleanupLayer + ' checking for cleanup of schedule ' + util.inspect(schedule.id) + ' schedule.cleanupLayer ' + schedule.element.cleanupLayer())
 				if (schedule.element.cleanupLayer() <= cleanupLayer) {
-					if (element.id != schedule.id) {
-						console.log('Schedule ' + element.id + ' cleaning up schedule ' + schedule.id)
+					if (entity.id != schedule.id) {
+						console.log('Schedule ' + entity.id + ' cleaning up schedule ' + schedule.id)
 						schedule.element.stop()
 					}
 				}
@@ -261,7 +254,7 @@ function SwSchedule(parent, element) {
 			}
 			is_playing = true
 			dom_element.style.display = 'block'
-			console.log('play ' + class_name + ' ' + element.id + ' css.display: ' + dom_element.style.display + util.inspect(cronSched))
+			console.log('play ' + class_name + ' ' + entity.id + ' css.display: ' + dom_element.style.display + util.inspect(cronSched))
 
 			timer = swSetInterval(playLayouts, cronSched, startDate, endDate)
 		},
@@ -271,7 +264,7 @@ function SwSchedule(parent, element) {
 			}
 			is_playing = false
 			dom_element.style.display = 'none'
-			console.log('stop ' + class_name + ' ' + element.id + ' css.display: ' + dom_element.style.display)
+			console.log('stop ' + class_name + ' ' + entity.id + ' css.display: ' + dom_element.style.display)
 			// console.log(util.inspect(layouts,{depth:6}))
 			layouts.forEach(function(layout){
 				// console.log(util.inspect(layout,{depth:6}))
@@ -300,27 +293,26 @@ function SwSchedule(parent, element) {
 }
 
 
-function SwLayout(parent, element) {
-	this.parent = parent
-	this.id = element.id
-	this.properties = element.properties
-	var layout_playlists = this.layout_playlists = []
+function SwLayout(entity) {
 	var document = window.document
 	var is_playing = this.is_playing = false
 	var class_name = 'SwLayout'
-	var dom_element = document.createElement('div')
-	dom_element.appendChild(document.createTextNode(class_name + ': ' + element.id))
-	dom_element.setAttribute('class', class_name)
-	dom_element.setAttribute('id', element.id)
-	dom_element.setAttribute('style', 'background-color:gray;')
-	dom_element.style.display = 'none'
-	dom_element.style.position = 'fixed'
-	document.getElementById(this.parent.id).appendChild(dom_element)
-	// console.log('New ' + class_name + ' ' + element.id + ' Style: ' + util.inspect(dom_element.style))
+	entity.dom_element = document.createElement('div')
+	entity.dom_element.appendChild(document.createTextNode(class_name + ': ' + entity.id))
+	entity.dom_element.setAttribute('class', class_name)
+	entity.dom_element.setAttribute('id', entity.id)
+	entity.dom_element.setAttribute('style', 'background-color:gray;')
+	entity.dom_element.style.display = 'none'
+	entity.dom_element.style.position = 'fixed'
+	console.log('New ' + class_name + ' ' + entity.id) // + ' Style: ' + util.inspect(entity.dom_element.style))
+	// console.log('New ' + class_name + ' ' + entity.id + ' Style: ' + util.inspect(dom_element.style))
 
-	for (id in element.childs) {
-		layout_playlists.push({'id' : id, 'element' : new SwLayoutPlaylist(this, element.childs[id])})
-	}
+	entity.element.parents.forEach(function(parent_entity) {
+		parent_entity.dom_element.appendChild(entity.dom_element)
+	})
+	entity.element.childs.forEach(function(child_entity) {
+		child_entity.player = new SwLayoutPlaylist(child_entity)
+	})
 	return {
 		play: function() {
 			if (is_playing) {
@@ -328,7 +320,7 @@ function SwLayout(parent, element) {
 			}
 			is_playing = true
 			dom_element.style.display = 'block'
-			console.log('play ' + class_name + ' ' + element.id + ' css.display: ' + dom_element.style.display)
+			console.log('play ' + class_name + ' ' + entity.id + ' css.display: ' + dom_element.style.display)
 			layout_playlists.forEach(function(layout_playlist) {
 				layout_playlist.element.play()
 			})
@@ -340,7 +332,7 @@ function SwLayout(parent, element) {
 			is_playing = false
 			// this.timer.clear()
 			dom_element.style.display = 'none'
-			console.log('stop ' + class_name + ' ' + element.id + ' css.display: ' + dom_element.style.display)
+			console.log('stop ' + class_name + ' ' + entity.id + ' css.display: ' + dom_element.style.display)
 			layout_playlists.forEach(function(layout_playlist) {
 				layout_playlist.element.stop()
 			})
@@ -357,34 +349,33 @@ function SwLayout(parent, element) {
 }
 
 
-function SwLayoutPlaylist(parent, element) {
-	this.parent = parent
-	this.id = element.id
-	this.properties = element.properties
-	var playlists = this.playlists = []
+function SwLayoutPlaylist(entity) {
 	var document = window.document
 	var is_playing = false
 	var class_name = 'SwLayoutPlaylist'
-	var dom_element = document.createElement('div')
-	dom_element.appendChild(document.createTextNode(class_name + ': ' + element.id + ' ' + this.properties.name.values[0]))
-	dom_element.setAttribute('class', class_name)
-	dom_element.setAttribute('id', element.id)
+	entity.dom_element = document.createElement('div')
+	entity.dom_element.appendChild(document.createTextNode(class_name + ': ' + entity.id + ' ' + entity.element.properties.name.values[0]))
+	entity.dom_element.setAttribute('class', class_name)
+	entity.dom_element.setAttribute('id', entity.id)
 	var style = 'background-color:brown;'
-				+ ' top:'     + ((typeof this.properties.top.values    === 'undefined') ? '0'   : this.properties.top.values[0]) + '%;'
-				+ ' left:'    + ((typeof this.properties.left.values   === 'undefined') ? '0'   : this.properties.left.values[0]) + '%;'
-				+ ' height:'  + ((typeof this.properties.height.values === 'undefined') ? '100' : this.properties.height.values[0]) + '%;'
-				+ ' width:'   + ((typeof this.properties.width.values  === 'undefined') ? '100' : this.properties.width.values[0]) + '%;'
-				+ ' z-index:' + ((typeof this.properties.zindex.values === 'undefined') ? '-1'  : this.properties.zindex.values[0]) + ';'
-	// console.log(class_name + ': ' + element.id + ' ' + style)
-	dom_element.setAttribute('style', style)
-	dom_element.style.display = 'none'
-	dom_element.style.position = 'fixed'
-	document.getElementById(this.parent.id).appendChild(dom_element)
-	// console.log('New ' + class_name + ' ' + element.id + ' Style: ' + util.inspect(dom_element.style))
+				+ ' top:'     + ((typeof entity.element.properties.top.values    === 'undefined') ? '0'   : entity.element.properties.top.values[0]) + '%;'
+				+ ' left:'    + ((typeof entity.element.properties.left.values   === 'undefined') ? '0'   : entity.element.properties.left.values[0]) + '%;'
+				+ ' height:'  + ((typeof entity.element.properties.height.values === 'undefined') ? '100' : entity.element.properties.height.values[0]) + '%;'
+				+ ' width:'   + ((typeof entity.element.properties.width.values  === 'undefined') ? '100' : entity.element.properties.width.values[0]) + '%;'
+				+ ' z-index:' + ((typeof entity.element.properties.zindex.values === 'undefined') ? '-1'  : entity.element.properties.zindex.values[0]) + ';'
+	// console.log(class_name + ': ' + entity.id + ' ' + style)
+	entity.dom_element.setAttribute('style', style)
+	entity.dom_element.style.display = 'none'
+	entity.dom_element.style.position = 'fixed'
+	console.log('New ' + class_name + ' ' + entity.id) // + ' Style: ' + util.inspect(entity.dom_element.style))
+	// console.log('New ' + class_name + ' ' + entity.id + ' Style: ' + util.inspect(dom_element.style))
 
-	for (id in element.childs) {
-		playlists.push({'id' : id, 'element' : new SwPlaylist(this, element.childs[id])})
-	}
+	entity.element.parents.forEach(function(parent_entity) {
+		parent_entity.dom_element.appendChild(entity.dom_element)
+	})
+	entity.element.childs.forEach(function(child_entity) {
+		child_entity.player = new SwPlaylist(child_entity)
+	})
 	return {
 		play: function() {
 			if (is_playing) {
@@ -392,7 +383,7 @@ function SwLayoutPlaylist(parent, element) {
 			}
 			is_playing = true
 			dom_element.style.display = 'block'
-			console.log('play ' + class_name + ' ' + element.id + ' css.display: ' + dom_element.style.display)
+			console.log('play ' + class_name + ' ' + entity.id + ' css.display: ' + dom_element.style.display)
 			playlists.forEach(function(playlist) {
 				playlist.element.play()
 			})
@@ -403,7 +394,7 @@ function SwLayoutPlaylist(parent, element) {
 			}
 			is_playing = false
 			dom_element.style.display = 'none'
-			console.log('stop ' + class_name + ' ' + element.id + ' css.display: ' + dom_element.style.display)
+			console.log('stop ' + class_name + ' ' + entity.id + ' css.display: ' + dom_element.style.display)
 			playlists.forEach(function(playlist) {
 				playlist.element.stop()
 			})
@@ -420,47 +411,27 @@ function SwLayoutPlaylist(parent, element) {
 }
 
 
-function SwPlaylist(parent, element) {
-	this.parent = parent
-	this.id = element.id
-	this.properties = element.properties
-	var loop = parent.properties.loop.values !== undefined ? parent.properties.loop.values[0] : 0
-	var playlist_medias = this.playlist_medias = []
+function SwPlaylist(entity) {
 	var document = window.document
 	var is_playing = this.is_playing = false
 	var class_name = 'SwPlaylist'
-	var dom_element = document.createElement('div')
-	dom_element.appendChild(document.createTextNode(class_name + ': ' + element.id))
-	dom_element.setAttribute('class', class_name)
-	dom_element.setAttribute('id', element.id)
-	dom_element.setAttribute('style', 'background-color:cyan; left:0; right:0; top:0; bottom:0;')
-	dom_element.style.display = 'none'
-	dom_element.style.position = 'absolute'
-	document.getElementById(this.parent.id).appendChild(dom_element)
-	// console.log('New ' + class_name + ' ' + element.id + ' Style: ' + util.inspect(dom_element.style))
+	entity.dom_element = document.createElement('div')
+	entity.dom_element.appendChild(document.createTextNode(class_name + ': ' + entity.id))
+	entity.dom_element.setAttribute('class', class_name)
+	entity.dom_element.setAttribute('id', entity.id)
+	entity.dom_element.setAttribute('style', 'background-color:cyan; left:0; right:0; top:0; bottom:0;')
+	entity.dom_element.style.display = 'none'
+	entity.dom_element.style.position = 'absolute'
+	console.log('New ' + class_name + ' ' + entity.id) // + ' Style: ' + util.inspect(entity.dom_element.style))
+	// console.log('New ' + class_name + ' ' + entity.id + ' Style: ' + util.inspect(dom_element.style))
 
-	for (id in element.childs) {
-		playlist_medias.push({'id' : id, 'element' : new SwPlaylistMedia(this, element.childs[id])})
-	}
-	playlist_medias.sort(function compare(a,b) {
-		if (a.element.ordinal() < b.element.ordinal())
-			return -1
-		if (a.element.ordinal() > b.element.ordinal())
-			return 1
-		return 0
+	entity.element.parents.forEach(function(parent_entity) {
+		parent_entity.dom_element.appendChild(entity.dom_element)
 	})
-	for (var i = 0; i < playlist_medias.length; i++) {
-		if (loop === 1) {
-			if (i === 0) {
-				playlist_medias[0].element.prev(playlist_medias[playlist_medias.length - 1])
-			} else if (i === playlist_medias.length - 1) {
-				playlist_medias[0].element.next(playlist_medias[0])
-			}
-		} else {
-			playlist_medias[i].element.prev(playlist_medias[i - 1])
-			playlist_medias[i].element.next(playlist_medias[i + 1])
-		}
-	}
+	entity.element.childs.forEach(function(child_entity) {
+		child_entity.player = new SwPlaylistMedia(child_entity)
+	})
+
 	i = 0
 	// playlist_medias.forEach(function(playlist_media) {
 	// 	console.log('AFTER sort[' + i++ + ']: playlist_media[' + playlist_media.id
@@ -476,7 +447,7 @@ function SwPlaylist(parent, element) {
 			}
 			is_playing = true
 			dom_element.style.display = 'block'
-			console.log('play ' + class_name + ' ' + element.id + ' css.display: ' + dom_element.style.display)
+			console.log('play ' + class_name + ' ' + entity.id + ' css.display: ' + dom_element.style.display)
 			playlist_medias[0].element.play()
 			// playlist_medias.forEach(function(playlist_media){
 			// 	playlist_media.element.play()
@@ -488,7 +459,7 @@ function SwPlaylist(parent, element) {
 			}
 			is_playing = false
 			dom_element.style.display = 'none'
-			console.log('stop ' + class_name + ' ' + element.id + ' css.display: ' + dom_element.style.display)
+			console.log('stop ' + class_name + ' ' + entity.id + ' css.display: ' + dom_element.style.display)
 			playlist_medias.forEach(function(playlist_media){
 				playlist_media.element.stop()
 			})
@@ -505,38 +476,38 @@ function SwPlaylist(parent, element) {
 }
 
 
-function SwPlaylistMedia(parent, element) {
-	this.parent = parent
-	this.id = element.id
-	this.properties = element.properties
+function SwPlaylistMedia(entity) {
 	// this.temp_ordinal = element.properties.ordinal.values[0]
 	var medias = this.medias = []
 	var document = window.document
 	var is_playing = this.is_playing = false
 	var class_name = 'SwPlaylistMedia'
-	var dom_element = document.createElement('div')
-	dom_element.appendChild(document.createTextNode(class_name + ': ' + element.id))
-	dom_element.setAttribute('class', class_name)
-	dom_element.setAttribute('id', element.id)
+	entity.dom_element = document.createElement('div')
+	entity.dom_element.appendChild(document.createTextNode(class_name + ': ' + entity.id))
+	entity.dom_element.setAttribute('class', class_name)
+	entity.dom_element.setAttribute('id', entity.id)
 	var style = 'background-color:pink;'
-	dom_element.setAttribute('style', style)
-	dom_element.style.display = 'none'
-	dom_element.style.position = 'absolute'
-	document.getElementById(this.parent.id).appendChild(dom_element)
-	// console.log('New ' + class_name + ' ' + element.id + ' Style: ' + util.inspect(dom_element.style))
+	entity.dom_element.setAttribute('style', style)
+	entity.dom_element.style.display = 'none'
+	entity.dom_element.style.position = 'absolute'
+	console.log('New ' + class_name + ' ' + entity.id) // + ' Style: ' + util.inspect(entity.dom_element.style))
+	// console.log('New ' + class_name + ' ' + entity.id + ' Style: ' + util.inspect(dom_element.style))
 
 
-	for (id in element.childs) {
-		medias.push({'id' : id, 'element' : new SwMedia(this, element.childs[id])})
-	}
+	entity.element.parents.forEach(function(parent_entity) {
+		parent_entity.dom_element.appendChild(entity.dom_element)
+	})
+	entity.element.childs.forEach(function(child_entity) {
+		child_entity.player = new SwMedia(child_entity)
+	})
 
 	var stop = function stop() {
 		if (!is_playing) {
 			return
 		}
 		is_playing = false
-		dom_element.style.display = 'none'
-		console.log('stop ' + class_name + ' ' + element.id)// + ' style: ' + util.inspect(dom_element.style))
+		entity.dom_element.style.display = 'none'
+		console.log('stop ' + class_name + ' ' + entity.id)// + ' style: ' + util.inspect(dom_element.style))
 		if (element.next !== undefined)
 			element.next.element.play()
 		medias.forEach(function(media) {
@@ -550,7 +521,7 @@ function SwPlaylistMedia(parent, element) {
 			}
 			is_playing = true
 			dom_element.style.display = 'block'
-			console.log('play ' + class_name + ' ' + element.id)// + ' style: ' + util.inspect(dom_element.style))
+			console.log('play ' + class_name + ' ' + entity.id)// + ' style: ' + util.inspect(dom_element.style))
 			console.log(util.inspect({'medias[0].element.mediatype()':medias[0].element.mediatype()}))
 
 			var media_dom_element = medias[0].element.play()
@@ -563,7 +534,7 @@ function SwPlaylistMedia(parent, element) {
 				})
 			}
 
-			// console.log('setTimeout STOP this ' + element.id + ' and PLAY next ' + element.next.id + ' playlist_media at ' + util.inspect(stopDate))
+			// console.log('setTimeout STOP this ' + entity.id + ' and PLAY next ' + element.next.id + ' playlist_media at ' + util.inspect(stopDate))
 			// console.log(util.inspect(element.next.element))
 			// setTimeout(console.log('got to PLAY ' + element.next.id), stopDate - Date.now)
 			// setTimeout(element.next.element.play, stopDate - Date.now())
@@ -607,47 +578,49 @@ function SwPlaylistMedia(parent, element) {
 }
 
 
-function SwMedia(parent, element) {
-	this.parent = parent
-	this.id = element.id
-	this.properties = element.properties
-	var mediatype = element.properties.type.values[0]
+function SwMedia(entity) {
+	var mediatype = entity.element.properties.type.values[0]
 	var document = window.document
 	var is_playing = this.is_playing = false
 	var class_name = 'SwMedia'
-	var dom_element
 	if (mediatype === 'Video') {
-		dom_element = document.createElement('video')
-		dom_element.autoplay = false
-		dom_element.controls = true
-		dom_element.preload = 'auto'
-		dom_element.width = '100'
-		dom_element.height = '100'
+		entity.dom_element = document.createElement('video')
+		entity.dom_element.autoplay = false
+		entity.dom_element.controls = true
+		entity.dom_element.preload = 'auto'
+		entity.dom_element.width = '100'
+		entity.dom_element.height = '100'
 		var source_element = document.createElement('source')
 		source_element.type = 'video/webm'
-		source_element.src = element.properties.filepath.values[0]
-		dom_element.appendChild(source_element)
-		// dom_element.addEventListener('pause', function() {
-		// 	dom_element.currentTime = 0
+		source_element.src = entity.element.properties.filepath.values[0]
+		entity.dom_element.appendChild(source_element)
+		// entity.dom_element.addEventListener('pause', function() {
+		// 	entity.dom_element.currentTime = 0
 		// })
-		// dom_element.addEventListener('ended', function() {
-		// 	dom_element.currentTime = 0
+		// entity.dom_element.addEventListener('ended', function() {
+		// 	entity.dom_element.currentTime = 0
 		// })
 	} else {
-		dom_element = document.createElement('div')
-		dom_element.appendChild(document.createTextNode(class_name + ': ' + element.id))
+		entity.dom_element = document.createElement('div')
+		entity.dom_element.appendChild(document.createTextNode(class_name + ': ' + entity.id))
 	}
 
 
 	var stopDate
-	dom_element.setAttribute('class', class_name)
-	dom_element.setAttribute('id', element.id)
+	entity.dom_element.setAttribute('class', class_name)
+	entity.dom_element.setAttribute('id', entity.id)
 	var style = 'background-color:purple;'
-	dom_element.setAttribute('style', style)
-	dom_element.style.display = 'none'
-	dom_element.style.position = 'absolute'
-	document.getElementById(this.parent.id).appendChild(dom_element)
-	// console.log('New ' + class_name + ' ' + element.id + ' Style: ' + util.inspect(dom_element.style))
+	entity.dom_element.setAttribute('style', style)
+	entity.dom_element.style.display = 'none'
+	entity.dom_element.style.position = 'absolute'
+
+	entity.element.parents.forEach(function(parent_entity) {
+		console.log(util.inspect(parent_entity))
+		parent_entity.dom_element.appendChild(entity.dom_element)
+	})
+	// document.getElementById(this.parent.id).appendChild(entity.dom_element)
+	console.log('New ' + class_name + ' ' + entity.id) // + ' Style: ' + util.inspect(entity.dom_element.style))
+	// console.log('New ' + class_name + ' ' + entity.id + ' Style: ' + util.inspect(dom_element.style))
 
 	return {
 		play: function() {
@@ -656,7 +629,7 @@ function SwMedia(parent, element) {
 			}
 			is_playing = true
 			dom_element.style.display = 'block'
-			console.log('play ' + class_name + ' ' + element.id + ' style: ' + util.inspect(dom_element.style))
+			console.log('play ' + class_name + ' ' + entity.id + ' style: ' + util.inspect(dom_element.style))
 			if (mediatype === 'Video') {
 				dom_element.play()
 			}
@@ -668,7 +641,7 @@ function SwMedia(parent, element) {
 			}
 			is_playing = false
 			dom_element.style.display = 'none'
-			console.log('stop ' + class_name + ' ' + element.id)// + ' style: ' + util.inspect(dom_element.style))
+			console.log('stop ' + class_name + ' ' + entity.id)// + ' style: ' + util.inspect(dom_element.style))
 			if (mediatype === 'Video') {
 				dom_element.pause()
 			}

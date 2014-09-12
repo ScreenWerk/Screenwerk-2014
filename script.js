@@ -48,7 +48,6 @@ var util    = require("util")
 var fs      = require('fs')
 var https   = require('https')
 var events  = require('events')
-var sw_ele  = require('./elements')
 var sw_play = require('./player')
 
 // var numlenf	= 6
@@ -120,27 +119,118 @@ swEmitter.on('fetcher-stop', function(data) {
 })
 
 swEmitter.on('init-ready', function() {
-	var filename = constants().META_DIR() + '/elements.json'
 	var sw_def, sw_child_def
 	var child = {}
+	var element = {}
+	// 1st iteration:
+	// - initialize dom_elements array for each element
+	// - join elements with parent-child references
 	l.swElements().forEach(function(el) {
-		sw_def = el.element.definition.keyname.split('sw-')[1]
-		console.log(el.id + ':' + sw_def)
+		el.dom_elements = []
+		element = el.element
+		sw_def = el.definition
+		// console.log(el.id + ':' + sw_def)
 		if (constants().HIERARCHY().child_of[sw_def] !== undefined) {
 			sw_child_def = constants().HIERARCHY().child_of[sw_def]
-			console.log(sw_child_def)
-			if (el.element.properties[sw_child_def].values !== undefined) {
-				el.element.properties[sw_child_def].values.forEach(function(value) {
+			// console.log(sw_child_def)
+			if (element.properties[sw_child_def].values !== undefined) {
+				element.properties[sw_child_def].values.forEach(function(value) {
 					child = l.swElements()[l.indexOfElement(value.db_value)]
-					el.element.childs.push(child)
-					child.element.parents.push(el.element)
+					el.childs.push(child)
+					child.parents.push(el)
 				})
 			}
 		}
-	})
-	fs.writeFileSync(filename, stringifier(l.swElements()))
+		// Validators, default values
+		switch (sw_def) {
+			case 'screen':
+			break;
+			case 'screen-group':
+			break;
+			case 'configuration':
+			break;
+			case 'schedule':
+				if (element.properties.crontab.values === undefined) {
+					console.error('Schedule ' + element.id + ' without crontab. rescheduling to midnight, February 30, Sunday')
+					element.properties.crontab.values = ['0 0 30 2 0'] // Midnight, February 30, Sunday
+				}
+				if (element.properties.cleanup.values === undefined) {
+					element.properties.cleanup.values = ['0']
+				}
+				if (element.properties.ordinal.values === undefined) {
+					element.properties.ordinal.values = ['0']
+				}
+			break;
+			case 'layout':
+			break;
+			case 'layout-playlist':
+				if (element.properties.zindex.values === undefined) {
+					element.properties.zindex.values = ['1']
+				}
+			break;
+			case 'playlist':
+				var plms = el.childs
+				var loop = false
+				el.parents.forEach(function(parent) {
+					if (parent.element.properties.loop.values !== undefined)
+						if (parent.element.properties.loop.values[0] === 1)
+							loop = true
+				})
 
-	sw_player.restart(l.swElements()[l.indexOfElement(constants().SCREEN_ID())])
+				plms.sort(function compare(a,b) {
+					if (a.element.properties.ordinal.values[0].db_value < b.element.properties.ordinal.values[0].db_value)
+						return -1
+					if (a.element.properties.ordinal.values[0].db_value > b.element.properties.ordinal.values[0].db_value)
+						return 1
+					return 0
+				})
+				for (var i = 0; i < plms.length; i++) {
+					if (loop) {
+						if (i === 0) {
+							plms[0].prev = plms[plms.length - 1]
+						} else if (i === plms.length - 1) {
+							plms[i].next = plms[0]
+						}
+					} else {
+						plms[i].prev = plms[i - 1]
+						plms[i].next = plms[i + 1]
+					}
+				}
+
+			break;
+			case 'playlist-media':
+			break;
+			case 'media':
+				// element.properties.type.values[0] = data.properties.type.values[0].value
+				element.properties.filepath = {'values': [constants().MEDIA_DIR() + '/' + el.id]}
+			break;
+		}
+	})
+	var filename = constants().META_DIR() + '/elements.json'
+	fs.writeFileSync(filename, stringifier(l.swElements()))
+	// 2nd iteration:
+	// - create <div> element for every unique child and join them into DOM
+	var createDomRec = function createDomRec(el) {
+		var dom_element = document.createElement('div')
+		dom_element.id = el.id
+		dom_element.className = el.definition
+		dom_element.style.display = 'block'
+		dom_element.style.border = 'dashed 1px green'
+
+		var para_element = document.createElement('p')
+		para_element.style.float = 'right'
+		para_element.style.zindex = 1000
+		para_element.appendChild(document.createTextNode(el.definition + ': ' + el.id))
+		dom_element.appendChild(para_element)
+		el.dom_elements.push(dom_element)
+		el.childs.forEach(function(child){
+			dom_element.appendChild(createDomRec(child))
+		})
+		return dom_element
+	}
+	document.body.appendChild(createDomRec(l.swElements()[0]))
+
+	// sw_player.restart(l.swElements()[l.indexOfElement(constants().SCREEN_ID())])
 
 	// gui.App.quit()
 })
@@ -222,10 +312,6 @@ var swLoader = function swLoader(screenEid) {
 						}
 					}
 				}
-				//
-				// Create childs and parents for future relationship registration
-				result.parents = []
-				result.childs = []
 				var filename = constants().META_DIR() + '/' + options.eid + '.' + options.sw_def + '.json'
 				if (options.sw_child_def === undefined) {
 					fs.writeFileSync(filename, stringifier(result))
@@ -468,7 +554,7 @@ var swLoader = function swLoader(screenEid) {
 		})
 	}
 	function swSet(swElement) {
-		swElements.push({'id':swElement.id, 'element':swElement})
+		swElements.push({'id':swElement.id, 'definition':swElement.definition.keyname.split('sw-')[1], 'element':swElement, 'parents':[], 'childs':[]})
 	}
 	function indexOfElement(eid) {
 		for (e in swElements) {
