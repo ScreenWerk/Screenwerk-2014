@@ -126,7 +126,7 @@ swEmitter.on('init-ready', function() {
 	// - initialize dom_elements array for each element
 	// - join elements with parent-child references
 	l.swElements().forEach(function(el) {
-		el.dom_elements = []
+		// el.dom_elements = []
 		element = el.element
 		sw_def = el.definition
 		// console.log(el.id + ':' + sw_def)
@@ -152,20 +152,20 @@ swEmitter.on('init-ready', function() {
 			case 'schedule':
 				if (element.properties.crontab.values === undefined) {
 					console.error('Schedule ' + element.id + ' without crontab. rescheduling to midnight, February 30, Sunday')
-					element.properties.crontab.values = ['0 0 30 2 0'] // Midnight, February 30, Sunday
+					element.properties.crontab.values = [{'db_value':'0 0 30 2 0'}] // Midnight, February 30, Sunday
 				}
 				if (element.properties.cleanup.values === undefined) {
-					element.properties.cleanup.values = ['0']
+					element.properties.cleanup.values = [{'db_value':0}]
 				}
 				if (element.properties.ordinal.values === undefined) {
-					element.properties.ordinal.values = ['0']
+					element.properties.ordinal.values = [{'db_value':0}]
 				}
 			break;
 			case 'layout':
 			break;
 			case 'layout-playlist':
 				if (element.properties.zindex.values === undefined) {
-					element.properties.zindex.values = ['1']
+					element.properties.zindex.values = [{'db_value':1}]
 				}
 			break;
 			case 'playlist':
@@ -173,7 +173,7 @@ swEmitter.on('init-ready', function() {
 				var loop = false
 				el.parents.forEach(function(parent) {
 					if (parent.element.properties.loop.values !== undefined)
-						if (parent.element.properties.loop.values[0] === 1)
+						if (parent.element.properties.loop.values[0].db_value === 1)
 							loop = true
 				})
 
@@ -185,10 +185,14 @@ swEmitter.on('init-ready', function() {
 					return 0
 				})
 				for (var i = 0; i < plms.length; i++) {
-					if (loop) {
-						if (i === 0) {
+					if (i === 0) {
+						if (loop) {
 							plms[0].prev = plms[plms.length - 1]
-						} else if (i === plms.length - 1) {
+						}
+						plms[i].next = plms[i + 1]
+					} else if (i === plms.length - 1) {
+						plms[i].prev = plms[i - 1]
+						if (loop) {
 							plms[i].next = plms[0]
 						}
 					} else {
@@ -202,35 +206,89 @@ swEmitter.on('init-ready', function() {
 			break;
 			case 'media':
 				// element.properties.type.values[0] = data.properties.type.values[0].value
-				element.properties.filepath = {'values': [constants().MEDIA_DIR() + '/' + el.id]}
+				element.properties.filepath = {'values': [{'db_value':constants().MEDIA_DIR() + '/' + el.id}]}
 			break;
 		}
 	})
-	var filename = constants().META_DIR() + '/elements.json'
-	fs.writeFileSync(filename, stringifier(l.swElements()))
+
+	// var swDomRec = function swDomRec(el) {
+	// 	sw_def = el.definition
+	// 	if (constants().HIERARCHY().child_of[sw_def] !== undefined) {
+	// 		sw_child_def = constants().HIERARCHY().child_of[sw_def]
+	// 		if (element.properties[sw_child_def].values !== undefined) {
+	// 			element.properties[sw_child_def].values.forEach(function(value) {
+	// 				child = l.swElements()[l.indexOfElement(value.db_value)]
+	// 				el.childs.push(child)
+	// 				child.parents.push(el)
+	// 			})
+	// 		}
+
+	// }
+	// var swDom = swDomRec(l.swElements()[0])
+
 	// 2nd iteration:
 	// - create <div> element for every unique child and join them into DOM
-	var createDomRec = function createDomRec(el) {
+	var createDomRec = function createDomRec(el, parent_eid) {
 		var dom_element = document.createElement('div')
-		dom_element.id = el.id
+		dom_element.id = parent_eid === undefined ? el.id : parent_eid + '_' + el.id
 		dom_element.className = el.definition
-		dom_element.style.display = 'block'
-		dom_element.style.border = 'dashed 1px green'
+		dom_element.style.display = 'none'
+		// dom_element.style.border = 'dashed 1px green'
+		// dom_element.style.position = 'relative'
+		var unit = '%'
+		if (el.element.properties['in-pixels'] !== undefined)
+			if (el.element.properties['in-pixels'].values !== undefined)
+				if (el.element.properties['in-pixels'].values[0].db_value === 1)
+					unit = 'px'
+		if (el.element.properties.width !== undefined)
+			if (el.element.properties.width.values !== undefined) {
+				dom_element.style.position = 'absolute'
+				dom_element.style.border = '2px solid red'
+				dom_element.style.padding = '-2px'
+				dom_element.style.width = el.element.properties.width.values[0].db_value + unit
+			}
+		if (el.element.properties.height !== undefined)
+			if (el.element.properties.height.values !== undefined) {
+				dom_element.style.position = 'absolute'
+				dom_element.style.border = '2px solid red'
+				dom_element.style.padding = '-2px'
+				dom_element.style.height = el.element.properties.height.values[0].db_value + unit
+			}
+		if (el.element.properties.left !== undefined)
+			if (el.element.properties.left.values !== undefined) {
+				dom_element.style.position = 'absolute'
+				dom_element.style.border = '2px solid red'
+				dom_element.style.padding = '-2px'
+				dom_element.style.left = el.element.properties.left.values[0].db_value + unit
+			}
+		if (el.element.properties.top !== undefined)
+			if (el.element.properties.top.values !== undefined) {
+				dom_element.style.position = 'absolute'
+				dom_element.style.border = '2px solid red'
+				dom_element.style.padding = '-2px'
+				dom_element.style.top = el.element.properties.top.values[0].db_value + unit
+			}
 
-		var para_element = document.createElement('p')
-		para_element.style.float = 'right'
-		para_element.style.zindex = 1000
-		para_element.appendChild(document.createTextNode(el.definition + ': ' + el.id))
-		dom_element.appendChild(para_element)
-		el.dom_elements.push(dom_element)
+		// var para_element = document.createElement('p')
+		// // para_element.style.float = 'none'
+		// para_element.style.zindex = 1000
+		// para_element.style.float = 'right'
+		// para_element.appendChild(document.createTextNode(el.definition + ': ' + el.id))
+		// dom_element.appendChild(para_element)
+		dom_element.swElement = el
+		// el.element.dom_element = dom_element
+		// el.dom_elements.push(dom_element)
 		el.childs.forEach(function(child){
-			dom_element.appendChild(createDomRec(child))
+			dom_element.appendChild(createDomRec(child, el.id))
 		})
 		return dom_element
 	}
-	document.body.appendChild(createDomRec(l.swElements()[0]))
+	var screen_dom_element = createDomRec(l.swElements()[0])
+	document.body.appendChild(screen_dom_element)
+	var filename = constants().META_DIR() + '/elements.json'
+	fs.writeFileSync(filename, stringifier(screen_dom_element))
 
-	// sw_player.restart(l.swElements()[l.indexOfElement(constants().SCREEN_ID())])
+	sw_player.restart(screen_dom_element)
 
 	// gui.App.quit()
 })
@@ -532,18 +590,27 @@ var swLoader = function swLoader(screenEid) {
 				} else throw err
 			}
 			swElement = JSON.parse(data)
-			swSet(swElement)
-			if (swElement.properties.file.values === undefined) {
-				// It must be URL - not going to fetch and store this kind of media
+			if (swExists(swElement.id)) {
+				swEmitter.emit('loader-stop', {'D':sw_def,'I':media_eid})
 			} else {
-				swMediaFetch(media_eid, swElement.properties.file.values[0].db_value)
+				swSet(swElement)
+				if (swElement.properties.file.values === undefined) {
+					// It must be URL - not going to fetch and store this kind of media
+				} else {
+					swMediaFetch(media_eid, swElement.properties.file.values[0].db_value)
+				}
+				swEmitter.emit('loader-stop', {'D':sw_def,'I':media_eid})
 			}
-			swEmitter.emit('loader-stop', {'D':sw_def,'I':media_eid})
 		})
 	}
 
 	function swExists(eid) {
-		return true
+		for (e in swElements) {
+			if (swElements[e].id === eid) {
+				return true
+			}
+		}
+		return false
 	}
 	function swGet(callback, eid) {
 		swElements.forEach(function(swElement) {
@@ -554,6 +621,7 @@ var swLoader = function swLoader(screenEid) {
 		})
 	}
 	function swSet(swElement) {
+		// if (indexOfElement(swElement.id) !== undefined)
 		swElements.push({'id':swElement.id, 'definition':swElement.definition.keyname.split('sw-')[1], 'element':swElement, 'parents':[], 'childs':[]})
 	}
 	function indexOfElement(eid) {

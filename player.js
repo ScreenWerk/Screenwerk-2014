@@ -1,210 +1,178 @@
 var util    = require("util")
 var later   = require("later")
+var events  = require('events')
 // var gui     = require('nw.gui')
 
+var swEmitter = new events.EventEmitter()
 
 function  SwPlayer(screen_id) {
 	this.screen_id = screen_id
-}
-SwPlayer.prototype.restart = function(screen_entity) {
-	console.log('Starting ScreenWerk player for screen ' + this.screen_id)
-	screen_entity.player = new SwScreen(screen_entity)
-	screen_entity.player.play()
+
+	return {
+		restart: function(screen_dom_element) {
+			console.log('Starting ScreenWerk player for screen ' + this.screen_id)
+			screen_dom_element.player = new SwScreen(screen_dom_element)
+			screen_dom_element.player.play()
+		}
+	}
 }
 
+// dom_element.swElement
 
-function SwScreen(entity) {
-	var document = window.document
+function SwScreen(dom_element) {
 	var is_playing = this.is_playing = false
-	var class_name = 'SwScreen'
-	entity.dom_element = document.createElement('div')
-	// console.log(util.inspect(entity.dom_element))
-	entity.dom_element.appendChild(document.createTextNode(class_name + ': ' + entity.id))
-	entity.dom_element.setAttribute('class', class_name)
-	entity.dom_element.setAttribute('id', entity.id)
-	entity.dom_element.setAttribute('style', 'position:fixed; background-color:red;')
-	entity.dom_element.style.display = 'none'
-	document.body.appendChild(entity.dom_element)
-	// console.log('New ' + class_name + ' ' + entity.id + ' Style: ' + util.inspect(dom_element.style))
+	var entity = dom_element.swElement
 
-	entity.element.childs.forEach(function(child_entity) {
-		// console.log(util.inspect(child_entity.element.parents[0]))
-		child_entity.player = new SwScreenGroup(child_entity)
-	})
-	// console.log(util.inspect(entity))
+	// console.log(entity.definition + ' ' + entity.id + ' has ' + dom_element.childNodes.length + ' childNodes.')
+	for (var key=0; key<dom_element.childNodes.length; key++) {
+		var child_node = dom_element.childNodes[key]
+		child_node.player = new SwScreenGroup(child_node)
+	}
 	return {
 		play: function() {
+			console.log(' DOM id: ' + dom_element.id + '. Attempting PLAY ' + entity.definition + ':' + is_playing)
 			if (is_playing) {
 				return
 			}
 			is_playing = true
 			dom_element.style.display = 'block'
-			console.log('play ' + class_name + ' ' + entity.id + ' css.display: ' + dom_element.style.display)
-			screen_groups.forEach(function(screen_group){
-				screen_group.element.play()
-			})
+			console.log('|-- PLAY ' + entity.definition + ' ' + entity.id + ' is_playing:' + is_playing)
+			for (var key=0; key<dom_element.childNodes.length; key++) {
+				dom_element.childNodes[key].player.play()
+			}
 		},
 		stop: function() {
+			console.log(' DOM id: ' + dom_element.id + '. Attempting STOP ' + entity.definition + ':' + is_playing)
 			if (!is_playing) {
 				return
 			}
 			is_playing = false
 			dom_element.style.display = 'none'
-			console.log('stop ' + class_name + ' ' + entity.id + ' css.display: ' + dom_element.style.display)
-			screen_groups.forEach(function(screen_group){
-				screen_group.element.stop()
-			})
+			console.log('|-- STOP ' + entity.definition + ' ' + entity.id)
+			for (var key=0; key<dom_element.childNodes.length; key++) {
+				dom_element.childNodes[key].player.stop()
+			}
 		},
 		clear: function() {
-			screen_groups.forEach(function(screen_group){
-				screen_group.element.clear()
-			})
-		},
-		screen_groups: function() {
-			return screen_groups
+			for (var key=0; key<dom_element.childNodes.length; key++) {
+				dom_element.childNodes[key].player.clear()
+			}
 		}
 	}
 }
 
 
-function SwScreenGroup(entity) {
-	var document = window.document
+function SwScreenGroup(dom_element) {
 	var is_playing = this.is_playing = false
-	var class_name = 'SwScreenGroup'
-	entity.dom_element = document.createElement('div')
-	entity.dom_element.appendChild(document.createTextNode(class_name + ': ' + entity.id))
-	entity.dom_element.setAttribute('class', class_name)
-	entity.dom_element.setAttribute('id', entity.id)
-	entity.dom_element.setAttribute('style', 'background-color:green;')
-	entity.dom_element.style.display = 'none'
-	entity.dom_element.style.position = 'fixed'
-
-	entity.element.parents.forEach(function(parent_entity) {
-		parent_entity.dom_element.appendChild(entity.dom_element)
-	})
-	entity.element.childs.forEach(function(child_entity) {
-		child_entity.player = new SwConfiguration(child_entity)
-	})
+	var entity = dom_element.swElement
+	// console.log(entity.definition + ' ' + entity.id + ' has ' + dom_element.childNodes.length + ' childNodes.')
+	for (var key=0; key<dom_element.childNodes.length; key++) {
+		var child_node = dom_element.childNodes[key]
+		child_node.player = new SwConfiguration(child_node)
+	}
 	return {
 		play: function() {
+			console.log(' DOM id: ' + dom_element.id + '. Attempting PLAY ' + entity.definition + ':' + is_playing)
 			if (is_playing) {
 				return
 			}
 			is_playing = true
 			dom_element.style.display = 'block'
-			console.log('play ' + class_name + ' ' + entity.id + ' css.display: ' + dom_element.style.display)
-			configurations.forEach(function(configuration){
-				configuration.element.play()
-			})
+			console.log('|-- PLAY ' + entity.definition + ' ' + entity.id + ' is_playing:' + is_playing)
+			for (var key=0; key<dom_element.childNodes.length; key++) {
+				dom_element.childNodes[key].player.play()
+			}
 		},
 		stop: function() {
+			console.log(' DOM id: ' + dom_element.id + '. Attempting STOP ' + entity.definition + ':' + is_playing)
 			if (!is_playing) {
 				return
 			}
 			is_playing = false
 			dom_element.style.display = 'none'
-			console.log('stop ' + class_name + ' ' + entity.id + ' css.display: ' + dom_element.style.display)
-			configurations.forEach(function(configuration){
-				configuration.element.stop()
-			})
+			console.log('|-- STOP ' + entity.definition + ' ' + entity.id)
+			for (var key=0; key<dom_element.childNodes.length; key++) {
+				dom_element.childNodes[key].player.stop()
+			}
 		},
 		clear: function() {
-			configurations.forEach(function(configuration){
-				configuration.element.clear()
-			})
-		},
-		configurations: function() {
-			return configurations
+			for (var key=0; key<dom_element.childNodes.length; key++) {
+				dom_element.childNodes[key].player.clear()
+			}
 		}
 	}
 }
 
 
-function SwConfiguration(entity) {
-	var document = window.document
+function SwConfiguration(dom_element) {
 	var is_playing = this.is_playing = false
-	var class_name = 'SwConfiguration'
-	entity.dom_element = document.createElement('div')
-	entity.dom_element.appendChild(document.createTextNode(class_name + ': ' + entity.id))
-	entity.dom_element.setAttribute('class', class_name)
-	entity.dom_element.setAttribute('id', entity.id)
-	entity.dom_element.setAttribute('style', 'background-color:white;')
-	entity.dom_element.style.display = 'none'
-	entity.dom_element.style.position = 'fixed'
-	console.log('New ' + class_name + ' ' + entity.id) // + ' Style: ' + util.inspect(entity.dom_element.style))
-
-	entity.element.parents.forEach(function(parent_entity) {
-		parent_entity.dom_element.appendChild(entity.dom_element)
-	})
-	entity.element.childs.forEach(function(child_entity) {
-		child_entity.player = new SwSchedule(child_entity)
-	})
+	var entity = dom_element.swElement
+	console.log('New ' + entity.definition + ' ' + entity.id) // + ' Style: ' + util.inspect(entity.dom_element.style))
+	// console.log(entity.definition + ' ' + entity.id + ' has ' + dom_element.childNodes.length + ' childNodes.')
+	for (var key=0; key<dom_element.childNodes.length; key++) {
+		var child_node = dom_element.childNodes[key]
+		child_node.player = new SwSchedule(child_node)
+	}
 
 	return {
 		play: function() {
+			console.log(' DOM id: ' + dom_element.id + '. Attempting PLAY ' + entity.definition + ':' + is_playing)
 			if (is_playing) {
 				return
 			}
 			is_playing = true
 			dom_element.style.display = 'block'
-			console.log('play ' + class_name + ' ' + entity.id + ' css.display: ' + dom_element.style.display)
-			schedules.forEach(function(schedule){
-				schedule.element.play()
-			})
+			console.log('|-- PLAY ' + entity.definition + ' ' + entity.id + ' is_playing:' + is_playing)
+			var schedules = []
+			for (var key=0; key<dom_element.childNodes.length; key++) {
+				// console.log(key + ':' + typeof dom_element.childNodes[key])
+				schedules.push(dom_element.childNodes[key].player)
+			}
 			//
 			// Layouts should show up right now. Scheduled layouts will play later
 			schedules.sort(function compare(a,b) {
-				if (a.element.prev > b.element.prev)
+				if (a.prev > b.prev)
 					return -1
-				if (a.element.prev < b.element.prev)
+				if (a.prev < b.prev)
 					return 1
 				return 0
 			})
 			// console.log(util.inspect({'schedules: ': schedules}, {depth: 6}))
-			schedules.forEach(function(schedule){
-				console.log('There are ' + schedule.element.layouts().length + ' layouts to initialize for schedule: ' + schedule.id)
-				schedule.element.playLayouts()
+			schedules.forEach( function(schedule){
+				schedule.playLayouts() // Start playing current content immediately
+				schedule.play()        // Continue with schedules according to crontab
 			})
 		},
 		stop: function() {
+			console.log(' DOM id: ' + dom_element.id + '. Attempting STOP ' + entity.definition + ':' + is_playing)
 			if (!is_playing) {
 				return
 			}
 			is_playing = false
 			dom_element.style.display = 'none'
-			console.log('stop ' + class_name + ' ' + entity.id + ' css.display: ' + dom_element.style.display)
-			schedules.forEach(function(schedule){
-				schedule.element.stop()
-			})
+			console.log('|-- STOP ' + entity.definition + ' ' + entity.id)
+			for (var key=0; key<dom_element.childNodes.length; key++) {
+				dom_element.childNodes[key].player.stop()
+			}
 		},
 		clear: function() {
-			schedules.forEach(function(schedule){
-				schedule.element.clear()
-			})
-		},
-		schedules: function() {
-			return schedules
+			for (var key=0; key<dom_element.childNodes.length; key++) {
+				dom_element.childNodes[key].player.clear()
+			}
 		}
 	}
 }
 
 
-function SwSchedule(entity) {
-	var timer = null
+function SwSchedule(dom_element) {
+	var entity = dom_element.swElement
 	var element = entity.element
-	var cleanupLayer = element.properties['ordinal'].values[0]
-	var cleanup = this.cleanup = element.properties['cleanup'].values[0]
+	var cleanupLayer = element.properties['ordinal'].values[0].db_value
+	var cleanup = this.cleanup = element.properties['cleanup'].values[0].db_value
 	var document = window.document
 	var is_playing = this.is_playing = false
-	var class_name = 'SwSchedule'
-	entity.dom_element = document.createElement('div')
-	entity.dom_element.appendChild(document.createTextNode(class_name + ': ' + entity.id))
-	entity.dom_element.setAttribute('class', class_name)
-	entity.dom_element.setAttribute('id', entity.id)
-	entity.dom_element.setAttribute('style', 'background-color:yellow;')
-	entity.dom_element.style.display = 'none'
-	entity.dom_element.style.position = 'fixed'
-	console.log('New ' + class_name + ' ' + entity.id) // + ' Style: ' + util.inspect(entity.dom_element.style))
+	console.log('New ' + entity.definition + ' ' + entity.id)
+	console.log('|-- ' + util.inspect({'cleanup':cleanup, 'cleanupLayer':cleanupLayer}))
 
 	// console.log(util.inspect(entity.element.properties.crontab.values[0]))
 	var cronSched = this.cronSched = later.parse.cron(entity.element.properties.crontab.values[0].db_value)
@@ -219,66 +187,78 @@ function SwSchedule(entity) {
 		var endTime = (endDate.getTime());
 		cronSched.schedules[0].fd_b = [endTime];
 	}
-
-	entity.element.parents.forEach(function(parent_entity) {
-		parent_entity.dom_element.appendChild(entity.dom_element)
-	})
-	entity.element.childs.forEach(function(child_entity) {
-		child_entity.player = new SwLayout(child_entity)
-	})
+	// console.log(entity.definition + ' ' + entity.id + ' has ' + dom_element.childNodes.length + ' childNodes.')
+	for (var key=0; key<dom_element.childNodes.length; key++) {
+		var child_node = dom_element.childNodes[key]
+		child_node.player = new SwLayout(child_node)
+	}
 	// console.log('There are ' + layouts.length + ' layouts in schedule ' + entity.id)
 	var playLayouts = function playLayouts() {
-		layouts.forEach( function(layout) {
-			layout.element.play()
-		})
+		console.log(' DOM id: ' + dom_element.id + '. Attempting play on ' + dom_element.childNodes.length + ' layouts')
+		for (var key=0; key<dom_element.childNodes.length; key++) {
+			dom_element.childNodes[key].player.play()
+		}
 		//
 		// !NB: if schedule has cleanup = true, then stop any other schedules on same or lower layers
 		if (cleanup === 1) {
-			// console.log(util.inspect(parent, {depth:6}))
-			parent.schedules.forEach(function(schedule){
+			// console.log(util.inspect(dom_element.parentNode.childNodes.length, {depth:6}))
+			for (var key=0; key<dom_element.parentNode.childNodes.length; key++) {
+				var sibling_node = dom_element.parentNode.childNodes[key]
+				// console.log(util.inspect(sibling_node.swElement.id))
+				// console.log('Schedule ' + util.inspect(entity.id))
+				if (entity.id === sibling_node.swElement.id)
+					continue
 				// console.log(util.inspect(schedule,{depth:6}))
-				console.log('Schedule ' + util.inspect(entity.id) + ' cleanupLayer ' + cleanupLayer + ' checking for cleanup of schedule ' + util.inspect(schedule.id) + ' schedule.cleanupLayer ' + schedule.element.cleanupLayer())
-				if (schedule.element.cleanupLayer() <= cleanupLayer) {
-					if (entity.id != schedule.id) {
-						console.log('Schedule ' + entity.id + ' cleaning up schedule ' + schedule.id)
-						schedule.element.stop()
-					}
+				sibling_node_cleanup_layer = sibling_node
+					.swElement
+					.element
+					.properties.ordinal
+					.values[0].db_value
+				console.log('Schedule ' + util.inspect(entity.id)
+					+ ' sibling_node_cleanup_layer LE cleanupLayer ' + sibling_node_cleanup_layer + ' LE ' + cleanupLayer
+					+ ' checking for cleanup of schedule ' + sibling_node.swElement.id)
+				if (sibling_node_cleanup_layer <= cleanupLayer) {
+					console.log('|-- Schedule ' + entity.id + ' cleaning up schedule ' + sibling_node.swElement.id)
+					sibling_node.player.stopLayouts()
 				}
-			})
+			}
+		}
+	}
+	var stopLayouts = function stopLayouts() {
+		console.log(' DOM id: ' + dom_element.id + '. Attempting stop on ' + dom_element.childNodes.length + ' layouts')
+		for (var key=0; key<dom_element.childNodes.length; key++) {
+			dom_element.childNodes[key].player.stop()
 		}
 	}
 	return {
 		play: function() {
+			console.log(' DOM id: ' + dom_element.id + '. Attempting PLAY ' + entity.definition + ':' + is_playing)
 			if (is_playing) {
 				return
 			}
 			is_playing = true
 			dom_element.style.display = 'block'
-			console.log('play ' + class_name + ' ' + entity.id + ' css.display: ' + dom_element.style.display + util.inspect(cronSched))
-
 			timer = swSetInterval(playLayouts, cronSched, startDate, endDate)
+			console.log('|-- PLAY ' + entity.definition + ' ' + entity.id + ' - Scheduled for ' + later.schedule(cronSched).next(1))
 		},
 		stop: function() {
+			console.log(' DOM id: ' + dom_element.id + '. Attempting STOP ' + entity.definition + ':' + is_playing)
 			if (!is_playing) {
 				return
 			}
 			is_playing = false
 			dom_element.style.display = 'none'
-			console.log('stop ' + class_name + ' ' + entity.id + ' css.display: ' + dom_element.style.display)
+			console.log('|-- STOP ' + entity.definition + ' ' + entity.id)
 			// console.log(util.inspect(layouts,{depth:6}))
-			layouts.forEach(function(layout){
-				// console.log(util.inspect(layout,{depth:6}))
-				layout.element.stop()
-			})
+			for (var key=0; key<dom_element.childNodes.length; key++) {
+				dom_element.childNodes[key].player.stop()
+			}
 		},
 		clear: function() {
 			timer.clear()
-			layouts.forEach(function(layout){
-				layout.element.clear()
-			})
-		},
-		layouts: function() {
-			return layouts
+			for (var key=0; key<dom_element.childNodes.length; key++) {
+				dom_element.childNodes[key].player.clear()
+			}
 		},
 		cleanupLayer: function() {
 			return cleanupLayer
@@ -288,152 +268,119 @@ function SwSchedule(entity) {
 		},
 		playLayouts: function() {
 			playLayouts()
+		},
+		stopLayouts: function() {
+			stopLayouts()
 		}
 	}
 }
 
 
-function SwLayout(entity) {
-	var document = window.document
+function SwLayout(dom_element) {
+	var entity = dom_element.swElement
 	var is_playing = this.is_playing = false
-	var class_name = 'SwLayout'
-	entity.dom_element = document.createElement('div')
-	entity.dom_element.appendChild(document.createTextNode(class_name + ': ' + entity.id))
-	entity.dom_element.setAttribute('class', class_name)
-	entity.dom_element.setAttribute('id', entity.id)
-	entity.dom_element.setAttribute('style', 'background-color:gray;')
-	entity.dom_element.style.display = 'none'
-	entity.dom_element.style.position = 'fixed'
-	console.log('New ' + class_name + ' ' + entity.id) // + ' Style: ' + util.inspect(entity.dom_element.style))
-	// console.log('New ' + class_name + ' ' + entity.id + ' Style: ' + util.inspect(dom_element.style))
+	console.log('New ' + entity.definition + ' ' + entity.id) // + ' Style: ' + util.inspect(entity.dom_element.style))
+	// console.log('New ' + entity.definition + ' ' + entity.id + ' Style: ' + util.inspect(dom_element.style))
 
-	entity.element.parents.forEach(function(parent_entity) {
-		parent_entity.dom_element.appendChild(entity.dom_element)
-	})
-	entity.element.childs.forEach(function(child_entity) {
-		child_entity.player = new SwLayoutPlaylist(child_entity)
-	})
+	// console.log(entity.definition + ' ' + entity.id + ' has ' + dom_element.childNodes.length + ' childNodes.')
+	for (var key=0; key<dom_element.childNodes.length; key++) {
+		var child_node = dom_element.childNodes[key]
+		child_node.player = new SwLayoutPlaylist(child_node)
+	}
 	return {
 		play: function() {
+			console.log(' DOM id: ' + dom_element.id + '. Attempting PLAY ' + entity.definition + ':' + is_playing)
 			if (is_playing) {
 				return
 			}
 			is_playing = true
 			dom_element.style.display = 'block'
-			console.log('play ' + class_name + ' ' + entity.id + ' css.display: ' + dom_element.style.display)
-			layout_playlists.forEach(function(layout_playlist) {
-				layout_playlist.element.play()
-			})
+			console.log('|-- PLAY ' + entity.definition + ' ' + entity.id + ' is_playing:' + is_playing)
+			for (var key=0; key<dom_element.childNodes.length; key++) {
+				dom_element.childNodes[key].player.play()
+			}
 		},
 		stop: function() {
+			console.log(' DOM id: ' + dom_element.id + '. Attempting STOP ' + entity.definition + ':' + is_playing)
 			if (!is_playing) {
 				return
 			}
 			is_playing = false
 			// this.timer.clear()
 			dom_element.style.display = 'none'
-			console.log('stop ' + class_name + ' ' + entity.id + ' css.display: ' + dom_element.style.display)
-			layout_playlists.forEach(function(layout_playlist) {
-				layout_playlist.element.stop()
-			})
+			console.log('|-- STOP ' + entity.definition + ' ' + entity.id)
+			for (var key=0; key<dom_element.childNodes.length; key++) {
+				dom_element.childNodes[key].player.stop()
+			}
 		},
 		clear: function() {
-			layout_playlists.forEach(function(layout_playlist){
-				layout_playlist.element.clear()
-			})
-		},
-		layout_playlists: function() {
-			return layout_playlists
+			for (var key=0; key<dom_element.childNodes.length; key++) {
+				dom_element.childNodes[key].player.clear()
+			}
 		}
 	}
 }
 
 
-function SwLayoutPlaylist(entity) {
-	var document = window.document
+function SwLayoutPlaylist(dom_element) {
+	var entity = dom_element.swElement
 	var is_playing = false
-	var class_name = 'SwLayoutPlaylist'
-	entity.dom_element = document.createElement('div')
-	entity.dom_element.appendChild(document.createTextNode(class_name + ': ' + entity.id + ' ' + entity.element.properties.name.values[0]))
-	entity.dom_element.setAttribute('class', class_name)
-	entity.dom_element.setAttribute('id', entity.id)
-	var style = 'background-color:brown;'
-				+ ' top:'     + ((typeof entity.element.properties.top.values    === 'undefined') ? '0'   : entity.element.properties.top.values[0]) + '%;'
-				+ ' left:'    + ((typeof entity.element.properties.left.values   === 'undefined') ? '0'   : entity.element.properties.left.values[0]) + '%;'
-				+ ' height:'  + ((typeof entity.element.properties.height.values === 'undefined') ? '100' : entity.element.properties.height.values[0]) + '%;'
-				+ ' width:'   + ((typeof entity.element.properties.width.values  === 'undefined') ? '100' : entity.element.properties.width.values[0]) + '%;'
-				+ ' z-index:' + ((typeof entity.element.properties.zindex.values === 'undefined') ? '-1'  : entity.element.properties.zindex.values[0]) + ';'
-	// console.log(class_name + ': ' + entity.id + ' ' + style)
-	entity.dom_element.setAttribute('style', style)
-	entity.dom_element.style.display = 'none'
-	entity.dom_element.style.position = 'fixed'
-	console.log('New ' + class_name + ' ' + entity.id) // + ' Style: ' + util.inspect(entity.dom_element.style))
-	// console.log('New ' + class_name + ' ' + entity.id + ' Style: ' + util.inspect(dom_element.style))
+	console.log('New ' + entity.definition + ' ' + entity.id) // + ' Style: ' + util.inspect(entity.dom_element.style))
+	// console.log('New ' + entity.definition + ' ' + entity.id + ' Style: ' + util.inspect(dom_element.style))
 
-	entity.element.parents.forEach(function(parent_entity) {
-		parent_entity.dom_element.appendChild(entity.dom_element)
-	})
-	entity.element.childs.forEach(function(child_entity) {
-		child_entity.player = new SwPlaylist(child_entity)
-	})
+	// console.log(entity.definition + ' ' + entity.id + ' has ' + dom_element.childNodes.length + ' childNodes.')
+	for (var key=0; key<dom_element.childNodes.length; key++) {
+		var child_node = dom_element.childNodes[key]
+		child_node.player = new SwPlaylist(child_node)
+	}
 	return {
 		play: function() {
+			console.log(' DOM id: ' + dom_element.id + '. Attempting PLAY ' + entity.definition + ':' + is_playing)
 			if (is_playing) {
 				return
 			}
 			is_playing = true
 			dom_element.style.display = 'block'
-			console.log('play ' + class_name + ' ' + entity.id + ' css.display: ' + dom_element.style.display)
-			playlists.forEach(function(playlist) {
-				playlist.element.play()
-			})
+			console.log('|-- PLAY ' + entity.definition + ' ' + entity.id + ' is_playing:' + is_playing)
+			for (var key=0; key<dom_element.childNodes.length; key++) {
+				dom_element.childNodes[key].player.play()
+			}
 		},
 		stop: function() {
+			console.log(' DOM id: ' + dom_element.id + '. Attempting STOP ' + entity.definition + ':' + is_playing)
 			if (!is_playing) {
 				return
 			}
 			is_playing = false
 			dom_element.style.display = 'none'
-			console.log('stop ' + class_name + ' ' + entity.id + ' css.display: ' + dom_element.style.display)
-			playlists.forEach(function(playlist) {
-				playlist.element.stop()
-			})
+			console.log('|-- STOP ' + entity.definition + ' ' + entity.id)
+			for (var key=0; key<dom_element.childNodes.length; key++) {
+				dom_element.childNodes[key].player.stop()
+			}
 		},
 		clear: function() {
-			playlists.forEach(function(playlist){
-				playlist.element.clear()
-			})
-		},
-		playlists: function() {
-			return playlists
+			for (var key=0; key<dom_element.childNodes.length; key++) {
+				dom_element.childNodes[key].player.clear()
+			}
 		}
 	}
 }
 
 
-function SwPlaylist(entity) {
-	var document = window.document
+function SwPlaylist(dom_element) {
+	var entity = dom_element.swElement
 	var is_playing = this.is_playing = false
-	var class_name = 'SwPlaylist'
-	entity.dom_element = document.createElement('div')
-	entity.dom_element.appendChild(document.createTextNode(class_name + ': ' + entity.id))
-	entity.dom_element.setAttribute('class', class_name)
-	entity.dom_element.setAttribute('id', entity.id)
-	entity.dom_element.setAttribute('style', 'background-color:cyan; left:0; right:0; top:0; bottom:0;')
-	entity.dom_element.style.display = 'none'
-	entity.dom_element.style.position = 'absolute'
-	console.log('New ' + class_name + ' ' + entity.id) // + ' Style: ' + util.inspect(entity.dom_element.style))
-	// console.log('New ' + class_name + ' ' + entity.id + ' Style: ' + util.inspect(dom_element.style))
+	console.log('New ' + entity.definition + ' ' + entity.id) // + ' Style: ' + util.inspect(entity.dom_element.style))
+	// console.log('New ' + entity.definition + ' ' + entity.id + ' Style: ' + util.inspect(dom_element.style))
 
-	entity.element.parents.forEach(function(parent_entity) {
-		parent_entity.dom_element.appendChild(entity.dom_element)
-	})
-	entity.element.childs.forEach(function(child_entity) {
-		child_entity.player = new SwPlaylistMedia(child_entity)
-	})
+	// console.log(entity.definition + ' ' + entity.id + ' has ' + dom_element.childNodes.length + ' childNodes.')
+	for (var key=0; key<dom_element.childNodes.length; key++) {
+		var child_node = dom_element.childNodes[key]
+		child_node.player = new SwPlaylistMedia(child_node)
+	}
 
 	i = 0
-	// playlist_medias.forEach(function(playlist_media) {
+	// playlist_medias.forEach( function(playlist_media) {
 	// 	console.log('AFTER sort[' + i++ + ']: playlist_media[' + playlist_media.id
 	// 	 + '].ordinal: ' + playlist_media.element.ordinal()
 	// 	 + ', prev:' + util.inspect(playlist_media.element.prev().id)
@@ -442,99 +389,116 @@ function SwPlaylist(entity) {
 	// })
 	return {
 		play: function() {
+			console.log(' DOM id: ' + dom_element.id + '. Attempting PLAY ' + entity.definition + ':' + is_playing)
 			if (is_playing) {
 				return
 			}
 			is_playing = true
 			dom_element.style.display = 'block'
-			console.log('play ' + class_name + ' ' + entity.id + ' css.display: ' + dom_element.style.display)
-			playlist_medias[0].element.play()
-			// playlist_medias.forEach(function(playlist_media){
-			// 	playlist_media.element.play()
-			// })
+			console.log('|-- PLAY ' + entity.definition + ' ' + entity.id + ' is_playing:' + is_playing)
+			dom_element.childNodes[0].player.play()
+			// for (var key=0; key<dom_element.childNodes.length; key++) {
+			// 	dom_element.childNodes[key].player.play()
+			// }
 		},
 		stop: function() {
+			console.log(' DOM id: ' + dom_element.id + '. Attempting STOP ' + entity.definition + ':' + is_playing)
 			if (!is_playing) {
 				return
 			}
 			is_playing = false
 			dom_element.style.display = 'none'
-			console.log('stop ' + class_name + ' ' + entity.id + ' css.display: ' + dom_element.style.display)
-			playlist_medias.forEach(function(playlist_media){
-				playlist_media.element.stop()
-			})
+			console.log('|-- STOP ' + entity.definition + ' ' + entity.id)
+			for (var key=0; key<dom_element.childNodes.length; key++) {
+				dom_element.childNodes[key].player.stop()
+			}
 		},
 		clear: function() {
-			playlist_medias.forEach(function(playlist_media){
-				playlist_media.element.clear()
-			})
-		},
-		playlist_medias: function() {
-			return playlist_medias
+			for (var key=0; key<dom_element.childNodes.length; key++) {
+				dom_element.childNodes[key].player.clear()
+			}
 		}
 	}
 }
 
 
-function SwPlaylistMedia(entity) {
-	// this.temp_ordinal = element.properties.ordinal.values[0]
-	var medias = this.medias = []
+function SwPlaylistMedia(dom_element) {
 	var document = window.document
+	var entity = dom_element.swElement
+	var element = entity.element
 	var is_playing = this.is_playing = false
-	var class_name = 'SwPlaylistMedia'
-	entity.dom_element = document.createElement('div')
-	entity.dom_element.appendChild(document.createTextNode(class_name + ': ' + entity.id))
-	entity.dom_element.setAttribute('class', class_name)
-	entity.dom_element.setAttribute('id', entity.id)
-	var style = 'background-color:pink;'
-	entity.dom_element.setAttribute('style', style)
-	entity.dom_element.style.display = 'none'
-	entity.dom_element.style.position = 'absolute'
-	console.log('New ' + class_name + ' ' + entity.id) // + ' Style: ' + util.inspect(entity.dom_element.style))
-	// console.log('New ' + class_name + ' ' + entity.id + ' Style: ' + util.inspect(dom_element.style))
+	console.log('New ' + entity.definition + ' ' + entity.id) // + ' Style: ' + util.inspect(entity.dom_element.style))
+	// console.log('New ' + entity.definition + ' ' + entity.id + ' Style: ' + util.inspect(dom_element.style))
 
+	// console.log(entity.definition + ' ' + entity.id + ' has ' + dom_element.childNodes.length + ' childNodes.')
+	var medias = []
+	for (var key=0; key<dom_element.childNodes.length; key++) {
+		var child_node = dom_element.childNodes[key]
+		// console.log('key:' + key + ': ' + typeof child_node)
+		child_node.player = new SwMedia(child_node)
+		medias.push(child_node.player)
+		// child_node.player.mediaDomElement().addEventListener('ended', function() {
+		// 	console.log(' DOM id: ' + dom_element.id + '. On event ENDED ' + entity.definition + ':' + is_playing)
+		// 	// window.alert('ended')
+		// 	stop()
+		// 	// element.next.element.play()
+		// })
+	}
 
-	entity.element.parents.forEach(function(parent_entity) {
-		parent_entity.dom_element.appendChild(entity.dom_element)
+	swEmitter.on('ended' + entity.id, function() {
+		console.log('ended event for ' + entity.id)
+		stop()
 	})
-	entity.element.childs.forEach(function(child_entity) {
-		child_entity.player = new SwMedia(child_entity)
+	swEmitter.on('requested' + entity.id, function() {
+		console.log('requested event for ' + entity.id)
+		play()
 	})
 
+	var play = function play() {
+		console.log(' DOM id: ' + dom_element.id + '. Attempting PLAY ' + entity.definition + ':' + is_playing)
+		if (is_playing) {
+			return
+		}
+		is_playing = true
+		dom_element.style.display = 'block'
+		console.log('|-- PLAY ' + entity.definition + ' ' + entity.id + ' is_playing:' + is_playing)
+		// console.log(util.inspect({'medias':medias, 'medias[0].mediatype()':medias[0].mediatype()}, {depth:null}))
+
+
+		medias.forEach( function(media) {
+			media.play()
+		})
+		// var media_dom_element = medias[0].play()
+		// console.log(util.inspect(media_dom_element.style))
+		// if (medias[0].mediatype() === 'Video') {
+		// 	// console.log(util.inspect(media_dom_element))
+		// 	media_dom_element.addEventListener('ended', function() {
+		// 		window.alert(util.inspect(element.next.element))
+		// 		element.next.element.play()
+		// 	})
+		// }
+	}
 	var stop = function stop() {
+		console.log(' DOM id: ' + dom_element.id + '. Attempting STOP ' + entity.definition + ':' + is_playing)
 		if (!is_playing) {
 			return
 		}
 		is_playing = false
-		entity.dom_element.style.display = 'none'
-		console.log('stop ' + class_name + ' ' + entity.id)// + ' style: ' + util.inspect(dom_element.style))
-		if (element.next !== undefined)
-			element.next.element.play()
-		medias.forEach(function(media) {
-			media.element.stop()
+		if (entity.next !== undefined)
+			swEmitter.emit('requested' + entity.next.id)
+
+		dom_element.style.display = 'none'
+		console.log('|-- STOP ' + entity.definition + ' ' + entity.id)
+		// console.log('entity: ' + util.inspect(entity, {depth:5}))
+		medias.forEach( function(media) {
+			media.stop()
 		})
 	}
 	return {
 		play: function() {
-			if (is_playing) {
-				return
-			}
-			is_playing = true
-			dom_element.style.display = 'block'
-			console.log('play ' + class_name + ' ' + entity.id)// + ' style: ' + util.inspect(dom_element.style))
-			console.log(util.inspect({'medias[0].element.mediatype()':medias[0].element.mediatype()}))
+			return play()
 
-			var media_dom_element = medias[0].element.play()
-			console.log(util.inspect(media_dom_element.style))
-			if (medias[0].element.mediatype() === 'Video') {
-				// console.log(util.inspect(media_dom_element))
-				media_dom_element.addEventListener('pause', function() {
-					window.alert(util.inspect(element.next.element))
-					element.next.element.play()
-				})
-			}
-
-			// console.log('setTimeout STOP this ' + entity.id + ' and PLAY next ' + element.next.id + ' playlist_media at ' + util.inspect(stopDate))
+			// console.log('setTimeout STOP this ' +  entity.id + ' and PLAY next ' + element.next.id + ' playlist_media at ' + util.inspect(stopDate))
 			// console.log(util.inspect(element.next.element))
 			// setTimeout(console.log('got to PLAY ' + element.next.id), stopDate - Date.now)
 			// setTimeout(element.next.element.play, stopDate - Date.now())
@@ -578,72 +542,73 @@ function SwPlaylistMedia(entity) {
 }
 
 
-function SwMedia(entity) {
-	var mediatype = entity.element.properties.type.values[0]
+//
+function SwMedia(dom_element) {
 	var document = window.document
+	var entity = dom_element.swElement
 	var is_playing = this.is_playing = false
-	var class_name = 'SwMedia'
+	// console.log(util.inspect(entity.element.properties.type.values))
+	var mediatype = entity.element.properties.type.values === undefined ? '#NA' : entity.element.properties.type.values[0].value
+	var media_dom_element = {}
 	if (mediatype === 'Video') {
-		entity.dom_element = document.createElement('video')
-		entity.dom_element.autoplay = false
-		entity.dom_element.controls = true
-		entity.dom_element.preload = 'auto'
-		entity.dom_element.width = '100'
-		entity.dom_element.height = '100'
-		var source_element = document.createElement('source')
-		source_element.type = 'video/webm'
-		source_element.src = entity.element.properties.filepath.values[0]
-		entity.dom_element.appendChild(source_element)
-		// entity.dom_element.addEventListener('pause', function() {
-		// 	entity.dom_element.currentTime = 0
+		dom_element.appendChild(document.createTextNode('VIDEO ' + entity.definition + ': ' + entity.id))
+		media_dom_element = document.createElement('VIDEO')
+		media_dom_element.type = 'video/webm'
+		media_dom_element.src = entity.element.properties.filepath.values[0].db_value
+		dom_element.appendChild(media_dom_element)
+		media_dom_element.autoplay = false
+		media_dom_element.controls = true
+		// media_dom_element.addEventListener('pause', function() {
+		// 	// media_dom_element.currentTime = 0
 		// })
-		// entity.dom_element.addEventListener('ended', function() {
-		// 	entity.dom_element.currentTime = 0
-		// })
+		media_dom_element.addEventListener('ended', function() {
+			swEmitter.emit('ended' + dom_element.id.split('_')[0])
+			// window.alert('ended')
+			// media_dom_element.currentTime = 0
+		})
+	} else if (mediatype === 'Image') {
+		media_dom_element = document.createElement('IMG')
+		// console.log(util.inspect(entity.element.properties.filepath.values[0]))
+		media_dom_element.src = entity.element.properties.filepath.values[0].db_value
+		dom_element.appendChild(media_dom_element)
 	} else {
-		entity.dom_element = document.createElement('div')
-		entity.dom_element.appendChild(document.createTextNode(class_name + ': ' + entity.id))
+		dom_element.appendChild(document.createTextNode(mediatype + ' ' + entity.definition + ': ' + entity.id))
 	}
 
 
 	var stopDate
-	entity.dom_element.setAttribute('class', class_name)
-	entity.dom_element.setAttribute('id', entity.id)
-	var style = 'background-color:purple;'
-	entity.dom_element.setAttribute('style', style)
-	entity.dom_element.style.display = 'none'
-	entity.dom_element.style.position = 'absolute'
-
-	entity.element.parents.forEach(function(parent_entity) {
-		console.log(util.inspect(parent_entity))
-		parent_entity.dom_element.appendChild(entity.dom_element)
-	})
 	// document.getElementById(this.parent.id).appendChild(entity.dom_element)
-	console.log('New ' + class_name + ' ' + entity.id) // + ' Style: ' + util.inspect(entity.dom_element.style))
-	// console.log('New ' + class_name + ' ' + entity.id + ' Style: ' + util.inspect(dom_element.style))
+	console.log('New ' + entity.definition + ' ' + entity.id) // + ' Style: ' + util.inspect(entity.dom_element.style))
+	// console.log('New ' + entity.definition + ' ' + entity.id + ' Style: ' + util.inspect(dom_element.style))
 
 	return {
 		play: function() {
+			console.log(' DOM id: ' + dom_element.id + '. Attempting PLAY ' + entity.definition + ':' + is_playing)
 			if (is_playing) {
 				return dom_element
 			}
 			is_playing = true
 			dom_element.style.display = 'block'
-			console.log('play ' + class_name + ' ' + entity.id + ' style: ' + util.inspect(dom_element.style))
+			console.log('|-- PLAY ' + entity.definition + ' ' + entity.id + ' is_playing:' + is_playing)
 			if (mediatype === 'Video') {
-				dom_element.play()
+				media_dom_element.play()
+				// console.log(util.inspect(dom_element.childNodes[0]))
+				// dom_element.play()
 			}
-			return dom_element
 		},
 		stop: function() {
+			console.log(' DOM id: ' + dom_element.id + '. Attempting STOP ' + entity.definition + ':' + is_playing)
 			if (!is_playing) {
 				return
 			}
 			is_playing = false
 			dom_element.style.display = 'none'
-			console.log('stop ' + class_name + ' ' + entity.id)// + ' style: ' + util.inspect(dom_element.style))
+			console.log('|-- STOP ' + entity.definition + ' ' + entity.id)// + ' style: ' + util.inspect(dom_element.style))
 			if (mediatype === 'Video') {
-				dom_element.pause()
+				if (media_dom_element.readyState > 0) {
+					media_dom_element.pause()
+					media_dom_element.currentTime = 0
+				}
 			}
 		},
 		stopDate: function() {
@@ -651,10 +616,15 @@ function SwMedia(entity) {
 		},
 		mediatype: function() {
 			return mediatype
+		},
+		mediaDomElement: function() {
+			return media_dom_element
 		}
+
 		// clear: function() {}
 	}
 }
+// SwMedia.prototype.__proto__ = events.EventEmitter.prototype
 
 
 var swSetTimeout = function(fn, sched, startDate, endDate) {
@@ -665,7 +635,7 @@ var swSetTimeout = function(fn, sched, startDate, endDate) {
 			}
 		}
 	}
-	// console.log('sched: ' + sched)
+	console.log('Timeout set for: ' + util.inspect({'fn':fn, 'sched':sched}, {depth:null}))
 	var s = later.schedule(sched)
 	var t
 	if (startDate !== undefined ? startDate > Date.now() : false) {
