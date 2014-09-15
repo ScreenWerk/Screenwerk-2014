@@ -1,16 +1,54 @@
 var util    = require("util")
 var later   = require("later")
 var events  = require('events')
-// var gui     = require('nw.gui')
 
 var swEmitter = new events.EventEmitter()
 
-function  SwPlayer(screen_id) {
-	this.screen_id = screen_id
 
+
+
+// ctrld = ctrlw.document
+function CW() {
+	var ctrw = window.control_win.window
+	ctrw.moveTo(75,25)
+	ctrw.resizeTo(350,450)
+	ctrw.toolbar = false
+	ctrw.show_in_taskbar = true
+	ctrw.icon = 'imgs/sw-p512.png'
+	ctrw.document.body.style.margin = '0px'
+	ctrw.document.body.style.padding = '0px'
+
+	var check = function check(id) {
+		var dom_element = ctrw.document.getElementById(id)
+		if (dom_element === null) {
+			dom_element = ctrw.document.createElement('p')
+			ctrw.document.body.appendChild(dom_element)
+			dom_element.appendChild(ctrw.document.createTextNode(id))
+			dom_element.id = id
+			dom_element.style.display = 'block'
+			dom_element.style.margin = '0px'
+		}
+		return dom_element
+	}
+	return {
+		show: function(id) { check(id).style.display = 'block' },
+		hide: function(id) { check(id).style.display = 'none' }
+	}
+}
+
+var ctrw = new CW()
+
+window.control_win.on('minimize', function() {
+	window.gui.App.quit()
+})
+window.control_win.on('close', function() {
+	window.gui.App.quit()
+})
+
+function  SwPlayer(screen_id) {
 	return {
 		restart: function(screen_dom_element) {
-			console.log('Starting ScreenWerk player for screen ' + this.screen_id)
+			console.log('Starting ScreenWerk player for screen ' + screen_id)
 			screen_dom_element.player = new SwScreen(screen_dom_element)
 			screen_dom_element.player.play()
 		}
@@ -139,7 +177,7 @@ function SwConfiguration(dom_element) {
 			})
 			// console.log(util.inspect({'schedules: ': schedules}, {depth: 6}))
 			schedules.forEach( function(schedule){
-				schedule.playLayouts() // Start playing current content immediately
+				// schedule.playLayouts() // Start playing current content immediately
 				schedule.play()        // Continue with schedules according to crontab
 			})
 		},
@@ -447,6 +485,7 @@ function SwPlaylistMedia(dom_element) {
 
 	swEmitter.on('ended' + entity.id, function() {
 		console.log('ended event for ' + entity.id)
+		// window.alert('ended event for ' + entity.id)
 		stop()
 	})
 	swEmitter.on('requested' + entity.id, function() {
@@ -575,14 +614,11 @@ function SwMedia(dom_element) {
 		dom_element.appendChild(document.createTextNode(mediatype + ' ' + entity.definition + ': ' + entity.id))
 	}
 
-
-	var stopDate
-	// document.getElementById(this.parent.id).appendChild(entity.dom_element)
 	console.log('New ' + entity.definition + ' ' + entity.id) // + ' Style: ' + util.inspect(entity.dom_element.style))
-	// console.log('New ' + entity.definition + ' ' + entity.id + ' Style: ' + util.inspect(dom_element.style))
 
 	return {
 		play: function() {
+			ctrw.show(dom_element.id)
 			console.log(' DOM id: ' + dom_element.id + '. Attempting PLAY ' + entity.definition + ':' + is_playing)
 			if (is_playing) {
 				return dom_element
@@ -597,6 +633,7 @@ function SwMedia(dom_element) {
 			}
 		},
 		stop: function() {
+			ctrw.hide(dom_element.id)
 			console.log(' DOM id: ' + dom_element.id + '. Attempting STOP ' + entity.definition + ':' + is_playing)
 			if (!is_playing) {
 				return
@@ -610,9 +647,6 @@ function SwMedia(dom_element) {
 					media_dom_element.currentTime = 0
 				}
 			}
-		},
-		stopDate: function() {
-			return stopDate
 		},
 		mediatype: function() {
 			return mediatype

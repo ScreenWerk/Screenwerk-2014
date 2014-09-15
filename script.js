@@ -14,6 +14,9 @@ assert.ok(Number(gui.App.argv[0]) > 0
 			, "Screen ID must be number greater than zero.")
 
 
+window.control_win = gui.Window.get(window.open('', {}))
+
+
 window.constants = function constants() {
 	return {
 		SCREEN_ID:   function() { return Number(gui.App.argv[0]) },
