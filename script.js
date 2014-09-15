@@ -289,7 +289,7 @@ swEmitter.on('init-ready', function() {
 	var screen_dom_element = createDomRec(l.swElements()[0])
 	document.body.appendChild(screen_dom_element)
 	var filename = constants().META_DIR() + '/elements.json'
-	fs.writeFileSync(filename, stringifier(screen_dom_element))
+	// fs.writeFileSync(filename, stringifier(screen_dom_element))
 
 	sw_player.restart(screen_dom_element)
 

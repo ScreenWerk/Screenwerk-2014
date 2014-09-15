@@ -177,14 +177,17 @@ function SwConfiguration(dom_element) {
 			//
 			// Layouts should show up right now. Scheduled layouts will play later
 			schedules.sort(function compare(a,b) {
-				if (a.prev > b.prev)
-					return -1
-				if (a.prev < b.prev)
+				if (a.prev().getTime() > b.prev().getTime())
 					return 1
+				if (a.prev().getTime() < b.prev().getTime())
+					return -1
 				return 0
 			})
-			// console.log(util.inspect({'schedules: ': schedules}, {depth: 6}))
-			schedules.forEach( function(schedule){
+			console.log(util.inspect({'schedules: ': schedules}, {depth: 6}))
+			schedules.forEach( function(schedule) {
+				console.log(schedule.id() + ' - ' + schedule.prev())
+			})
+			schedules.forEach( function(schedule) {
 				schedule.playLayouts() // Start playing current content immediately
 				schedule.play()        // Continue with schedules according to crontab
 			})
@@ -212,6 +215,7 @@ function SwConfiguration(dom_element) {
 
 function SwSchedule(dom_element) {
 	var entity = dom_element.swElement
+	// this.id = entity.id
 	var element = entity.element
 	var cleanupLayer = element.properties['ordinal'].values[0].db_value
 	var cleanup = this.cleanup = element.properties['cleanup'].values[0].db_value
@@ -317,6 +321,9 @@ function SwSchedule(dom_element) {
 		},
 		stopLayouts: function() {
 			stopLayouts()
+		},
+		id: function() {
+			return entity.id
 		}
 	}
 }
@@ -617,6 +624,13 @@ function SwMedia(dom_element) {
 		// console.log(util.inspect(entity.element.properties.filepath.values[0]))
 		media_dom_element.src = entity.element.properties.filepath.values[0].db_value
 		dom_element.appendChild(media_dom_element)
+	} else if (mediatype === 'URL') {
+		media_dom_element = document.createElement('IFRAME')
+		// console.log(util.inspect(entity.element.properties.filepath.values[0]))
+		media_dom_element.src = entity.element.properties.url.values[0].db_value
+		media_dom_element.width = '100%'
+		media_dom_element.height = '100%'
+		dom_element.appendChild(media_dom_element)
 	} else {
 		dom_element.appendChild(document.createTextNode(mediatype + ' ' + entity.definition + ': ' + entity.id))
 	}
@@ -635,6 +649,10 @@ function SwMedia(dom_element) {
 			console.log('|-- PLAY ' + entity.definition + ' ' + entity.id + ' is_playing:' + is_playing)
 			if (mediatype === 'Video') {
 				media_dom_element.play()
+				// console.log(util.inspect(dom_element.childNodes[0]))
+				// dom_element.play()
+			} else if (mediatype === 'URL') {
+				// media_dom_element.play()
 				// console.log(util.inspect(dom_element.childNodes[0]))
 				// dom_element.play()
 			}
