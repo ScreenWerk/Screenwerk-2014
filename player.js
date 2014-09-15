@@ -31,8 +31,16 @@ function CW() {
 		return dom_element
 	}
 	return {
-		show: function(id) { check(id).style.display = 'block' },
-		hide: function(id) { check(id).style.display = 'none' }
+		show: function(id) {
+			check(id).style['text-decoration'] = 'none'
+			check(id).style['font-weight'] = 'bold'
+			check(id).style.color = 'black'
+		},
+		hide: function(id) {
+			check(id).style['text-decoration'] = 'line-through'
+			check(id).style['font-weight'] = 'normal'
+			check(id).style.color = 'gray'
+		}
 	}
 }
 
@@ -177,7 +185,7 @@ function SwConfiguration(dom_element) {
 			})
 			// console.log(util.inspect({'schedules: ': schedules}, {depth: 6}))
 			schedules.forEach( function(schedule){
-				// schedule.playLayouts() // Start playing current content immediately
+				schedule.playLayouts() // Start playing current content immediately
 				schedule.play()        // Continue with schedules according to crontab
 			})
 		},
@@ -232,7 +240,7 @@ function SwSchedule(dom_element) {
 	}
 	// console.log('There are ' + layouts.length + ' layouts in schedule ' + entity.id)
 	var playLayouts = function playLayouts() {
-		console.log(' DOM id: ' + dom_element.id + '. Attempting play on ' + dom_element.childNodes.length + ' layouts')
+		console.log(' DOM id: ' + dom_element.id + '. ' + entity.definition + ' attempting play on ' + dom_element.childNodes.length + ' layouts')
 		for (var key=0; key<dom_element.childNodes.length; key++) {
 			dom_element.childNodes[key].player.play()
 		}
@@ -263,7 +271,7 @@ function SwSchedule(dom_element) {
 		}
 	}
 	var stopLayouts = function stopLayouts() {
-		console.log(' DOM id: ' + dom_element.id + '. Attempting stop on ' + dom_element.childNodes.length + ' layouts')
+		console.log(' DOM id: ' + dom_element.id + '. ' + entity.definition + ' attempting stop on ' + dom_element.childNodes.length + ' layouts')
 		for (var key=0; key<dom_element.childNodes.length; key++) {
 			dom_element.childNodes[key].player.stop()
 		}
@@ -487,6 +495,8 @@ function SwPlaylistMedia(dom_element) {
 		console.log('ended event for ' + entity.id)
 		// window.alert('ended event for ' + entity.id)
 		stop()
+		if (entity.next !== undefined)
+			swEmitter.emit('requested' + entity.next.id)
 	})
 	swEmitter.on('requested' + entity.id, function() {
 		console.log('requested event for ' + entity.id)
@@ -523,9 +533,6 @@ function SwPlaylistMedia(dom_element) {
 			return
 		}
 		is_playing = false
-		if (entity.next !== undefined)
-			swEmitter.emit('requested' + entity.next.id)
-
 		dom_element.style.display = 'none'
 		console.log('|-- STOP ' + entity.definition + ' ' + entity.id)
 		// console.log('entity: ' + util.inspect(entity, {depth:5}))
@@ -642,8 +649,10 @@ function SwMedia(dom_element) {
 			dom_element.style.display = 'none'
 			console.log('|-- STOP ' + entity.definition + ' ' + entity.id)// + ' style: ' + util.inspect(dom_element.style))
 			if (mediatype === 'Video') {
+				console.log('|-- Video ' + entity.definition + ' ' + entity.id)// + ' style: ' + util.inspect(dom_element.style))
+				console.log('|-- readyState ' + media_dom_element.readyState + ' ' + entity.id)// + ' style: ' + util.inspect(dom_element.style))
+				media_dom_element.pause()
 				if (media_dom_element.readyState > 0) {
-					media_dom_element.pause()
 					media_dom_element.currentTime = 0
 				}
 			}
