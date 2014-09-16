@@ -5,25 +5,16 @@ var events  = require('events')
 var swEmitter = new events.EventEmitter()
 
 
-
+var console = window.console
 
 // ctrld = ctrlw.document
 function CW() {
-	var ctrw = window.control_win.window
-	ctrw.moveTo(75,25)
-	ctrw.resizeTo(350,450)
-	ctrw.toolbar = false
-	ctrw.show_in_taskbar = true
-	ctrw.icon = 'imgs/sw-p512.png'
-	ctrw.document.body.style.margin = '0px'
-	ctrw.document.body.style.padding = '0px'
-
 	var check = function check(id) {
-		var dom_element = ctrw.document.getElementById(id)
+		var dom_element = window.monitor_window.window.document.getElementById(id)
 		if (dom_element === null) {
-			dom_element = ctrw.document.createElement('p')
-			ctrw.document.body.appendChild(dom_element)
-			dom_element.appendChild(ctrw.document.createTextNode(id))
+			dom_element = window.monitor_window.window.document.createElement('p')
+			window.monitor_window.window.document.body.appendChild(dom_element)
+			dom_element.appendChild(window.monitor_window.window.document.createTextNode(id))
 			dom_element.id = id
 			dom_element.style.display = 'block'
 			dom_element.style.margin = '0px'
@@ -46,12 +37,6 @@ function CW() {
 
 var ctrw = new CW()
 
-window.control_win.on('minimize', function() {
-	window.gui.App.quit()
-})
-window.control_win.on('close', function() {
-	window.gui.App.quit()
-})
 
 function  SwPlayer(screen_id) {
 	return {
@@ -183,7 +168,7 @@ function SwConfiguration(dom_element) {
 					return -1
 				return 0
 			})
-			console.log(util.inspect({'schedules: ': schedules}, {depth: 6}))
+			// console.log(util.inspect({'schedules: ': schedules}, {depth: 6}))
 			schedules.forEach( function(schedule) {
 				console.log(schedule.id() + ' - ' + schedule.prev())
 			})
@@ -604,10 +589,15 @@ function SwMedia(dom_element) {
 	var mediatype = entity.element.properties.type.values === undefined ? '#NA' : entity.element.properties.type.values[0].value
 	var media_dom_element = {}
 	if (mediatype === 'Video') {
-		dom_element.appendChild(document.createTextNode('VIDEO ' + entity.definition + ': ' + entity.id))
+		// var p = document.createElement('P')
+		// p.appendChild(document.createTextNode('VIDEO ' + entity.definition + ': ' + entity.id))
+		// p.style.float = 'left'
+		// p.style.color = 'gray'
+		// dom_element.appendChild(p)
 		media_dom_element = document.createElement('VIDEO')
 		media_dom_element.type = 'video/webm'
 		media_dom_element.src = entity.element.properties.filepath.values[0].db_value
+		media_dom_element.overflow = 'hidden'
 		dom_element.appendChild(media_dom_element)
 		media_dom_element.autoplay = false
 		media_dom_element.controls = true
@@ -630,7 +620,11 @@ function SwMedia(dom_element) {
 		media_dom_element.src = entity.element.properties.url.values[0].db_value
 		media_dom_element.width = '100%'
 		media_dom_element.height = '100%'
+		media_dom_element.scrolling = 'no'
 		dom_element.appendChild(media_dom_element)
+		var ifrst = media_dom_element.contentWindow.document.body.style
+		ifrst.overflow = 'hidden'
+		console.log('==================' + util.inspect(ifrst))
 	} else {
 		dom_element.appendChild(document.createTextNode(mediatype + ' ' + entity.definition + ': ' + entity.id))
 	}

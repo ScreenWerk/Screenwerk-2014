@@ -13,8 +13,32 @@ assert.equal(typeof(gui.App.argv[0]), 'string'
 assert.ok(Number(gui.App.argv[0]) > 0
 			, "Screen ID must be number greater than zero.")
 
+var player_window = gui.Window.get()
+player_window.window.moveTo(201,1)
+if (gui.App.argv.length > 1) {
+	console.log('launching in fullscreen mode')
+	player_window.isFullscreen = true
+}
 
-window.control_win = gui.Window.get(window.open('', {}))
+window.monitor_window = gui.Window.get(window.open('monitor.html'))
+// window.monitor_window = gui.Window.get(window.open(''))
+var mon_win = window.monitor_window.window
+mon_win.moveTo(1,1)
+mon_win.resizeTo(200,450)
+mon_win.toolbar = false
+mon_win.show = false
+mon_win.show_in_taskbar = false
+mon_win.icon = 'imgs/sw-p512.png'
+var mon_win_body = mon_win.document.body
+mon_win_body.style.margin = '0px'
+mon_win_body.style.padding = '0px'
+
+window.monitor_window.on('minimize', function() {
+	window.gui.App.quit()
+})
+window.monitor_window.on('close', function() {
+	window.gui.App.quit()
+})
 
 
 window.constants = function constants() {
@@ -239,6 +263,8 @@ swEmitter.on('init-ready', function() {
 		// dom_element.style.border = 'dashed 1px green'
 		// dom_element.style.position = 'relative'
 		var unit = '%'
+		dom_element.style.width = '100%'
+		dom_element.style.height = '100%'
 		if (el.element.properties['in-pixels'] !== undefined)
 			if (el.element.properties['in-pixels'].values !== undefined)
 				if (el.element.properties['in-pixels'].values[0].db_value === 1)
@@ -246,29 +272,29 @@ swEmitter.on('init-ready', function() {
 		if (el.element.properties.width !== undefined)
 			if (el.element.properties.width.values !== undefined) {
 				dom_element.style.position = 'absolute'
-				dom_element.style.border = '2px solid red'
-				dom_element.style.padding = '-2px'
+				// dom_element.style.border = '2px solid red'
+				dom_element.style.padding = '0px'
 				dom_element.style.width = el.element.properties.width.values[0].db_value + unit
 			}
 		if (el.element.properties.height !== undefined)
 			if (el.element.properties.height.values !== undefined) {
 				dom_element.style.position = 'absolute'
-				dom_element.style.border = '2px solid red'
-				dom_element.style.padding = '-2px'
+				// dom_element.style.border = '2px solid red'
+				dom_element.style.padding = '0px'
 				dom_element.style.height = el.element.properties.height.values[0].db_value + unit
 			}
 		if (el.element.properties.left !== undefined)
 			if (el.element.properties.left.values !== undefined) {
 				dom_element.style.position = 'absolute'
-				dom_element.style.border = '2px solid red'
-				dom_element.style.padding = '-2px'
+				// dom_element.style.border = '2px solid red'
+				dom_element.style.padding = '0px'
 				dom_element.style.left = el.element.properties.left.values[0].db_value + unit
 			}
 		if (el.element.properties.top !== undefined)
 			if (el.element.properties.top.values !== undefined) {
 				dom_element.style.position = 'absolute'
-				dom_element.style.border = '2px solid red'
-				dom_element.style.padding = '-2px'
+				// dom_element.style.border = '2px solid red'
+				dom_element.style.padding = '0px'
 				dom_element.style.top = el.element.properties.top.values[0].db_value + unit
 			}
 
