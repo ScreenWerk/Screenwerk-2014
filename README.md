@@ -12,8 +12,8 @@ SW14 uses node-webkit >= v0.3.0.**
 
 #### Playlist
 
-> By default **Playlist**s will not loop. If any parent **Layout-Playlist** has *loop* = true, **Playlist** will loop.
-> May cause confusion (as unexpected looping), if same **Playlist** is used on multiple **Layout**s (on same **Screen**) but should loop on only some.
+> By default **Playlists** will not loop. If any parent **Layout-Playlist** has *loop* = true, **Playlist** will loop.
+> May cause confusion (as unexpected looping), if same **Playlist** is used on multiple **Layouts** (on same **Screen**) but should loop on only some.
 
 #### Playlist-Media
 - ***mute***
