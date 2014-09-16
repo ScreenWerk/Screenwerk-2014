@@ -15,6 +15,7 @@ assert.ok(Number(gui.App.argv[0]) > 0
 
 var player_window = gui.Window.get()
 player_window.window.moveTo(201,1)
+player_window.isFullscreen = false
 if (gui.App.argv.length > 1) {
 	console.log('launching in fullscreen mode')
 	player_window.isFullscreen = true
@@ -217,12 +218,14 @@ swEmitter.on('init-ready', function() {
 							plms[0].prev = plms[plms.length - 1]
 						}
 						plms[i].next = plms[i + 1]
-					} else if (i === plms.length - 1) {
+					}
+					if (i === plms.length - 1) {
 						plms[i].prev = plms[i - 1]
 						if (loop) {
 							plms[i].next = plms[0]
 						}
-					} else {
+					}
+					if (i > 0 && i < plms.length - 1) {
 						plms[i].prev = plms[i - 1]
 						plms[i].next = plms[i + 1]
 					}
@@ -232,7 +235,7 @@ swEmitter.on('init-ready', function() {
 			case 'playlist-media':
 			break;
 			case 'media':
-				// element.properties.type.values[0] = data.properties.type.values[0].value
+					// element.properties.type.values[0] = data.properties.type.values[0].value
 				element.properties.filepath = {'values': [{'db_value':constants().MEDIA_DIR() + '/' + el.id}]}
 			break;
 		}
@@ -378,6 +381,7 @@ var swLoader = function swLoader(screenEid) {
 		}
 		swEmitter.emit('fetcher-start', {'D':options.sw_def,'I':options.eid})
 		var path = '/api2/entity-' + options.eid
+		// console.log(path)
 		var request = https.request({
 			hostname: 'piletilevi.entu.ee', port: 443, path: path, method: 'GET'})
 		request.on('response', function response_handler( response ) {
@@ -387,7 +391,13 @@ var swLoader = function swLoader(screenEid) {
 				// console.log('CHUNK: ' + str.length + '(+' + chunk.length + ')')
 			})
 			response.on('end', function response_emitter() {
-				var result = JSON.parse(str).result
+				var obj = JSON.parse(str)
+				console.log(util.inspect(obj))
+				if (obj.error !== undefined) {
+					console.log(path + ' responded with error: ' + obj.error)
+					throw(path + ' responded with error: ' + obj.error)
+				}
+				var result = obj.result
 				//
 				// Remove extra property values. Keep only 'multiplicity' most recent ones
 				for (var key in result.properties) {
@@ -436,7 +446,7 @@ var swLoader = function swLoader(screenEid) {
 
 	function swLoadScreen(screen_eid) {
 		var sw_def = 'screen'
-		var sw_child_def = 'screen-group'
+		var sw_child_def = constants().HIERARCHY().child_of[sw_def]
 		swEmitter.emit('loader-start', {'D':sw_def,'I':screen_eid})
 		var filename = constants().META_DIR() + '/' + screen_eid + '.' + sw_def + '.json'
 		fs.readFile( filename, {'encoding': 'utf8'}, function(err, data) {
@@ -447,7 +457,9 @@ var swLoader = function swLoader(screenEid) {
 					return
 				} else throw err
 			}
-			swElement = JSON.parse(data)
+			var swElement = JSON.parse(data)
+			if (swElement.properties[sw_child_def].values === undefined)
+				throw ('Expected property ' + sw_child_def + ' is missing for entity ' + swElement.id)
 			swElement.properties[sw_child_def].values.forEach(function(chval) {
 				swLoadScreengroup(chval.db_value)
 			})
@@ -458,7 +470,7 @@ var swLoader = function swLoader(screenEid) {
 	}
 	function swLoadScreengroup(screengroup_eid) {
 		var sw_def = 'screen-group'
-		var sw_child_def = 'configuration'
+		var sw_child_def = constants().HIERARCHY().child_of[sw_def]
 		swEmitter.emit('loader-start', {'D':sw_def,'I':screengroup_eid})
 		var filename = constants().META_DIR() + '/' + screengroup_eid + '.' + sw_def + '.json'
 		fs.readFile( filename, {'encoding': 'utf8'}, function(err, data) {
@@ -469,7 +481,9 @@ var swLoader = function swLoader(screenEid) {
 					return
 				} else throw err
 			}
-			swElement = JSON.parse(data)
+			var swElement = JSON.parse(data)
+			if (swElement.properties[sw_child_def].values === undefined)
+				throw ('Expected property ' + sw_child_def + ' is missing for entity ' + swElement.id)
 			swElement.properties[sw_child_def].values.forEach(function(chval) {
 				swLoadConfiguration(chval.db_value)
 			})
@@ -479,7 +493,7 @@ var swLoader = function swLoader(screenEid) {
 	}
 	function swLoadConfiguration(configuration_eid) {
 		var sw_def = 'configuration'
-		var sw_child_def = 'schedule'
+		var sw_child_def = constants().HIERARCHY().child_of[sw_def]
 		swEmitter.emit('loader-start', {'D':sw_def,'I':configuration_eid})
 		var filename = constants().META_DIR() + '/' + configuration_eid + '.' + sw_def + '.json'
 		fs.readFile( filename, {'encoding': 'utf8'}, function(err, data) {
@@ -490,8 +504,9 @@ var swLoader = function swLoader(screenEid) {
 					return
 				} else throw err
 			}
-			swElement = JSON.parse(data)
-			// console.log(util.inspect({'element':swElement.properties[sw_child_def].values}))
+			var swElement = JSON.parse(data)
+			if (swElement.properties[sw_child_def].values === undefined)
+				throw ('Expected property ' + sw_child_def + ' is missing for entity ' + swElement.id)
 			swElement.properties[sw_child_def].values.forEach(function(chval) {
 				swLoadSchedule(chval.db_value)
 			})
@@ -501,7 +516,7 @@ var swLoader = function swLoader(screenEid) {
 	}
 	function swLoadSchedule(schedule_eid) {
 		var sw_def = 'schedule'
-		var sw_child_def = 'layout'
+		var sw_child_def = constants().HIERARCHY().child_of[sw_def]
 		swEmitter.emit('loader-start', {'D':sw_def,'I':schedule_eid})
 		var filename = constants().META_DIR() + '/' + schedule_eid + '.' + sw_def + '.json'
 		fs.readFile( filename, {'encoding': 'utf8'}, function(err, data) {
@@ -512,7 +527,9 @@ var swLoader = function swLoader(screenEid) {
 					return
 				} else throw err
 			}
-			swElement = JSON.parse(data)
+			var swElement = JSON.parse(data)
+			if (swElement.properties[sw_child_def].values === undefined)
+				throw ('Expected property ' + sw_child_def + ' is missing for entity ' + swElement.id)
 			swElement.properties[sw_child_def].values.forEach(function(chval) {
 				swLoadLayout(chval.db_value)
 			})
@@ -522,7 +539,7 @@ var swLoader = function swLoader(screenEid) {
 	}
 	function swLoadLayout(layout_eid) {
 		var sw_def = 'layout'
-		var sw_child_def = 'layout-playlist'
+		var sw_child_def = constants().HIERARCHY().child_of[sw_def]
 		swEmitter.emit('loader-start', {'D':sw_def,'I':layout_eid})
 		var filename = constants().META_DIR() + '/' + layout_eid + '.' + sw_def + '.json'
 		fs.readFile( filename, {'encoding': 'utf8'}, function(err, data) {
@@ -533,7 +550,9 @@ var swLoader = function swLoader(screenEid) {
 					return
 				} else throw err
 			}
-			swElement = JSON.parse(data)
+			var swElement = JSON.parse(data)
+			if (swElement.properties[sw_child_def].values === undefined)
+				throw ('Expected property ' + sw_child_def + ' is missing for entity ' + swElement.id)
 			// console.log(util.inspect({'element':swElement.properties[sw_child_def]}))
 			swElement.properties[sw_child_def].values.forEach(function(chval) {
 				swLoadLayoutPlaylist(chval.db_value)
@@ -544,7 +563,7 @@ var swLoader = function swLoader(screenEid) {
 	}
 	function swLoadLayoutPlaylist(layout_playlist_eid) {
 		var sw_def = 'layout-playlist'
-		var sw_child_def = 'playlist'
+		var sw_child_def = constants().HIERARCHY().child_of[sw_def]
 		swEmitter.emit('loader-start', {'D':sw_def,'I':layout_playlist_eid})
 		var filename = constants().META_DIR() + '/' + layout_playlist_eid + '.' + sw_def + '.json'
 		fs.readFile( filename, {'encoding': 'utf8'}, function(err, data) {
@@ -555,7 +574,9 @@ var swLoader = function swLoader(screenEid) {
 					return
 				} else throw err
 			}
-			swElement = JSON.parse(data)
+			var swElement = JSON.parse(data)
+			if (swElement.properties[sw_child_def].values === undefined)
+				throw ('Expected property ' + sw_child_def + ' is missing for entity ' + swElement.id)
 			swElement.properties[sw_child_def].values.forEach(function(chval) {
 				swLoadPlaylist(chval.db_value)
 			})
@@ -565,7 +586,7 @@ var swLoader = function swLoader(screenEid) {
 	}
 	function swLoadPlaylist(playlist_eid) {
 		var sw_def = 'playlist'
-		var sw_child_def = 'playlist-media'
+		var sw_child_def = constants().HIERARCHY().child_of[sw_def]
 		swEmitter.emit('loader-start', {'D':sw_def,'I':playlist_eid})
 		var filename = constants().META_DIR() + '/' + playlist_eid + '.' + sw_def + '.json'
 		fs.readFile( filename, {'encoding': 'utf8'}, function(err, data) {
@@ -576,7 +597,9 @@ var swLoader = function swLoader(screenEid) {
 					return
 				} else throw err
 			}
-			swElement = JSON.parse(data)
+			var swElement = JSON.parse(data)
+			if (swElement.properties[sw_child_def].values === undefined)
+				throw ('Expected property ' + sw_child_def + ' is missing for entity ' + swElement.id)
 			// console.log(util.inspect({'element':swElement.properties[sw_child_def]}))
 			swElement.properties[sw_child_def].values.forEach(function(chval) {
 				swLoadPlaylistMedia(chval.db_value)
@@ -587,7 +610,7 @@ var swLoader = function swLoader(screenEid) {
 	}
 	function swLoadPlaylistMedia(playlist_media_eid) {
 		var sw_def = 'playlist-media'
-		var sw_child_def = 'media'
+		var sw_child_def = constants().HIERARCHY().child_of[sw_def]
 		swEmitter.emit('loader-start', {'D':sw_def,'I':playlist_media_eid})
 		var filename = constants().META_DIR() + '/' + playlist_media_eid + '.' + sw_def + '.json'
 		fs.readFile( filename, {'encoding': 'utf8'}, function(err, data) {
@@ -598,7 +621,10 @@ var swLoader = function swLoader(screenEid) {
 					return
 				} else throw err
 			}
-			swElement = JSON.parse(data)
+			var swElement = JSON.parse(data)
+			if (swElement.properties[sw_child_def].values === undefined)
+				throw ('Expected property ' + sw_child_def + ' is missing for entity ' + swElement.id)
+
 			swElement.properties[sw_child_def].values.forEach(function(chval) {
 				swLoadMedia(chval.db_value)
 			})
@@ -618,7 +644,7 @@ var swLoader = function swLoader(screenEid) {
 					return
 				} else throw err
 			}
-			swElement = JSON.parse(data)
+			var swElement = JSON.parse(data)
 			if (swExists(swElement.id)) {
 				swEmitter.emit('loader-stop', {'D':sw_def,'I':media_eid})
 			} else {

@@ -473,7 +473,15 @@ function SwPlaylistMedia(dom_element) {
 	for (var key=0; key<dom_element.childNodes.length; key++) {
 		var child_node = dom_element.childNodes[key]
 		// console.log('key:' + key + ': ' + typeof child_node)
-		child_node.player = new SwMedia(child_node)
+
+		var muted = false
+		if (entity.element.properties.mute.values !== undefined) {
+			if (entity.element.properties.mute.values[0].db_value == 1) {
+				muted = true
+			}
+		}
+
+		child_node.player = new SwMedia(child_node, muted)
 		medias.push(child_node.player)
 		// child_node.player.mediaDomElement().addEventListener('ended', function() {
 		// 	console.log(' DOM id: ' + dom_element.id + '. On event ENDED ' + entity.definition + ':' + is_playing)
@@ -581,7 +589,7 @@ function SwPlaylistMedia(dom_element) {
 
 
 //
-function SwMedia(dom_element) {
+function SwMedia(dom_element, muted) {
 	var document = window.document
 	var entity = dom_element.swElement
 	var is_playing = this.is_playing = false
@@ -601,6 +609,7 @@ function SwMedia(dom_element) {
 		dom_element.appendChild(media_dom_element)
 		media_dom_element.autoplay = false
 		media_dom_element.controls = true
+		media_dom_element.muted = muted
 		// media_dom_element.addEventListener('pause', function() {
 		// 	// media_dom_element.currentTime = 0
 		// })
