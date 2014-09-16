@@ -317,10 +317,7 @@ function SwSchedule(dom_element) {
 function SwLayout(dom_element) {
 	var entity = dom_element.swElement
 	var is_playing = this.is_playing = false
-	console.log('New ' + entity.definition + ' ' + entity.id) // + ' Style: ' + util.inspect(entity.dom_element.style))
-	// console.log('New ' + entity.definition + ' ' + entity.id + ' Style: ' + util.inspect(dom_element.style))
-
-	// console.log(entity.definition + ' ' + entity.id + ' has ' + dom_element.childNodes.length + ' childNodes.')
+	console.log('New ' + entity.definition + ' ' + entity.id)
 	for (var key=0; key<dom_element.childNodes.length; key++) {
 		var child_node = dom_element.childNodes[key]
 		child_node.player = new SwLayoutPlaylist(child_node)
@@ -344,7 +341,6 @@ function SwLayout(dom_element) {
 				return
 			}
 			is_playing = false
-			// this.timer.clear()
 			dom_element.style.display = 'none'
 			console.log('|-- STOP ' + entity.definition + ' ' + entity.id)
 			for (var key=0; key<dom_element.childNodes.length; key++) {
@@ -363,14 +359,12 @@ function SwLayout(dom_element) {
 function SwLayoutPlaylist(dom_element) {
 	var entity = dom_element.swElement
 	var is_playing = false
-	console.log('New ' + entity.definition + ' ' + entity.id) // + ' Style: ' + util.inspect(entity.dom_element.style))
-	// console.log('New ' + entity.definition + ' ' + entity.id + ' Style: ' + util.inspect(dom_element.style))
-
-	// console.log(entity.definition + ' ' + entity.id + ' has ' + dom_element.childNodes.length + ' childNodes.')
+	console.log('New ' + entity.definition + ' ' + entity.id)
 	for (var key=0; key<dom_element.childNodes.length; key++) {
 		var child_node = dom_element.childNodes[key]
 		child_node.player = new SwPlaylist(child_node)
 	}
+
 	return {
 		play: function() {
 			console.log(' DOM id: ' + dom_element.id + '. Attempting PLAY ' + entity.definition + ':' + is_playing)
@@ -408,23 +402,12 @@ function SwLayoutPlaylist(dom_element) {
 function SwPlaylist(dom_element) {
 	var entity = dom_element.swElement
 	var is_playing = this.is_playing = false
-	console.log('New ' + entity.definition + ' ' + entity.id) // + ' Style: ' + util.inspect(entity.dom_element.style))
-	// console.log('New ' + entity.definition + ' ' + entity.id + ' Style: ' + util.inspect(dom_element.style))
-
-	// console.log(entity.definition + ' ' + entity.id + ' has ' + dom_element.childNodes.length + ' childNodes.')
+	console.log('New ' + entity.definition + ' ' + entity.id)
 	for (var key=0; key<dom_element.childNodes.length; key++) {
 		var child_node = dom_element.childNodes[key]
 		child_node.player = new SwPlaylistMedia(child_node)
 	}
 
-	i = 0
-	// playlist_medias.forEach( function(playlist_media) {
-	// 	console.log('AFTER sort[' + i++ + ']: playlist_media[' + playlist_media.id
-	// 	 + '].ordinal: ' + playlist_media.element.ordinal()
-	// 	 + ', prev:' + util.inspect(playlist_media.element.prev().id)
-	// 	 + ', next:' + util.inspect(playlist_media.element.next().id)
-	// 	 )
-	// })
 	return {
 		play: function() {
 			console.log(' DOM id: ' + dom_element.id + '. Attempting PLAY ' + entity.definition + ':' + is_playing)
@@ -435,9 +418,6 @@ function SwPlaylist(dom_element) {
 			dom_element.style.display = 'block'
 			console.log('|-- PLAY ' + entity.definition + ' ' + entity.id + ' is_playing:' + is_playing)
 			dom_element.childNodes[0].player.play()
-			// for (var key=0; key<dom_element.childNodes.length; key++) {
-			// 	dom_element.childNodes[key].player.play()
-			// }
 		},
 		stop: function() {
 			console.log(' DOM id: ' + dom_element.id + '. Attempting STOP ' + entity.definition + ':' + is_playing)
@@ -480,7 +460,6 @@ function SwPlaylistMedia(dom_element) {
 				muted = true
 			}
 		}
-
 		child_node.player = new SwMedia(child_node, muted)
 		medias.push(child_node.player)
 		// child_node.player.mediaDomElement().addEventListener('ended', function() {
