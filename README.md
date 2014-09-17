@@ -2,6 +2,8 @@
 
 SW14 uses node-webkit >= v0.3.0.**
 
+Video medias **must** have filename with correct extension
+
 ### Supported attributes
 
 #### All elements

@@ -582,7 +582,10 @@ function SwMedia(dom_element, muted) {
 		// p.style.color = 'gray'
 		// dom_element.appendChild(p)
 		media_dom_element = document.createElement('VIDEO')
-		media_dom_element.type = 'video/webm'
+		var filename = entity.element.properties.file.values[0].value
+		var mimetype = 'video/' + filename.split('.')[filename.split('.').length-1]
+		media_dom_element.type = mimetype
+		console.log(mimetype)
 		media_dom_element.src = entity.element.properties.filepath.values[0].db_value
 		media_dom_element.overflow = 'hidden'
 		dom_element.appendChild(media_dom_element)
