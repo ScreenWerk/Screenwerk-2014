@@ -53,6 +53,9 @@ function  SwPlayer(screen_id) {
 function SwScreen(dom_element) {
 	var is_playing = this.is_playing = false
 	var entity = dom_element.swElement
+	var element = dom_element.swElement.element
+	var properties = dom_element.swElement.element.properties
+
 
 	// console.log(entity.definition + ' ' + entity.id + ' has ' + dom_element.childNodes.length + ' childNodes.')
 	for (var key=0; key<dom_element.childNodes.length; key++) {
@@ -65,6 +68,11 @@ function SwScreen(dom_element) {
 			if (is_playing) {
 				return
 			}
+			if (properties['valid-to'] !== undefined)
+				if (properties['valid-to'].values !== undefined)
+					if (properties['valid-to'].values[0].getTime() < Date.now().getTime())
+						return
+
 			is_playing = true
 			dom_element.style.display = 'block'
 			console.log('|-- PLAY ' + entity.definition + ' ' + entity.id + ' is_playing:' + is_playing)
@@ -96,6 +104,8 @@ function SwScreen(dom_element) {
 function SwScreenGroup(dom_element) {
 	var is_playing = this.is_playing = false
 	var entity = dom_element.swElement
+	var element = dom_element.swElement.element
+	var properties = dom_element.swElement.element.properties
 	// console.log(entity.definition + ' ' + entity.id + ' has ' + dom_element.childNodes.length + ' childNodes.')
 	for (var key=0; key<dom_element.childNodes.length; key++) {
 		var child_node = dom_element.childNodes[key]
@@ -107,6 +117,11 @@ function SwScreenGroup(dom_element) {
 			if (is_playing) {
 				return
 			}
+			if (properties['valid-to'] !== undefined)
+				if (properties['valid-to'].values !== undefined)
+					if (properties['valid-to'].values[0].getTime() < Date.now().getTime())
+						return
+
 			is_playing = true
 			dom_element.style.display = 'block'
 			console.log('|-- PLAY ' + entity.definition + ' ' + entity.id + ' is_playing:' + is_playing)
@@ -138,6 +153,9 @@ function SwScreenGroup(dom_element) {
 function SwConfiguration(dom_element) {
 	var is_playing = this.is_playing = false
 	var entity = dom_element.swElement
+	var element = dom_element.swElement.element
+	var properties = dom_element.swElement.element.properties
+
 	console.log('New ' + entity.definition + ' ' + entity.id) // + ' Style: ' + util.inspect(entity.dom_element.style))
 	// console.log(entity.definition + ' ' + entity.id + ' has ' + dom_element.childNodes.length + ' childNodes.')
 	for (var key=0; key<dom_element.childNodes.length; key++) {
@@ -151,6 +169,11 @@ function SwConfiguration(dom_element) {
 			if (is_playing) {
 				return
 			}
+			if (properties['valid-to'] !== undefined)
+				if (properties['valid-to'].values !== undefined)
+					if (properties['valid-to'].values[0].getTime() < Date.now().getTime())
+						return
+
 			is_playing = true
 			dom_element.style.display = 'block'
 			console.log('|-- PLAY ' + entity.definition + ' ' + entity.id + ' is_playing:' + is_playing)
@@ -200,8 +223,9 @@ function SwConfiguration(dom_element) {
 
 function SwSchedule(dom_element) {
 	var entity = dom_element.swElement
-	// this.id = entity.id
-	var element = entity.element
+	var element = dom_element.swElement.element
+	var properties = dom_element.swElement.element.properties
+
 	var cleanupLayer = element.properties['ordinal'].values[0].db_value
 	var cleanup = this.cleanup = element.properties['cleanup'].values[0].db_value
 	var document = window.document
@@ -271,6 +295,11 @@ function SwSchedule(dom_element) {
 			if (is_playing) {
 				return
 			}
+			if (properties['valid-to'] !== undefined)
+				if (properties['valid-to'].values !== undefined)
+					if (properties['valid-to'].values[0].getTime() < Date.now().getTime())
+						return
+
 			is_playing = true
 			dom_element.style.display = 'block'
 			timer = swSetInterval(playLayouts, cronSched, startDate, endDate)
@@ -316,6 +345,9 @@ function SwSchedule(dom_element) {
 
 function SwLayout(dom_element) {
 	var entity = dom_element.swElement
+	var element = dom_element.swElement.element
+	var properties = dom_element.swElement.element.properties
+
 	var is_playing = this.is_playing = false
 	console.log('New ' + entity.definition + ' ' + entity.id)
 	for (var key=0; key<dom_element.childNodes.length; key++) {
@@ -328,6 +360,11 @@ function SwLayout(dom_element) {
 			if (is_playing) {
 				return
 			}
+			if (properties['valid-to'] !== undefined)
+				if (properties['valid-to'].values !== undefined)
+					if (properties['valid-to'].values[0].getTime() < Date.now().getTime())
+						return
+
 			is_playing = true
 			dom_element.style.display = 'block'
 			console.log('|-- PLAY ' + entity.definition + ' ' + entity.id + ' is_playing:' + is_playing)
@@ -358,6 +395,9 @@ function SwLayout(dom_element) {
 
 function SwLayoutPlaylist(dom_element) {
 	var entity = dom_element.swElement
+	var element = dom_element.swElement.element
+	var properties = dom_element.swElement.element.properties
+
 	var is_playing = false
 	console.log('New ' + entity.definition + ' ' + entity.id)
 	for (var key=0; key<dom_element.childNodes.length; key++) {
@@ -371,6 +411,11 @@ function SwLayoutPlaylist(dom_element) {
 			if (is_playing) {
 				return
 			}
+			if (properties['valid-to'] !== undefined)
+				if (properties['valid-to'].values !== undefined)
+					if (properties['valid-to'].values[0].getTime() < Date.now().getTime())
+						return
+
 			is_playing = true
 			dom_element.style.display = 'block'
 			console.log('|-- PLAY ' + entity.definition + ' ' + entity.id + ' is_playing:' + is_playing)
@@ -401,6 +446,9 @@ function SwLayoutPlaylist(dom_element) {
 
 function SwPlaylist(dom_element) {
 	var entity = dom_element.swElement
+	var element = dom_element.swElement.element
+	var properties = dom_element.swElement.element.properties
+
 	var is_playing = this.is_playing = false
 	console.log('New ' + entity.definition + ' ' + entity.id)
 	for (var key=0; key<dom_element.childNodes.length; key++) {
@@ -414,6 +462,11 @@ function SwPlaylist(dom_element) {
 			if (is_playing) {
 				return
 			}
+			if (properties['valid-to'] !== undefined)
+				if (properties['valid-to'].values !== undefined)
+					if (properties['valid-to'].values[0].getTime() < Date.now().getTime())
+						return
+
 			is_playing = true
 			dom_element.style.display = 'block'
 			console.log('|-- PLAY ' + entity.definition + ' ' + entity.id + ' is_playing:' + is_playing)
@@ -443,7 +496,8 @@ function SwPlaylist(dom_element) {
 function SwPlaylistMedia(dom_element) {
 	var document = window.document
 	var entity = dom_element.swElement
-	var element = entity.element
+	var element = dom_element.swElement.element
+	var properties = dom_element.swElement.element.properties
 	var is_playing = this.is_playing = false
 	console.log('New ' + entity.definition + ' ' + entity.id) // + ' Style: ' + util.inspect(entity.dom_element.style))
 	// console.log('New ' + entity.definition + ' ' + entity.id + ' Style: ' + util.inspect(dom_element.style))
@@ -455,8 +509,8 @@ function SwPlaylistMedia(dom_element) {
 		// console.log('key:' + key + ': ' + typeof child_node)
 
 		var muted = false
-		if (entity.element.properties.mute.values !== undefined) {
-			if (entity.element.properties.mute.values[0].db_value == 1) {
+		if (properties.mute.values !== undefined) {
+			if (properties.mute.values[0].db_value == 1) {
 				muted = true
 			}
 		}
@@ -487,6 +541,14 @@ function SwPlaylistMedia(dom_element) {
 		if (is_playing) {
 			return
 		}
+		if (properties['valid-to'] !== undefined)
+			if (properties['valid-to'].values !== undefined)
+				if (properties['valid-to'].values[0].getTime() < Date.now().getTime()) {
+					if (entity.next !== undefined)
+						swEmitter.emit('requested' + entity.next.id)
+					return
+				}
+
 		is_playing = true
 		dom_element.style.display = 'block'
 		console.log('|-- PLAY ' + entity.definition + ' ' + entity.id + ' is_playing:' + is_playing)
@@ -571,6 +633,9 @@ function SwPlaylistMedia(dom_element) {
 function SwMedia(dom_element, muted) {
 	var document = window.document
 	var entity = dom_element.swElement
+	var element = dom_element.swElement.element
+	var properties = dom_element.swElement.element.properties
+
 	var is_playing = this.is_playing = false
 	// console.log(util.inspect(entity.element.properties.type.values))
 	var mediatype = entity.element.properties.type.values === undefined ? '#NA' : entity.element.properties.type.values[0].value
@@ -629,6 +694,11 @@ function SwMedia(dom_element, muted) {
 			if (is_playing) {
 				return dom_element
 			}
+			if (properties['valid-to'] !== undefined)
+				if (properties['valid-to'].values !== undefined)
+					if (properties['valid-to'].values[0].getTime() < Date.now().getTime())
+						return dom_element
+
 			is_playing = true
 			dom_element.style.display = 'block'
 			console.log('|-- PLAY ' + entity.definition + ' ' + entity.id + ' is_playing:' + is_playing)

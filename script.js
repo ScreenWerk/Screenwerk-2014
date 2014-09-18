@@ -458,6 +458,10 @@ var swLoader = function swLoader(screenEid) {
 				} else throw err
 			}
 			var swElement = JSON.parse(data)
+			if (swElement.definition_keyname !== 'sw-screen')
+				throw ('Sorry, this is a ' + swElement.definition_keyname + ', not a SCREEN at entity ' + swElement.id)
+			if (swElement.properties[sw_child_def] === undefined)
+				throw ('Expected property ' + sw_child_def + ' is missing for entity ' + swElement.id)
 			if (swElement.properties[sw_child_def].values === undefined)
 				throw ('Expected property ' + sw_child_def + ' is missing for entity ' + swElement.id)
 			swElement.properties[sw_child_def].values.forEach(function(chval) {
