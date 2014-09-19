@@ -13,11 +13,11 @@ function CW() {
 		var dom_element = window.monitor_window.window.document.getElementById(id)
 		if (dom_element === null) {
 			dom_element = window.monitor_window.window.document.createElement('p')
-			window.monitor_window.window.document.body.appendChild(dom_element)
 			dom_element.appendChild(window.monitor_window.window.document.createTextNode(id))
 			dom_element.id = id
 			dom_element.style.display = 'block'
 			dom_element.style.margin = '0px'
+			window.monitor_window.window.document.body.appendChild(dom_element)
 		}
 		return dom_element
 	}
@@ -514,7 +514,16 @@ function SwPlaylistMedia(dom_element) {
 				muted = true
 			}
 		}
-		child_node.player = new SwMedia(child_node, muted)
+
+		var duration_ms = undefined
+		if (properties.duration.values !== undefined)
+			duration_ms = Number(properties.duration.values[0].db_value) * 1000
+
+		var delay_ms = 0
+		if (properties.delay_ms.values !== undefined)
+			delay_ms = Number(properties.delay.values[0].db_value) * 1000
+
+		child_node.player = new SwMedia(child_node, muted, duration_ms)
 		medias.push(child_node.player)
 		// child_node.player.mediaDomElement().addEventListener('ended', function() {
 		// 	console.log(' DOM id: ' + dom_element.id + '. On event ENDED ' + entity.definition + ':' + is_playing)
@@ -533,7 +542,8 @@ function SwPlaylistMedia(dom_element) {
 	})
 	swEmitter.on('requested' + entity.id, function() {
 		console.log('requested event for ' + entity.id)
-		play()
+		window.setTimeout(play(), delay_ms)
+
 	})
 
 	var play = function play() {
@@ -630,7 +640,7 @@ function SwPlaylistMedia(dom_element) {
 
 
 //
-function SwMedia(dom_element, muted) {
+function SwMedia(dom_element, muted, duration_ms) {
 	var document = window.document
 	var entity = dom_element.swElement
 	var element = dom_element.swElement.element
@@ -640,6 +650,7 @@ function SwMedia(dom_element, muted) {
 	// console.log(util.inspect(entity.element.properties.type.values))
 	var mediatype = entity.element.properties.type.values === undefined ? '#NA' : entity.element.properties.type.values[0].value
 	var media_dom_element = {}
+
 	if (mediatype === 'Video') {
 		// var p = document.createElement('P')
 		// p.appendChild(document.createTextNode('VIDEO ' + entity.definition + ': ' + entity.id))
@@ -655,7 +666,7 @@ function SwMedia(dom_element, muted) {
 		media_dom_element.overflow = 'hidden'
 		dom_element.appendChild(media_dom_element)
 		media_dom_element.autoplay = false
-		media_dom_element.controls = true
+		media_dom_element.controls = false
 		media_dom_element.muted = muted
 		// media_dom_element.addEventListener('pause', function() {
 		// 	// media_dom_element.currentTime = 0
@@ -665,11 +676,13 @@ function SwMedia(dom_element, muted) {
 			// window.alert('ended')
 			// media_dom_element.currentTime = 0
 		})
+
 	} else if (mediatype === 'Image') {
 		media_dom_element = document.createElement('IMG')
 		// console.log(util.inspect(entity.element.properties.filepath.values[0]))
 		media_dom_element.src = entity.element.properties.filepath.values[0].db_value
 		dom_element.appendChild(media_dom_element)
+
 	} else if (mediatype === 'URL') {
 		media_dom_element = document.createElement('IFRAME')
 		// console.log(util.inspect(entity.element.properties.filepath.values[0]))
@@ -681,6 +694,7 @@ function SwMedia(dom_element, muted) {
 		var ifrst = media_dom_element.contentWindow.document.body.style
 		ifrst.overflow = 'hidden'
 		console.log('==================' + util.inspect(ifrst))
+
 	} else {
 		dom_element.appendChild(document.createTextNode(mediatype + ' ' + entity.definition + ': ' + entity.id))
 	}
@@ -703,7 +717,12 @@ function SwMedia(dom_element, muted) {
 			dom_element.style.display = 'block'
 			console.log('|-- PLAY ' + entity.definition + ' ' + entity.id + ' is_playing:' + is_playing)
 			if (mediatype === 'Video') {
-				media_dom_element.play()
+				if (media_dom_element.play === undefined) {
+					console.log(util.inspect(media_dom_element,{depth:1}))
+					console.log('No play() function!!! for ' + dom_element.id + ' - aborting.')
+					throw ('\n\nThere is no play() method available for media ' + dom_element.id + ' (check your data at /api2/entity-' + entity.id + ')\nIt may as well be fault of ffmpegsumo library distributed with chromium.')
+				} else
+					media_dom_element.play()
 				// console.log(util.inspect(dom_element.childNodes[0]))
 				// dom_element.play()
 			} else if (mediatype === 'URL') {
@@ -711,6 +730,8 @@ function SwMedia(dom_element, muted) {
 				// console.log(util.inspect(dom_element.childNodes[0]))
 				// dom_element.play()
 			}
+			if (duration_ms !== undefined)
+				window.setTimeout(swEmitter.emit('ended' + dom_element.id.split('_')[0]), duration_ms)
 		},
 		stop: function() {
 			ctrw.hide(dom_element.id)

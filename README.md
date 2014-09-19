@@ -1,8 +1,11 @@
 # ScreenWerk 2014
 
-SW14 uses node-webkit >= v0.3.0.**
-
-Video medias **must** have filename with correct extension
+### Important notes
+> SW14 uses node-webkit >= v0.10.5
+> Out of the box SW14 supports only webm video type.
+> For proprietary codecs (i.e. MP4) a ffmpegsumo library has to be copied from Google Chrome into node-webkit package.
+> Suitable fmpegsumo version was provided with chrome version 36.0.1985.125 http://google-chrome.en.uptodown.com/mac/old
+> Video medias **must** have filename with correct extension as screenwerk doesnot bother to detect mimetypes.
 
 ### Supported attributes
 
@@ -54,6 +57,10 @@ Video medias **must** have filename with correct extension
 
 - ***mute***
   If set to true, *mute* property will propagate to **Media**. If not set or set to false, it will not propagate at all.
+- ***duration***
+  If not set, then media will play till its own "end" event happens. For images and urls there is no native "end" event and duration is required, if media has to stop after some time. Duration is set in seconds.
+- ***delay***
+  If not set, then media will start immediately. If set, then media will wait for that long before starting. Delay is set in seconds.
 
 #### Media
 > ***mute***: By default everything plays with sound. **Media** gets muted by parent **Playlist-Media**.
