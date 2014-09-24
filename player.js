@@ -520,7 +520,7 @@ function SwPlaylistMedia(dom_element) {
 			duration_ms = Number(properties.duration.values[0].db_value) * 1000
 
 		var delay_ms = 0
-		if (properties.delay_ms.values !== undefined)
+		if (properties.delay.values !== undefined)
 			delay_ms = Number(properties.delay.values[0].db_value) * 1000
 
 		child_node.player = new SwMedia(child_node, muted, duration_ms)

@@ -236,7 +236,7 @@ swEmitter.on('init-ready', function() {
 			break;
 			case 'media':
 					// element.properties.type.values[0] = data.properties.type.values[0].value
-				element.properties.filepath = {'values': [{'db_value':constants().MEDIA_DIR() + '/' + el.id}]}
+				element.properties.filepath = {'values': [{'db_value':constants().MEDIA_DIR() + '/' + el.id + '_' + element.properties.file.values[0].db_value}]}
 			break;
 		}
 	})
@@ -335,7 +335,7 @@ var swLoader = function swLoader(screenEid) {
 			console.log('Fetcher allready started for ' + util.inspect(fetchersEngaged[fetchersEngaged.indexOf(entity_id + '_' + file_id)]))
 			return
 		}
-		var filename = constants().MEDIA_DIR() + '/' + entity_id
+		var filename = constants().MEDIA_DIR() + '/' + entity_id + '_' + file_id
 		if (fs.existsSync(filename)) {
 			return
 		}
