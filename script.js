@@ -41,6 +41,21 @@ window.monitor_window.on('close', function() {
 	window.gui.App.quit()
 })
 
+var monitor_start = function monitor_start() {
+	var quit_button = window.monitor_window.window.document.getElementById('quit')
+	if (quit_button === null)
+		throw ("NULL!")
+	if (quit_button.onclick === undefined)
+		throw ("undefined is not a funCTION!")
+
+	quit_button.onclick = function() {
+		window.gui.App.quit()
+	}
+}
+
+setTimeout(monitor_start, 1000)
+
+
 
 window.constants = function constants() {
 	return {
