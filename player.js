@@ -69,9 +69,11 @@ function SwScreen(dom_element) {
 				return
 			}
 			if (properties['valid-to'] !== undefined)
-				if (properties['valid-to'].values !== undefined)
-					if (properties['valid-to'].values[0].getTime() < Date.now().getTime())
+				if (properties['valid-to'].values !== undefined) {
+					var vt_date = new Date(properties['valid-to'].values[0].db_value)
+					if (vt_date.getTime() < Date.now())
 						return
+				}
 
 			is_playing = true
 			dom_element.style.display = 'block'
@@ -118,9 +120,11 @@ function SwScreenGroup(dom_element) {
 				return
 			}
 			if (properties['valid-to'] !== undefined)
-				if (properties['valid-to'].values !== undefined)
-					if (properties['valid-to'].values[0].getTime() < Date.now().getTime())
+				if (properties['valid-to'].values !== undefined) {
+					var vt_date = new Date(properties['valid-to'].values[0].db_value)
+					if (vt_date.getTime() < Date.now())
 						return
+				}
 
 			is_playing = true
 			dom_element.style.display = 'block'
@@ -170,9 +174,11 @@ function SwConfiguration(dom_element) {
 				return
 			}
 			if (properties['valid-to'] !== undefined)
-				if (properties['valid-to'].values !== undefined)
-					if (properties['valid-to'].values[0].getTime() < Date.now().getTime())
+				if (properties['valid-to'].values !== undefined) {
+					var vt_date = new Date(properties['valid-to'].values[0].db_value)
+					if (vt_date.getTime() < Date.now())
 						return
+				}
 
 			is_playing = true
 			dom_element.style.display = 'block'
@@ -242,7 +248,7 @@ function SwSchedule(dom_element) {
 		cronSched.schedules[0].fd_a = [startTime];
 	}
 	if (entity.element.properties['valid-to'].values !== undefined) {
-		var endDate = entity.element.properties['valid-to'].values[0]
+		var endDate = new Date(entity.element.properties['valid-to'].values[0].db_value)
 		var endTime = (endDate.getTime());
 		cronSched.schedules[0].fd_b = [endTime];
 	}
@@ -296,9 +302,11 @@ function SwSchedule(dom_element) {
 				return
 			}
 			if (properties['valid-to'] !== undefined)
-				if (properties['valid-to'].values !== undefined)
-					if (properties['valid-to'].values[0].getTime() < Date.now().getTime())
+				if (properties['valid-to'].values !== undefined) {
+					var vt_date = new Date(properties['valid-to'].values[0].db_value)
+					if (vt_date.getTime() < Date.now())
 						return
+				}
 
 			is_playing = true
 			dom_element.style.display = 'block'
@@ -361,9 +369,11 @@ function SwLayout(dom_element) {
 				return
 			}
 			if (properties['valid-to'] !== undefined)
-				if (properties['valid-to'].values !== undefined)
-					if (properties['valid-to'].values[0].getTime() < Date.now().getTime())
+				if (properties['valid-to'].values !== undefined) {
+					var vt_date = new Date(properties['valid-to'].values[0].db_value)
+					if (vt_date.getTime() < Date.now())
 						return
+				}
 
 			is_playing = true
 			dom_element.style.display = 'block'
@@ -412,9 +422,11 @@ function SwLayoutPlaylist(dom_element) {
 				return
 			}
 			if (properties['valid-to'] !== undefined)
-				if (properties['valid-to'].values !== undefined)
-					if (properties['valid-to'].values[0].getTime() < Date.now().getTime())
+				if (properties['valid-to'].values !== undefined) {
+					var vt_date = new Date(properties['valid-to'].values[0].db_value)
+					if (vt_date.getTime() < Date.now())
 						return
+				}
 
 			is_playing = true
 			dom_element.style.display = 'block'
@@ -463,9 +475,11 @@ function SwPlaylist(dom_element) {
 				return
 			}
 			if (properties['valid-to'] !== undefined)
-				if (properties['valid-to'].values !== undefined)
-					if (properties['valid-to'].values[0].getTime() < Date.now().getTime())
+				if (properties['valid-to'].values !== undefined) {
+					var vt_date = new Date(properties['valid-to'].values[0].db_value)
+					if (vt_date.getTime() < Date.now())
 						return
+				}
 
 			is_playing = true
 			dom_element.style.display = 'block'
@@ -552,12 +566,14 @@ function SwPlaylistMedia(dom_element) {
 			return
 		}
 		if (properties['valid-to'] !== undefined)
-			if (properties['valid-to'].values !== undefined)
-				if (properties['valid-to'].values[0].getTime() < Date.now().getTime()) {
+			if (properties['valid-to'].values !== undefined) {
+				var vt_date = new Date(properties['valid-to'].values[0].db_value)
+				if (vt_date.getTime() < Date.now()) {
 					if (entity.next !== undefined)
 						swEmitter.emit('requested' + entity.next.id)
 					return
 				}
+			}
 
 		is_playing = true
 		dom_element.style.display = 'block'
@@ -594,12 +610,6 @@ function SwPlaylistMedia(dom_element) {
 	return {
 		play: function() {
 			return play()
-
-			// console.log('setTimeout STOP this ' +  entity.id + ' and PLAY next ' + element.next.id + ' playlist_media at ' + util.inspect(stopDate))
-			// console.log(util.inspect(element.next.element))
-			// setTimeout(console.log('got to PLAY ' + element.next.id), stopDate - Date.now)
-			// setTimeout(element.next.element.play, stopDate - Date.now())
-			// setTimeout(stop, stopDate - Date.now())
 		},
 		stop: function() {
 			return stop()
@@ -709,9 +719,11 @@ function SwMedia(dom_element, muted, duration_ms) {
 				return dom_element
 			}
 			if (properties['valid-to'] !== undefined)
-				if (properties['valid-to'].values !== undefined)
-					if (properties['valid-to'].values[0].getTime() < Date.now().getTime())
+				if (properties['valid-to'].values !== undefined) {
+					var vt_date = new Date(properties['valid-to'].values[0].db_value)
+					if (vt_date.getTime() < Date.now())
 						return dom_element
+				}
 
 			is_playing = true
 			dom_element.style.display = 'block'

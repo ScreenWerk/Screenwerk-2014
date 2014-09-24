@@ -53,7 +53,7 @@ var monitor_start = function monitor_start() {
 	}
 }
 
-setTimeout(monitor_start, 1000)
+setTimeout(monitor_start, 5000)
 
 
 
@@ -194,8 +194,9 @@ swEmitter.on('init-ready', function() {
 			break;
 			case 'schedule':
 				if (element.properties.crontab.values === undefined) {
-					console.error('Schedule ' + element.id + ' without crontab. rescheduling to midnight, February 30, Sunday')
-					element.properties.crontab.values = [{'db_value':'0 0 30 2 0'}] // Midnight, February 30, Sunday
+					throw ('Schedule ' + element.id + ' has no crontab.')
+					// console.error('Schedule ' + element.id + ' without crontab. rescheduling to midnight, February 30, Sunday')
+					// element.properties.crontab.values = [{'db_value':'0 0 30 2 0'}] // Midnight, February 30, Sunday
 				}
 				if (element.properties.cleanup.values === undefined) {
 					element.properties.cleanup.values = [{'db_value':0}]
@@ -251,7 +252,10 @@ swEmitter.on('init-ready', function() {
 			break;
 			case 'media':
 					// element.properties.type.values[0] = data.properties.type.values[0].value
-				element.properties.filepath = {'values': [{'db_value':constants().MEDIA_DIR() + '/' + el.id + '_' + element.properties.file.values[0].db_value}]}
+				if (element.properties.file.values === undefined && element.properties.url.values === undefined)
+					throw ('"URL" or "file" property must be set for ' + element.id)
+				if (element.properties.file.values !== undefined)
+					element.properties.filepath = {'values': [{'db_value':constants().MEDIA_DIR() + '/' + el.id + '_' + element.properties.file.values[0].db_value}]}
 			break;
 		}
 	})
