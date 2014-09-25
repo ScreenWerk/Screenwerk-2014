@@ -703,8 +703,6 @@ function SwMedia(dom_element, muted, duration_ms) {
 		dom_element.appendChild(media_dom_element)
 		var ifrst = media_dom_element.contentWindow.document.body.style
 		ifrst.overflow = 'hidden'
-		console.log('==================' + util.inspect(ifrst))
-
 	} else {
 		dom_element.appendChild(document.createTextNode(mediatype + ' ' + entity.definition + ': ' + entity.id))
 	}
@@ -742,8 +740,10 @@ function SwMedia(dom_element, muted, duration_ms) {
 				// console.log(util.inspect(dom_element.childNodes[0]))
 				// dom_element.play()
 			}
-			if (duration_ms !== undefined)
-				window.setTimeout(swEmitter.emit('ended' + dom_element.id.split('_')[0]), duration_ms)
+			if (duration_ms !== undefined) {
+				// console.log(' DOM id: ' + dom_element.id + '. duration_ms ' + duration_ms)
+				window.setTimeout(function() {swEmitter.emit('ended' + dom_element.id.split('_')[0])}, duration_ms)
+			}
 		},
 		stop: function() {
 			ctrw.hide(dom_element.id)
