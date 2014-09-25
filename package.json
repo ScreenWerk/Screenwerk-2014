@@ -12,6 +12,7 @@
     "width": 900,
     "height": 500
   },
+  "chromium-args": "--ignore-gpu-blacklist",
   "repository": {
     "type": "git",
     "url": "git://github.com/argoroots/Screenwerk.git"
