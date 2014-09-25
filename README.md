@@ -11,7 +11,7 @@
 
 #### All elements
 
-- ***in-pixels***
+- ***in-pixels***  
   All elements occupy 100% of available screen estate by default. If dimensions are specified, then by default it is assumed to be in %. If *in-pixels* attribute is selected, element will be rendered with pixel accuracy.
 
 #### Schedule
@@ -33,19 +33,19 @@
 </tbody>
 </table>
 
-- ***ordinal***
+- ***ordinal***  
   Affects cleanup action
 
-- ***cleanup***
+- ***cleanup***  
   If set to true, **Schedule** will stop all currently playing **Layouts** with *ordinal* less than or equal to itself's *ordinal*
 
 
 #### Layout-Playlist
 
-- ***loop***
+- ***loop***  
   If set to true, loop property will propagate to **Playlist**. If not set or set to false, it will not propagate at all
 
-- ***layer***
+- ***layer***  
   If not set, element will be placed on layer 1 (*z-index* = 1). Layers with higher number will be rendered on top of layers with smaller number. If multiple elements share same *layer*, then its up to chance, which one will be on top of another.
 
 #### Playlist
@@ -55,12 +55,21 @@
 
 #### Playlist-Media
 
-- ***mute***
+> #### ToDo:
+>     **Playlist-Media** could be configured as a hierarchical object 
+>     where every child **Playlist-Media** will be rendered right after parent.
+
+- ***mute***  
   If set to true, *mute* property will propagate to **Media**. If not set or set to false, it will not propagate at all.
-- ***duration***
+- ***duration***  
   If not set, then media will play till its own "end" event happens. For images and urls there is no native "end" event and duration is required, if media has to stop after some time. Duration is set in seconds.
-- ***delay***
+- ***delay***  
   If not set, then media will start immediately. If set, then media will wait for that long before starting. Delay is set in seconds.
+  ***ordinal***  
+  Medias are ordered in playlist by ordinal. In case two ordinals are equal, then their order is up to chance.
+
+  
+  
 
 #### Media
 > ***mute***: By default everything plays with sound. **Media** gets muted by parent **Playlist-Media**.
