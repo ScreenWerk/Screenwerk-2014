@@ -1,0 +1,27 @@
+{
+  "name": "ScreenWerk-2014",
+  "description": "Digital signage made simple!",
+  "version": "0.0.1",
+  "main": "index.html",
+  "license": "MIT",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/argoroots/Screenwerk"
+  },
+  "dependencies": {
+    "later": "*"
+  },
+  "window": {
+    "icon": "imgs/sw-p512.png",
+    "show_in_taskbar": true,
+    "fullscreen": true,
+    "toolbar": false,
+    "frame": false,
+    "show": true,
+    "position": "right",
+    "width": 900,
+    "height": 500
+  },
+  "chromium-args": "--ignore-gpu-blacklist"
+}
