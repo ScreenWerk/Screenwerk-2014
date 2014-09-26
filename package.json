@@ -16,5 +16,8 @@
   "repository": {
     "type": "git",
     "url": "git://github.com/argoroots/Screenwerk.git"
+  },
+  "dependencies": {
+    "later": "*"
   }
 }
