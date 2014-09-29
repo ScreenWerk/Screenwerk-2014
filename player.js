@@ -556,7 +556,7 @@ function SwPlaylistMedia(dom_element) {
 	})
 	swEmitter.on('requested' + entity.id, function() {
 		console.log('requested event for ' + entity.id)
-		window.setTimeout(play(), delay_ms)
+		window.setTimeout(play, delay_ms)
 
 	})
 

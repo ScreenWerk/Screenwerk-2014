@@ -360,7 +360,7 @@ var swLoader = function swLoader(screenEid) {
 		}
 		// indexOfElement(entity_id)
 		var element = swElements[indexOfElement(entity_id)].element
-		swEmitter.emit('fetcher-start', {'D':element.definition_keyname,'I':entity_id + '_' + file_id})
+		swEmitter.emit('fetcher-start', {'D':element.definition.keyname,'I':entity_id + '_' + file_id})
 		console.log('File ' + filename + ' missing. Fetch!')
 		var options = {
 			hostname: 'piletilevi.entu.ee',
@@ -411,7 +411,7 @@ var swLoader = function swLoader(screenEid) {
 			})
 			response.on('end', function response_emitter() {
 				var obj = JSON.parse(str)
-				console.log(util.inspect(obj))
+				// console.log(util.inspect(obj))
 				if (obj.error !== undefined) {
 					console.log(path + ' responded with error: ' + obj.error)
 					throw(path + ' responded with error: ' + obj.error)
