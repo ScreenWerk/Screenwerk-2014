@@ -57,39 +57,39 @@ if (gui.App.argv.length > 1) {
 	player_window.isFullscreen = true
 }
 
-window.monitor_window = gui.Window.get(window.open('monitor.html'))
-// window.monitor_window = gui.Window.get(window.open(''))
-var mon_win = window.monitor_window.window
-mon_win.moveTo(1,1)
-mon_win.resizeTo(200,450)
-mon_win.toolbar = false
-mon_win.show = false
-mon_win.show_in_taskbar = false
-mon_win.icon = 'imgs/sw-p512.png'
-var mon_win_body = mon_win.document.body
-mon_win_body.style.margin = '0px'
-mon_win_body.style.padding = '0px'
+// window.monitor_window = gui.Window.get(window.open('monitor.html'))
+// // window.monitor_window = gui.Window.get(window.open(''))
+// var mon_win = window.monitor_window.window
+// mon_win.moveTo(1,1)
+// mon_win.resizeTo(200,450)
+// mon_win.toolbar = false
+// mon_win.show = false
+// mon_win.show_in_taskbar = false
+// mon_win.icon = 'imgs/sw-p512.png'
+// var mon_win_body = mon_win.document.body
+// mon_win_body.style.margin = '0px'
+// mon_win_body.style.padding = '0px'
 
-window.monitor_window.on('minimize', function() {
-	window.gui.App.quit()
-})
-window.monitor_window.on('close', function() {
-	window.gui.App.quit()
-})
+// window.monitor_window.on('minimize', function() {
+// 	window.gui.App.quit()
+// })
+// window.monitor_window.on('close', function() {
+// 	window.gui.App.quit()
+// })
 
-var monitor_start = function monitor_start() {
-	var quit_button = window.monitor_window.window.document.getElementById('quit')
-	if (quit_button === null)
-		throw ("NULL!")
-	if (quit_button.onclick === undefined)
-		throw ("undefined is not a funCTION!")
+// var monitor_start = function monitor_start() {
+// 	var quit_button = window.monitor_window.window.document.getElementById('quit')
+// 	if (quit_button === null)
+// 		throw ("NULL!")
+// 	if (quit_button.onclick === undefined)
+// 		throw ("undefined is not a funCTION!")
 
-	quit_button.onclick = function() {
-		window.gui.App.quit()
-	}
-}
-
-setTimeout(monitor_start, 5000)
+// 	quit_button.onclick = function() {
+// 		window.gui.App.quit()
+// 	}
+// }
+//
+// setTimeout(monitor_start, 5000)
 
 
 

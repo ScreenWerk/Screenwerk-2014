@@ -22,34 +22,34 @@ var swLog = function swLog(message, scope) {
 }
 
 // ctrld = ctrlw.document
-function CW() {
-	var check = function check(id) {
-		var dom_element = window.monitor_window.window.document.getElementById(id)
-		if (dom_element === null) {
-			dom_element = window.monitor_window.window.document.createElement('p')
-			dom_element.appendChild(window.monitor_window.window.document.createTextNode(id))
-			dom_element.id = id
-			dom_element.style.display = 'block'
-			dom_element.style.margin = '0px'
-			window.monitor_window.window.document.body.appendChild(dom_element)
-		}
-		return dom_element
-	}
-	return {
-		show: function(id) {
-			check(id).style['text-decoration'] = 'none'
-			check(id).style['font-weight'] = 'bold'
-			check(id).style.color = 'black'
-		},
-		hide: function(id) {
-			check(id).style['text-decoration'] = 'line-through'
-			check(id).style['font-weight'] = 'normal'
-			check(id).style.color = 'gray'
-		}
-	}
-}
+// function CW() {
+// 	var check = function check(id) {
+// 		var dom_element = window.monitor_window.window.document.getElementById(id)
+// 		if (dom_element === null) {
+// 			dom_element = window.monitor_window.window.document.createElement('p')
+// 			dom_element.appendChild(window.monitor_window.window.document.createTextNode(id))
+// 			dom_element.id = id
+// 			dom_element.style.display = 'block'
+// 			dom_element.style.margin = '0px'
+// 			window.monitor_window.window.document.body.appendChild(dom_element)
+// 		}
+// 		return dom_element
+// 	}
+// 	return {
+// 		show: function(id) {
+// 			check(id).style['text-decoration'] = 'none'
+// 			check(id).style['font-weight'] = 'bold'
+// 			check(id).style.color = 'black'
+// 		},
+// 		hide: function(id) {
+// 			check(id).style['text-decoration'] = 'line-through'
+// 			check(id).style['font-weight'] = 'normal'
+// 			check(id).style.color = 'gray'
+// 		}
+// 	}
+// }
 
-var ctrw = new CW()
+// var ctrw = new CW()
 
 
 function SwPlayer(screen_id) {
@@ -725,7 +725,7 @@ function SwMedia(dom_element, muted, duration_ms) {
 
 	return {
 		play: function() {
-			ctrw.show(dom_element.id)
+			// ctrw.show(dom_element.id)
 			swLog(' DOM id: ' + dom_element.id + '. Attempting PLAY ' + entity.definition + ':' + is_playing)
 			if (is_playing) {
 				return dom_element
@@ -760,7 +760,7 @@ function SwMedia(dom_element, muted, duration_ms) {
 			}
 		},
 		stop: function() {
-			ctrw.hide(dom_element.id)
+			// ctrw.hide(dom_element.id)
 			swLog(' DOM id: ' + dom_element.id + '. Attempting STOP ' + entity.definition + ':' + is_playing)
 			if (!is_playing) {
 				return
@@ -798,7 +798,7 @@ var swSetTimeout = function(fn, sched, startDate, endDate) {
 			}
 		}
 	}
-	swLog('Timeout set for: ' + util.inspect({'fn':fn, 'sched':sched}, {depth:null}))
+	// swLog('Timeout set for: ' + util.inspect({'fn':fn, 'sched':sched}, {depth:null}))
 	var s = later.schedule(sched)
 	var t
 	if (startDate !== undefined ? startDate > Date.now() : false) {
