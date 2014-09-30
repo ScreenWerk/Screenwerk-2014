@@ -7,17 +7,53 @@
 
 var gui    = require('nw.gui')
 var assert = require('assert')
+var util    = require("util")
+var fs      = require('fs')
+
+var os  = require('os-utils')
+
+var https   = require('https')
+var events  = require('events')
+var sw_play = require('./player')
+
 
 assert.equal(typeof(gui.App.argv[0]), 'string'
 			, "Screen ID should be passed as first argument.")
 assert.ok(Number(gui.App.argv[0]) > 0
 			, "Screen ID must be number greater than zero.")
 
+var consoleStream = fs.createWriteStream('./console.log', {flags:'a'})
+var sysLogStream = fs.createWriteStream('./system.log', {flags:'a'})
+var swLog = function swLog(message, scope) {
+	console.log(message)
+	if (scope === undefined)
+		scope = 'INFO'
+	now = new Date()
+	if (scope === 'SYSTEM')
+		sysLogStream.write(now.toString().slice(0,24) + ': ' + message + '\n')
+	else
+		consoleStream.write(now.toString().slice(0,24) + ' ' + scope + ': ' + message + '\n')
+}
+
+
+swLog('\n\n===================================')
+
+
+swLog(os.platform(), 'SYSTEM')
+
+var systemLoad = function systemLoad() {
+	os.cpuUsage(function(v){
+	    swLog( os.processUptime() + 'sec | CPU Usage : ' + Math.round(v*100)/1 + '% | Mem free: ' + Math.round(os.freemem()) + '/' + Math.round(os.totalmem()) + 'M', 'SYSTEM' )
+	})
+	setTimeout(systemLoad, 10000)
+}
+systemLoad()
+
 var player_window = gui.Window.get()
 player_window.window.moveTo(201,1)
 player_window.isFullscreen = false
 if (gui.App.argv.length > 1) {
-	console.log('launching in fullscreen mode')
+	swLog('launching in fullscreen mode')
 	player_window.isFullscreen = true
 }
 
@@ -87,36 +123,30 @@ window.constants = function constants() {
 }
 
 
-var util    = require("util")
-var fs      = require('fs')
-var https   = require('https')
-var events  = require('events')
-var sw_play = require('./player')
-
 // var numlenf	= 6
 
 
 fs.lstat(constants().META_DIR(), function(err, stats) {
 	if (err) {
-		console.log('Creating folder for ' + constants().META_DIR() + '.')
+		swLog('Creating folder for ' + constants().META_DIR() + '.')
 		fs.mkdir(constants().META_DIR())
 	}
 	else if (!stats.isDirectory()) {
-		console.log('Renaming existing file "' + constants().META_DIR() + '" to "' + constants().META_DIR() + '.bak.')
+		swLog('Renaming existing file "' + constants().META_DIR() + '" to "' + constants().META_DIR() + '.bak.')
 		fs.renameSync(constants().META_DIR(), constants().META_DIR() + '.bak')
-		console.log('Creating folder for ' + constants().META_DIR() + '.')
+		swLog('Creating folder for ' + constants().META_DIR() + '.')
 		fs.mkdir(constants().META_DIR())
     }
 })
 fs.lstat(constants().MEDIA_DIR(), function(err, stats) {
 	if (err) {
-		console.log('Creating folder for ' + constants().MEDIA_DIR() + '.')
+		swLog('Creating folder for ' + constants().MEDIA_DIR() + '.')
 		fs.mkdir(constants().MEDIA_DIR())
 	}
 	else if (!stats.isDirectory()) {
-		console.log('Renaming existantsng file "' + consta.MEDIA_DIR() + '" to "' + consta.MEDIA_DIR() + '.bak.')
+		swLog('Renaming existantsng file "' + consta.MEDIA_DIR() + '" to "' + consta.MEDIA_DIR() + '.bak.')
 		fs.renameSync(constants().MEDIA_DIR(), constants().MEDIA_DIR() + '.bak')
-		console.log('Creating folder for ' + constants().MEDIA_DIR() + '.')
+		swLog('Creating folder for ' + constants().MEDIA_DIR() + '.')
 		fs.mkdir(constants().MEDIA_DIR())
     }
 })
@@ -131,23 +161,23 @@ var bytes_to_go = bytes_downloaded = 0
 swEmitter.on('loader-start', function(data) {
 	if (loadersEngaged.indexOf(data.I) === -1) {
 		loadersEngaged.push(data.I)
-		console.log(fetchersEngaged.length + loadersEngaged.length + ' +  Start loading ' + util.inspect(data))
+		swLog(fetchersEngaged.length + loadersEngaged.length + ' +  Start loading ' + util.inspect(data))
 	} else {
-		console.log(fetchersEngaged.length + loadersEngaged.length + ' ~ Resume loading ' + util.inspect(data))
+		swLog(fetchersEngaged.length + loadersEngaged.length + ' ~ Resume loading ' + util.inspect(data))
 	}
 })
 swEmitter.on('loader-stop', function(data) {
 	if (loadersEngaged.indexOf(data.I) === -1)
 		return
 	loadersEngaged.splice(loadersEngaged.indexOf(data.I),1)
-	console.log((fetchersEngaged.length + loadersEngaged.length) + ' -   Stop loading ' + util.inspect(data))
+	swLog((fetchersEngaged.length + loadersEngaged.length) + ' -   Stop loading ' + util.inspect(data))
 	if (fetchersEngaged.length + loadersEngaged.length + fetchersEngaged.length + loadersEngaged.length === 0)
 		swEmitter.emit('init-ready')
 })
 swEmitter.on('fetcher-start', function(data) {
 	if (fetchersEngaged.indexOf(data.I) === -1) {
 		fetchersEngaged.push(data.I)
-		console.log(fetchersEngaged.length + loadersEngaged.length + ' +  Start fetching ' + util.inspect(data))
+		swLog(fetchersEngaged.length + loadersEngaged.length + ' +  Start fetching ' + util.inspect(data))
 	} else {
 		throw ('Duplicate fetcher tried to launch for ' + data.I)
 	}
@@ -156,7 +186,7 @@ swEmitter.on('fetcher-stop', function(data) {
 	if (fetchersEngaged.indexOf(data.I) === -1)
 		throw ('Fetcher should not exist ' + data.I)
 	fetchersEngaged.splice(fetchersEngaged.indexOf(data.I),1)
-	console.log((fetchersEngaged.length + loadersEngaged.length) + ' -   Stop fetching ' + util.inspect(data))
+	swLog((fetchersEngaged.length + loadersEngaged.length) + ' -   Stop fetching ' + util.inspect(data))
 	if (fetchersEngaged.length + loadersEngaged.length + fetchersEngaged.length + loadersEngaged.length === 0)
 		swEmitter.emit('init-ready')
 })
@@ -172,10 +202,10 @@ swEmitter.on('init-ready', function() {
 		// el.dom_elements = []
 		element = el.element
 		sw_def = el.definition
-		// console.log(el.id + ':' + sw_def)
+		// swLog(el.id + ':' + sw_def)
 		if (constants().HIERARCHY().child_of[sw_def] !== undefined) {
 			sw_child_def = constants().HIERARCHY().child_of[sw_def]
-			// console.log(sw_child_def)
+			// swLog(sw_child_def)
 			if (element.properties[sw_child_def].values !== undefined) {
 				element.properties[sw_child_def].values.forEach(function(value) {
 					child = l.swElements()[l.indexOfElement(value.db_value)]
@@ -343,7 +373,7 @@ swEmitter.on('init-ready', function() {
 
 	// gui.App.quit()
 })
-// console.log(constants().META_DIR() + '/' + constants().SCREEN_ID() + '.sw-screen.json')
+// swLog(constants().META_DIR() + '/' + constants().SCREEN_ID() + '.sw-screen.json')
 
 var swLoader = function swLoader(screenEid) {
 	var swElements = []
@@ -351,7 +381,7 @@ var swLoader = function swLoader(screenEid) {
 
 	function swMediaFetch(entity_id, file_id) {
 		if (fetchersEngaged.indexOf(entity_id + '_' + file_id) !== -1) {
-			console.log('Fetcher allready started for ' + util.inspect(fetchersEngaged[fetchersEngaged.indexOf(entity_id + '_' + file_id)]))
+			swLog('Fetcher allready started for ' + util.inspect(fetchersEngaged[fetchersEngaged.indexOf(entity_id + '_' + file_id)]))
 			return
 		}
 		var filename = constants().MEDIA_DIR() + '/' + entity_id + '_' + file_id
@@ -361,7 +391,7 @@ var swLoader = function swLoader(screenEid) {
 		// indexOfElement(entity_id)
 		var element = swElements[indexOfElement(entity_id)].element
 		swEmitter.emit('fetcher-start', {'D':element.definition.keyname,'I':entity_id + '_' + file_id})
-		console.log('File ' + filename + ' missing. Fetch!')
+		swLog('File ' + filename + ' missing. Fetch!')
 		var options = {
 			hostname: 'piletilevi.entu.ee',
 		 	port: 443,
@@ -373,8 +403,8 @@ var swLoader = function swLoader(screenEid) {
 			var filesize = response.headers['content-length']
 
 			bytes_to_go += Number(filesize)
-			console.log('Start fetching media for ' + entity_id + '. Bytes to go: ' + bytes_to_go)
-			// console.log('STATUS: ' + response.statusCode);
+			swLog('Start fetching media for ' + entity_id + '. Bytes to go: ' + bytes_to_go)
+			// swLog('STATUS: ' + response.statusCode);
 
 			var file = fs.createWriteStream(filename + '.download');
 			response.on('data', function(chunk){
@@ -382,8 +412,8 @@ var swLoader = function swLoader(screenEid) {
 				file.write(chunk)
 			})
 			response.on('end', function() {
-				console.log('Media for ' + entity_id + ' (' + element.properties.file.values[0].value + ') fetched.')
-				console.log('TOTAL:' + bytes_downloaded + '/' + bytes_to_go
+				swLog('Media for ' + entity_id + ' (' + element.properties.file.values[0].value + ') fetched.')
+				swLog('TOTAL:' + bytes_downloaded + '/' + bytes_to_go
 					+ ' LEFT:' + (bytes_to_go - bytes_downloaded))
 				file.end()
 				fs.rename(filename + '.download', filename)
@@ -395,25 +425,25 @@ var swLoader = function swLoader(screenEid) {
 
 	function swMetaFetch(callback, options) {
 		if (fetchersEngaged.indexOf(options.eid) !== -1) {
-			console.log('Fetcher allready started for ' + util.inspect(fetchersEngaged[fetchersEngaged.indexOf(options.eid)]))
+			swLog('Fetcher allready started for ' + util.inspect(fetchersEngaged[fetchersEngaged.indexOf(options.eid)]))
 			return
 		}
 		swEmitter.emit('fetcher-start', {'D':options.sw_def,'I':options.eid})
 		var path = '/api2/entity-' + options.eid
-		// console.log(path)
+		// swLog(path)
 		var request = https.request({
 			hostname: 'piletilevi.entu.ee', port: 443, path: path, method: 'GET'})
 		request.on('response', function response_handler( response ) {
 			var str = ''
 			response.on('data', function chunk_sticher( chunk ) {
 				str += chunk
-				// console.log('CHUNK: ' + str.length + '(+' + chunk.length + ')')
+				// swLog('CHUNK: ' + str.length + '(+' + chunk.length + ')')
 			})
 			response.on('end', function response_emitter() {
 				var obj = JSON.parse(str)
-				// console.log(util.inspect(obj))
+				// swLog(util.inspect(obj))
 				if (obj.error !== undefined) {
-					console.log(path + ' responded with error: ' + obj.error)
+					swLog(path + ' responded with error: ' + obj.error)
 					throw(path + ' responded with error: ' + obj.error)
 				}
 				var result = obj.result
@@ -438,9 +468,9 @@ var swLoader = function swLoader(screenEid) {
 					result.properties[options.sw_child_def].values = []
 					var child_request = https.request({
 						hostname: 'piletilevi.entu.ee', port: 443, path: path + '/childs', method: 'GET'})
-					// console.log('request: ' + util.inspect(child_request))
+					// swLog('request: ' + util.inspect(child_request))
 					child_request.on('response', function child_response_handler( child_response ) {
-						// console.log('response: ' + util.inspect(child_response))
+						// swLog('response: ' + util.inspect(child_response))
 						var child_str = ''
 						child_response.on('data', function child_chunk_sticher( child_chunk ) {
 							child_str += child_chunk
@@ -471,7 +501,7 @@ var swLoader = function swLoader(screenEid) {
 		fs.readFile( filename, {'encoding': 'utf8'}, function(err, data) {
 			if (err) {
 				if (err.code === 'ENOENT') {
-					console.log(filename + ' not present. Fetching from Entu.')
+					swLog(filename + ' not present. Fetching from Entu.')
 					swMetaFetch(swLoadScreen, {'eid':screen_eid, 'sw_def':sw_def})
 					return
 				} else throw err
@@ -499,7 +529,7 @@ var swLoader = function swLoader(screenEid) {
 		fs.readFile( filename, {'encoding': 'utf8'}, function(err, data) {
 			if (err) {
 				if (err.code === 'ENOENT') {
-					console.log(filename + ' not present. Fetching from Entu.')
+					swLog(filename + ' not present. Fetching from Entu.')
 					swMetaFetch(swLoadScreengroup, {'eid':screengroup_eid, 'sw_def':sw_def})
 					return
 				} else throw err
@@ -522,7 +552,7 @@ var swLoader = function swLoader(screenEid) {
 		fs.readFile( filename, {'encoding': 'utf8'}, function(err, data) {
 			if (err) {
 				if (err.code === 'ENOENT') {
-					console.log(filename + ' not present. Fetching from Entu.')
+					swLog(filename + ' not present. Fetching from Entu.')
 					swMetaFetch(swLoadConfiguration, {'eid':configuration_eid, 'sw_def':sw_def, 'sw_child_def':sw_child_def})
 					return
 				} else throw err
@@ -545,7 +575,7 @@ var swLoader = function swLoader(screenEid) {
 		fs.readFile( filename, {'encoding': 'utf8'}, function(err, data) {
 			if (err) {
 				if (err.code === 'ENOENT') {
-					console.log(filename + ' not present. Fetching from Entu.')
+					swLog(filename + ' not present. Fetching from Entu.')
 					swMetaFetch(swLoadSchedule, {'eid':schedule_eid, 'sw_def':sw_def})
 					return
 				} else throw err
@@ -568,7 +598,7 @@ var swLoader = function swLoader(screenEid) {
 		fs.readFile( filename, {'encoding': 'utf8'}, function(err, data) {
 			if (err) {
 				if (err.code === 'ENOENT') {
-					console.log(filename + ' not present. Fetching from Entu.')
+					swLog(filename + ' not present. Fetching from Entu.')
 					swMetaFetch(swLoadLayout, {'eid':layout_eid, 'sw_def':sw_def, 'sw_child_def':sw_child_def})
 					return
 				} else throw err
@@ -576,7 +606,7 @@ var swLoader = function swLoader(screenEid) {
 			var swElement = JSON.parse(data)
 			if (swElement.properties[sw_child_def].values === undefined)
 				throw ('Expected property ' + sw_child_def + ' is missing for entity ' + swElement.id)
-			// console.log(util.inspect({'element':swElement.properties[sw_child_def]}))
+			// swLog(util.inspect({'element':swElement.properties[sw_child_def]}))
 			swElement.properties[sw_child_def].values.forEach(function(chval) {
 				swLoadLayoutPlaylist(chval.db_value)
 			})
@@ -592,7 +622,7 @@ var swLoader = function swLoader(screenEid) {
 		fs.readFile( filename, {'encoding': 'utf8'}, function(err, data) {
 			if (err) {
 				if (err.code === 'ENOENT') {
-					console.log(filename + ' not present. Fetching from Entu.')
+					swLog(filename + ' not present. Fetching from Entu.')
 					swMetaFetch(swLoadLayoutPlaylist, {'eid':layout_playlist_eid, 'sw_def':sw_def})
 					return
 				} else throw err
@@ -615,7 +645,7 @@ var swLoader = function swLoader(screenEid) {
 		fs.readFile( filename, {'encoding': 'utf8'}, function(err, data) {
 			if (err) {
 				if (err.code === 'ENOENT') {
-					console.log(filename + ' not present. Fetching from Entu.')
+					swLog(filename + ' not present. Fetching from Entu.')
 					swMetaFetch(swLoadPlaylist, {'eid':playlist_eid, 'sw_def':sw_def, 'sw_child_def':sw_child_def})
 					return
 				} else throw err
@@ -623,7 +653,7 @@ var swLoader = function swLoader(screenEid) {
 			var swElement = JSON.parse(data)
 			if (swElement.properties[sw_child_def].values === undefined)
 				throw ('Expected property ' + sw_child_def + ' is missing for entity ' + swElement.id)
-			// console.log(util.inspect({'element':swElement.properties[sw_child_def]}))
+			// swLog(util.inspect({'element':swElement.properties[sw_child_def]}))
 			swElement.properties[sw_child_def].values.forEach(function(chval) {
 				swLoadPlaylistMedia(chval.db_value)
 			})
@@ -639,7 +669,7 @@ var swLoader = function swLoader(screenEid) {
 		fs.readFile( filename, {'encoding': 'utf8'}, function(err, data) {
 			if (err) {
 				if (err.code === 'ENOENT') {
-					console.log(filename + ' not present. Fetching from Entu.')
+					swLog(filename + ' not present. Fetching from Entu.')
 					swMetaFetch(swLoadPlaylistMedia, {'eid':playlist_media_eid, 'sw_def':sw_def})
 					return
 				} else throw err
@@ -662,7 +692,7 @@ var swLoader = function swLoader(screenEid) {
 		fs.readFile( filename, {'encoding': 'utf8'}, function(err, data) {
 			if (err) {
 				if (err.code === 'ENOENT') {
-					console.log(filename + ' not present. Fetching from Entu.')
+					swLog(filename + ' not present. Fetching from Entu.')
 					swMetaFetch(swLoadMedia, {'eid':media_eid, 'sw_def':sw_def})
 					return
 				} else throw err
@@ -693,7 +723,7 @@ var swLoader = function swLoader(screenEid) {
 	function swGet(callback, eid) {
 		swElements.forEach(function(swElement) {
 			if (swElement.id === eid) {
-				console.log(eid)
+				swLog(eid)
 				callback(swElement)
 			}
 		})
