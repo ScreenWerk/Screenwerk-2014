@@ -14,6 +14,7 @@ var https   = require('https')
 var events  = require('events')
 
 // 2. public modules from npm
+var os      = require('os-utils')
 
 
 assert.equal(typeof(gui.App.argv[0]), 'string'
@@ -22,15 +23,15 @@ assert.ok(Number(gui.App.argv[0]) > 0
 			, "Screen ID must be number greater than zero.")
 
 swLog('\n\n===================================')
-// swLog(os.platform(), 'SYSTEM')
+swLog(os.platform(), 'SYSTEM')
 
-// var systemLoad = function systemLoad() {
-// 	os.cpuUsage(function(v){
-// 	    swLog( os.processUptime() + 'sec | CPU Usage : ' + Math.round(v*100)/1 + '% | Mem free: ' + Math.round(os.freemem()) + '/' + Math.round(os.totalmem()) + 'M', 'SYSTEM' )
-// 	})
-// 	setTimeout(systemLoad, 10000)
-// }
-// systemLoad()
+var systemLoad = function systemLoad() {
+	os.cpuUsage(function(v){
+	    swLog( os.processUptime() + 'sec | CPU Usage : ' + Math.round(v*100)/1 + '% | Mem free: ' + Math.round(os.freemem()) + '/' + Math.round(os.totalmem()) + 'M', 'SYSTEM' )
+	})
+	setTimeout(systemLoad, 10000)
+}
+systemLoad()
 
 
 var player_window = gui.Window.get()
