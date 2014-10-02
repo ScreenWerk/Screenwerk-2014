@@ -14,6 +14,11 @@
 - ***in-pixels***
   All elements occupy 100% of available screen estate by default. If dimensions are specified, then by default it is assumed to be in %. If *in-pixels* attribute is selected, element will be rendered with pixel accuracy.
 
+#### Screengroup
+
+- ***published-at***
+  Set the desired publishing time for screens in this group. If player detects change in ***published-at*** property, it starts to fetch new content and restarts its schedules as soon as poosible but not earlier than specified by ***published-at***.
+
 #### Schedule
 
 - ***crontab***

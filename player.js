@@ -1,7 +1,8 @@
-var util    = require("util")
-var later   = require("later")
-var events  = require('events')
-var fs      = require('fs')
+var util   = require("util")
+var later  = require("later")
+var events = require('events')
+var fs     = require('fs')
+// var helper = require('./helper')
 
 var swEmitter = new events.EventEmitter()
 
@@ -36,29 +37,29 @@ function SwScreen(dom_element) {
 	}
 	return {
 		play: function() {
-			window.swLog(' DOM id: ' + dom_element.id + '. Attempting PLAY ' + entity.definition + ':' + is_playing)
 			if (is_playing) {
-				return
+				return false
 			}
+			window.swLog(' DOM id: ' + dom_element.id + '. Attempting PLAY ' + entity.definition)
 			if (properties['valid-to'] !== undefined)
 				if (properties['valid-to'].values !== undefined) {
 					var vt_date = new Date(properties['valid-to'].values[0].db_value)
 					if (vt_date.getTime() < Date.now())
-						return
+						return false
 				}
 
 			is_playing = true
 			dom_element.style.display = 'block'
-			window.swLog('|-- PLAY ' + entity.definition + ' ' + entity.id + ' is_playing:' + is_playing)
+			window.swLog('|-- PLAY ' + entity.definition + ' ' + entity.id)
 			for (var key=0; key<dom_element.childNodes.length; key++) {
 				dom_element.childNodes[key].player.play()
 			}
 		},
 		stop: function() {
-			window.swLog(' DOM id: ' + dom_element.id + '. Attempting STOP ' + entity.definition + ':' + is_playing)
 			if (!is_playing) {
-				return
+				return false
 			}
+			window.swLog(' DOM id: ' + dom_element.id + '. Attempting STOP ' + entity.definition)
 			is_playing = false
 			dom_element.style.display = 'none'
 			window.swLog('|-- STOP ' + entity.definition + ' ' + entity.id)
@@ -87,29 +88,29 @@ function SwScreenGroup(dom_element) {
 	}
 	return {
 		play: function() {
-			window.swLog(' DOM id: ' + dom_element.id + '. Attempting PLAY ' + entity.definition + ':' + is_playing)
 			if (is_playing) {
-				return
+				return false
 			}
+			window.swLog(' DOM id: ' + dom_element.id + '. Attempting PLAY ' + entity.definition)
 			if (properties['valid-to'] !== undefined)
 				if (properties['valid-to'].values !== undefined) {
 					var vt_date = new Date(properties['valid-to'].values[0].db_value)
 					if (vt_date.getTime() < Date.now())
-						return
+						return false
 				}
 
 			is_playing = true
 			dom_element.style.display = 'block'
-			window.swLog('|-- PLAY ' + entity.definition + ' ' + entity.id + ' is_playing:' + is_playing)
+			window.swLog('|-- PLAY ' + entity.definition + ' ' + entity.id)
 			for (var key=0; key<dom_element.childNodes.length; key++) {
 				dom_element.childNodes[key].player.play()
 			}
 		},
 		stop: function() {
-			window.swLog(' DOM id: ' + dom_element.id + '. Attempting STOP ' + entity.definition + ':' + is_playing)
 			if (!is_playing) {
-				return
+				return false
 			}
+			window.swLog(' DOM id: ' + dom_element.id + '. Attempting STOP ' + entity.definition)
 			is_playing = false
 			dom_element.style.display = 'none'
 			window.swLog('|-- STOP ' + entity.definition + ' ' + entity.id)
@@ -141,20 +142,20 @@ function SwConfiguration(dom_element) {
 
 	return {
 		play: function() {
-			window.swLog(' DOM id: ' + dom_element.id + '. Attempting PLAY ' + entity.definition + ':' + is_playing)
 			if (is_playing) {
-				return
+				return false
 			}
+			window.swLog(' DOM id: ' + dom_element.id + '. Attempting PLAY ' + entity.definition)
 			if (properties['valid-to'] !== undefined)
 				if (properties['valid-to'].values !== undefined) {
 					var vt_date = new Date(properties['valid-to'].values[0].db_value)
 					if (vt_date.getTime() < Date.now())
-						return
+						return false
 				}
 
 			is_playing = true
 			dom_element.style.display = 'block'
-			window.swLog('|-- PLAY ' + entity.definition + ' ' + entity.id + ' is_playing:' + is_playing)
+			window.swLog('|-- PLAY ' + entity.definition + ' ' + entity.id)
 			var schedules = []
 			for (var key=0; key<dom_element.childNodes.length; key++) {
 				// window.swLog(key + ':' + typeof dom_element.childNodes[key])
@@ -179,10 +180,10 @@ function SwConfiguration(dom_element) {
 			})
 		},
 		stop: function() {
-			window.swLog(' DOM id: ' + dom_element.id + '. Attempting STOP ' + entity.definition + ':' + is_playing)
 			if (!is_playing) {
-				return
+				return false
 			}
+			window.swLog(' DOM id: ' + dom_element.id + '. Attempting STOP ' + entity.definition)
 			is_playing = false
 			dom_element.style.display = 'none'
 			window.swLog('|-- STOP ' + entity.definition + ' ' + entity.id)
@@ -269,15 +270,15 @@ function SwSchedule(dom_element) {
 	}
 	return {
 		play: function() {
-			window.swLog(' DOM id: ' + dom_element.id + '. Attempting PLAY ' + entity.definition + ':' + is_playing)
 			if (is_playing) {
-				return
+				return false
 			}
+			window.swLog(' DOM id: ' + dom_element.id + '. Attempting PLAY ' + entity.definition)
 			if (properties['valid-to'] !== undefined)
 				if (properties['valid-to'].values !== undefined) {
 					var vt_date = new Date(properties['valid-to'].values[0].db_value)
 					if (vt_date.getTime() < Date.now())
-						return
+						return false
 				}
 
 			is_playing = true
@@ -286,10 +287,10 @@ function SwSchedule(dom_element) {
 			window.swLog('|-- PLAY ' + entity.definition + ' ' + entity.id + ' - Scheduled for ' + later.schedule(cronSched).next(1))
 		},
 		stop: function() {
-			window.swLog(' DOM id: ' + dom_element.id + '. Attempting STOP ' + entity.definition + ':' + is_playing)
 			if (!is_playing) {
-				return
+				return false
 			}
+			window.swLog(' DOM id: ' + dom_element.id + '. Attempting STOP ' + entity.definition)
 			is_playing = false
 			dom_element.style.display = 'none'
 			window.swLog('|-- STOP ' + entity.definition + ' ' + entity.id)
@@ -336,29 +337,29 @@ function SwLayout(dom_element) {
 	}
 	return {
 		play: function() {
-			window.swLog(' DOM id: ' + dom_element.id + '. Attempting PLAY ' + entity.definition + ':' + is_playing)
 			if (is_playing) {
-				return
+				return false
 			}
+			window.swLog(' DOM id: ' + dom_element.id + '. Attempting PLAY ' + entity.definition)
 			if (properties['valid-to'] !== undefined)
 				if (properties['valid-to'].values !== undefined) {
 					var vt_date = new Date(properties['valid-to'].values[0].db_value)
 					if (vt_date.getTime() < Date.now())
-						return
+						return false
 				}
 
 			is_playing = true
 			dom_element.style.display = 'block'
-			window.swLog('|-- PLAY ' + entity.definition + ' ' + entity.id + ' is_playing:' + is_playing)
+			window.swLog('|-- PLAY ' + entity.definition + ' ' + entity.id)
 			for (var key=0; key<dom_element.childNodes.length; key++) {
 				dom_element.childNodes[key].player.play()
 			}
 		},
 		stop: function() {
-			window.swLog(' DOM id: ' + dom_element.id + '. Attempting STOP ' + entity.definition + ':' + is_playing)
 			if (!is_playing) {
-				return
+				return false
 			}
+			window.swLog(' DOM id: ' + dom_element.id + '. Attempting STOP ' + entity.definition)
 			is_playing = false
 			dom_element.style.display = 'none'
 			window.swLog('|-- STOP ' + entity.definition + ' ' + entity.id)
@@ -389,29 +390,29 @@ function SwLayoutPlaylist(dom_element) {
 
 	return {
 		play: function() {
-			window.swLog(' DOM id: ' + dom_element.id + '. Attempting PLAY ' + entity.definition + ':' + is_playing)
 			if (is_playing) {
-				return
+				return false
 			}
+			window.swLog(' DOM id: ' + dom_element.id + '. Attempting PLAY ' + entity.definition)
 			if (properties['valid-to'] !== undefined)
 				if (properties['valid-to'].values !== undefined) {
 					var vt_date = new Date(properties['valid-to'].values[0].db_value)
 					if (vt_date.getTime() < Date.now())
-						return
+						return false
 				}
 
 			is_playing = true
 			dom_element.style.display = 'block'
-			window.swLog('|-- PLAY ' + entity.definition + ' ' + entity.id + ' is_playing:' + is_playing)
+			window.swLog('|-- PLAY ' + entity.definition + ' ' + entity.id)
 			for (var key=0; key<dom_element.childNodes.length; key++) {
 				dom_element.childNodes[key].player.play()
 			}
 		},
 		stop: function() {
-			window.swLog(' DOM id: ' + dom_element.id + '. Attempting STOP ' + entity.definition + ':' + is_playing)
 			if (!is_playing) {
-				return
+				return false
 			}
+			window.swLog(' DOM id: ' + dom_element.id + '. Attempting STOP ' + entity.definition)
 			is_playing = false
 			dom_element.style.display = 'none'
 			window.swLog('|-- STOP ' + entity.definition + ' ' + entity.id)
@@ -442,27 +443,27 @@ function SwPlaylist(dom_element) {
 
 	return {
 		play: function() {
-			window.swLog(' DOM id: ' + dom_element.id + '. Attempting PLAY ' + entity.definition + ':' + is_playing)
 			if (is_playing) {
-				return
+				return false
 			}
+			window.swLog(' DOM id: ' + dom_element.id + '. Attempting PLAY ' + entity.definition)
 			if (properties['valid-to'] !== undefined)
 				if (properties['valid-to'].values !== undefined) {
 					var vt_date = new Date(properties['valid-to'].values[0].db_value)
 					if (vt_date.getTime() < Date.now())
-						return
+						return false
 				}
 
 			is_playing = true
 			dom_element.style.display = 'block'
-			window.swLog('|-- PLAY ' + entity.definition + ' ' + entity.id + ' is_playing:' + is_playing)
+			window.swLog('|-- PLAY ' + entity.definition + ' ' + entity.id)
 			dom_element.childNodes[0].player.play()
 		},
 		stop: function() {
-			window.swLog(' DOM id: ' + dom_element.id + '. Attempting STOP ' + entity.definition + ':' + is_playing)
 			if (!is_playing) {
-				return
+				return false
 			}
+			window.swLog(' DOM id: ' + dom_element.id + '. Attempting STOP ' + entity.definition)
 			is_playing = false
 			dom_element.style.display = 'none'
 			window.swLog('|-- STOP ' + entity.definition + ' ' + entity.id)
@@ -511,12 +512,6 @@ function SwPlaylistMedia(dom_element) {
 
 		child_node.player = new SwMedia(child_node, muted, duration_ms)
 		medias.push(child_node.player)
-		// child_node.player.mediaDomElement().addEventListener('ended', function() {
-		// 	window.swLog(' DOM id: ' + dom_element.id + '. On event ENDED ' + entity.definition + ':' + is_playing)
-		// 	// window.alert('ended')
-		// 	stop()
-		// 	// element.next.element.play()
-		// })
 	}
 
 	swEmitter.on('ended' + entity.id, function() {
@@ -527,21 +522,21 @@ function SwPlaylistMedia(dom_element) {
 			swEmitter.emit('requested' + entity.next.id)
 	})
 	swEmitter.on('requested' + entity.id, function() {
-		window.swLog('requested event for ' + entity.id)
+		window.swLog('requested event for ' + entity.id + ' delay ' + delay_ms)
 		window.setTimeout(play, delay_ms)
 
 	})
 
 	var play = function play() {
-		window.swLog(' DOM id: ' + dom_element.id + '. Attempting PLAY ' + entity.definition + ':' + is_playing)
 		if (is_playing) {
-			return
+			return false
 		}
+		window.swLog(' DOM id: ' + dom_element.id + '. Attempting PLAY ' + entity.definition)
 		if (properties['valid-to'] !== undefined)
 			if (properties['valid-to'].values !== undefined) {
 				var vt_date = new Date(properties['valid-to'].values[0].db_value)
 				if (vt_date.getTime() < Date.now()) {
-					if (entity.next !== undefined)
+					if (entity.next !== undefined) false
 						swEmitter.emit('requested' + entity.next.id)
 					return
 				}
@@ -549,7 +544,7 @@ function SwPlaylistMedia(dom_element) {
 
 		is_playing = true
 		dom_element.style.display = 'block'
-		window.swLog('|-- PLAY ' + entity.definition + ' ' + entity.id + ' is_playing:' + is_playing)
+		window.swLog('|-- PLAY ' + entity.definition + ' ' + entity.id)
 		// window.swLog(util.inspect({'medias':medias, 'medias[0].mediatype()':medias[0].mediatype()}, {depth:null}))
 
 
@@ -567,10 +562,10 @@ function SwPlaylistMedia(dom_element) {
 		// }
 	}
 	var stop = function stop() {
-		window.swLog(' DOM id: ' + dom_element.id + '. Attempting STOP ' + entity.definition + ':' + is_playing)
 		if (!is_playing) {
-			return
+			return false
 		}
+		window.swLog(' DOM id: ' + dom_element.id + '. Attempting STOP ' + entity.definition)
 		is_playing = false
 		dom_element.style.display = 'none'
 		window.swLog('|-- STOP ' + entity.definition + ' ' + entity.id)
@@ -684,10 +679,10 @@ function SwMedia(dom_element, muted, duration_ms) {
 	return {
 		play: function() {
 			// ctrw.show(dom_element.id)
-			window.swLog(' DOM id: ' + dom_element.id + '. Attempting PLAY ' + entity.definition + ':' + is_playing)
 			if (is_playing) {
 				return dom_element
 			}
+			window.swLog(' DOM id: ' + dom_element.id + '. Attempting PLAY')
 			if (properties['valid-to'] !== undefined)
 				if (properties['valid-to'].values !== undefined) {
 					var vt_date = new Date(properties['valid-to'].values[0].db_value)
@@ -697,7 +692,7 @@ function SwMedia(dom_element, muted, duration_ms) {
 
 			is_playing = true
 			dom_element.style.display = 'block'
-			window.swLog('|-- PLAY ' + entity.definition + ' ' + entity.id + ' is_playing:' + is_playing)
+			window.swLog('|-- PLAY ' + entity.definition + ' ' + entity.id)
 			if (mediatype === 'Video') {
 				if (media_dom_element.play === undefined) {
 					window.swLog(util.inspect(media_dom_element,{depth:1}))
@@ -719,10 +714,10 @@ function SwMedia(dom_element, muted, duration_ms) {
 		},
 		stop: function() {
 			// ctrw.hide(dom_element.id)
-			window.swLog(' DOM id: ' + dom_element.id + '. Attempting STOP ' + entity.definition + ':' + is_playing)
 			if (!is_playing) {
-				return
+				return false
 			}
+			window.swLog(' DOM id: ' + dom_element.id + '. Attempting STOP')
 			is_playing = false
 			dom_element.style.display = 'none'
 			window.swLog('|-- STOP ' + entity.definition + ' ' + entity.id)// + ' style: ' + util.inspect(dom_element.style))
@@ -802,5 +797,3 @@ var swSetInterval = function(fn, sched, startDate, endDate) {
 		}
 	}
 }
-
-exports.SwPlayer = SwPlayer

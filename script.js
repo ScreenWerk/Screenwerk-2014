@@ -5,36 +5,22 @@
  *
  */
 
-var gui    = require('nw.gui')
-var assert = require('assert')
-var util    = require("util")
+// 1. core modules
+var gui     = require('nw.gui')
+var assert  = require('assert')
+var util    = require('util')
 var fs      = require('fs')
-
-var os  = require('os-utils')
-
 var https   = require('https')
 var events  = require('events')
-var sw_play = require('./player')
+
+// 2. public modules from npm
+var os      = require('os-utils')
 
 
 assert.equal(typeof(gui.App.argv[0]), 'string'
 			, "Screen ID should be passed as first argument.")
 assert.ok(Number(gui.App.argv[0]) > 0
 			, "Screen ID must be number greater than zero.")
-
-var consoleStream = fs.createWriteStream('./console.log', {flags:'a'})
-var sysLogStream = fs.createWriteStream('./system.log', {flags:'a'})
-var swLog = window.swLog = function swLog(message, scope) {
-	console.log(message)
-	if (scope === undefined)
-		scope = 'INFO'
-	now = new Date()
-	if (scope === 'SYSTEM')
-		sysLogStream.write(now.toString().slice(0,24) + ': ' + message + '\n')
-	else
-		consoleStream.write(now.toString().slice(0,24) + ' ' + scope + ': ' + message + '\n')
-}
-
 
 swLog('\n\n===================================')
 swLog(os.platform(), 'SYSTEM')
@@ -47,18 +33,19 @@ var systemLoad = function systemLoad() {
 }
 systemLoad()
 
+
 var player_window = gui.Window.get()
-player_window.window.moveTo(201,1)
-player_window.isFullscreen = false
 if (gui.App.argv.length > 1) {
 	swLog('launching in fullscreen mode')
 	player_window.isFullscreen = true
+} else {
+	player_window.window.moveTo(201,1)
+	player_window.isFullscreen = false
 }
-
-
 
 window.constants = function constants() {
 	return {
+		HOSTNAME:    function() { return 'piletilevi.entu.ee' },
 		SCREEN_ID:   function() { return Number(gui.App.argv[0]) },
 		META_DIR:    function() { return 'sw-meta' },
 		MEDIA_DIR:   function() { return 'sw-media' },
@@ -86,10 +73,7 @@ window.constants = function constants() {
 	}
 }
 
-
-// var numlenf	= 6
-
-
+// Make sure folder for metadata is in place
 fs.lstat(constants().META_DIR(), function(err, stats) {
 	if (err) {
 		swLog('Creating folder for ' + constants().META_DIR() + '.')
@@ -102,6 +86,8 @@ fs.lstat(constants().META_DIR(), function(err, stats) {
 		fs.mkdir(constants().META_DIR())
     }
 })
+
+// Make sure folder for media files is in place
 fs.lstat(constants().MEDIA_DIR(), function(err, stats) {
 	if (err) {
 		swLog('Creating folder for ' + constants().MEDIA_DIR() + '.')
@@ -116,7 +102,7 @@ fs.lstat(constants().MEDIA_DIR(), function(err, stats) {
 })
 
 var swEmitter = new events.EventEmitter()
-var sw_player = new sw_play.SwPlayer(constants().SCREEN_ID())
+var sw_player = new SwPlayer(constants().SCREEN_ID())
 
 var loadersEngaged = []
 var fetchersEngaged = []
@@ -159,20 +145,21 @@ swEmitter.on('init-ready', function() {
 	var sw_def, sw_child_def
 	var child = {}
 	var element = {}
+
 	// 1st iteration:
 	// - initialize dom_elements array for each element
 	// - join elements with parent-child references
-	l.swElements().forEach(function(el) {
-		// el.dom_elements = []
+	sw_loader.swElements().forEach(function(el) {
 		element = el.element
 		sw_def = el.definition
-		// swLog(el.id + ':' + sw_def)
 		if (constants().HIERARCHY().child_of[sw_def] !== undefined) {
 			sw_child_def = constants().HIERARCHY().child_of[sw_def]
-			// swLog(sw_child_def)
 			if (element.properties[sw_child_def].values !== undefined) {
 				element.properties[sw_child_def].values.forEach(function(value) {
-					child = l.swElements()[l.indexOfElement(value.db_value)]
+					child = sw_loader.swElements()[sw_loader.indexOfElement(value.db_value)]
+					// child might be undefined if it had its 'valid-to' property set to past date.
+					if (child === undefined)
+						return false
 					el.childs.push(child)
 					child.parents.push(el)
 				})
@@ -207,14 +194,15 @@ swEmitter.on('init-ready', function() {
 				}
 			break;
 			case 'playlist':
-				var plms = el.childs
 				var loop = false
+				// If any of parent LayoutPlaylist's has loop == true, then loop the playlist
 				el.parents.forEach(function(parent) {
 					if (parent.element.properties.loop.values !== undefined)
 						if (parent.element.properties.loop.values[0].db_value === 1)
 							loop = true
 				})
 
+				var plms = el.childs
 				plms.sort(function compare(a,b) {
 					if (a.element.properties.ordinal.values[0].db_value < b.element.properties.ordinal.values[0].db_value)
 						return -1
@@ -306,7 +294,7 @@ swEmitter.on('init-ready', function() {
 		})
 		return dom_element
 	}
-	var screen_dom_element = createDomRec(l.swElements()[0])
+	var screen_dom_element = createDomRec(sw_loader.swElements()[0])
 	document.body.appendChild(screen_dom_element)
 	var filename = constants().META_DIR() + '/elements.json'
 
@@ -327,12 +315,11 @@ var swLoader = function swLoader(screenEid) {
 		if (fs.existsSync(filename)) {
 			return
 		}
-		// indexOfElement(entity_id)
 		var element = swElements[indexOfElement(entity_id)].element
 		swEmitter.emit('fetcher-start', {'D':element.definition.keyname,'I':entity_id + '_' + file_id})
 		swLog('File ' + filename + ' missing. Fetch!')
 		var options = {
-			hostname: 'piletilevi.entu.ee',
+			hostname: constants().HOSTNAME(),
 		 	port: 443,
 			path: '/api2/file-' + file_id,
 			method: 'GET'
@@ -343,7 +330,6 @@ var swLoader = function swLoader(screenEid) {
 
 			bytes_to_go += Number(filesize)
 			swLog('Start fetching media for ' + entity_id + '. Bytes to go: ' + bytes_to_go)
-			// swLog('STATUS: ' + response.statusCode);
 
 			var file = fs.createWriteStream(filename + '.download');
 			response.on('data', function(chunk){
@@ -364,14 +350,12 @@ var swLoader = function swLoader(screenEid) {
 
 	function swMetaFetch(callback, options) {
 		if (fetchersEngaged.indexOf(options.eid) !== -1) {
-			swLog('Fetcher allready started for ' + util.inspect(fetchersEngaged[fetchersEngaged.indexOf(options.eid)]))
+			// swLog('Fetcher allready started for ' + util.inspect(fetchersEngaged[fetchersEngaged.indexOf(options.eid)]))
 			return
 		}
 		swEmitter.emit('fetcher-start', {'D':options.sw_def,'I':options.eid})
 		var path = '/api2/entity-' + options.eid
-		// swLog(path)
-		var request = https.request({
-			hostname: 'piletilevi.entu.ee', port: 443, path: path, method: 'GET'})
+		var request = https.request({ hostname: constants().HOSTNAME(), port: 443, path: path, method: 'GET' })
 		request.on('response', function response_handler( response ) {
 			var str = ''
 			response.on('data', function chunk_sticher( chunk ) {
@@ -380,7 +364,6 @@ var swLoader = function swLoader(screenEid) {
 			})
 			response.on('end', function response_emitter() {
 				var obj = JSON.parse(str)
-				// swLog(util.inspect(obj))
 				if (obj.error !== undefined) {
 					swLog(path + ' responded with error: ' + obj.error)
 					throw(path + ' responded with error: ' + obj.error)
@@ -388,6 +371,7 @@ var swLoader = function swLoader(screenEid) {
 				var result = obj.result
 				//
 				// Remove extra property values. Keep only 'multiplicity' most recent ones
+				// Shouldnt be the problem when fixed in Entu.
 				for (var key in result.properties) {
 					if (result.properties[key].values === undefined)
 						continue
@@ -668,9 +652,19 @@ var swLoader = function swLoader(screenEid) {
 		})
 	}
 	function swSet(swElement) {
-		// if (indexOfElement(swElement.id) !== undefined)
+		var properties = swElement.properties
+		if (properties['valid-to'] !== undefined) {
+			if (properties['valid-to'].values !== undefined) {
+				var vt_date = new Date(properties['valid-to'].values[0].db_value)
+				var now = Date.now()
+				if (vt_date.getTime() < now) {
+					return false
+				}
+			}
+		}
 		swElements.push({'id':swElement.id, 'definition':swElement.definition.keyname.split('sw-')[1], 'element':swElement, 'parents':[], 'childs':[]})
 	}
+
 	function indexOfElement(eid) {
 		for (e in swElements) {
 			if (swElements[e].id === eid) {
@@ -692,21 +686,7 @@ var swLoader = function swLoader(screenEid) {
 /*
  * Start the action
  */
-var l = new swLoader()
+var sw_loader = new swLoader()
 
 
 
-var stringifier = function(o) {
-	var cache = [];
-	return JSON.stringify(o, function(key, value) {
-	    if (typeof value === 'object' && value !== null) {
-	        if (cache.indexOf(value) !== -1) {
-	            // Circular reference found, replace key
-	            return 'Circular reference to: ' + key
-	        }
-	        // Store value in our collection
-	        cache.push(value)
-	    }
-	    return value
-	}, '\t')
-}
