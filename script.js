@@ -24,7 +24,7 @@ assert.ok(Number(gui.App.argv[0]) > 0
 
 var consoleStream = fs.createWriteStream('./console.log', {flags:'a'})
 var sysLogStream = fs.createWriteStream('./system.log', {flags:'a'})
-var swLog = function swLog(message, scope) {
+var swLog = window.swLog = function swLog(message, scope) {
 	console.log(message)
 	if (scope === undefined)
 		scope = 'INFO'
@@ -37,8 +37,6 @@ var swLog = function swLog(message, scope) {
 
 
 swLog('\n\n===================================')
-
-
 swLog(os.platform(), 'SYSTEM')
 
 var systemLoad = function systemLoad() {
@@ -56,40 +54,6 @@ if (gui.App.argv.length > 1) {
 	swLog('launching in fullscreen mode')
 	player_window.isFullscreen = true
 }
-
-// window.monitor_window = gui.Window.get(window.open('monitor.html'))
-// // window.monitor_window = gui.Window.get(window.open(''))
-// var mon_win = window.monitor_window.window
-// mon_win.moveTo(1,1)
-// mon_win.resizeTo(200,450)
-// mon_win.toolbar = false
-// mon_win.show = false
-// mon_win.show_in_taskbar = false
-// mon_win.icon = 'imgs/sw-p512.png'
-// var mon_win_body = mon_win.document.body
-// mon_win_body.style.margin = '0px'
-// mon_win_body.style.padding = '0px'
-
-// window.monitor_window.on('minimize', function() {
-// 	window.gui.App.quit()
-// })
-// window.monitor_window.on('close', function() {
-// 	window.gui.App.quit()
-// })
-
-// var monitor_start = function monitor_start() {
-// 	var quit_button = window.monitor_window.window.document.getElementById('quit')
-// 	if (quit_button === null)
-// 		throw ("NULL!")
-// 	if (quit_button.onclick === undefined)
-// 		throw ("undefined is not a funCTION!")
-
-// 	quit_button.onclick = function() {
-// 		window.gui.App.quit()
-// 	}
-// }
-//
-// setTimeout(monitor_start, 5000)
 
 
 
@@ -290,20 +254,6 @@ swEmitter.on('init-ready', function() {
 		}
 	})
 
-	// var swDomRec = function swDomRec(el) {
-	// 	sw_def = el.definition
-	// 	if (constants().HIERARCHY().child_of[sw_def] !== undefined) {
-	// 		sw_child_def = constants().HIERARCHY().child_of[sw_def]
-	// 		if (element.properties[sw_child_def].values !== undefined) {
-	// 			element.properties[sw_child_def].values.forEach(function(value) {
-	// 				child = l.swElements()[l.indexOfElement(value.db_value)]
-	// 				el.childs.push(child)
-	// 				child.parents.push(el)
-	// 			})
-	// 		}
-
-	// }
-	// var swDom = swDomRec(l.swElements()[0])
 
 	// 2nd iteration:
 	// - create <div> element for every unique child and join them into DOM
@@ -350,15 +300,7 @@ swEmitter.on('init-ready', function() {
 				dom_element.style.top = el.element.properties.top.values[0].db_value + unit
 			}
 
-		// var para_element = document.createElement('p')
-		// // para_element.style.float = 'none'
-		// para_element.style.zindex = 1000
-		// para_element.style.float = 'right'
-		// para_element.appendChild(document.createTextNode(el.definition + ': ' + el.id))
-		// dom_element.appendChild(para_element)
 		dom_element.swElement = el
-		// el.element.dom_element = dom_element
-		// el.dom_elements.push(dom_element)
 		el.childs.forEach(function(child){
 			dom_element.appendChild(createDomRec(child, el.id))
 		})
@@ -367,13 +309,10 @@ swEmitter.on('init-ready', function() {
 	var screen_dom_element = createDomRec(l.swElements()[0])
 	document.body.appendChild(screen_dom_element)
 	var filename = constants().META_DIR() + '/elements.json'
-	// fs.writeFileSync(filename, stringifier(screen_dom_element))
 
 	sw_player.restart(screen_dom_element)
 
-	// gui.App.quit()
 })
-// swLog(constants().META_DIR() + '/' + constants().SCREEN_ID() + '.sw-screen.json')
 
 var swLoader = function swLoader(screenEid) {
 	var swElements = []
