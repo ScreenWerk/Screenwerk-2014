@@ -39,3 +39,27 @@ var swLog = window.swLog = function swLog(message, scope) {
     else
         consoleStream.write(now.toString().slice(0,24) + ' ' + scope + ': ' + message + '\n')
 }
+
+var progress = window.progress = function progress(message) {
+    if (window.document.body !== null) {
+        var progress_DOM = window.document.getElementById('progress')
+        if (progress_DOM === null) {
+            progress_DOM = document.createElement('pre')
+            progress_DOM.id = 'progress'
+            document.body.appendChild(progress_DOM)
+        }
+        progress_DOM.textContent = message
+    }
+    return {
+        finish: function() {
+            document.getElementById('progress').style.display = 'none'
+        }
+    }
+}
+
+var bytesToSize = function bytesToSize(bytes) {
+    var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB']
+    if (bytes == 0) return 'n/a'
+    var i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)))
+    return Math.round(bytes / Math.pow(1024, i), 2) + ' ' + sizes[i]
+}

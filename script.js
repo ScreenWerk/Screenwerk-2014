@@ -142,6 +142,7 @@ swEmitter.on('fetcher-stop', function(data) {
 })
 
 swEmitter.on('init-ready', function() {
+	progress('Finished').finish()
 	var sw_def, sw_child_def
 	var child = {}
 	var element = {}
@@ -334,6 +335,7 @@ var swLoader = function swLoader(screenEid) {
 			var file = fs.createWriteStream(filename + '.download');
 			response.on('data', function(chunk){
 				bytes_downloaded += chunk.length
+				progress(bytesToSize(bytes_to_go) + ' - ' + bytesToSize(bytes_downloaded) + ' = ' + bytesToSize(bytes_to_go - bytes_downloaded) )
 				file.write(chunk)
 			})
 			response.on('end', function() {

@@ -3,7 +3,7 @@
   "description": "Digital signage made simple!",
   "version": "0.0.1",
   "main": "index.html",
-  "license": "MIT",
+  "license": "CC-SA",
   "private": true,
   "repository": {
     "type": "git",

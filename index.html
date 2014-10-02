@@ -24,6 +24,18 @@ html, body {
   opacity: 0.8;
   width: 485px;
   padding: 20px;
+  display: none;
+}
+#progress {
+  background-color: yellow;
+  opacity: 0.6;
+  float: right;
+  /*width: 200px;*/
+  /*height: 50px;*/
+  padding: 10px;
+  margin: 100px;
+  border-radius: 15px;
+  text-align: center;
 }
 iframe {
     overflow:hidden;
@@ -53,5 +65,7 @@ iframe {
 <script src="script.js"></script>
 </head>
 <body>
+  <div id='progress'></div>
+  <pre id='console'></pre>
 </body>
 </html>
