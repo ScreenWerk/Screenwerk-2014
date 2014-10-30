@@ -10,8 +10,9 @@
     "url": "https://github.com/argoroots/Screenwerk"
   },
   "dependencies": {
-    "later": "*",
-    "os-utils": "*"
+    "later": "^1.1.0",
+    "os-utils": "*",
+    "node-uuid": "^1.4.0"
   },
   "window": {
     "icon": "imgs/sw-p512.png",
