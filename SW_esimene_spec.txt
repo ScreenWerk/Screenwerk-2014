@@ -1,0 +1,88 @@
+Mallar:
+*player peaks vähemalt ühes aknas oskama mängida erinevaid meediaid (windows media, flash, powerpoint ja miks mitte ka quicktime) läbisegi vastavlt playlistile.
+*ühes arvutis peaks saama käitada mitut (kuni 8, näiteks) erineva ID-ga playerit.
+*meediaklipi esituse programmerimine peaks olema paindlikum. s.t. et saaks defineerida esituse parameetreid ka kellaaja ja nädalapäeva lõikes.
+---
+*meediaklippidel võiks olla esitusreiting (1-100) s.t. klipid mille reiting on 1 mängitakse ette igas playlistis ja klipid reitinguga 100 mängitakse ette igas sajandas playlistis.
+*meediaklippidel peaks olema prioriteet (1-10), et ära määrata nende esitusjärjekord. prioriteediga 1 klipid mängitakse ette esimesena ja 10 alati viimasena
+*scrollivat riba võiks saada paigutada ükskõik millisesse ekraaniserva
+*scrolliva riba tekst võiks tulla samuti serverist, et seda vajadusel kiiresti vahetada
+*scrolliv riba võiks osata lugeda rss-i
+*ekraani layout-i ehk akende suurusi võiks saada ka serverist muuta.
+ 
+
+ScreenWerk
+
+Tööjaamadeks on linux-i masinad, mis näitavad full-screen veebilehti Firefox'iga, millel on javascript lubatud.
+
+Et olla sõltumatu veebiühenduse kvaliteedist/olemasolust, vaadatakse veebilehte kohalikust masinast:
+http://localhost/screen_id/
+kus screen_id on unikaalne ekraani nimi, nt. http://localhost/tallinn_kristiine_2/ , http://localhost/tallinn_pirita_selver_infolaud/
+
+Aeg-ajalt käivad tööjaamad keskserveri käest uuendusi alla laadimas (selleks kõlbab crontab/rsync).
+
+Veebilehti muudetakse keskses serveris selleks loodud veebikeskkonnas ScreenWerk.
+
+
+ScreenWerk
+
+on mõeldud ekraanide võrgustiku sisu haldamiseks.
+
+Ekraanid on juhtserveri andmebaasis kirjeldatud:
+#. res_x res_y screen_id
+1. 1680  1050  tallinn_pirita_selver_infolaud
+2. ...
+
+
+Ekraanidel mängib playlist ekraanijaotuste kogudest template collection
+/localscreens/screen_id/tcoll.playlist
+#. HH:MM filename
+1. 09:00 morning.tcoll
+2. 17:00 rush_hour.tcoll
+3. 19:00 relax.tcoll
+
+
+Iga template collection koosneb ekraanijaotuste nimekirjast
+
+/localscreens/screen_id/morning.tcoll
+#  frequency count order duration filename
+1. 1         0     1     00:05    morning_1.tmpl
+2. 2         0     0     00:05    morning_2.tmpl
+3. 1         5     0     00:05    morning_3.tmpl
+
+
+ - igale ekraanijaotusel on määratud kestus, peale mida näidatakse järgmist ekraanijaotust
+(või on otstarbekas ekraanijaotused siduda kellaajaga?);
+
+Ekraanijaotus kirjeldab piksli täpsusega ekraanielementidele määratud alad;
+
+Ekraanielemendiks on playlist meediafailidest (jpg, gif, avi, flash, ...) ja nende kestusest;
+
+
+- Meediafaile on võimalik laadida läbi veebikeskkonna või ftp.
+
+- Ekraanijaotuste kirjeldamiseks kõlbab minu arvates xml formaat (vaielge vastu). Järgnev fail on midagi sellesarnast, mida ma Pirita Selveris nägin.
+Milline võiks olla mugav kasutajaliides sellise loomiseks, tuleb veel välja mõelda.
+<ekraanijaotus>
+  <horisontal size="150px">
+    päise_playlist
+  </horisontal>
+  <horisontal size="800px">
+    <vertical size="640px">
+      filmi_playlist
+    </vertical>
+    <vertical size="1040px">
+      kava_playlist
+    </vertical>
+  </horisontal>
+  <horisontal size="100">
+    footer_playlist
+  </horisontal>
+</ekraanijaotus>
+
+- playlistide koostamiseks on samuti veebiliides.
+
+
+
+
+

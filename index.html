@@ -26,16 +26,21 @@ html, body {
   padding: 20px;
   display: none;
 }
-#progress {
+#progress{
   background-color: yellow;
+  z-index: 1000;
+}
+#error {
+  background-color: red;
+}
+#progress, #error {
   opacity: 0.6;
   float: right;
-  /*width: 200px;*/
-  /*height: 50px;*/
+  display: block;
   padding: 10px;
   margin: 100px;
   border-radius: 15px;
-  text-align: center;
+  text-align: left;
 }
 iframe {
     overflow:hidden;
@@ -65,7 +70,7 @@ iframe {
 <script src="script.js"></script>
 </head>
 <body>
-  <div id='progress'></div>
-  <pre id='console'></pre>
+  <pre id='progress'></pre>
+  <div id='console'></div>
 </body>
 </html>

@@ -34,14 +34,9 @@ var systemLoad = function systemLoad() {
 systemLoad()
 
 
-var player_window = gui.Window.get()
-if (gui.App.argv.length > 1) {
-	swLog('launching in fullscreen mode')
-	player_window.isFullscreen = true
-} else {
-	player_window.window.moveTo(201,1)
-	player_window.isFullscreen = false
-}
+swLog('launching in fullscreen mode')
+player_window.isFullscreen = true
+
 
 window.constants = function constants() {
 	return {
@@ -103,10 +98,12 @@ fs.lstat(constants().MEDIA_DIR(), function(err, stats) {
 
 var swEmitter = new events.EventEmitter()
 var sw_player = new SwPlayer(constants().SCREEN_ID())
+var sw_player_is_playing = false
 
 var loadersEngaged = []
 var fetchersEngaged = []
 var bytes_to_go = bytes_downloaded = 0
+var update_interval_ms = 10 * 60 * 1000 // set default update interval to 10 minutes
 
 swEmitter.on('loader-start', function(data) {
 	if (loadersEngaged.indexOf(data.I) === -1) {
@@ -129,12 +126,12 @@ swEmitter.on('fetcher-start', function(data) {
 		fetchersEngaged.push(data.I)
 		swLog(fetchersEngaged.length + loadersEngaged.length + ' +  Start fetching ' + util.inspect(data))
 	} else {
-		throw ('Duplicate fetcher tried to launch for ' + data.I)
+		throw ('Programming error: Duplicate fetcher tried to launch for ' + data.I)
 	}
 })
 swEmitter.on('fetcher-stop', function(data) {
 	if (fetchersEngaged.indexOf(data.I) === -1)
-		throw ('Fetcher should not exist ' + data.I)
+		throw ('Programming error: Fetcher should not exist ' + data.I)
 	fetchersEngaged.splice(fetchersEngaged.indexOf(data.I),1)
 	swLog((fetchersEngaged.length + loadersEngaged.length) + ' -   Stop fetching ' + util.inspect(data))
 	if (fetchersEngaged.length + loadersEngaged.length + fetchersEngaged.length + loadersEngaged.length === 0)
@@ -146,6 +143,22 @@ swEmitter.on('init-ready', function() {
 	var sw_def, sw_child_def
 	var child = {}
 	var element = {}
+	setTimeout(function() {
+		if (sw_loader.swPollScreen(constants().SCREEN_ID())) { // if publishing date has been changed
+			// ToDo:
+			// - clear metadata on disk
+			fs.readdirSync(constants().META_DIR()).forEach(function(meta_fileName) {
+	            fs.unlinkSync(meta_fileName);
+		    })
+			// - download new metadata and media
+			// - if publishing time in past, restart player immediately
+			// - if publishing time in future, shcedule restart to that exact moment
+		}
+
+	}, update_interval_ms)
+
+	if (sw_player_is_playing)
+		return
 
 	// 1st iteration:
 	// - initialize dom_elements array for each element
@@ -299,7 +312,9 @@ swEmitter.on('init-ready', function() {
 	document.body.appendChild(screen_dom_element)
 	var filename = constants().META_DIR() + '/elements.json'
 
-	sw_player.restart(screen_dom_element)
+	if (sw_player.restart(screen_dom_element))
+		sw_player_is_playing = true
+
 
 })
 
@@ -383,11 +398,11 @@ var swLoader = function swLoader(screenEid) {
 						}
 					}
 				}
-				var filename = constants().META_DIR() + '/' + options.eid + '.' + options.sw_def + '.json'
+				var filename = options.filename
 				if (options.sw_child_def === undefined) {
 					fs.writeFileSync(filename, stringifier(result))
 					swEmitter.emit('fetcher-stop', {'D':options.sw_def,'I':options.eid})
-					callback(options.eid)
+					return callback(options.eid)
 				} else {
 					result.properties[options.sw_child_def] = {}
 					result.properties[options.sw_child_def].values = []
@@ -407,7 +422,7 @@ var swLoader = function swLoader(screenEid) {
 							})
 							fs.writeFileSync(filename, stringifier(result))
 							swEmitter.emit('fetcher-stop', {'D':options.sw_def,'I':options.eid})
-							callback(options.eid)
+							return callback(options.eid)
 						})
 					})
 					child_request.end()
@@ -417,6 +432,24 @@ var swLoader = function swLoader(screenEid) {
 		request.end()
 	}
 
+	function swPollScreen(screen_eid) {
+		var sw_def = 'screen'
+		var filename = constants().META_DIR() + '/poll_' + screen_eid + '.' + sw_def + '.json'
+		fs.readFile( filename, {'encoding': 'utf8'}, function(err, data) {
+			if (err) { throw err }
+			var current_screen = swElements[indexOfElement(screen_eid)].element
+			var new_screen = JSON.parse(data)
+			var current_published = new Date(current_screen.properties.published.values[0].value)
+			var new_published = new Date(new_screen.properties.published.values[0].value)
+			if (current_published.toJSON() != new_published.toJSON()) {
+				progress (current_published.toString() + ' <> ' + new_published.toString() + '. Update in ' + (update_interval_ms / 1000 / 60) + ' minutes')
+				return true
+			} else {
+				progress (current_published.toString() + ' === ' + new_published.toString() + '. Update in ' + (update_interval_ms / 1000 / 60) + ' minutes')
+				return false
+			}
+		})
+	}
 
 	function swLoadScreen(screen_eid) {
 		var sw_def = 'screen'
@@ -427,17 +460,22 @@ var swLoader = function swLoader(screenEid) {
 			if (err) {
 				if (err.code === 'ENOENT') {
 					swLog(filename + ' not present. Fetching from Entu.')
-					swMetaFetch(swLoadScreen, {'eid':screen_eid, 'sw_def':sw_def})
+					swMetaFetch(swLoadScreen, {'eid':screen_eid, 'sw_def':sw_def, 'filename':filename})
 					return
 				} else throw err
 			}
 			var swElement = JSON.parse(data)
-			if (swElement.definition_keyname !== 'sw-screen')
-				throw ('Sorry, this is a ' + swElement.definition_keyname + ', not a SCREEN at entity ' + swElement.id)
+			if (swElement.definition_keyname !== 'sw-screen') {
+				var message_url = 'https://' + constants().HOSTNAME() + '/entity/' + swElement.definition_keyname + '/' + swElement.id
+				var message = 'Wrong startup parameters: This is a ' + swElement.definition_keyname + ', not a SCREEN at\n  ' + message_url
+				console.log(message)
+				error(message, message_url)
+				return false
+			}
 			if (swElement.properties[sw_child_def] === undefined)
-				throw ('Expected property ' + sw_child_def + ' is missing for entity ' + swElement.id)
+				throw ('Configuration error: Expected property ' + sw_child_def + ' is missing for entity ' + swElement.id)
 			if (swElement.properties[sw_child_def].values === undefined)
-				throw ('Expected property ' + sw_child_def + ' is missing for entity ' + swElement.id)
+				throw ('Configuration error: Expected property ' + sw_child_def + ' is missing for entity ' + swElement.id)
 			swElement.properties[sw_child_def].values.forEach(function(chval) {
 				swLoadScreengroup(chval.db_value)
 			})
@@ -446,6 +484,7 @@ var swLoader = function swLoader(screenEid) {
 			swEmitter.emit('loader-stop', {'D':sw_def,'I':screen_eid})
 		})
 	}
+
 	function swLoadScreengroup(screengroup_eid) {
 		var sw_def = 'screen-group'
 		var sw_child_def = constants().HIERARCHY().child_of[sw_def]
@@ -455,7 +494,7 @@ var swLoader = function swLoader(screenEid) {
 			if (err) {
 				if (err.code === 'ENOENT') {
 					swLog(filename + ' not present. Fetching from Entu.')
-					swMetaFetch(swLoadScreengroup, {'eid':screengroup_eid, 'sw_def':sw_def})
+					swMetaFetch(swLoadScreengroup, {'eid':screengroup_eid, 'sw_def':sw_def, 'filename':filename})
 					return
 				} else throw err
 			}
@@ -469,6 +508,7 @@ var swLoader = function swLoader(screenEid) {
 			swEmitter.emit('loader-stop', {'D':sw_def,'I':screengroup_eid})
 		})
 	}
+
 	function swLoadConfiguration(configuration_eid) {
 		var sw_def = 'configuration'
 		var sw_child_def = constants().HIERARCHY().child_of[sw_def]
@@ -478,13 +518,16 @@ var swLoader = function swLoader(screenEid) {
 			if (err) {
 				if (err.code === 'ENOENT') {
 					swLog(filename + ' not present. Fetching from Entu.')
-					swMetaFetch(swLoadConfiguration, {'eid':configuration_eid, 'sw_def':sw_def, 'sw_child_def':sw_child_def})
+					swMetaFetch(swLoadConfiguration, {'eid':configuration_eid, 'sw_def':sw_def, 'sw_child_def':sw_child_def, 'filename':filename})
 					return
 				} else throw err
 			}
 			var swElement = JSON.parse(data)
 			if (swElement.properties[sw_child_def].values === undefined)
 				throw ('Expected property ' + sw_child_def + ' is missing for entity ' + swElement.id)
+			if (swElement.properties['update-interval'].values !== undefined)
+				update_interval_ms = 1000 * 60 * swElement.properties['update-interval'].values[0].db_value
+
 			swElement.properties[sw_child_def].values.forEach(function(chval) {
 				swLoadSchedule(chval.db_value)
 			})
@@ -492,6 +535,7 @@ var swLoader = function swLoader(screenEid) {
 			swEmitter.emit('loader-stop', {'D':sw_def,'I':configuration_eid})
 		})
 	}
+
 	function swLoadSchedule(schedule_eid) {
 		var sw_def = 'schedule'
 		var sw_child_def = constants().HIERARCHY().child_of[sw_def]
@@ -501,7 +545,7 @@ var swLoader = function swLoader(screenEid) {
 			if (err) {
 				if (err.code === 'ENOENT') {
 					swLog(filename + ' not present. Fetching from Entu.')
-					swMetaFetch(swLoadSchedule, {'eid':schedule_eid, 'sw_def':sw_def})
+					swMetaFetch(swLoadSchedule, {'eid':schedule_eid, 'sw_def':sw_def, 'filename':filename})
 					return
 				} else throw err
 			}
@@ -515,6 +559,7 @@ var swLoader = function swLoader(screenEid) {
 			swEmitter.emit('loader-stop', {'D':sw_def,'I':schedule_eid})
 		})
 	}
+
 	function swLoadLayout(layout_eid) {
 		var sw_def = 'layout'
 		var sw_child_def = constants().HIERARCHY().child_of[sw_def]
@@ -524,7 +569,7 @@ var swLoader = function swLoader(screenEid) {
 			if (err) {
 				if (err.code === 'ENOENT') {
 					swLog(filename + ' not present. Fetching from Entu.')
-					swMetaFetch(swLoadLayout, {'eid':layout_eid, 'sw_def':sw_def, 'sw_child_def':sw_child_def})
+					swMetaFetch(swLoadLayout, {'eid':layout_eid, 'sw_def':sw_def, 'sw_child_def':sw_child_def, 'filename':filename})
 					return
 				} else throw err
 			}
@@ -539,6 +584,7 @@ var swLoader = function swLoader(screenEid) {
 			swEmitter.emit('loader-stop', {'D':sw_def,'I':layout_eid})
 		})
 	}
+
 	function swLoadLayoutPlaylist(layout_playlist_eid) {
 		var sw_def = 'layout-playlist'
 		var sw_child_def = constants().HIERARCHY().child_of[sw_def]
@@ -548,7 +594,7 @@ var swLoader = function swLoader(screenEid) {
 			if (err) {
 				if (err.code === 'ENOENT') {
 					swLog(filename + ' not present. Fetching from Entu.')
-					swMetaFetch(swLoadLayoutPlaylist, {'eid':layout_playlist_eid, 'sw_def':sw_def})
+					swMetaFetch(swLoadLayoutPlaylist, {'eid':layout_playlist_eid, 'sw_def':sw_def, 'filename':filename})
 					return
 				} else throw err
 			}
@@ -562,6 +608,7 @@ var swLoader = function swLoader(screenEid) {
 			swEmitter.emit('loader-stop', {'D':sw_def,'I':layout_playlist_eid})
 		})
 	}
+
 	function swLoadPlaylist(playlist_eid) {
 		var sw_def = 'playlist'
 		var sw_child_def = constants().HIERARCHY().child_of[sw_def]
@@ -571,7 +618,7 @@ var swLoader = function swLoader(screenEid) {
 			if (err) {
 				if (err.code === 'ENOENT') {
 					swLog(filename + ' not present. Fetching from Entu.')
-					swMetaFetch(swLoadPlaylist, {'eid':playlist_eid, 'sw_def':sw_def, 'sw_child_def':sw_child_def})
+					swMetaFetch(swLoadPlaylist, {'eid':playlist_eid, 'sw_def':sw_def, 'sw_child_def':sw_child_def, 'filename':filename})
 					return
 				} else throw err
 			}
@@ -586,6 +633,7 @@ var swLoader = function swLoader(screenEid) {
 			swEmitter.emit('loader-stop', {'D':sw_def,'I':playlist_eid})
 		})
 	}
+
 	function swLoadPlaylistMedia(playlist_media_eid) {
 		var sw_def = 'playlist-media'
 		var sw_child_def = constants().HIERARCHY().child_of[sw_def]
@@ -595,7 +643,7 @@ var swLoader = function swLoader(screenEid) {
 			if (err) {
 				if (err.code === 'ENOENT') {
 					swLog(filename + ' not present. Fetching from Entu.')
-					swMetaFetch(swLoadPlaylistMedia, {'eid':playlist_media_eid, 'sw_def':sw_def})
+					swMetaFetch(swLoadPlaylistMedia, {'eid':playlist_media_eid, 'sw_def':sw_def, 'filename':filename})
 					return
 				} else throw err
 			}
@@ -610,6 +658,7 @@ var swLoader = function swLoader(screenEid) {
 			swEmitter.emit('loader-stop', {'D':sw_def,'I':playlist_media_eid})
 		})
 	}
+
 	function swLoadMedia(media_eid) {
 		var sw_def = 'media'
 		swEmitter.emit('loader-start', {'D':sw_def,'I':media_eid})
@@ -618,7 +667,7 @@ var swLoader = function swLoader(screenEid) {
 			if (err) {
 				if (err.code === 'ENOENT') {
 					swLog(filename + ' not present. Fetching from Entu.')
-					swMetaFetch(swLoadMedia, {'eid':media_eid, 'sw_def':sw_def})
+					swMetaFetch(swLoadMedia, {'eid':media_eid, 'sw_def':sw_def, 'filename':filename})
 					return
 				} else throw err
 			}
@@ -648,7 +697,7 @@ var swLoader = function swLoader(screenEid) {
 	function swGet(callback, eid) {
 		swElements.forEach(function(swElement) {
 			if (swElement.id === eid) {
-				swLog(eid)
+				// swLog(eid)
 				callback(swElement)
 			}
 		})
@@ -681,6 +730,15 @@ var swLoader = function swLoader(screenEid) {
 		},
 		indexOfElement: function (eid) {
 			return indexOfElement(eid)
+		},
+		swPollScreen: function (screen_eid) {
+			var sw_def = 'screen'
+			var filename = constants().META_DIR() + '/poll_' + screen_eid + '.' + sw_def + '.json'
+			return swMetaFetch(swPollScreen, {'eid':screen_eid, 'sw_def':sw_def, 'filename':filename})
+		},
+		reload: function () {
+			swElements = []
+			swLoadScreen(constants().SCREEN_ID())
 		}
 	}
 }

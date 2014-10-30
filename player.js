@@ -18,7 +18,7 @@ function SwPlayer(screen_id) {
 		restart: function(screen_dom_element) {
 			window.swLog('Starting ScreenWerk player for screen ' + screen_id)
 			screen_dom_element.player = new SwScreen(screen_dom_element)
-			screen_dom_element.player.play()
+			return screen_dom_element.player.play()
 		}
 	}
 }
@@ -54,6 +54,7 @@ function SwScreen(dom_element) {
 			for (var key=0; key<dom_element.childNodes.length; key++) {
 				dom_element.childNodes[key].player.play()
 			}
+			return true
 		},
 		stop: function() {
 			if (!is_playing) {
@@ -722,11 +723,11 @@ function SwMedia(dom_element, muted, duration_ms) {
 			dom_element.style.display = 'none'
 			window.swLog('|-- STOP ' + entity.definition + ' ' + entity.id)// + ' style: ' + util.inspect(dom_element.style))
 			if (mediatype === 'Video') {
-				window.swLog('|-- Video ' + entity.definition + ' ' + entity.id)// + ' style: ' + util.inspect(dom_element.style))
-				window.swLog('|-- readyState ' + media_dom_element.readyState + ' ' + entity.id)// + ' style: ' + util.inspect(dom_element.style))
 				media_dom_element.pause()
+				window.swLog('|-- Video ' + entity.definition + ' ' + entity.id)// + ' style: ' + util.inspect(dom_element.style))
 				if (media_dom_element.readyState > 0) {
 					media_dom_element.currentTime = 0
+					window.swLog('|-- readyState ' + media_dom_element.readyState + ' ' + entity.id)// + ' style: ' + util.inspect(dom_element.style))
 				}
 			}
 		},
