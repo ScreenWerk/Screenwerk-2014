@@ -4,7 +4,7 @@
  * argv[0]        Screen's Entu ID
  *
  */
-
+console.log('foo')
 // 1. core modules
 var gui     = require('nw.gui')
 var assert  = require('assert')
@@ -12,6 +12,8 @@ var util    = require('util')
 var fs      = require('fs')
 var https   = require('https')
 var events  = require('events')
+var uuid    = require('node-uuid')
+
 
 // 2. public modules from npm
 var os      = require('os-utils')
@@ -25,21 +27,10 @@ assert.ok(Number(gui.App.argv[0]) > 0
 swLog('\n\n===================================')
 swLog(os.platform(), 'SYSTEM')
 
-var systemLoad = function systemLoad() {
-	os.cpuUsage(function(v){
-	    swLog( os.processUptime() + 'sec | CPU Usage : ' + Math.round(v*100)/1 + '% | Mem free: ' + Math.round(os.freemem()) + '/' + Math.round(os.totalmem()) + 'M', 'SYSTEM' )
-	})
-	setTimeout(systemLoad, 10000)
-}
-systemLoad()
-
-
-swLog('launching in fullscreen mode')
-player_window.isFullscreen = true
-
-
+var entu_api_key = ''
 window.constants = function constants() {
 	return {
+		API_KEY:     function() { return entu_api_key },
 		HOSTNAME:    function() { return 'piletilevi.entu.ee' },
 		SCREEN_ID:   function() { return Number(gui.App.argv[0]) },
 		META_DIR:    function() { return 'sw-meta' },
@@ -67,6 +58,33 @@ window.constants = function constants() {
 		}
 	}
 }
+
+var uuid_path = constants().SCREEN_ID() + '.uuid'
+if (fs.existsSync(uuid_path)) {
+	entu_api_key = fs.readFileSync(uuid_path)
+	swLog('Read key: ' + entu_api_key, 'SYSTEM')
+} else {
+	entu_api_key = uuid.v1()
+	fs.writeFileSync(uuid_path, entu_api_key)
+	swLog('Create key: ' + entu_api_key, 'SYSTEM')
+}
+
+
+var systemLoad = function systemLoad() {
+	os.cpuUsage(function(v){
+	    swLog( os.processUptime() + 'sec | CPU Usage : ' + Math.round(v*100)/1 + '% | Mem free: ' + Math.round(os.freemem()) + '/' + Math.round(os.totalmem()) + 'M', 'SYSTEM' )
+	})
+	setTimeout(systemLoad, 10000)
+}
+systemLoad()
+
+
+
+
+swLog('launching in fullscreen mode')
+player_window.isFullscreen = true
+
+
 
 // Make sure folder for metadata is in place
 fs.lstat(constants().META_DIR(), function(err, stats) {
