@@ -113,31 +113,27 @@ var bytes_downloaded = 0
 progress(loading_process_count + '| ' + bytesToSize(total_download_size) + ' - ' + bytesToSize(bytes_downloaded) + ' = ' + bytesToSize(total_download_size - bytes_downloaded) )
 
 function loadMedia(err, entity_id, file_id, callback) {
-	++ loading_process_count
-	progress(loading_process_count + '| ' + bytesToSize(total_download_size) + ' - ' + bytesToSize(bytes_downloaded) + ' = ' + bytesToSize(total_download_size - bytes_downloaded) )
+	incrementProcessCount()
 	if (err) {
 		console.log('loadMedia err', err)
 		callback(err)
-		-- loading_process_count
-		progress(loading_process_count + '| ' + bytesToSize(total_download_size) + ' - ' + bytesToSize(bytes_downloaded) + ' = ' + bytesToSize(total_download_size - bytes_downloaded) )
+		decrementProcessCount()
 		return
 	}
 	var filename = __MEDIA_DIR + entity_id + '_' + file_id
 	var download_filename = filename + '.download'
 
-	console.log ('Looking for ' + filename)
+	// console.log ('Looking for ' + filename)
 	if (fs.existsSync(filename)) {
-		-- loading_process_count
-		progress(loading_process_count + '| ' + bytesToSize(total_download_size) + ' - ' + bytesToSize(bytes_downloaded) + ' = ' + bytesToSize(total_download_size - bytes_downloaded) )
+		decrementProcessCount()
 		callback(null)
 		return
 	}
 
-	console.log ('Looking for ' + download_filename)
+	// console.log ('Looking for ' + download_filename)
 	if (fs.existsSync(download_filename)) {
 		console.log('Download for ' + filename + ' already in progress')
-		-- loading_process_count
-		progress(loading_process_count + '| ' + bytesToSize(total_download_size) + ' - ' + bytesToSize(bytes_downloaded) + ' = ' + bytesToSize(total_download_size - bytes_downloaded) )
+		decrementProcessCount()
 		return
 	}
 
@@ -176,8 +172,7 @@ function loadMedia(err, entity_id, file_id, callback) {
 			    console.log('CRITICAL: Messed up with parallel downloading of ' + filename + '. Cleanup and relaunch, please. Closing down.', e);
 				process.exit(99)
 			}
-			-- loading_process_count
-			progress(loading_process_count + '| ' + bytesToSize(total_download_size) + ' - ' + bytesToSize(bytes_downloaded) + ' = ' + bytesToSize(total_download_size - bytes_downloaded) )
+			decrementProcessCount()
 			callback(null)
 		})
 	})
@@ -186,13 +181,11 @@ function loadMedia(err, entity_id, file_id, callback) {
 
 var swElements = []
 function registerMeta(err, metadata, callback) {
-	++ loading_process_count
-	progress(loading_process_count + '| ' + bytesToSize(total_download_size) + ' - ' + bytesToSize(bytes_downloaded) + ' = ' + bytesToSize(total_download_size - bytes_downloaded) )
+	incrementProcessCount()
 	if (err) {
 		console.log('registerMeta err', err)
 		callback(err)
-		-- loading_process_count
-		progress(loading_process_count + '| ' + bytesToSize(total_download_size) + ' - ' + bytesToSize(bytes_downloaded) + ' = ' + bytesToSize(total_download_size - bytes_downloaded) )
+		decrementProcessCount()
 		return false
 	}
 	var properties = metadata.properties
@@ -201,8 +194,7 @@ function registerMeta(err, metadata, callback) {
 			var vt_date = new Date(properties['valid-to'].values[0].db_value)
 			var now = Date.now()
 			if (vt_date.getTime() < now) {
-				-- loading_process_count
-				progress(loading_process_count + '| ' + bytesToSize(total_download_size) + ' - ' + bytesToSize(bytes_downloaded) + ' = ' + bytesToSize(total_download_size - bytes_downloaded) )
+				decrementProcessCount()
 				return false
 			}
 		}
@@ -213,8 +205,7 @@ function registerMeta(err, metadata, callback) {
 		loadMedia(null, metadata.id, file_id, callback)
 	}
 	swElements.push({'id':metadata.id, 'definition':definition, 'element':metadata, 'parents':[], 'childs':[]})
-	-- loading_process_count
-	progress(loading_process_count + '| ' + bytesToSize(total_download_size) + ' - ' + bytesToSize(bytes_downloaded) + ' = ' + bytesToSize(total_download_size - bytes_downloaded) )
+	decrementProcessCount()
 	return true
 }
 
@@ -234,13 +225,11 @@ function reloadMeta(err, callback) {
 }
 
 function loadMeta(err, eid, struct_node, callback) {
-	++ loading_process_count
-	progress(loading_process_count + '| ' + bytesToSize(total_download_size) + ' - ' + bytesToSize(bytes_downloaded) + ' = ' + bytesToSize(total_download_size - bytes_downloaded) )
+	incrementProcessCount()
 	if (err) {
 		console.log('loadMeta err', err)
 		callback(err)
-		-- loading_process_count
-		progress(loading_process_count + '| ' + bytesToSize(total_download_size) + ' - ' + bytesToSize(bytes_downloaded) + ' = ' + bytesToSize(total_download_size - bytes_downloaded) )
+		decrementProcessCount()
 		return
 	}
 	var definition = struct_node.name
@@ -253,29 +242,25 @@ function loadMeta(err, eid, struct_node, callback) {
 				if (err) {
 					console.log(definition + ': ' + util.inspect(result), err)
 					callback(err)
-					-- loading_process_count
-					progress(loading_process_count + '| ' + bytesToSize(total_download_size) + ' - ' + bytesToSize(bytes_downloaded) + ' = ' + bytesToSize(total_download_size - bytes_downloaded) )
+					decrementProcessCount()
 					return
 				}
 				if (result.error !== undefined) {
 					console.log (definition + ': ' + 'Failed to load from Entu EID=' + eid + '.')
 					callback(new Error(result.error))
-					-- loading_process_count
-					progress(loading_process_count + '| ' + bytesToSize(total_download_size) + ' - ' + bytesToSize(bytes_downloaded) + ' = ' + bytesToSize(total_download_size - bytes_downloaded) )
+					decrementProcessCount()
 					return
 				}
 				fs.writeFile(meta_path, stringifier(result.result), function(err) {
 					if (err) {
 						console.log(definition + ': ' + util.inspect(result))
 						callback(err)
-						-- loading_process_count
-						progress(loading_process_count + '| ' + bytesToSize(total_download_size) + ' - ' + bytesToSize(bytes_downloaded) + ' = ' + bytesToSize(total_download_size - bytes_downloaded) )
+						decrementProcessCount()
 						return
 					}
 				})
 				loadMeta(null, eid, struct_node, callback)
-				-- loading_process_count
-				progress(loading_process_count + '| ' + bytesToSize(total_download_size) + ' - ' + bytesToSize(bytes_downloaded) + ' = ' + bytesToSize(total_download_size - bytes_downloaded) )
+				decrementProcessCount()
 			})
 			return
 		}
@@ -285,16 +270,14 @@ function loadMeta(err, eid, struct_node, callback) {
 		} catch (e) {
 		    console.log('WARNING: Data got corrupted while reading from ' + meta_path + '. Retrying.', e);
 			loadMeta(null, eid, struct_node, callback)
-			-- loading_process_count
-			progress(loading_process_count + '| ' + bytesToSize(total_download_size) + ' - ' + bytesToSize(bytes_downloaded) + ' = ' + bytesToSize(total_download_size - bytes_downloaded) )
+			decrementProcessCount()
 			return
 		}
 
 		console.log('Successfully loaded ' + definition + ' ' + eid)
 		if (registerMeta(null, meta_json, callback) === false) {
 			console.log('Not registered ' + definition + ' ' + eid)
-			-- loading_process_count
-			progress(loading_process_count + '| ' + bytesToSize(total_download_size) + ' - ' + bytesToSize(bytes_downloaded) + ' = ' + bytesToSize(total_download_size - bytes_downloaded) )
+			decrementProcessCount()
 			callback(null)
 			return
 		}
@@ -305,8 +288,7 @@ function loadMeta(err, eid, struct_node, callback) {
 			ref_def_name = struct_node.reference.name
 			ref_def_id = meta_json.properties[ref_def_name].values[0].db_value
 			loadMeta(null, ref_def_id, struct_node.reference, callback)
-			-- loading_process_count
-			progress(loading_process_count + '| ' + bytesToSize(total_download_size) + ' - ' + bytesToSize(bytes_downloaded) + ' = ' + bytesToSize(total_download_size - bytes_downloaded) )
+			decrementProcessCount()
 			// console.log(struct_node.reference)
 		}
 		else if (struct_node.child !== undefined) {
@@ -316,28 +298,24 @@ function loadMeta(err, eid, struct_node, callback) {
 				if (err) {
 					console.log(definition + ': ' + util.inspect(result), err)
 					callback(err)
-					-- loading_process_count
-					progress(loading_process_count + '| ' + bytesToSize(total_download_size) + ' - ' + bytesToSize(bytes_downloaded) + ' = ' + bytesToSize(total_download_size - bytes_downloaded) )
+					decrementProcessCount()
 					return
 				}
 				if (result.error !== undefined) {
 					console.log (definition + ': ' + 'Failed to load childs for EID=' + eid + '.')
 					callback(new Error(result.error))
-					-- loading_process_count
-					progress(loading_process_count + '| ' + bytesToSize(total_download_size) + ' - ' + bytesToSize(bytes_downloaded) + ' = ' + bytesToSize(total_download_size - bytes_downloaded) )
+					decrementProcessCount()
 					return
 				}
 				// console.log(ch_def_name + ': ' + util.inspect(result, {depth:null}))
 				result.result['sw-'+ch_def_name].entities.forEach(function(entity) {
 					loadMeta(null, entity.id, struct_node.child, callback)
 				})
-				-- loading_process_count
-				progress(loading_process_count + '| ' + bytesToSize(total_download_size) + ' - ' + bytesToSize(bytes_downloaded) + ' = ' + bytesToSize(total_download_size - bytes_downloaded) )
+				decrementProcessCount()
 			})
 		}
 		else {
-			-- loading_process_count
-			progress(loading_process_count + '| ' + bytesToSize(total_download_size) + ' - ' + bytesToSize(bytes_downloaded) + ' = ' + bytesToSize(total_download_size - bytes_downloaded) )
+			decrementProcessCount()
 			callback(null)
 		}
 	})

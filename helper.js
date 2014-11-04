@@ -57,6 +57,15 @@ var progress = window.progress = function progress(message) {
     }
 }
 
+var decrementProcessCount = function decrementProcessCount() {
+    -- loading_process_count
+    progress(loading_process_count + '| ' + bytesToSize(total_download_size) + ' - ' + bytesToSize(bytes_downloaded) + ' = ' + bytesToSize(total_download_size - bytes_downloaded) )
+}
+var incrementProcessCount = function decrementProcessCount() {
+    ++ loading_process_count
+    progress(loading_process_count + '| ' + bytesToSize(total_download_size) + ' - ' + bytesToSize(bytes_downloaded) + ' = ' + bytesToSize(total_download_size - bytes_downloaded) )
+}
+
 var error = window.error = function error(message, link) {
     if (window.document.body !== null) {
         var error_DOM = window.document.getElementById('error')
