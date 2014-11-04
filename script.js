@@ -96,27 +96,38 @@ a.forEach(function(foldername) {
 
 
 // Cleanup unfinished downloads if any
-fs.readdirSync(__MEDIA_DIR).forEach(function(download_filename) {
-	if (download_filename.split('.').pop() !== 'download')
-		return
-    console.log("Unlink " + __MEDIA_DIR + download_filename)
-	var result = fs.unlinkSync(__MEDIA_DIR + download_filename)
-	if (result instanceof Error) {
-	    console.log("Can't unlink " + __MEDIA_DIR + download_filename, result)
+try {
+	fs.readdirSync(__MEDIA_DIR).forEach(function(download_filename) {
+		if (download_filename.split('.').pop() !== 'download')
+			return
+	    console.log("Unlink " + __MEDIA_DIR + download_filename)
+		var result = fs.unlinkSync(__MEDIA_DIR + download_filename)
+		if (result instanceof Error) {
+		    console.log("Can't unlink " + __MEDIA_DIR + download_filename, result)
+		}
+	})
+} catch (e) {
+	// No worries. There is no media folder present (yet) therefore no download files in it.
+	null
+}
+
+function noOp(err) {
+	if (err) {
+		console.log('noOp err', err)
 	}
-})
-
-
+	console.log('noOp')
+}
 
 // Beware: we'll go quite eventful from now on
 var swEmitter = new events.EventEmitter()
 
-swEmitter.on('update-init', function(interval_ms) {
-	setTimeout(swUpdate, interval_ms);
+swEmitter.on('update-init', function(callback) {
+	loadMeta(null, __SCREEN_ID, __STRUCTURE, callback)
+	// reloadMeta(null, __SCREEN_ID, __STRUCTURE, callback)
 })
 
-swEmitter.on('reload-init', function(interval_ms) {
-	setTimeout(swReload, interval_ms);
+swEmitter.on('restart-init', function(interval_ms) {
+	// setTimeout(swReload, interval_ms);
 })
 
 
@@ -145,14 +156,15 @@ function loadMedia(err, entity_id, file_id, callback) {
 
 	// console.log ('Looking for ' + download_filename)
 	if (fs.existsSync(download_filename)) {
-		console.log('Download for ' + filename + ' already in progress')
+		// console.log('Download for ' + filename + ' already in progress')
 		decrementProcessCount()
 		return
 	}
 
 	var writable = fs.createWriteStream(download_filename)
 
-	console.log ('File ' + filename + ' missing. Fetch!')
+	// console.log ('File ' + filename + ' missing. Fetch!')
+
 	// TODO:
 	// implement file fetcher for EntuLib
 	// - with option to pass writable stream
@@ -287,14 +299,14 @@ function loadMeta(err, eid, struct_node, callback) {
 			return
 		}
 
-		console.log('Successfully loaded ' + definition + ' ' + eid)
+		// console.log('Successfully loaded ' + definition + ' ' + eid)
 		if (registerMeta(null, meta_json, callback) === false) {
 			console.log('Not registered ' + definition + ' ' + eid)
 			decrementProcessCount()
 			callback(null)
 			return
 		}
-		console.log('Registered ' + definition + ' ' + eid)
+		// console.log('Registered ' + definition + ' ' + eid)
 
 
 		if (struct_node.reference !== undefined) {
@@ -309,7 +321,7 @@ function loadMeta(err, eid, struct_node, callback) {
 			// console.log(struct_node.child)
 			EntuLib.getChilds(eid, function(err, result) {
 				if (err) {
-					console.log(definition + ': ' + util.inspect(result), err)
+					console.log('loadMeta err:', err)
 					callback(err)
 					decrementProcessCount()
 					return
@@ -336,7 +348,7 @@ function loadMeta(err, eid, struct_node, callback) {
 
 function startPlayer(err, eid) {
 	if (err) {
-		console.log(err)
+		console.log('startPlayer err:', err)
 		return
 	}
 	if (loading_process_count > 0) {
@@ -350,13 +362,5 @@ function startPlayer(err, eid) {
 	}, 3000);
 }
 
-setTimeout(function() {
-	loadMeta(null, __SCREEN_ID, __STRUCTURE, startPlayer)
-	// reloadMeta(null, __SCREEN_ID, __STRUCTURE, startPlayer)
-}, 10);
-
-
-var swUpdate = function swUpdate() {
-	null
-}
-
+// Start the action here! (in a sec)
+swEmitter.emit('update-init', startPlayer)
