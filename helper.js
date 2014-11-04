@@ -1,25 +1,20 @@
-var fs      = require('fs')
+var fs          = require('fs')
+var stringifier = require('./stringifier.js')
 
-var stringifier = function stringifier(o) {
-    var cache = [];
-    return JSON.stringify(o, function(key, value) {
-        if (typeof value === 'object' && value !== null) {
-            if (cache.indexOf(value) !== -1) {
-                // Circular reference found, replace key
-                return 'Circular reference to: ' + key
-            }
-            // Store value in our collection
-            cache.push(value)
-        }
-        return value
-    }, '\t')
-}
 
-var consoleStream = fs.createWriteStream('./console.log', {flags:'a'})
-var sysLogStream = fs.createWriteStream('./system.log', {flags:'a'})
+// var datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '')
+// var consoleStream = fs.createWriteStream(c_stream_path, {flags:'a'})
+// var sysLogStream = fs.createWriteStream(s_stream_path, {flags:'a'})
+// var c_stream_path = './Console ' + datestring + '.log'
+// var s_stream_path = './System ' + datestring + '.log'
+var log_streams_are_closed = false
 var message_q = []
 var swLog = window.swLog = function swLog(message, scope) {
     console.log(message)
+    if (log_streams_are_closed) {
+        console.log('Log files are closed allready.')
+        return { end: function() {return false}}
+    }
     if (scope === undefined)
         scope = 'INFO'
     now = new Date()
@@ -38,6 +33,15 @@ var swLog = window.swLog = function swLog(message, scope) {
         sysLogStream.write(now.toString().slice(0,24) + ': ' + message + '\n')
     else
         consoleStream.write(now.toString().slice(0,24) + ' ' + scope + ': ' + message + '\n')
+
+    return {
+        end: function() {
+            log_streams_are_closed = true
+            sysLogStream.end()
+            consoleStream.end()
+            return {'c_stream_path': c_stream_path, 's_stream_path': s_stream_path}
+        }
+    }
 }
 
 var progress = window.progress = function progress(message) {
@@ -50,11 +54,6 @@ var progress = window.progress = function progress(message) {
         }
         progress_DOM.textContent = message
         document.getElementById('progress').style.display = 'block'
-    }
-    return {
-        finish: function() {
-            document.getElementById('progress').style.display = 'none'
-        }
     }
 }
 
@@ -86,7 +85,7 @@ var error = window.error = function error(message, link) {
 
 var bytesToSize = function bytesToSize(bytes) {
     var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB']
-    if (bytes == 0) return 'n/a'
+    if (bytes == 0) return '0'
     var i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)))
     return Math.round(bytes / Math.pow(1024, i), 2) + ' ' + sizes[i]
 }

@@ -9,8 +9,8 @@ var swEmitter = new events.EventEmitter()
 
 var console = window.console
 
-var consoleStream = fs.createWriteStream('./console.log', {flags:'a'})
-var sysLogStream = fs.createWriteStream('./system.log', {flags:'a'})
+// var consoleStream = fs.createWriteStream('./console.log', {flags:'a'})
+// var sysLogStream = fs.createWriteStream('./system.log', {flags:'a'})
 
 
 function SwPlayer(screen_id) {
