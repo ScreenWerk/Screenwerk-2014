@@ -95,6 +95,19 @@ a.forEach(function(foldername) {
 })
 
 
+// Cleanup unfinished downloads if any
+fs.readdirSync(__MEDIA_DIR).forEach(function(download_filename) {
+	if (download_filename.split('.').pop() !== 'download')
+		return
+    console.log("Unlink " + __MEDIA_DIR + download_filename)
+	var result = fs.unlinkSync(__MEDIA_DIR + download_filename)
+	if (result instanceof Error) {
+	    console.log("Can't unlink " + __MEDIA_DIR + download_filename, result)
+	}
+})
+
+
+
 // Beware: we'll go quite eventful from now on
 var swEmitter = new events.EventEmitter()
 
