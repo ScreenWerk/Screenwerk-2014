@@ -92,6 +92,13 @@ var error = window.error = function error(message, link) {
     }
 }
 
+function noOp(err) {
+    if (err) {
+        console.log('noOp err', err)
+    }
+    console.log('noOp')
+}
+
 var bytesToSize = function bytesToSize(bytes) {
     var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB']
     if (bytes == 0) return '0'
