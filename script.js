@@ -134,37 +134,45 @@ swEmitter.on('restart-init', function(interval_ms) {
 
 progress(loading_process_count + '| ' + bytesToSize(total_download_size) + ' - ' + bytesToSize(bytes_downloaded) + ' = ' + bytesToSize(total_download_size - bytes_downloaded) )
 
-function startPlayer(err, eid) {
+function startDigester(err, eid) {
 	if (err) {
-		console.log('startPlayer err:', eid, err)
+		console.log('startDigester err:', err, eid)
 		setTimeout(function() {
 			process.exit(0)
 		}, 300)
 		return
 	}
 	if (loading_process_count > 0) {
-		console.log('Waiting for loaders to calm down. Active processes: ' + loading_process_count)
+		// console.log('Waiting for loaders to calm down. Active processes: ' + loading_process_count)
 		return
 	}
-	console.log('Reached stable state. Flushing metadata and terminating in three.')
+	console.log('Reached stable state. Flushing metadata and starting preprocessing elements.')
 	fs.writeFileSync('elements.json', stringifier(swElements))
 
 	var stacksize = swElements.length
 	swElements.forEach(function(swElement) {
 		var meta_path = __META_DIR + swElement.id + ' ' + swElement.definition.keyname.split('sw-')[1] + '.json'
 		fs.writeFileSync(meta_path, stringifier(swElement))
-		console.log (stacksize, meta_path)
+		// console.log (stacksize, meta_path)
 		if(-- stacksize === 0) {
-			// setTimeout(function() {
-				process.exit(0)
-			// }, 3000)
+			console.log('Metadata flushed')
 		}
 	})
+	processElements(null, startDOM)
+}
 
+function startDOM(err, data) {
+	if (err) {
+		console.log('startDOM err:', err, data)
+		setTimeout(function() {
+			process.exit(0)
+		}, 300)
+		return
+	}
 }
 
 // Start the action here! (in a sec)
-swEmitter.emit('update-init', startPlayer)
+swEmitter.emit('update-init', startDigester)
 
 // Begin capturing screenshots
 function captureScreenshot(err, callback) {

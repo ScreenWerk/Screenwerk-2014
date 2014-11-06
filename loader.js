@@ -103,8 +103,8 @@ var element_register = []
 function registerMeta(err, metadata, callback) {
 	if (element_register.indexOf(metadata.id) > -1)
 		return true
-	element_register.push(metadata.id)
 	incrementProcessCount()
+	element_register.push(metadata.id)
 	if (err) {
 		console.log('registerMeta err', err)
 		callback(err)
@@ -211,6 +211,10 @@ function loadMeta(err, eid, struct_node, callback) {
 			meta_json.childs = []
 			if (struct_node.reference !== undefined) {
 				ref_entity_name = struct_node.reference.name
+				if (meta_json.properties[ref_entity_name].values === undefined) {
+					callback(new Error(struct_node.name + ' ' + eid + ' has no ' + ref_entity_name + "'s."))
+					decrementProcessCount()
+				}
 				ref_entity_id = meta_json.properties[ref_entity_name].values[0].db_value
 				registerChild(null, meta_json, ref_entity_id, function(err) {
 					console.log(ref_entity_id)
@@ -236,7 +240,11 @@ function loadMeta(err, eid, struct_node, callback) {
 						return
 					}
 					// console.log(ch_def_name + ': ' + util.inspect(ch_result, {depth:null}))
-					ch_result.result['sw-'+ch_def_name].entities.forEach(function(entity) {
+					if (ch_result.result['sw-'+ch_def_name].entities.length === 0) {
+						callback(new Error(struct_node.name + ' ' + eid + ' has no ' + ch_def_name + "'s."))
+						decrementProcessCount()
+					}
+					forEach(function(entity) {
 						registerChild(null, meta_json, entity.id, function() {
 							console.log(entity.id)
 							loadMeta(null, entity.id, struct_node.child, callback)
