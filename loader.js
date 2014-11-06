@@ -99,7 +99,11 @@ function loadMedia(err, entity_id, file_id, callback) {
 }
 
 var swElements = []
+var element_register = []
 function registerMeta(err, metadata, callback) {
+	if (element_register.indexOf(metadata.id) > -1)
+		return true
+	element_register.push(metadata.id)
 	incrementProcessCount()
 	if (err) {
 		console.log('registerMeta err', err)
@@ -144,7 +148,7 @@ function reloadMeta(err, callback) {
 }
 
 function loadMeta(err, eid, struct_node, callback) {
-	// console.log('loadMeta: ', eid, struct_node)
+	console.log('loadMeta: ', eid, struct_node)
 	incrementProcessCount()
 	if (err) {
 		console.log('loadMeta err', err)
@@ -157,10 +161,10 @@ function loadMeta(err, eid, struct_node, callback) {
 	var meta_json = ''
 	fs.readFile(meta_path, function(err, data) {
 		if (err) {
-			// console.log('ENOENT', err)
+			// console.log('ENOENT', meta_path, err, data)
 			EntuLib.getEntity(eid, function(err, result) {
 				if (err) {
-					console.log(definition + ': ' + util.inspect(result), err)
+					console.log(definition + ': ' + util.inspect(result), err, result)
 					callback(err)
 					decrementProcessCount()
 					return
@@ -209,6 +213,7 @@ function loadMeta(err, eid, struct_node, callback) {
 				ref_entity_name = struct_node.reference.name
 				ref_entity_id = meta_json.properties[ref_entity_name].values[0].db_value
 				registerChild(null, meta_json, ref_entity_id, function(err) {
+					console.log(ref_entity_id)
 					loadMeta(err, ref_entity_id, struct_node.reference, callback)
 				})
 				decrementProcessCount()
@@ -232,9 +237,10 @@ function loadMeta(err, eid, struct_node, callback) {
 					}
 					// console.log(ch_def_name + ': ' + util.inspect(ch_result, {depth:null}))
 					ch_result.result['sw-'+ch_def_name].entities.forEach(function(entity) {
-						// registerChild(null, meta_json, {'id': entity.id}, function() {
+						registerChild(null, meta_json, entity.id, function() {
+							console.log(entity.id)
 							loadMeta(null, entity.id, struct_node.child, callback)
-						// }
+						})
 					})
 					decrementProcessCount()
 				})
@@ -245,12 +251,14 @@ function loadMeta(err, eid, struct_node, callback) {
 			}
 		}
 		else {
-			meta_json.childs.forEach(function(child_id) {
+			meta_json.childs.forEach(function(child) {
 				if (struct_node.reference !== undefined) {
-					loadMeta(null, child_id, struct_node.reference, callback)
+					console.log(child)
+					loadMeta(null, child, struct_node.reference, callback)
 				}
 				if (struct_node.child !== undefined) {
-					loadMeta(null, child_id, struct_node.child, callback)
+					console.log(child)
+					loadMeta(null, child, struct_node.child, callback)
 				}
 			})
 			decrementProcessCount()

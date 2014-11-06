@@ -136,7 +136,7 @@ progress(loading_process_count + '| ' + bytesToSize(total_download_size) + ' - '
 
 function startPlayer(err, eid) {
 	if (err) {
-		console.log('startPlayer err:', err)
+		console.log('startPlayer err:', eid, err)
 		setTimeout(function() {
 			process.exit(0)
 		}, 300)
@@ -146,18 +146,21 @@ function startPlayer(err, eid) {
 		console.log('Waiting for loaders to calm down. Active processes: ' + loading_process_count)
 		return
 	}
-	console.log('Reached stable state. Terminating in three.')
+	console.log('Reached stable state. Flushing metadata and terminating in three.')
 	fs.writeFileSync('elements.json', stringifier(swElements))
+
+	var stacksize = swElements.length
 	swElements.forEach(function(swElement) {
 		var meta_path = __META_DIR + swElement.id + ' ' + swElement.definition.keyname.split('sw-')[1] + '.json'
 		fs.writeFileSync(meta_path, stringifier(swElement))
+		console.log (stacksize, meta_path)
+		if(-- stacksize === 0) {
+			// setTimeout(function() {
+				process.exit(0)
+			// }, 3000)
+		}
 	})
 
-
-	// console.log(stringifier(swElements))
-	setTimeout(function() {
-		process.exit(0)
-	}, 6000)
 }
 
 // Start the action here! (in a sec)
@@ -180,17 +183,21 @@ function captureScreenshot(err, callback) {
 		}
 		writer.close()
 		function addScreenshot() {
-			console.log('Saving screenshot')
+			// console.log('Saving screenshot')
 			EntuLib.addFile(__SCREEN_ID, 'sw-screen-photo', screenshot_path, function(err, data) {
 				if (err) {
 					console.log('captureScreenshot err:', util.inspect(err), util.inspect(data))
 				}
-				console.log(util.inspect(data))
+				// console.log(util.inspect(data))
 			})
 		}
 		EntuLib.getEntity(__SCREEN_ID, function(err, entity) {
 			if (err) {
-				console.log('captureScreenshot err:', util.inspect(err), util.inspect(entity))
+				if (err.code === 'ENOTFOUND') {
+					console.log('Not connected')
+				} else {
+					console.log('captureScreenshot err:', util.inspect(err), util.inspect(entity))
+				}
 				return
 			}
 			if (entity.result.properties.photo.values === undefined) {
@@ -204,7 +211,7 @@ function captureScreenshot(err, callback) {
 						if (err) {
 							console.log('captureScreenshot err:', util.inspect(item), util.inspect(err), util.inspect(data))
 						}
-						console.log(util.inspect(item), util.inspect(data))
+						// console.log(util.inspect(item), util.inspect(data))
 						if(-- stacksize === 0) {
 							addScreenshot()
 						}
@@ -214,8 +221,8 @@ function captureScreenshot(err, callback) {
 			}
 		})
 	}, { format : 'jpeg', datatype : 'buffer'})
-	// setTimeout(function() { callback(null, callback) }, 2222)
+	setTimeout(function() { callback(null, callback) }, 30*1000)
 }
 setTimeout(function() {
 	captureScreenshot(null, captureScreenshot)
-}, 2222)
+}, 1*1000)
