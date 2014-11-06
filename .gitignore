@@ -1,5 +1,6 @@
 sw-media/*
 sw-meta/*
+sw-log/*
 node_modules
 
 *.log

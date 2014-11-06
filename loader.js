@@ -144,7 +144,7 @@ function reloadMeta(err, callback) {
 }
 
 function loadMeta(err, eid, struct_node, callback) {
-	console.log('loadMeta: ', eid, struct_node)
+	// console.log('loadMeta: ', eid, struct_node)
 	incrementProcessCount()
 	if (err) {
 		console.log('loadMeta err', err)

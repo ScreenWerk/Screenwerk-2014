@@ -26,7 +26,7 @@ var stringifier = require('./stringifier.js')
 
 
 domain.on('error', function(err){
-    console.log(err)
+	console.log(err)
 })
 
 
@@ -90,7 +90,7 @@ a.forEach(function(foldername) {
 			fs.renameSync(foldername, foldername + '.bak')
 			console.log ('Creating folder for ' + foldername)
 			fs.mkdir(foldername)
-	    }
+		}
 	})
 })
 
@@ -109,10 +109,10 @@ fs.stat(__MEDIA_DIR, function(err, stats) {
 		fs.readdirSync(__MEDIA_DIR).forEach(function(download_filename) {
 			if (download_filename.split('.').pop() !== 'download')
 				return
-		    console.log("Unlink " + __MEDIA_DIR + download_filename)
+			console.log("Unlink " + __MEDIA_DIR + download_filename)
 			var result = fs.unlinkSync(__MEDIA_DIR + download_filename)
 			if (result instanceof Error) {
-			    console.log("Can't unlink " + __MEDIA_DIR + download_filename, result)
+				console.log("Can't unlink " + __MEDIA_DIR + download_filename, result)
 			}
 		})
 	}
@@ -153,6 +153,7 @@ function startPlayer(err, eid) {
 		fs.writeFileSync(meta_path, stringifier(swElement))
 	})
 
+
 	// console.log(stringifier(swElements))
 	setTimeout(function() {
 		process.exit(0)
@@ -168,21 +169,52 @@ function captureScreenshot(err, callback) {
 		console.log('captureScreenshot err:', err)
 		return
 	}
-	var writer = fs.createWriteStream('screencapture.png')
-    player_window.capturePage(function(buffer) {
-    	if (writer.write(buffer) === false) {
-    		writer.once('drain', function() {writer.write(buffer)})
-    	}
-    	writer.close()
-    	EntuLib.addFile(__SCREEN_ID, 'sw-screen-photo', 'screencapture.png', function(err, data) {
+	var datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '')
+	var screenshot_path = __LOG_DIR + 'screencapture ' + datestring + '.jpeg'
+	var writer = fs.createWriteStream(screenshot_path)
+	player_window.capturePage(function(buffer) {
+		if (writer.write(buffer) === false) {
+			console.log('Shouldnt happen!')
+			console.log('   ...always does...')
+			writer.once('drain', function() {writer.write(buffer)})
+		}
+		writer.close()
+		function addScreenshot() {
+			console.log('Saving screenshot')
+			EntuLib.addFile(__SCREEN_ID, 'sw-screen-photo', screenshot_path, function(err, data) {
+				if (err) {
+					console.log('captureScreenshot err:', util.inspect(err), util.inspect(data))
+				}
+				console.log(util.inspect(data))
+			})
+		}
+		EntuLib.getEntity(__SCREEN_ID, function(err, entity) {
 			if (err) {
-				console.log('captureScreenshot err:', util.inspect(err), util.inspect(data))
+				console.log('captureScreenshot err:', util.inspect(err), util.inspect(entity))
+				return
 			}
-    	})
-    }, { format : 'png', datatype : 'buffer'})
-    setTimeout(function() {
-    	callback(null, callback)
-    }, 2222)
+			if (entity.result.properties.photo.values === undefined) {
+				addScreenshot()
+			} else {
+				var stack = entity.result.properties.photo.values
+				// console.log(stack)
+				var stacksize = stack.length
+				stack.forEach(function(item) {
+					EntuLib.removeProperty(__SCREEN_ID, 'sw-screen-photo', item.id, function(err, data) {
+						if (err) {
+							console.log('captureScreenshot err:', util.inspect(item), util.inspect(err), util.inspect(data))
+						}
+						console.log(util.inspect(item), util.inspect(data))
+						if(-- stacksize === 0) {
+							addScreenshot()
+						}
+					})
+				})
+
+			}
+		})
+	}, { format : 'jpeg', datatype : 'buffer'})
+	// setTimeout(function() { callback(null, callback) }, 2222)
 }
 setTimeout(function() {
 	captureScreenshot(null, captureScreenshot)
