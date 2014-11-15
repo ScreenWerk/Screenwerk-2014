@@ -123,7 +123,7 @@ fs.stat(__MEDIA_DIR, function(err, stats) {
 var swEmitter = new events.EventEmitter()
 
 swEmitter.on('update-init', function(callback) {
-	loadMeta(null, __SCREEN_ID, __STRUCTURE, callback)
+	loadMeta(null, null, __SCREEN_ID, __STRUCTURE, callback)
 	// reloadMeta(null, __SCREEN_ID, __STRUCTURE, callback)
 })
 
@@ -151,24 +151,30 @@ function startDigester(err, eid) {
 
 	var stacksize = swElements.length
 	swElements.forEach(function(swElement) {
-		var meta_path = __META_DIR + swElement.id + ' ' + swElement.definition.keyname.split('sw-')[1] + '.json'
+		var meta_path = __META_DIR + swElement.id + ' ' + swElement.definition.keyname.split('sw-')[1] + '(1).json'
 		fs.writeFileSync(meta_path, stringifier(swElement))
 		// console.log (stacksize, meta_path)
 		if(-- stacksize === 0) {
-			console.log('Metadata flushed')
+			console.log('====== Metadata flushed')
+			processElements(null, startDOM)
 		}
 	})
-	processElements(null, startDOM)
+	// setTimeout(function() {processElements(null, startDOM)}, 1000)
+
 }
 
 function startDOM(err, data) {
 	if (err) {
 		console.log('startDOM err:', err, data)
-		setTimeout(function() {
-			process.exit(0)
-		}, 300)
+		process.exit(0)
 		return
 	}
+	console.log('====== Start startDOM')
+	console.log('====== Finish startDOM', data)
+	setTimeout(function() {
+		process.exit(0)
+	}, 300)
+	return
 }
 
 // Start the action here! (in a sec)
@@ -185,8 +191,7 @@ function captureScreenshot(err, callback) {
 	var writer = fs.createWriteStream(screenshot_path)
 	player_window.capturePage(function(buffer) {
 		if (writer.write(buffer) === false) {
-			console.log('Shouldnt happen!')
-			console.log('   ...always does...')
+			console.log('Shouldnt happen!   ...always does...')
 			writer.once('drain', function() {writer.write(buffer)})
 		}
 		writer.close()

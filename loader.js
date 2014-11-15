@@ -144,11 +144,14 @@ function reloadMeta(err, callback) {
 		    console.log("Can't unlink " + __META_DIR + meta_fileName, result)
 		}
     })
-	loadMeta(null, __SCREEN_ID, __STRUCTURE, startPlayer)
+	loadMeta(null, null, __SCREEN_ID, __STRUCTURE, startPlayer)
 }
 
-function loadMeta(err, eid, struct_node, callback) {
-	console.log('loadMeta: ', eid, struct_node)
+//
+// Load metafiles.
+// Fetch only if not present
+function loadMeta(err, parent_eid, eid, struct_node, callback) {
+	// console.log('loadMeta: ', eid, struct_node)
 	incrementProcessCount()
 	if (err) {
 		console.log('loadMeta err', err)
@@ -161,7 +164,7 @@ function loadMeta(err, eid, struct_node, callback) {
 	var meta_json = ''
 	fs.readFile(meta_path, function(err, data) {
 		if (err) {
-			// console.log('ENOENT', meta_path, err, data)
+			console.log('ENOENT', meta_path, err, data)
 			EntuLib.getEntity(eid, function(err, result) {
 				if (err) {
 					console.log(definition + ': ' + util.inspect(result), err, result)
@@ -170,8 +173,8 @@ function loadMeta(err, eid, struct_node, callback) {
 					return
 				}
 				if (result.error !== undefined) {
-					console.log (definition + ': ' + 'Failed to load from Entu EID=' + eid + '.')
-					callback(new Error(result.error))
+					console.log (result.error, definition + ': ' + 'Failed to load from Entu EID=' + eid + '.')
+					callback(result.error, result)
 					decrementProcessCount()
 					return
 				}
@@ -183,7 +186,7 @@ function loadMeta(err, eid, struct_node, callback) {
 						return
 					}
 				})
-				loadMeta(null, eid, struct_node, callback)
+				loadMeta(null, parent_eid, eid, struct_node, callback)
 				decrementProcessCount()
 			})
 			return
@@ -193,7 +196,7 @@ function loadMeta(err, eid, struct_node, callback) {
 			meta_json = JSON.parse(data)
 		} catch (e) {
 		    console.log('WARNING: Data got corrupted while reading from ' + meta_path + '. Retrying.', e);
-			loadMeta(null, eid, struct_node, callback)
+			loadMeta(null, parent_eid, eid, struct_node, callback)
 			decrementProcessCount()
 			return
 		}
@@ -216,9 +219,9 @@ function loadMeta(err, eid, struct_node, callback) {
 					decrementProcessCount()
 				}
 				ref_entity_id = meta_json.properties[ref_entity_name].values[0].db_value
-				registerChild(null, meta_json, ref_entity_id, function(err) {
+				registerChild(null, parent_eid, meta_json, ref_entity_id, function(err) {
 					console.log(ref_entity_id)
-					loadMeta(err, ref_entity_id, struct_node.reference, callback)
+					loadMeta(err, eid, ref_entity_id, struct_node.reference, callback)
 				})
 				decrementProcessCount()
 				// console.log(struct_node.reference)
@@ -244,16 +247,18 @@ function loadMeta(err, eid, struct_node, callback) {
 						callback(new Error(struct_node.name + ' ' + eid + ' has no ' + ch_def_name + "'s."))
 						decrementProcessCount()
 					}
-					forEach(function(entity) {
-						registerChild(null, meta_json, entity.id, function() {
+					ch_result.result['sw-'+ch_def_name].entities.forEach(function(entity) {
+						registerChild(null, parent_eid, meta_json, entity.id, function() {
 							console.log(entity.id)
-							loadMeta(null, entity.id, struct_node.child, callback)
+							loadMeta(null, eid, entity.id, struct_node.child, callback)
 						})
 					})
 					decrementProcessCount()
 				})
 			}
 			else {
+				registerChild(null, parent_eid, meta_json, null, function() {
+				})
 				decrementProcessCount()
 				callback(null)
 			}
@@ -261,12 +266,12 @@ function loadMeta(err, eid, struct_node, callback) {
 		else {
 			meta_json.childs.forEach(function(child) {
 				if (struct_node.reference !== undefined) {
-					console.log(child)
-					loadMeta(null, child, struct_node.reference, callback)
+					// console.log(child)
+					loadMeta(null, eid, child, struct_node.reference, callback)
 				}
 				if (struct_node.child !== undefined) {
-					console.log(child)
-					loadMeta(null, child, struct_node.child, callback)
+					// console.log(child)
+					loadMeta(null, eid, child, struct_node.child, callback)
 				}
 			})
 			decrementProcessCount()
@@ -285,15 +290,25 @@ Array.prototype.contains = function(obj) {
     return false;
 }
 
-function registerChild(err, parent, child, callback) {
+function registerChild(err, parent_eid, element, child_eid, callback) {
 	if (err) {
 		console.log('registerChild err:', err)
 		callback(err)
 		// decrementProcessCount()
 		return
 	}
-	if (parent.childs.indexOf(child) === -1)
-		parent.childs.push(child)
+	if (element.childs === undefined)
+		element.childs = []
+	if (child_eid !== undefined && child_eid !== null) {
+		if (element.childs.indexOf(child_eid) === -1)
+			element.childs.push(child_eid)
+	}
+	if (element.parents === undefined)
+		element.parents = []
+	if (parent_eid !== undefined && parent_eid !== null) {
+		if (element.parents.indexOf(parent_eid) === -1)
+			element.parents.push(parent_eid)
+	}
 	callback(null)
 }
 
