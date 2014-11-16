@@ -56,6 +56,8 @@ function recurseHierarchy(structure, parent_name) {
 		recurseHierarchy(structure.reference, structure.name)
 }
 recurseHierarchy(__STRUCTURE)
+__DEFAULT_UPDATE_INTERVAL_MINUTES = 10
+__UPDATE_INTERVAL_SECONDS = __DEFAULT_UPDATE_INTERVAL_MINUTES * 60
 
 __API_KEY = ''
 var uuid_path = __SCREEN_ID + '.uuid'
@@ -118,18 +120,58 @@ fs.stat(__MEDIA_DIR, function(err, stats) {
 	}
 })
 
-
-// Beware: we'll go quite eventful from now on
-var swEmitter = new events.EventEmitter()
-
-swEmitter.on('update-init', function(callback) {
-	loadMeta(null, null, __SCREEN_ID, __STRUCTURE, callback)
-	// reloadMeta(null, __SCREEN_ID, __STRUCTURE, callback)
+// Read existing screen meta, if local data available
+var meta_path = __META_DIR + __SCREEN_ID + ' ' + 'screen.json'
+var meta_obj = ''
+var local_published = new Date(Date.parse('2004-01-01'))
+var can_do_offline = true
+fs.readFile(meta_path, function(err, data) {
+	if (err) {
+		console.log('No local data for ' + meta_path)
+		can_do_offline = false
+		return
+	}
+	try {
+		meta_obj = JSON.parse(data)
+	} catch (e) {
+	    console.log('Parse error. Please check (or remove) the file ' + meta_path + ' and relaunch.', e);
+		process.exit(99)
+	}
+	local_published = new Date(Date.parse(meta_obj.properties.published.values[0].value))
+	console.log('Local published: ', local_published.toJSON())
 })
 
-swEmitter.on('restart-init', function(interval_ms) {
-	// setTimeout(swReload, interval_ms);
+// Fetch fresh definition for screen, if Entu is reachable
+var remote_published = new Date(Date.parse('2004-01-01'))
+EntuLib.getEntity(__SCREEN_ID, function(err, result) {
+	if (err) {
+		console.log(definition + ': ' + util.inspect(result), err, result)
+		if (!can_do_offline) {
+			console.log('Remote and local both unreachable. Terminating.')
+			process.exit(99)
+		}
+	}
+	else if (result.error !== undefined) {
+		console.log (result.error, definition + ': ' + 'Failed to load from Entu EID=' + eid + '.')
+		if (!can_do_offline) {
+			console.log('Remote and local both unreachable. Terminating.')
+			process.exit(99)
+		}
+	} else {
+		remote_published = new Date(Date.parse(result.result.properties.published.values[0].value))
+		console.log('Remote published: ', remote_published.toJSON())
+		if (local_published.toJSON() === remote_published.toJSON()) {
+			console.log('Trying to play with local content.')
+			loadMeta(null, null, __SCREEN_ID, __STRUCTURE, startDigester)
+		}
+		else {
+			console.log('Remove local content. Fetch new from Entu!')
+			reloadMeta(null, startDigester)
+		}
+	}
 })
+
+// var swEmitter = new events.EventEmitter()
 
 
 progress(loading_process_count + '| ' + bytesToSize(total_download_size) + ' - ' + bytesToSize(bytes_downloaded) + ' = ' + bytesToSize(total_download_size - bytes_downloaded) )
@@ -147,13 +189,19 @@ function startDigester(err, eid) {
 		return
 	}
 	console.log('Reached stable state. Flushing metadata and starting preprocessing elements.')
-	fs.writeFileSync('elements.json', stringifier(swElements))
+	fs.writeFileSync('elements.debug.json', stringifier(swElements))
+
+	setTimeout(function() {
+		console.log('RRRRRRRRRRR: Starting scheduled reload.')
+		loadMeta(null, null, __SCREEN_ID, __STRUCTURE, startDigester)
+	}, 1000 * __UPDATE_INTERVAL_SECONDS)
+	console.log('RRRRRRRRRRR: Reload scheduled in ' + __UPDATE_INTERVAL_SECONDS + ' seconds.')
 
 	var stacksize = swElements.length
 	swElements.forEach(function(swElement) {
+		swElementsById[''+swElement.id] = swElement
 		var meta_path = __META_DIR + swElement.id + ' ' + swElement.definition.keyname.split('sw-')[1] + '(1).json'
 		fs.writeFileSync(meta_path, stringifier(swElement))
-		// console.log (stacksize, meta_path)
 		if(-- stacksize === 0) {
 			console.log('====== Metadata flushed')
 			processElements(null, startDOM)
@@ -171,14 +219,12 @@ function startDOM(err, data) {
 	}
 	console.log('====== Start startDOM')
 	console.log('====== Finish startDOM', data)
-	setTimeout(function() {
-		process.exit(0)
-	}, 300)
+	// setTimeout(function() {
+	// 	process.exit(0)
+	// }, 300)
 	return
 }
 
-// Start the action here! (in a sec)
-swEmitter.emit('update-init', startDigester)
 
 // Begin capturing screenshots
 function captureScreenshot(err, callback) {

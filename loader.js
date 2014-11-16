@@ -99,6 +99,7 @@ function loadMedia(err, entity_id, file_id, callback) {
 }
 
 var swElements = []
+var swElementsById = {}
 var element_register = []
 function registerMeta(err, metadata, callback) {
 	if (element_register.indexOf(metadata.id) > -1)
@@ -123,6 +124,57 @@ function registerMeta(err, metadata, callback) {
 		}
 	}
 	var definition = metadata.definition.keyname.split('sw-')[1]
+
+	switch (definition) {
+		case 'screen':
+			if (metadata.properties['published'].values === undefined) {
+				metadata.properties['published'].values = [{'value':new Date(Date.parse('2004-01-01')).toJSON()}]
+			}
+		break
+		case 'screen-group':
+		break
+		case 'configuration':
+			if (metadata.properties['update-interval'].values === undefined) {
+				metadata.properties['update-interval'].values = [{'db_value':__DEFAULT_UPDATE_INTERVAL_MINUTES}]
+			}
+			__UPDATE_INTERVAL_SECONDS = metadata.properties['update-interval'].values[0].db_value * 60
+		break
+		case 'schedule':
+			if (metadata.properties.crontab.values === undefined) {
+				callback('Schedule ' + metadata.id + ' has no crontab.', metadata)
+				return
+			}
+			if (metadata.properties.cleanup.values === undefined) {
+				metadata.properties.cleanup.values = [{'db_value':0}]
+			}
+			if (metadata.properties.ordinal.values === undefined) {
+				metadata.properties.ordinal.values = [{'db_value':0}]
+			}
+		break
+		case 'layout':
+		break
+		case 'layout-playlist':
+			if (metadata.properties.zindex.values === undefined) {
+				metadata.properties.zindex.values = [{'db_value':1}]
+			}
+		break
+		case 'playlist':
+		break
+		case 'playlist-media':
+			if (metadata.properties.ordinal.values === undefined) {
+				metadata.properties.ordinal.values = [{'db_value':1}]
+			}
+		break
+		case 'media':
+			if (metadata.properties.file.values === undefined && metadata.properties.url.values === undefined)
+				throw ('"URL" or "file" property must be set for ' + metadata.id)
+			if (metadata.properties.file.values !== undefined)
+				metadata.properties.filepath = {'values': [{'db_value':__MEDIA_DIR + '/' + metadata.id + '_' + metadata.properties.file.values[0].db_value}]}
+		break
+		default:
+			callback('Unrecognised definition: ' + metadata.definition.keyname, metadata)
+			return
+	}
 	if (definition === 'media') {
 		var file_id = metadata.properties.file.values[0].db_value
 		loadMedia(null, metadata.id, file_id, callback)
@@ -144,7 +196,7 @@ function reloadMeta(err, callback) {
 		    console.log("Can't unlink " + __META_DIR + meta_fileName, result)
 		}
     })
-	loadMeta(null, null, __SCREEN_ID, __STRUCTURE, startPlayer)
+	loadMeta(null, null, __SCREEN_ID, __STRUCTURE, callback)
 }
 
 //
@@ -162,9 +214,29 @@ function loadMeta(err, parent_eid, eid, struct_node, callback) {
 	var definition = struct_node.name
 	var meta_path = __META_DIR + eid + ' ' + definition + '.json'
 	var meta_json = ''
+
+	if (definition === 'screen') {
+		// EntuLib.getEntity(eid, function(err, result) {
+		// 	if (err) {
+		// 		console.log(definition + ': ' + util.inspect(result), err, result)
+		// 	}
+		// 	else if (result.error !== undefined) {
+		// 		console.log (result.error, definition + ': ' + 'Failed to load from Entu EID=' + eid + '.')
+		// 	} else {
+		// 		console.log(result.result.changed)
+		// 		fs.writeFile(meta_path, stringifier(result.result), function(err) {
+		// 			if (err) {
+		// 				console.log(definition + ': ' + util.inspect(result))
+		// 				throw err
+		// 			}
+		// 		})
+		// 	}
+		// })
+	}
+
 	fs.readFile(meta_path, function(err, data) {
 		if (err) {
-			console.log('ENOENT', meta_path, err, data)
+			// console.log('ENOENT', meta_path, err, data)
 			EntuLib.getEntity(eid, function(err, result) {
 				if (err) {
 					console.log(definition + ': ' + util.inspect(result), err, result)
@@ -220,7 +292,7 @@ function loadMeta(err, parent_eid, eid, struct_node, callback) {
 				}
 				ref_entity_id = meta_json.properties[ref_entity_name].values[0].db_value
 				registerChild(null, parent_eid, meta_json, ref_entity_id, function(err) {
-					console.log(ref_entity_id)
+					// console.log(ref_entity_id)
 					loadMeta(err, eid, ref_entity_id, struct_node.reference, callback)
 				})
 				decrementProcessCount()
@@ -249,7 +321,7 @@ function loadMeta(err, parent_eid, eid, struct_node, callback) {
 					}
 					ch_result.result['sw-'+ch_def_name].entities.forEach(function(entity) {
 						registerChild(null, parent_eid, meta_json, entity.id, function() {
-							console.log(entity.id)
+							// console.log(entity.id)
 							loadMeta(null, eid, entity.id, struct_node.child, callback)
 						})
 					})
@@ -257,8 +329,7 @@ function loadMeta(err, parent_eid, eid, struct_node, callback) {
 				})
 			}
 			else {
-				registerChild(null, parent_eid, meta_json, null, function() {
-				})
+				registerChild(null, parent_eid, meta_json, null, function() {})
 				decrementProcessCount()
 				callback(null)
 			}
@@ -280,15 +351,15 @@ function loadMeta(err, parent_eid, eid, struct_node, callback) {
 	})
 }
 
-Array.prototype.contains = function(obj) {
-    var i = this.length;
-    while (i--) {
-        if (this[i] == obj) {
-            return true;
-        }
-    }
-    return false;
-}
+// Array.prototype.contains = function(obj) {
+//     var i = this.length;
+//     while (i--) {
+//         if (this[i] == obj) {
+//             return true;
+//         }
+//     }
+//     return false;
+// }
 
 function registerChild(err, parent_eid, element, child_eid, callback) {
 	if (err) {
