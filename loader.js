@@ -303,7 +303,7 @@ function loadMeta(err, parent_eid, eid, struct_node, callback) {
 				// console.log(struct_node.child)
 				EntuLib.getChilds(eid, function(err, ch_result) {
 					if (err) {
-						console.log('loadMeta err:', err)
+						console.log('loadMeta ' + eid + ' err:', err)
 						callback(err)
 						decrementProcessCount()
 						return

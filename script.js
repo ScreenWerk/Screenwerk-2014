@@ -120,54 +120,60 @@ fs.stat(__MEDIA_DIR, function(err, stats) {
 	}
 })
 
+
 // Read existing screen meta, if local data available
 var meta_path = __META_DIR + __SCREEN_ID + ' ' + 'screen.json'
-var meta_obj = ''
 var local_published = new Date(Date.parse('2004-01-01'))
-var can_do_offline = true
-fs.readFile(meta_path, function(err, data) {
-	if (err) {
-		console.log('No local data for ' + meta_path)
-		can_do_offline = false
-		return
-	}
-	try {
-		meta_obj = JSON.parse(data)
-	} catch (e) {
-	    console.log('Parse error. Please check (or remove) the file ' + meta_path + ' and relaunch.', e);
-		process.exit(99)
-	}
+var remote_published = new Date(Date.parse('2004-01-01'))
+var meta_obj = {}
+var data
+try {
+	meta_obj = JSON.parse(fs.readFileSync(meta_path, 'utf-8'))
 	local_published = new Date(Date.parse(meta_obj.properties.published.values[0].value))
 	console.log('Local published: ', local_published.toJSON())
-})
+} catch (e) {
+	local_published = false
+}
 
-// Fetch fresh definition for screen, if Entu is reachable
-var remote_published = new Date(Date.parse('2004-01-01'))
+// Fetch publishing time for screen, if Entu is reachable
 EntuLib.getEntity(__SCREEN_ID, function(err, result) {
 	if (err) {
-		console.log(definition + ': ' + util.inspect(result), err, result)
-		if (!can_do_offline) {
+		remote_published = false
+		console.log('Can\'t reach Entu', err, result)
+		if (local_published) {
+			console.log('Trying to play with local content.')
+			loadMeta(null, null, __SCREEN_ID, __STRUCTURE, startDigester)
+			return
+		} else {
 			console.log('Remote and local both unreachable. Terminating.')
 			process.exit(99)
 		}
 	}
 	else if (result.error !== undefined) {
+		remote_published = false
 		console.log (result.error, definition + ': ' + 'Failed to load from Entu EID=' + eid + '.')
-		if (!can_do_offline) {
+		if (local_published) {
+			console.log('Trying to play with local content.')
+			loadMeta(null, null, __SCREEN_ID, __STRUCTURE, startDigester)
+			return
+		} else {
 			console.log('Remote and local both unreachable. Terminating.')
 			process.exit(99)
 		}
 	} else {
 		remote_published = new Date(Date.parse(result.result.properties.published.values[0].value))
 		console.log('Remote published: ', remote_published.toJSON())
-		if (local_published.toJSON() === remote_published.toJSON()) {
-			console.log('Trying to play with local content.')
-			loadMeta(null, null, __SCREEN_ID, __STRUCTURE, startDigester)
-		}
-		else {
-			console.log('Remove local content. Fetch new from Entu!')
-			reloadMeta(null, startDigester)
-		}
+	}
+
+	if (local_published &&
+	    local_published.toJSON() === remote_published.toJSON()) {
+		console.log('Trying to play with local content.')
+		loadMeta(null, null, __SCREEN_ID, __STRUCTURE, startDigester)
+	}
+	else {
+		console.log('Remove local content. Fetch new from Entu!')
+		local_published = new Date(Date.parse(remote_published.toJSON()))
+		reloadMeta(null, startDigester)
 	}
 })
 
@@ -193,14 +199,31 @@ function startDigester(err, eid) {
 
 	setTimeout(function() {
 		console.log('RRRRRRRRRRR: Starting scheduled reload.')
-		loadMeta(null, null, __SCREEN_ID, __STRUCTURE, startDigester)
+		EntuLib.getEntity(__SCREEN_ID, function(err, result) {
+			if (err) {
+				console.log('Can\'t reach Entu', err, result)
+			}
+			else if (result.error !== undefined) {
+				console.log (result.error, definition + ': ' + 'Failed to load from Entu EID=' + eid + '.')
+			} else {
+				remote_published = new Date(Date.parse(result.result.properties.published.values[0].value))
+				console.log('Remote published: ', remote_published.toJSON())
+			}
+
+			if (remote_published
+				&& local_published.toJSON() !== remote_published.toJSON()) {
+				console.log('Remove local content. Fetch new from Entu!')
+				local_published = new Date(Date.parse(remote_published.toJSON()))
+				reloadMeta(null, startDigester)
+			}
+		})
 	}, 1000 * __UPDATE_INTERVAL_SECONDS)
 	console.log('RRRRRRRRRRR: Reload scheduled in ' + __UPDATE_INTERVAL_SECONDS + ' seconds.')
 
 	var stacksize = swElements.length
 	swElements.forEach(function(swElement) {
 		swElementsById[''+swElement.id] = swElement
-		var meta_path = __META_DIR + swElement.id + ' ' + swElement.definition.keyname.split('sw-')[1] + '(1).json'
+		var meta_path = __META_DIR + swElement.id + ' ' + swElement.definition.keyname.split('sw-')[1] + '.json'
 		fs.writeFileSync(meta_path, stringifier(swElement))
 		if(-- stacksize === 0) {
 			console.log('====== Metadata flushed')
@@ -237,7 +260,7 @@ function captureScreenshot(err, callback) {
 	var writer = fs.createWriteStream(screenshot_path)
 	player_window.capturePage(function(buffer) {
 		if (writer.write(buffer) === false) {
-			console.log('Shouldnt happen!   ...always does...')
+			// console.log('Shouldnt happen!   ...always does...')
 			writer.once('drain', function() {writer.write(buffer)})
 		}
 		writer.close()
@@ -253,7 +276,7 @@ function captureScreenshot(err, callback) {
 		EntuLib.getEntity(__SCREEN_ID, function(err, entity) {
 			if (err) {
 				if (err.code === 'ENOTFOUND') {
-					console.log('Not connected')
+					// console.log('Not connected')
 				} else {
 					console.log('captureScreenshot err:', util.inspect(err), util.inspect(entity))
 				}
