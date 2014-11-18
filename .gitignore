@@ -1,7 +1,7 @@
 sw-media/*
 sw-meta/*
+sw-log/*
 node_modules
-
 *.log
-
 *.uuid
+elements.debug.json

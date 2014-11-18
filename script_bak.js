@@ -240,11 +240,11 @@ swEmitter.on('init-ready', function() { // if publishing date has been changed
 		// Validators, default values
 		switch (sw_def) {
 			case 'screen':
-			break;
+			break
 			case 'screen-group':
-			break;
+			break
 			case 'configuration':
-			break;
+			break
 			case 'schedule':
 				if (element.properties.crontab.values === undefined) {
 					throw ('Schedule ' + element.id + ' has no crontab.')
@@ -257,14 +257,14 @@ swEmitter.on('init-ready', function() { // if publishing date has been changed
 				if (element.properties.ordinal.values === undefined) {
 					element.properties.ordinal.values = [{'db_value':0}]
 				}
-			break;
+			break
 			case 'layout':
-			break;
+			break
 			case 'layout-playlist':
 				if (element.properties.zindex.values === undefined) {
 					element.properties.zindex.values = [{'db_value':1}]
 				}
-			break;
+			break
 			case 'playlist':
 				var loop = false
 				// If any of parent LayoutPlaylist's has loop == true, then loop the playlist
@@ -301,16 +301,16 @@ swEmitter.on('init-ready', function() { // if publishing date has been changed
 					}
 				}
 
-			break;
+			break
 			case 'playlist-media':
-			break;
+			break
 			case 'media':
 					// element.properties.type.values[0] = data.properties.type.values[0].value
 				if (element.properties.file.values === undefined && element.properties.url.values === undefined)
 					throw ('"URL" or "file" property must be set for ' + element.id)
 				if (element.properties.file.values !== undefined)
 					element.properties.filepath = {'values': [{'db_value':__MEDIA_DIR() + '/' + el.id + '_' + element.properties.file.values[0].db_value}]}
-			break;
+			break
 		}
 	})
 

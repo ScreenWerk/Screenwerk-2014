@@ -1,12 +1,13 @@
 var fs          = require('fs')
 var stringifier = require('./stringifier.js')
 
+__LOG_DIR = 'sw-log/'
 
-// var datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '')
-// var consoleStream = fs.createWriteStream(c_stream_path, {flags:'a'})
-// var sysLogStream = fs.createWriteStream(s_stream_path, {flags:'a'})
-// var c_stream_path = './Console ' + datestring + '.log'
-// var s_stream_path = './System ' + datestring + '.log'
+var datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '')
+var c_stream_path = __LOG_DIR + './Console ' + datestring + '.log'
+var s_stream_path = __LOG_DIR + './System ' + datestring + '.log'
+var consoleStream = fs.createWriteStream(c_stream_path, {flags:'a'})
+var sysLogStream = fs.createWriteStream(s_stream_path, {flags:'a'})
 var log_streams_are_closed = false
 var message_q = []
 var swLog = window.swLog = function swLog(message, scope) {
@@ -92,9 +93,16 @@ var error = window.error = function error(message, link) {
     }
 }
 
+function noOp(err) {
+    if (err) {
+        console.log('noOp err', err)
+    }
+    console.log('noOp')
+}
+
 var bytesToSize = function bytesToSize(bytes) {
     var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB']
     if (bytes == 0) return '0'
     var i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)))
-    return Math.round(bytes / Math.pow(1024, i), 2) + ' ' + sizes[i]
+    return Math.round(bytes / Math.pow(1024, i) * 100, 2)/100 + ' ' + sizes[i]
 }

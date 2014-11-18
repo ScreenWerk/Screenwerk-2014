@@ -26,7 +26,7 @@ var stringifier = require('./stringifier.js')
 
 
 domain.on('error', function(err){
-    console.log(err)
+	console.log(err)
 })
 
 
@@ -40,7 +40,6 @@ console.log ( os.platform(), 'SYSTEM')
 
 __HOSTNAME = 'piletilevi.entu.ee'
 __SCREEN_ID = Number(gui.App.argv[0])
-__LOG_DIR = 'sw-log/'
 __META_DIR = 'sw-meta/'
 __MEDIA_DIR = 'sw-media/'
 __STRUCTURE = {"name":"screen","reference":{"name":"screen-group","reference":{"name":"configuration","child":{"name":"schedule","reference":{"name":"layout","child":{"name":"layout-playlist","reference":{"name":"playlist","child":{"name":"playlist-media","reference":{"name":"media"}}}}}}}}}
@@ -56,6 +55,8 @@ function recurseHierarchy(structure, parent_name) {
 		recurseHierarchy(structure.reference, structure.name)
 }
 recurseHierarchy(__STRUCTURE)
+__DEFAULT_UPDATE_INTERVAL_MINUTES = 10
+__UPDATE_INTERVAL_SECONDS = __DEFAULT_UPDATE_INTERVAL_MINUTES * 60
 
 __API_KEY = ''
 var uuid_path = __SCREEN_ID + '.uuid'
@@ -82,281 +83,243 @@ var a = [__META_DIR, __MEDIA_DIR, __LOG_DIR]
 a.forEach(function(foldername) {
 	fs.lstat(foldername, function(err, stats) {
 		if (err) {
-			console.log ('Creating folder for ' + foldername + '.')
+			console.log ('Creating folder for ' + foldername)
 			fs.mkdir(foldername)
 		}
 		else if (!stats.isDirectory()) {
-			console.log ('Renaming existing file "' + foldername + '" to "' + foldername + '.bak.')
+			console.log ('Renaming existing file "' + foldername + '" to "' + foldername + '.bak')
 			fs.renameSync(foldername, foldername + '.bak')
-			console.log ('Creating folder for ' + foldername + '.')
+			console.log ('Creating folder for ' + foldername)
 			fs.mkdir(foldername)
-	    }
+		}
 	})
 })
 
 
 // Cleanup unfinished downloads if any
-fs.readdirSync(__MEDIA_DIR).forEach(function(download_filename) {
-	if (download_filename.split('.').pop() !== 'download')
-		return
-    console.log("Unlink " + __MEDIA_DIR + download_filename)
-	var result = fs.unlinkSync(__MEDIA_DIR + download_filename)
-	if (result instanceof Error) {
-	    console.log("Can't unlink " + __MEDIA_DIR + download_filename, result)
+fs.stat(__MEDIA_DIR, function(err, stats) {
+	if (err) {
+		if (err.code === 'ENOENT') {
+			console.log(__MEDIA_DIR + ' will be OK in a sec')
+		} else {
+			console.log(__MEDIA_DIR + ' err', err)
+			return
+		}
+	}
+	else if (stats.isDirectory()) {
+		fs.readdirSync(__MEDIA_DIR).forEach(function(download_filename) {
+			if (download_filename.split('.').pop() !== 'download')
+				return
+			console.log("Unlink " + __MEDIA_DIR + download_filename)
+			var result = fs.unlinkSync(__MEDIA_DIR + download_filename)
+			if (result instanceof Error) {
+				console.log("Can't unlink " + __MEDIA_DIR + download_filename, result)
+			}
+		})
 	}
 })
 
 
+// Read existing screen meta, if local data available
+var meta_path = __META_DIR + __SCREEN_ID + ' ' + 'screen.json'
+var local_published = new Date(Date.parse('2004-01-01'))
+var remote_published = new Date(Date.parse('2004-01-01'))
+var meta_obj = {}
+var data
+try {
+	meta_obj = JSON.parse(fs.readFileSync(meta_path, 'utf-8'))
+	local_published = new Date(Date.parse(meta_obj.properties.published.values[0].value))
+	console.log('Local published: ', local_published.toJSON())
+} catch (e) {
+	local_published = false
+}
 
-// Beware: we'll go quite eventful from now on
-var swEmitter = new events.EventEmitter()
+// Fetch publishing time for screen, if Entu is reachable
+//   and start the show
+EntuLib.getEntity(__SCREEN_ID, function(err, result) {
+	if (err) {
+		remote_published = false
+		console.log('Can\'t reach Entu', err, result)
+		if (local_published) {
+			console.log('Trying to play with local content.')
+			loadMeta(null, null, __SCREEN_ID, __STRUCTURE, startDigester)
+			return
+		} else {
+			console.log('Remote and local both unreachable. Terminating.')
+			process.exit(99)
+		}
+	}
+	else if (result.error !== undefined) {
+		remote_published = false
+		console.log (result.error, definition + ': ' + 'Failed to load from Entu EID=' + eid + '.')
+		if (local_published) {
+			console.log('Trying to play with local content.')
+			loadMeta(null, null, __SCREEN_ID, __STRUCTURE, startDigester)
+			return
+		} else {
+			console.log('Remote and local both unreachable. Terminating.')
+			process.exit(99)
+		}
+	} else {
+		remote_published = new Date(Date.parse(result.result.properties.published.values[0].value))
+		console.log('Remote published: ', remote_published.toJSON())
+	}
 
-swEmitter.on('update-init', function(interval_ms) {
-	setTimeout(swUpdate, interval_ms);
+	if (local_published &&
+	    local_published.toJSON() === remote_published.toJSON()) {
+		console.log('Trying to play with local content.')
+		loadMeta(null, null, __SCREEN_ID, __STRUCTURE, startDigester)
+	}
+	else {
+		console.log('Remove local content. Fetch new from Entu!')
+		local_published = new Date(Date.parse(remote_published.toJSON()))
+		reloadMeta(null, startDigester)
+	}
 })
 
-swEmitter.on('reload-init', function(interval_ms) {
-	setTimeout(swReload, interval_ms);
-})
+// var swEmitter = new events.EventEmitter()
 
 
-var loading_process_count = 0
-var total_download_size = 0
-var bytes_downloaded = 0
 progress(loading_process_count + '| ' + bytesToSize(total_download_size) + ' - ' + bytesToSize(bytes_downloaded) + ' = ' + bytesToSize(total_download_size - bytes_downloaded) )
 
-function loadMedia(err, entity_id, file_id, callback) {
-	incrementProcessCount()
+function startDigester(err, data) {
 	if (err) {
-		console.log('loadMedia err', err)
-		callback(err)
-		decrementProcessCount()
-		return
-	}
-	var filename = __MEDIA_DIR + entity_id + '_' + file_id
-	var download_filename = filename + '.download'
-
-	// console.log ('Looking for ' + filename)
-	if (fs.existsSync(filename)) {
-		decrementProcessCount()
-		callback(null)
-		return
-	}
-
-	// console.log ('Looking for ' + download_filename)
-	if (fs.existsSync(download_filename)) {
-		console.log('Download for ' + filename + ' already in progress')
-		decrementProcessCount()
-		return
-	}
-
-	var writable = fs.createWriteStream(download_filename)
-
-	console.log ('File ' + filename + ' missing. Fetch!')
-	// TODO:
-	// implement file fetcher for EntuLib
-	// - with option to pass writable stream
-	// - and returning callback with file path
-	var options = {
-		hostname: __HOSTNAME,
-	 	port: 443,
-		path: '/api2/file-' + file_id,
-		method: 'GET'
-	}
-	var request = https.request(options)
-	request.on('response', function response_handler( response ) {
-		var filesize = response.headers['content-length']
-
-		total_download_size += Number(filesize)
-		console.log ('DOWNLOAD:' + bytesToSize(total_download_size) + ' - ' + bytesToSize(bytes_downloaded) + ' = ' + bytesToSize(total_download_size - bytes_downloaded))
-		progress(loading_process_count + '| ' + bytesToSize(total_download_size) + ' - ' + bytesToSize(bytes_downloaded) + ' = ' + bytesToSize(total_download_size - bytes_downloaded) )
-		response.on('data', function(chunk){
-			bytes_downloaded += chunk.length
-			progress(loading_process_count + '| ' + bytesToSize(total_download_size) + ' - ' + bytesToSize(bytes_downloaded) + ' = ' + bytesToSize(total_download_size - bytes_downloaded) )
-			writable.write(chunk)
-		})
-		response.on('end', function() {
-			console.log ('DOWNLOAD:' + bytesToSize(total_download_size) + ' - ' + bytesToSize(bytes_downloaded) + ' = ' + bytesToSize(total_download_size - bytes_downloaded))
-			progress(loading_process_count + '| ' + bytesToSize(total_download_size) + ' - ' + bytesToSize(bytes_downloaded) + ' = ' + bytesToSize(total_download_size - bytes_downloaded) )
-			writable.end()
-			try {
-				fs.rename(download_filename, filename)
-			} catch (e) {
-			    console.log('CRITICAL: Messed up with parallel downloading of ' + filename + '. Cleanup and relaunch, please. Closing down.', e);
-				process.exit(99)
-			}
-			decrementProcessCount()
-			callback(null)
-		})
-	})
-	request.end()
-}
-
-var swElements = []
-function registerMeta(err, metadata, callback) {
-	incrementProcessCount()
-	if (err) {
-		console.log('registerMeta err', err)
-		callback(err)
-		decrementProcessCount()
-		return false
-	}
-	var properties = metadata.properties
-	if (properties['valid-to'] !== undefined) {
-		if (properties['valid-to'].values !== undefined) {
-			var vt_date = new Date(properties['valid-to'].values[0].db_value)
-			var now = Date.now()
-			if (vt_date.getTime() < now) {
-				decrementProcessCount()
-				return false
-			}
-		}
-	}
-	var definition = metadata.definition.keyname.split('sw-')[1]
-	if (definition === 'media') {
-		var file_id = metadata.properties.file.values[0].db_value
-		loadMedia(null, metadata.id, file_id, callback)
-	}
-	swElements.push({'id':metadata.id, 'definition':definition, 'element':metadata, 'parents':[], 'childs':[]})
-	decrementProcessCount()
-	return true
-}
-
-function reloadMeta(err, callback) {
-	if (err) {
-		console.log('reloadMeta err', err)
-		callback(err)
-		return
-	}
-	fs.readdirSync(__META_DIR).forEach(function(meta_fileName) {
-		var result = fs.unlinkSync(__META_DIR + meta_fileName)
-		if (result instanceof Error) {
-		    console.log("Can't unlink " + __META_DIR + meta_fileName, result)
-		}
-    })
-	loadMeta(null, __SCREEN_ID, __STRUCTURE, startPlayer)
-}
-
-function loadMeta(err, eid, struct_node, callback) {
-	incrementProcessCount()
-	if (err) {
-		console.log('loadMeta err', err)
-		callback(err)
-		decrementProcessCount()
-		return
-	}
-	var definition = struct_node.name
-	var meta_path = __META_DIR + eid + ' ' + definition + '.json'
-	var meta_json = ''
-	fs.readFile(meta_path, function(err, data) {
-		if (err) {
-			// console.log('ENOENT', err)
-			EntuLib.getEntity(eid, function(err, result) {
-				if (err) {
-					console.log(definition + ': ' + util.inspect(result), err)
-					callback(err)
-					decrementProcessCount()
-					return
-				}
-				if (result.error !== undefined) {
-					console.log (definition + ': ' + 'Failed to load from Entu EID=' + eid + '.')
-					callback(new Error(result.error))
-					decrementProcessCount()
-					return
-				}
-				fs.writeFile(meta_path, stringifier(result.result), function(err) {
-					if (err) {
-						console.log(definition + ': ' + util.inspect(result))
-						callback(err)
-						decrementProcessCount()
-						return
-					}
-				})
-				loadMeta(null, eid, struct_node, callback)
-				decrementProcessCount()
-			})
-			return
-		}
-
-		try {
-			meta_json = JSON.parse(data)
-		} catch (e) {
-		    console.log('WARNING: Data got corrupted while reading from ' + meta_path + '. Retrying.', e);
-			loadMeta(null, eid, struct_node, callback)
-			decrementProcessCount()
-			return
-		}
-
-		console.log('Successfully loaded ' + definition + ' ' + eid)
-		if (registerMeta(null, meta_json, callback) === false) {
-			console.log('Not registered ' + definition + ' ' + eid)
-			decrementProcessCount()
-			callback(null)
-			return
-		}
-		console.log('Registered ' + definition + ' ' + eid)
-
-
-		if (struct_node.reference !== undefined) {
-			ref_def_name = struct_node.reference.name
-			ref_def_id = meta_json.properties[ref_def_name].values[0].db_value
-			loadMeta(null, ref_def_id, struct_node.reference, callback)
-			decrementProcessCount()
-			// console.log(struct_node.reference)
-		}
-		else if (struct_node.child !== undefined) {
-			ch_def_name = struct_node.child.name
-			// console.log(struct_node.child)
-			EntuLib.getChilds(eid, function(err, result) {
-				if (err) {
-					console.log(definition + ': ' + util.inspect(result), err)
-					callback(err)
-					decrementProcessCount()
-					return
-				}
-				if (result.error !== undefined) {
-					console.log (definition + ': ' + 'Failed to load childs for EID=' + eid + '.')
-					callback(new Error(result.error))
-					decrementProcessCount()
-					return
-				}
-				// console.log(ch_def_name + ': ' + util.inspect(result, {depth:null}))
-				result.result['sw-'+ch_def_name].entities.forEach(function(entity) {
-					loadMeta(null, entity.id, struct_node.child, callback)
-				})
-				decrementProcessCount()
-			})
-		}
-		else {
-			decrementProcessCount()
-			callback(null)
-		}
-	})
-}
-
-function startPlayer(err, eid) {
-	if (err) {
-		console.log(err)
+		console.log('startDigester err:', err, data)
+		setTimeout(function() {
+			process.exit(0)
+		}, 300)
 		return
 	}
 	if (loading_process_count > 0) {
-		console.log('Waiting for loaders to calm down. Active processes: ' + loading_process_count)
+		// console.log('Waiting for loaders to calm down. Active processes: ' + loading_process_count)
 		return
 	}
-	console.log('Reached stable state. Terminating in three.')
-	// console.log(stringifier(swElements))
-	setTimeout(function() {
+	console.log('Reached stable state. Flushing metadata and starting preprocessing elements.')
+	fs.writeFileSync('elements.debug.json', stringifier(swElementsById))
+
+	var doTimeout = function() {
+		setTimeout(function() {
+			console.log('RRRRRRRRRRR: Pinging Entu for news.')
+			EntuLib.getEntity(__SCREEN_ID, function(err, result) {
+				if (err) {
+					console.log('Can\'t reach Entu', err, result)
+				}
+				else if (result.error !== undefined) {
+					console.log ('Failed to load from Entu.', result)
+				} else {
+					remote_published = new Date(Date.parse(result.result.properties.published.values[0].value))
+					console.log('Remote published: ', remote_published.toJSON())
+				}
+
+				if (remote_published
+					&& local_published.toJSON() !== remote_published.toJSON()
+					&& (new Date()).toJSON() > remote_published.toJSON()
+					) {
+					console.log('Remove local content. Fetch new from Entu!')
+					local_published = new Date(Date.parse(remote_published.toJSON()))
+					reloadMeta(null, startDigester)
+				} else {
+					doTimeout()
+					// loadMeta(null, null, __SCREEN_ID, __STRUCTURE, startDigester)
+				}
+			})
+		}, 1000 * __UPDATE_INTERVAL_SECONDS)
+		console.log('RRRRRRRRRRR: Check for news scheduled in ' + __UPDATE_INTERVAL_SECONDS + ' seconds.')
+	}
+	doTimeout()
+
+	var stacksize = swElements.length
+	swElements.forEach(function(swElement) {
+		var meta_path = __META_DIR + swElement.id + ' ' + swElement.definition.keyname.split('sw-')[1] + '.json'
+		fs.writeFileSync(meta_path, stringifier(swElement))
+		if(-- stacksize === 0) {
+			console.log('====== Metadata flushed')
+			processElements(null, startDOM)
+		}
+	})
+}
+
+var sw_player = new SwPlayer(__SCREEN_ID)
+
+var screen_dom_element
+function startDOM(err, options) {
+	if (err) {
+		console.log('startDOM err:', err, options)
 		process.exit(0)
-	}, 3000);
+		return
+	}
+	if (screen_dom_element)
+		document.body.removeChild(screen_dom_element)
+	console.log('====== Start startDOM')
+	buildDom(null, function(err, dom_element) {
+		screen_dom_element = dom_element
+		console.log('DOM rebuilt')
+	})
+	console.log('====== Finish startDOM', options)
+	sw_player.restart(screen_dom_element)
+	// setTimeout(function() {
+	// 	process.exit(0)
+	// }, 300)
+	return
 }
 
+
+// Begin capturing screenshots
+function captureScreenshot(err, callback) {
+	if (err) {
+		console.log('captureScreenshot err:', err)
+		return
+	}
+	var datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '')
+	var screenshot_path = __LOG_DIR + 'screencapture ' + datestring + '.jpeg'
+	var writer = fs.createWriteStream(screenshot_path)
+	player_window.capturePage(function(buffer) {
+		if (writer.write(buffer) === false) {
+			// console.log('Shouldnt happen!   ...always does...')
+			writer.once('drain', function() {writer.write(buffer)})
+		}
+		writer.close()
+		function addScreenshot() {
+			// console.log('Saving screenshot')
+			EntuLib.addFile(__SCREEN_ID, 'sw-screen-photo', screenshot_path, function(err, data) {
+				if (err) {
+					console.log('captureScreenshot err:', util.inspect(err), util.inspect(data))
+				}
+				// console.log(util.inspect(data))
+			})
+		}
+		EntuLib.getEntity(__SCREEN_ID, function(err, entity) {
+			if (err) {
+				if (err.code === 'ENOTFOUND') {
+					// console.log('Not connected')
+				} else {
+					console.log('captureScreenshot err:', util.inspect(err), util.inspect(entity))
+				}
+				return
+			}
+			if (entity.result.properties.photo.values === undefined) {
+				addScreenshot()
+			} else {
+				var stack = entity.result.properties.photo.values
+				// console.log(stack)
+				var stacksize = stack.length
+				stack.forEach(function(item) {
+					EntuLib.removeProperty(__SCREEN_ID, 'sw-screen-photo', item.id, function(err, data) {
+						if (err) {
+							console.log('captureScreenshot err:', util.inspect(item), util.inspect(err), util.inspect(data))
+						}
+						// console.log(util.inspect(item), util.inspect(data))
+						if(-- stacksize === 0) {
+							addScreenshot()
+						}
+					})
+				})
+
+			}
+		})
+	}, { format : 'jpeg', datatype : 'buffer'})
+	setTimeout(function() { callback(null, callback) }, 30*1000)
+}
 setTimeout(function() {
-	loadMeta(null, __SCREEN_ID, __STRUCTURE, startPlayer)
-	// reloadMeta(null, __SCREEN_ID, __STRUCTURE, startPlayer)
-}, 10);
-
-
-var swUpdate = function swUpdate() {
-	null
-}
-
+	captureScreenshot(null, captureScreenshot)
+}, 1*1000)
