@@ -40,7 +40,6 @@ console.log ( os.platform(), 'SYSTEM')
 
 __HOSTNAME = 'piletilevi.entu.ee'
 __SCREEN_ID = Number(gui.App.argv[0])
-__LOG_DIR = 'sw-log/'
 __META_DIR = 'sw-meta/'
 __MEDIA_DIR = 'sw-media/'
 __STRUCTURE = {"name":"screen","reference":{"name":"screen-group","reference":{"name":"configuration","child":{"name":"schedule","reference":{"name":"layout","child":{"name":"layout-playlist","reference":{"name":"playlist","child":{"name":"playlist-media","reference":{"name":"media"}}}}}}}}}
@@ -136,6 +135,7 @@ try {
 }
 
 // Fetch publishing time for screen, if Entu is reachable
+//   and start the show
 EntuLib.getEntity(__SCREEN_ID, function(err, result) {
 	if (err) {
 		remote_published = false
@@ -182,9 +182,9 @@ EntuLib.getEntity(__SCREEN_ID, function(err, result) {
 
 progress(loading_process_count + '| ' + bytesToSize(total_download_size) + ' - ' + bytesToSize(bytes_downloaded) + ' = ' + bytesToSize(total_download_size - bytes_downloaded) )
 
-function startDigester(err, eid) {
+function startDigester(err, data) {
 	if (err) {
-		console.log('startDigester err:', err, eid)
+		console.log('startDigester err:', err, data)
 		setTimeout(function() {
 			process.exit(0)
 		}, 300)
@@ -195,34 +195,41 @@ function startDigester(err, eid) {
 		return
 	}
 	console.log('Reached stable state. Flushing metadata and starting preprocessing elements.')
-	fs.writeFileSync('elements.debug.json', stringifier(swElements))
+	fs.writeFileSync('elements.debug.json', stringifier(swElementsById))
 
-	setTimeout(function() {
-		console.log('RRRRRRRRRRR: Starting scheduled reload.')
-		EntuLib.getEntity(__SCREEN_ID, function(err, result) {
-			if (err) {
-				console.log('Can\'t reach Entu', err, result)
-			}
-			else if (result.error !== undefined) {
-				console.log (result.error, definition + ': ' + 'Failed to load from Entu EID=' + eid + '.')
-			} else {
-				remote_published = new Date(Date.parse(result.result.properties.published.values[0].value))
-				console.log('Remote published: ', remote_published.toJSON())
-			}
+	var doTimeout = function() {
+		setTimeout(function() {
+			console.log('RRRRRRRRRRR: Pinging Entu for news.')
+			EntuLib.getEntity(__SCREEN_ID, function(err, result) {
+				if (err) {
+					console.log('Can\'t reach Entu', err, result)
+				}
+				else if (result.error !== undefined) {
+					console.log ('Failed to load from Entu.', result)
+				} else {
+					remote_published = new Date(Date.parse(result.result.properties.published.values[0].value))
+					console.log('Remote published: ', remote_published.toJSON())
+				}
 
-			if (remote_published
-				&& local_published.toJSON() !== remote_published.toJSON()) {
-				console.log('Remove local content. Fetch new from Entu!')
-				local_published = new Date(Date.parse(remote_published.toJSON()))
-				reloadMeta(null, startDigester)
-			}
-		})
-	}, 1000 * __UPDATE_INTERVAL_SECONDS)
-	console.log('RRRRRRRRRRR: Reload scheduled in ' + __UPDATE_INTERVAL_SECONDS + ' seconds.')
+				if (remote_published
+					&& local_published.toJSON() !== remote_published.toJSON()
+					&& (new Date()).toJSON() > remote_published.toJSON()
+					) {
+					console.log('Remove local content. Fetch new from Entu!')
+					local_published = new Date(Date.parse(remote_published.toJSON()))
+					reloadMeta(null, startDigester)
+				} else {
+					doTimeout()
+					// loadMeta(null, null, __SCREEN_ID, __STRUCTURE, startDigester)
+				}
+			})
+		}, 1000 * __UPDATE_INTERVAL_SECONDS)
+		console.log('RRRRRRRRRRR: Check for news scheduled in ' + __UPDATE_INTERVAL_SECONDS + ' seconds.')
+	}
+	doTimeout()
 
 	var stacksize = swElements.length
 	swElements.forEach(function(swElement) {
-		swElementsById[''+swElement.id] = swElement
 		var meta_path = __META_DIR + swElement.id + ' ' + swElement.definition.keyname.split('sw-')[1] + '.json'
 		fs.writeFileSync(meta_path, stringifier(swElement))
 		if(-- stacksize === 0) {
@@ -230,18 +237,26 @@ function startDigester(err, eid) {
 			processElements(null, startDOM)
 		}
 	})
-	// setTimeout(function() {processElements(null, startDOM)}, 1000)
-
 }
 
-function startDOM(err, data) {
+var sw_player = new SwPlayer(__SCREEN_ID)
+
+var screen_dom_element
+function startDOM(err, options) {
 	if (err) {
-		console.log('startDOM err:', err, data)
+		console.log('startDOM err:', err, options)
 		process.exit(0)
 		return
 	}
+	if (screen_dom_element)
+		document.body.removeChild(screen_dom_element)
 	console.log('====== Start startDOM')
-	console.log('====== Finish startDOM', data)
+	buildDom(null, function(err, dom_element) {
+		screen_dom_element = dom_element
+		console.log('DOM rebuilt')
+	})
+	console.log('====== Finish startDOM', options)
+	sw_player.restart(screen_dom_element)
 	// setTimeout(function() {
 	// 	process.exit(0)
 	// }, 300)

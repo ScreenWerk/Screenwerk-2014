@@ -1,6 +1,7 @@
 // var update_interval_ms = 10 * 60 * 1000 // set default update interval to 10 minutes
 
 // Integrity check and element validation
+console.log('Load function processElements')
 function processElements(err, callback) {
 	if (err) {
 		console.log('processElements err:', err)
@@ -84,3 +85,74 @@ function processElements(err, callback) {
 	})
 }
 
+console.log('Load function buildDom')
+function buildDom(err, callback) {
+	if (err) {
+		console.log('buildDom err:', err)
+		process.exit(0)
+		return
+	}
+
+	var createDomRec = function createDomRec(eid, parent_eid) {
+		var dom_element = document.createElement('div')
+		var swElement = swElementsById[eid]
+		// console.log(stringifier(dom_element))
+		// console.log(eid)
+		dom_element.id = parent_eid === undefined ? eid : parent_eid + '_' + eid
+		dom_element.className = swElement.definition.keyname
+		dom_element.style.display = 'none'
+		// dom_element.style.border = 'dashed 1px green'
+		// dom_element.style.position = 'relative'
+		var unit = '%'
+		dom_element.style.width = '100%'
+		dom_element.style.height = '100%'
+		if (swElement.properties['in-pixels'] !== undefined)
+			if (swElement.properties['in-pixels'].values !== undefined)
+				if (swElement.properties['in-pixels'].values[0].db_value === 1)
+					unit = 'px'
+		if (swElement.properties.width !== undefined)
+			if (swElement.properties.width.values !== undefined) {
+				dom_element.style.position = 'absolute'
+				// dom_element.style.border = '2px solid red'
+				dom_element.style.padding = '0px'
+				dom_element.style.width = swElement.properties.width.values[0].db_value + unit
+			}
+		if (swElement.properties.height !== undefined)
+			if (swElement.properties.height.values !== undefined) {
+				dom_element.style.position = 'absolute'
+				// dom_element.style.border = '2px solid red'
+				dom_element.style.padding = '0px'
+				dom_element.style.height = swElement.properties.height.values[0].db_value + unit
+			}
+		if (swElement.properties.left !== undefined)
+			if (swElement.properties.left.values !== undefined) {
+				dom_element.style.position = 'absolute'
+				// dom_element.style.border = '2px solid red'
+				dom_element.style.padding = '0px'
+				dom_element.style.left = swElement.properties.left.values[0].db_value + unit
+			}
+		if (swElement.properties.top !== undefined)
+			if (swElement.properties.top.values !== undefined) {
+				dom_element.style.position = 'absolute'
+				// dom_element.style.border = '2px solid red'
+				dom_element.style.padding = '0px'
+				dom_element.style.top = swElement.properties.top.values[0].db_value + unit
+			}
+		// console.log(stringifier(dom_element.style.cssText))
+
+		dom_element.swElement = swElement
+		swElement.childs.forEach(function(child_eid){
+			var child_node = createDomRec(child_eid, eid)
+			// console.log(stringifier(child_node))
+			dom_element.appendChild(child_node)
+		})
+		return dom_element
+	}
+	console.log('Start createDomRec')
+	var screen_dom_element = createDomRec(__SCREEN_ID)
+	// var scrdom = document.findElementByID(__SCREEN_ID)
+	// scrdom.delete()
+	document.body.appendChild(screen_dom_element)
+	callback(null, screen_dom_element)
+	console.log('Finish createDomRec')
+}

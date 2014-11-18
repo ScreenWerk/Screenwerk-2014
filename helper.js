@@ -1,12 +1,13 @@
 var fs          = require('fs')
 var stringifier = require('./stringifier.js')
 
+__LOG_DIR = 'sw-log/'
 
-// var datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '')
-// var consoleStream = fs.createWriteStream(c_stream_path, {flags:'a'})
-// var sysLogStream = fs.createWriteStream(s_stream_path, {flags:'a'})
-// var c_stream_path = './Console ' + datestring + '.log'
-// var s_stream_path = './System ' + datestring + '.log'
+var datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '')
+var c_stream_path = __LOG_DIR + './Console ' + datestring + '.log'
+var s_stream_path = __LOG_DIR + './System ' + datestring + '.log'
+var consoleStream = fs.createWriteStream(c_stream_path, {flags:'a'})
+var sysLogStream = fs.createWriteStream(s_stream_path, {flags:'a'})
 var log_streams_are_closed = false
 var message_q = []
 var swLog = window.swLog = function swLog(message, scope) {

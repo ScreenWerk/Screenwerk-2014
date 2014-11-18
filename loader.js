@@ -70,6 +70,10 @@ function loadMedia(err, entity_id, file_id, callback) {
 		method: 'GET'
 	}
 	var request = https.request(options)
+	request.on('error', function error_handler( err ) {
+		console.log('Where\'s net?', err)
+		process.exit(99)
+	})
 	request.on('response', function response_handler( response ) {
 		var filesize = response.headers['content-length']
 
@@ -98,17 +102,20 @@ function loadMedia(err, entity_id, file_id, callback) {
 	request.end()
 }
 
+
 var swElements = []
 var swElementsById = {}
-var element_register = []
+// var element_register = []
+
 function registerMeta(err, metadata, callback) {
-	if (element_register.indexOf(metadata.id) > -1)
+	// if (element_register.indexOf(metadata.id) > -1)
+	if (swElementsById[metadata.id] !== undefined)
 		return true
 	incrementProcessCount()
-	element_register.push(metadata.id)
+	// element_register.push(metadata.id)
 	if (err) {
 		console.log('registerMeta err', err)
-		callback(err)
+		callback(err, metadata) //
 		decrementProcessCount()
 		return false
 	}
@@ -169,17 +176,15 @@ function registerMeta(err, metadata, callback) {
 			if (metadata.properties.file.values === undefined && metadata.properties.url.values === undefined)
 				throw ('"URL" or "file" property must be set for ' + metadata.id)
 			if (metadata.properties.file.values !== undefined)
-				metadata.properties.filepath = {'values': [{'db_value':__MEDIA_DIR + '/' + metadata.id + '_' + metadata.properties.file.values[0].db_value}]}
+				metadata.properties.filepath = {'values': [{'db_value':__MEDIA_DIR + metadata.id + '_' + metadata.properties.file.values[0].db_value}]}
+			loadMedia(null, metadata.id, metadata.properties.file.values[0].db_value, callback)
 		break
 		default:
 			callback('Unrecognised definition: ' + metadata.definition.keyname, metadata)
 			return
 	}
-	if (definition === 'media') {
-		var file_id = metadata.properties.file.values[0].db_value
-		loadMedia(null, metadata.id, file_id, callback)
-	}
 	swElements.push(metadata)
+	swElementsById[metadata.id] = metadata
 	decrementProcessCount()
 	return true
 }
@@ -215,25 +220,6 @@ function loadMeta(err, parent_eid, eid, struct_node, callback) {
 	var meta_path = __META_DIR + eid + ' ' + definition + '.json'
 	var meta_json = ''
 
-	if (definition === 'screen') {
-		// EntuLib.getEntity(eid, function(err, result) {
-		// 	if (err) {
-		// 		console.log(definition + ': ' + util.inspect(result), err, result)
-		// 	}
-		// 	else if (result.error !== undefined) {
-		// 		console.log (result.error, definition + ': ' + 'Failed to load from Entu EID=' + eid + '.')
-		// 	} else {
-		// 		console.log(result.result.changed)
-		// 		fs.writeFile(meta_path, stringifier(result.result), function(err) {
-		// 			if (err) {
-		// 				console.log(definition + ': ' + util.inspect(result))
-		// 				throw err
-		// 			}
-		// 		})
-		// 	}
-		// })
-	}
-
 	fs.readFile(meta_path, function(err, data) {
 		if (err) {
 			// console.log('ENOENT', meta_path, err, data)
@@ -243,110 +229,109 @@ function loadMeta(err, parent_eid, eid, struct_node, callback) {
 					callback(err)
 					decrementProcessCount()
 					return
-				}
-				if (result.error !== undefined) {
+				} else if (result.error !== undefined) {
 					console.log (result.error, definition + ': ' + 'Failed to load from Entu EID=' + eid + '.')
 					callback(result.error, result)
 					decrementProcessCount()
 					return
+				} else {
+					fs.writeFile(meta_path, stringifier(result.result), function(err) {
+						if (err) {
+							console.log(definition + ': ' + util.inspect(result))
+							callback(err)
+							decrementProcessCount()
+							return // form writeFile -> getEntity -> readFile -> loadMeta
+						} else {
+							loadMeta(null, parent_eid, eid, struct_node, callback)
+							decrementProcessCount()
+							return // form writeFile -> getEntity -> readFile -> loadMeta
+						}
+					})
 				}
-				fs.writeFile(meta_path, stringifier(result.result), function(err) {
-					if (err) {
-						console.log(definition + ': ' + util.inspect(result))
-						callback(err)
-						decrementProcessCount()
-						return
-					}
-				})
+			})
+		} else { // read from file succeeded
+			try {
+				meta_json = JSON.parse(data)
+			} catch (e) {
+			    console.log('WARNING: Data got corrupted while reading from ' + meta_path + '. Retrying.', e);
 				loadMeta(null, parent_eid, eid, struct_node, callback)
 				decrementProcessCount()
-			})
-			return
-		}
-
-		try {
-			meta_json = JSON.parse(data)
-		} catch (e) {
-		    console.log('WARNING: Data got corrupted while reading from ' + meta_path + '. Retrying.', e);
-			loadMeta(null, parent_eid, eid, struct_node, callback)
-			decrementProcessCount()
-			return
-		}
-
-		// console.log('Successfully loaded ' + definition + ' ' + eid)
-		if (registerMeta(null, meta_json, callback) === false) {
-			console.log('Not registered ' + definition + ' ' + eid)
-			decrementProcessCount()
-			callback(null)
-			return
-		}
-		// console.log('Registered ' + definition + ' ' + eid)
-
-		if (meta_json.childs === undefined) {
-			meta_json.childs = []
-			if (struct_node.reference !== undefined) {
-				ref_entity_name = struct_node.reference.name
-				if (meta_json.properties[ref_entity_name].values === undefined) {
-					callback(new Error(struct_node.name + ' ' + eid + ' has no ' + ref_entity_name + "'s."))
-					decrementProcessCount()
-				}
-				ref_entity_id = meta_json.properties[ref_entity_name].values[0].db_value
-				registerChild(null, parent_eid, meta_json, ref_entity_id, function(err) {
-					// console.log(ref_entity_id)
-					loadMeta(err, eid, ref_entity_id, struct_node.reference, callback)
-				})
-				decrementProcessCount()
-				// console.log(struct_node.reference)
+				return // form readFile -> loadMeta
 			}
-			else if (struct_node.child !== undefined) {
-				ch_def_name = struct_node.child.name
-				// console.log(struct_node.child)
-				EntuLib.getChilds(eid, function(err, ch_result) {
-					if (err) {
-						console.log('loadMeta ' + eid + ' err:', err)
-						callback(err)
-						decrementProcessCount()
-						return
-					}
-					if (ch_result.error !== undefined) {
-						console.log (definition + ': ' + 'Failed to load childs for EID=' + eid + '.')
-						callback(new Error(ch_result.error))
-						decrementProcessCount()
-						return
-					}
-					// console.log(ch_def_name + ': ' + util.inspect(ch_result, {depth:null}))
-					if (ch_result.result['sw-'+ch_def_name].entities.length === 0) {
-						callback(new Error(struct_node.name + ' ' + eid + ' has no ' + ch_def_name + "'s."))
+
+			if (registerMeta(null, meta_json, callback) === false) {
+				console.log('Not registered ' + definition + ' ' + eid)
+				decrementProcessCount()
+				callback(null)
+				return // form readFile -> loadMeta
+			}
+
+			if (meta_json.childs === undefined) {
+				meta_json.childs = []
+				if (struct_node.reference !== undefined) {
+					ref_entity_name = struct_node.reference.name
+					if (meta_json.properties[ref_entity_name].values === undefined) {
+						callback(new Error(struct_node.name + ' ' + eid + ' has no ' + ref_entity_name + "'s."))
 						decrementProcessCount()
 					}
-					ch_result.result['sw-'+ch_def_name].entities.forEach(function(entity) {
-						registerChild(null, parent_eid, meta_json, entity.id, function() {
-							// console.log(entity.id)
-							loadMeta(null, eid, entity.id, struct_node.child, callback)
-						})
+					ref_entity_id = meta_json.properties[ref_entity_name].values[0].db_value
+					registerChild(null, parent_eid, meta_json, ref_entity_id, function(err) {
+						// console.log(ref_entity_id)
+						loadMeta(err, eid, ref_entity_id, struct_node.reference, callback)
 					})
 					decrementProcessCount()
-				})
+					// console.log(struct_node.reference)
+				}
+				else if (struct_node.child !== undefined) {
+					ch_def_name = struct_node.child.name
+					// console.log(struct_node.child)
+					EntuLib.getChilds(eid, function(err, ch_result) {
+						if (err) {
+							console.log('loadMeta ' + eid + ' err:', err)
+							callback(err)
+							decrementProcessCount()
+							return
+						}
+						if (ch_result.error !== undefined) {
+							console.log (definition + ': ' + 'Failed to load childs for EID=' + eid + '.')
+							callback(new Error(ch_result.error))
+							decrementProcessCount()
+							return
+						}
+						// console.log(ch_def_name + ': ' + util.inspect(ch_result, {depth:null}))
+						if (ch_result.result['sw-'+ch_def_name].entities.length === 0) {
+							callback(new Error(struct_node.name + ' ' + eid + ' has no ' + ch_def_name + "'s."))
+							decrementProcessCount()
+						}
+						ch_result.result['sw-'+ch_def_name].entities.forEach(function(entity) {
+							registerChild(null, parent_eid, meta_json, entity.id, function() {
+								// console.log(entity.id)
+								loadMeta(null, eid, entity.id, struct_node.child, callback)
+							})
+						})
+						decrementProcessCount()
+					})
+				}
+				else {
+					registerChild(null, parent_eid, meta_json, null, function() {})
+					decrementProcessCount()
+					callback(null)
+				}
 			}
 			else {
-				registerChild(null, parent_eid, meta_json, null, function() {})
+				meta_json.childs.forEach(function(child) {
+					if (struct_node.reference !== undefined) {
+						// console.log(child)
+						loadMeta(null, eid, child, struct_node.reference, callback)
+					}
+					if (struct_node.child !== undefined) {
+						// console.log(child)
+						loadMeta(null, eid, child, struct_node.child, callback)
+					}
+				})
 				decrementProcessCount()
 				callback(null)
 			}
-		}
-		else {
-			meta_json.childs.forEach(function(child) {
-				if (struct_node.reference !== undefined) {
-					// console.log(child)
-					loadMeta(null, eid, child, struct_node.reference, callback)
-				}
-				if (struct_node.child !== undefined) {
-					// console.log(child)
-					loadMeta(null, eid, child, struct_node.child, callback)
-				}
-			})
-			decrementProcessCount()
-			callback(null)
 		}
 	})
 }
