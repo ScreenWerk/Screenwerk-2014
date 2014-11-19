@@ -544,6 +544,7 @@ function SwPlaylistMedia(dom_element) {
 
 	var play = function play() {
 		if (is_playing) {
+			console.log(' DOM id: ' + dom_element.id + '. Already PLAYing ' + entity.definition.keyname)
 			return false
 		}
 		console.log(' DOM id: ' + dom_element.id + '. Attempting PLAY ' + entity.definition.keyname)
@@ -577,17 +578,13 @@ function SwPlaylistMedia(dom_element) {
 
 
 		medias.forEach( function(media) {
-			media.play()
+			if (media.play() === 'can not play') {
+				if (entity.next !== undefined) {
+					swEmitter.emit('requested' + entity.next)
+				}
+				return
+			}
 		})
-		// var media_dom_element = medias[0].play()
-		// console.log(util.inspect(media_dom_element.style))
-		// if (medias[0].mediatype() === 'Video') {
-		// 	// console.log(util.inspect(media_dom_element))
-		// 	media_dom_element.addEventListener('ended', function() {
-		// 		window.alert(util.inspect(element.next.element))
-		// 		element.next.element.play()
-		// 	})
-		// }
 	}
 	var stop = function stop() {
 		if (!is_playing) {
@@ -710,14 +707,14 @@ function SwMedia(dom_element, muted, duration_ms) {
 		play: function() {
 			// ctrw.show(dom_element.id)
 			if (is_playing) {
-				return dom_element
+				return
 			}
 			console.log(' DOM id: ' + dom_element.id + '. Attempting PLAY')
 			if (properties['valid-from'] !== undefined) {
 				if (properties['valid-from'].values !== undefined) {
 					var vt_date = new Date(properties['valid-from'].values[0].db_value)
 					if (vt_date.getTime() > Date.now()) {
-						return dom_element
+						return 'can not play'
 					}
 				}
 			}
@@ -725,7 +722,7 @@ function SwMedia(dom_element, muted, duration_ms) {
 				if (properties['valid-to'].values !== undefined) {
 					var vt_date = new Date(properties['valid-to'].values[0].db_value)
 					if (vt_date.getTime() < Date.now()) {
-						return dom_element
+						return 'can not play'
 					}
 				}
 			}
