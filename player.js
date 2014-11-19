@@ -528,7 +528,7 @@ function SwPlaylistMedia(dom_element) {
 	}
 
 	swEmitter.on('ended' + entity.id, function() {
-		console.log('ended event for ' + entity.id)
+		console.log('stopping ' + entity.id)
 		// window.alert('ended event for ' + entity.id)
 		stop()
 		if (entity.next !== undefined) {
