@@ -109,8 +109,8 @@ var swElementsById = {}
 
 function registerMeta(err, metadata, callback) {
 	// if (element_register.indexOf(metadata.id) > -1)
-	if (swElementsById[metadata.id] !== undefined)
-		return true
+	// if (swElementsById[metadata.id] !== undefined)
+	// 	return true
 	incrementProcessCount()
 	// element_register.push(metadata.id)
 	if (err) {
