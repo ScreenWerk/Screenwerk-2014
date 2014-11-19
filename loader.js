@@ -173,6 +173,10 @@ function registerMeta(err, metadata, callback) {
 			}
 		break
 		case 'media':
+			if (metadata.properties.type.values === undefined) {
+				callback('Media ' + metadata.id + ' type not specified.', metadata)
+				return
+			}
 			if (metadata.properties.file.values === undefined && metadata.properties.url.values === undefined)
 				throw ('"URL" or "file" property must be set for ' + metadata.id)
 			if (metadata.properties.file.values !== undefined)

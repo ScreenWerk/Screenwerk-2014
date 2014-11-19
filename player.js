@@ -528,7 +528,7 @@ function SwPlaylistMedia(dom_element) {
 	}
 
 	swEmitter.on('ended' + entity.id, function() {
-		console.log('ended event for ' + entity.id)
+		console.log('stopping ' + entity.id)
 		// window.alert('ended event for ' + entity.id)
 		stop()
 		if (entity.next !== undefined) {
@@ -551,7 +551,7 @@ function SwPlaylistMedia(dom_element) {
 			if (properties['valid-to'].values !== undefined) {
 				var vt_date = new Date(properties['valid-to'].values[0].db_value)
 				if (vt_date.getTime() < Date.now()) {
-					if (entity.next !== undefined) false
+					if (entity.next !== undefined)
 						swEmitter.emit('requested' + entity.next)
 					return
 				}

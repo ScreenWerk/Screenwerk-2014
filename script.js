@@ -75,7 +75,7 @@ var EntuLib = new EntuLib(__SCREEN_ID, __API_KEY, __HOSTNAME)
 
 console.log ( 'launching in fullscreen mode')
 var player_window = gui.Window.get()
-// player_window.isFullscreen = true
+player_window.isFullscreen = true
 
 
 // Make sure folders for metadata, media and logs are in place
@@ -320,6 +320,6 @@ function captureScreenshot(err, callback) {
 	}, { format : 'jpeg', datatype : 'buffer'})
 	setTimeout(function() { callback(null, callback) }, 30*1000)
 }
-setTimeout(function() {
-	captureScreenshot(null, captureScreenshot)
-}, 1*1000)
+// setTimeout(function() {
+// 	captureScreenshot(null, captureScreenshot)
+// }, 1*1000)
