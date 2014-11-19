@@ -23,6 +23,6 @@
     "position": "right",
     "width": 900,
     "height": 500
-  }
-  // , "chromium-args": "--ignore-gpu-blacklist"
+  },
+  "chromium-args": "--ignore-gpu-blacklist"
 }
