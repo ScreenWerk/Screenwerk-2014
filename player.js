@@ -538,7 +538,7 @@ function SwPlaylistMedia(dom_element) {
 	})
 	swEmitter.on('requested' + entity.id, function() {
 		console.log('requested event for ' + entity.id + ' delay ' + delay_ms)
-		window.setTimeout(play, delay_ms)
+		sw_timeouts.push(window.setTimeout(play, delay_ms))
 
 	})
 
@@ -746,7 +746,7 @@ function SwMedia(dom_element, muted, duration_ms) {
 			}
 			if (duration_ms !== undefined) {
 				// console.log(' DOM id: ' + dom_element.id + '. duration_ms ' + duration_ms)
-				window.setTimeout(function() {swEmitter.emit('ended' + dom_element.id.split('_')[0])}, duration_ms)
+				sw_timeouts.push(window.setTimeout(function() {swEmitter.emit('ended' + dom_element.id.split('_')[0])}, duration_ms))
 			}
 		},
 		stop: function() {

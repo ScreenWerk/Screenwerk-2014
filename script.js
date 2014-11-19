@@ -134,6 +134,14 @@ try {
 	local_published = false
 }
 
+// Register timeouts that need to be cleared on player restart
+var sw_timeouts = []
+function clearSwTimeouts() {
+	while (sw_timeouts.length > 0) {
+		clearTimeout(sw_timeouts.pop())
+	}
+}
+
 // Fetch publishing time for screen, if Entu is reachable
 //   and start the show
 EntuLib.getEntity(__SCREEN_ID, function(err, result) {
@@ -256,6 +264,7 @@ function startDOM(err, options) {
 		console.log('DOM rebuilt')
 	})
 	console.log('====== Finish startDOM', options)
+	clearSwTimeouts()
 	sw_player.restart(screen_dom_element)
 	// setTimeout(function() {
 	// 	process.exit(0)
