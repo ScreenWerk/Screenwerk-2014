@@ -106,3 +106,13 @@ var bytesToSize = function bytesToSize(bytes) {
     var i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)))
     return Math.round(bytes / Math.pow(1024, i) * 1, 2)/1 + ' ' + sizes[i]
 }
+
+var msToTime = function msToTime(ms) {
+    var sizes = ['sec', 'min', 'h', 'd', 'w']
+    if (ms === 0) return '0'
+    if (ms < 1000 * 60) return Math.round(ms / 1000 * 10)/10 + ' ' + sizes[0]
+    if (ms < 1000 * 60 * 60) return Math.round(ms / 1000 / 60 * 10)/10 + ' ' + sizes[1]
+    if (ms < 1000 * 60 * 60 * 24) return Math.round(ms / 1000 / 60 / 60 * 10)/10 + ' ' + sizes[2]
+    if (ms < 1000 * 60 * 60 * 24 * 7) return Math.round(ms / 1000 / 60 / 60 / 24 * 10)/10 + ' ' + sizes[3]
+    return Math.round(ms / 1000 / 60 / 60 / 24 / 7 * 10)/10 + ' ' + sizes[4]
+}

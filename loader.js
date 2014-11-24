@@ -107,6 +107,28 @@ var swElements = []
 var swElementsById = {}
 // var element_register = []
 
+function unregisterMeta(err, eidx, callback) {
+	var eid = swElements[eidx].id
+	console.log('UNREGISTER ' + eid)
+	if (eid === __SCREEN_ID) {
+		callback('Screen has no content. Everything expired?', eid)
+		process.exit(99)
+	}
+	if (swElementsById[eid] === undefined) {
+		callback('Entity absent. Already unregistered?', eid)
+		return
+	}
+	var parent_eid = swElementsById[eid].parents[0]
+	// console.log(swElementsById[eid], swElementsById[parent_eid], parent_eid)
+	swElementsById[parent_eid].childs.splice(swElementsById[parent_eid].childs.indexOf(eid), 1)
+	swElements.splice(eidx, 1)
+	delete swElementsById[eid]
+	// if (swElementsById[parent_eid].childs.length === 0) {
+	// 	unregisterMeta(null, parent_eid, callback)
+	// }
+}
+
+// Integrity check and element validation
 function registerMeta(err, metadata, callback) {
 	// if (element_register.indexOf(metadata.id) > -1)
 	// if (swElementsById[metadata.id] !== undefined)
@@ -126,6 +148,7 @@ function registerMeta(err, metadata, callback) {
 			var now = Date.now()
 			if (vt_date.getTime() < now) {
 				decrementProcessCount()
+				// console.log('valid-to in past:', properties)
 				return false
 			}
 		}
@@ -171,6 +194,9 @@ function registerMeta(err, metadata, callback) {
 			if (metadata.properties.ordinal.values === undefined) {
 				metadata.properties.ordinal.values = [{'db_value':1}]
 			}
+			if (metadata.properties.mute.values === undefined) {
+				metadata.properties.mute.values = [{'db_value':1}]
+			}
 		break
 		case 'media':
 			if (metadata.properties.type.values === undefined) {
@@ -179,9 +205,10 @@ function registerMeta(err, metadata, callback) {
 			}
 			if (metadata.properties.file.values === undefined && metadata.properties.url.values === undefined)
 				throw ('"URL" or "file" property must be set for ' + metadata.id)
-			if (metadata.properties.file.values !== undefined)
+			if (metadata.properties.file.values !== undefined) {
 				metadata.properties.filepath = {'values': [{'db_value':__MEDIA_DIR + metadata.id + '_' + metadata.properties.file.values[0].db_value}]}
-			loadMedia(null, metadata.id, metadata.properties.file.values[0].db_value, callback)
+				loadMedia(null, metadata.id, metadata.properties.file.values[0].db_value, callback)
+			}
 		break
 		default:
 			callback('Unrecognised definition: ' + metadata.definition.keyname, metadata)
@@ -267,6 +294,7 @@ function loadMeta(err, parent_eid, eid, struct_node, callback) {
 				console.log('Not registered ' + definition + ' ' + eid)
 				decrementProcessCount()
 				callback(null)
+				swElementsById[parent_eid].childs.splice(swElementsById[parent_eid].childs.indexOf(eid),1)
 				return // form readFile -> loadMeta
 			}
 
@@ -340,15 +368,6 @@ function loadMeta(err, parent_eid, eid, struct_node, callback) {
 	})
 }
 
-// Array.prototype.contains = function(obj) {
-//     var i = this.length;
-//     while (i--) {
-//         if (this[i] == obj) {
-//             return true;
-//         }
-//     }
-//     return false;
-// }
 
 function registerChild(err, parent_eid, element, child_eid, callback) {
 	if (err) {
