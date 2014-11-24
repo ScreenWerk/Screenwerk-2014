@@ -1,6 +1,7 @@
+var later  = require("later")
+
 // var update_interval_ms = 10 * 60 * 1000 // set default update interval to 10 minutes
 
-// Integrity check and element validation
 console.log('Load function processElements')
 function processElements(err, callback) {
 	if (err) {
@@ -15,25 +16,30 @@ function processElements(err, callback) {
 		// console.log('Processing ' + swElement.definition.keyname + ':' + swElement.id + ' - ' + swElement.displayname)
 		switch (swElement.definition.keyname) {
 			case 'sw-screen':
-				// console.log(swElement.definition.keyname)
 			break
 			case 'sw-screen-group':
-				// console.log(swElement.definition.keyname)
 			break
 			case 'sw-configuration':
-				// console.log(swElement.definition.keyname)
 			break
 			case 'sw-schedule':
-				// console.log(swElement.definition.keyname)
+				var sched = later.parse.cron(swElement.properties.crontab.values[0].db_value)
+				if (swElement.properties['valid-from'].values !== undefined) {
+					var startDate = swElement.properties['valid-from'].values[0]
+					var startTime = (startDate.getTime())
+					sched.schedules[0].fd_a = [startTime]
+				}
+				if (swElement.properties['valid-to'].values !== undefined) {
+					var endDate = new Date(swElement.properties['valid-to'].values[0].db_value)
+					var endTime = (endDate.getTime())
+					sched.schedules[0].fd_b = [endTime]
+				}
+				swElement.laterSchedule = later.schedule(sched)
 			break
 			case 'sw-layout':
-				// console.log(swElement.definition.keyname)
 			break
 			case 'sw-layout-playlist':
-				// console.log(swElement.definition.keyname)
 			break
 			case 'sw-playlist':
-				// console.log(swElement.definition.keyname)
 				var loop = false
 				// If any of parent LayoutPlaylist's has loop == true, then loop the playlist
 				swElement.parents.forEach(function(parent_eid) {
@@ -65,10 +71,8 @@ function processElements(err, callback) {
 				}
 			break
 			case 'sw-playlist-media':
-				// console.log(swElement.definition.keyname)
 			break
 			case 'sw-media':
-				// console.log(swElement.definition.keyname)
 			break
 			default:
 				callback('Unrecognised definition: ' + swElement.definition.keyname, swElement)
@@ -93,12 +97,14 @@ function buildDom(err, callback) {
 		return
 	}
 
-	var createDomRec = function createDomRec(eid, parent_eid) {
+	var createDomRec = function createDomRec(eid, parent_dom_id) {
+		// console.log(eid, parent_dom_id)
 		var dom_element = document.createElement('div')
 		var swElement = swElementsById[eid]
+		var parentSwElement = swElementsById[swElement.parents[0]]
 		// console.log(stringifier(dom_element))
 		// console.log(eid)
-		dom_element.id = parent_eid === undefined ? eid : parent_eid + '_' + eid
+		dom_element.id = parent_dom_id === undefined ? eid : parent_dom_id + '_' + eid
 		dom_element.className = swElement.definition.keyname
 		dom_element.style.display = 'none'
 		// dom_element.style.border = 'dashed 1px green'
@@ -142,10 +148,49 @@ function buildDom(err, callback) {
 
 		dom_element.swElement = swElement
 		swElement.childs.forEach(function(child_eid){
-			var child_node = createDomRec(child_eid, eid)
+			var child_node = createDomRec(child_eid, dom_element.id)
 			// console.log(stringifier(child_node))
 			dom_element.appendChild(child_node)
 		})
+
+		if (swElement.definition.keyname !== 'sw-media')
+			return dom_element
+		// We are here because we have media!
+		var mediatype = swElement.properties.type.values === undefined ? '#NA' : swElement.properties.type.values[0].value
+		var media_dom_element = {}
+
+		if (mediatype === 'Video') {
+			media_dom_element = document.createElement('VIDEO')
+			var filename = swElement.properties.file.values[0].value
+			var mimetype = 'video/' + filename.split('.')[filename.split('.').length-1]
+			media_dom_element.type = mimetype
+			// console.log(mimetype)
+			media_dom_element.src = swElement.properties.filepath.values[0].db_value
+			media_dom_element.overflow = 'hidden'
+			dom_element.appendChild(media_dom_element)
+			media_dom_element.autoplay = false
+			media_dom_element.controls = false
+			media_dom_element.muted = parentSwElement.properties.mute.values[0].db_value === 1
+
+		} else if (mediatype === 'Image') {
+			media_dom_element = document.createElement('IMG')
+			// console.log(util.inspect(swElement.properties.filepath.values[0]))
+			media_dom_element.src = swElement.properties.filepath.values[0].db_value
+			dom_element.appendChild(media_dom_element)
+
+		} else if (mediatype === 'URL') {
+			media_dom_element = document.createElement('IFRAME')
+			// console.log(util.inspect(swElement.properties.filepath.values[0]))
+			media_dom_element.src = swElement.properties.url.values[0].db_value
+			media_dom_element.width = '100%'
+			media_dom_element.height = '100%'
+			media_dom_element.scrolling = 'no'
+			dom_element.appendChild(media_dom_element)
+			// var ifrst = media_dom_element.contentWindow.document.body.style
+			// ifrst.overflow = 'hidden'
+		} else {
+			dom_element.appendChild(document.createTextNode(mediatype + ' ' + entity.definition.keyname + ': ' + entity.id))
+		}
 		return dom_element
 	}
 	console.log('Start createDomRec')

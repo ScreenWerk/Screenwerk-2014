@@ -17,12 +17,12 @@
   "window": {
     "icon": "imgs/sw-p512.png",
     "show_in_taskbar": true,
-    "toolbar": false,
-    "frame": false,
+    "toolbar": true,
+    "frame": true,
     "show": true,
-    "position": "right",
+    "position": "center",
     "width": 900,
     "height": 500
-  }
-  // , "chromium-args": "--ignore-gpu-blacklist"
+  },
+  "chromium-args": "--ignore-gpu-blacklist"
 }

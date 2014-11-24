@@ -35,7 +35,7 @@ assert.equal(typeof(gui.App.argv[0]), 'string'
 assert.ok(Number(gui.App.argv[0]) > 0
 			, "Screen ID must be number greater than zero.")
 
-console.log ( "\n===================================")
+console.log ( "===================================")
 console.log ( os.platform(), 'SYSTEM')
 
 __HOSTNAME = 'piletilevi.entu.ee'
@@ -57,6 +57,8 @@ function recurseHierarchy(structure, parent_name) {
 recurseHierarchy(__STRUCTURE)
 __DEFAULT_UPDATE_INTERVAL_MINUTES = 10
 __UPDATE_INTERVAL_SECONDS = __DEFAULT_UPDATE_INTERVAL_MINUTES * 60
+__DEFAULT_DURATION_MS = 5 * 1000
+__DEFAULT_DELAY_MS = 0
 
 __API_KEY = ''
 var uuid_path = __SCREEN_ID + '.uuid'
@@ -75,7 +77,8 @@ var EntuLib = new EntuLib(__SCREEN_ID, __API_KEY, __HOSTNAME)
 
 console.log ( 'launching in fullscreen mode')
 var player_window = gui.Window.get()
-player_window.isFullscreen = true
+player_window.moveTo(0,30)
+// player_window.isFullscreen = true
 
 
 // Make sure folders for metadata, media and logs are in place
@@ -134,6 +137,14 @@ try {
 	local_published = false
 }
 
+// Register timeouts that need to be cleared on player restart
+var sw_timeouts = []
+function clearSwTimeouts() {
+	while (sw_timeouts.length > 0) {
+		clearTimeout(sw_timeouts.pop())
+	}
+}
+
 // Fetch publishing time for screen, if Entu is reachable
 //   and start the show
 EntuLib.getEntity(__SCREEN_ID, function(err, result) {
@@ -172,6 +183,7 @@ EntuLib.getEntity(__SCREEN_ID, function(err, result) {
 	}
 	else {
 		console.log('Remove local content. Fetch new from Entu!')
+		clearSwTimeouts()
 		local_published = new Date(Date.parse(remote_published.toJSON()))
 		reloadMeta(null, startDigester)
 	}
@@ -216,6 +228,7 @@ function startDigester(err, data) {
 					&& (new Date()).toJSON() > remote_published.toJSON()
 					) {
 					console.log('Remove local content. Fetch new from Entu!')
+					clearSwTimeouts()
 					local_published = new Date(Date.parse(remote_published.toJSON()))
 					reloadMeta(null, startDigester)
 				} else {
@@ -228,25 +241,41 @@ function startDigester(err, data) {
 	}
 	doTimeout()
 
-	var stacksize = swElements.length
-	swElements.forEach(function(swElement) {
-		var meta_path = __META_DIR + swElement.id + ' ' + swElement.definition.keyname.split('sw-')[1] + '.json'
-		fs.writeFileSync(meta_path, stringifier(swElement))
-		if(-- stacksize === 0) {
-			console.log('====== Metadata flushed')
-			processElements(null, startDOM)
+	function flushMeta(err) {
+		if (err) {
+			console.log('flushMeta err:', err)
+			process.exit(99)
 		}
-	})
+		var stacksize = swElements.length
+		swElements.every(function(swElement, idx) {
+			if (swElement.definition.keyname !== 'sw-media' && swElement.childs.length === 0) {
+				console.log(swElement.id)
+				unregisterMeta(null, idx, function(err, data) {
+					if (err) {
+						console.log('flushMeta err:', err, data)
+					}
+				})
+				flushMeta(null)
+				return false
+			}
+			var meta_path = __META_DIR + swElement.id + ' ' + swElement.definition.keyname.split('sw-')[1] + '.json'
+			fs.writeFileSync(meta_path, stringifier(swElement))
+			if(-- stacksize === 0) {
+				console.log('====== Metadata flushed')
+				processElements(null, startDOM)
+			}
+			return true
+		})
+	}
+	flushMeta(null)
 }
 
-var sw_player = new SwPlayer(__SCREEN_ID)
 
 var screen_dom_element
 function startDOM(err, options) {
 	if (err) {
 		console.log('startDOM err:', err, options)
-		process.exit(0)
-		return
+		process.exit(99)
 	}
 	if (screen_dom_element)
 		document.body.removeChild(screen_dom_element)
@@ -256,7 +285,17 @@ function startDOM(err, options) {
 		console.log('DOM rebuilt')
 	})
 	console.log('====== Finish startDOM', options)
-	sw_player.restart(screen_dom_element)
+	clearSwTimeouts()
+	screen_dom_element.player = new SwPlayer(null, screen_dom_element, function(err, data) {
+		console.log('startDOM err:', err, util.inspect(data))
+		process.exit(99)
+	})
+	screen_dom_element.player.restart(null, function(err, data) {
+		if (err) {
+			console.log('startDOM err:', err, data)
+			callback(er, data)
+		}
+	})
 	// setTimeout(function() {
 	// 	process.exit(0)
 	// }, 300)

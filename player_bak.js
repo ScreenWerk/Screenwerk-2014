@@ -1,4 +1,5 @@
 var util   = require("util")
+var later  = require("later")
 var events = require('events')
 var fs     = require('fs')
 // var helper = require('./helper')
@@ -12,220 +13,12 @@ var console = window.console
 // var sysLogStream = fs.createWriteStream('./system.log', {flags:'a'})
 
 
-function SwPlayer(err, dom_element, callback) {
-	if (err) {
-		console.log('SwPlayer err:', err, dom_element.swElement)
-		callback(err)
-	}
-	// console.log('SwPlayer:', dom_element.swElement)
-	if (dom_element.swElement == null) {
-		callback('foo', dom_element)
-		return
-	}
-	var is_playing = this.is_playing = false
-	var element = dom_element.swElement
-	var properties = element.properties
-
-	// TODO: Consider forEach
-	if (element.definition.keyname !== 'sw-media') {
-		for (var key=0; key<dom_element.childNodes.length; key++) {
-			var child_node = dom_element.childNodes[key]
-			// console.log(typeof child_node)
-			// console.log(child_node)
-			child_node.player = new SwPlayer(null, child_node, callback)
-		}
-	}
-
+function SwPlayer(screen_id) {
 	return {
-		play: function(err, timeout, callback) {
-			if (err) {
-				console.log('SwPlayer.play err:', err, element.id)
-				return this
-			}
-			console.log('Attempting PLAY on ' + element.definition.keyname + ' ' + element.id)
-			if (properties['valid-from'] !== undefined) {
-				if (properties['valid-from'].values !== undefined) {
-					var vf_date = new Date(properties['valid-from'].values[0].db_value)
-					if (vf_date.getTime() > Date.now()) {
-						console.log('DOM id: ' + element.id + ' valid-from not reached.', properties['valid-from'].values[0].db_value)
-						callback('not valid until', vf_date.getTime(), element.id)
-						return this
-					}
-				}
-			}
-			if (properties['valid-to'] !== undefined) {
-				if (properties['valid-to'].values !== undefined) {
-					var vt_date = new Date(properties['valid-to'].values[0].db_value)
-					if (vt_date.getTime() < Date.now()) {
-						console.log('DOM id: ' + element.id + ' valid-to expired.', properties['valid-to'].values[0].db_value)
-						callback('expired', element.id)
-						return this
-					}
-				}
-			}
-			if (timeout && timeout > 0) {
-				var self = this
-				console.log('Postponing PLAY on ' + element.definition.keyname + ' ' + element.id + ' for ' + msToTime(timeout))
-				sw_timeouts.push(setTimeout(function() {
-									self.play(null, false, callback)
-								}, timeout))
-				return self
-			}
-			console.log('PLAY ' + element.id, is_playing ? 'Already playing' : 'Was stopped')
-			if (is_playing === true)
-				return this
-			is_playing = true
-			dom_element.style.display = 'block'
-
-			switch (element.definition.keyname) {
-				case 'sw-screen':
-					dom_element.childNodes[0].player.play(null, 0, function(){})
-				break
-				case 'sw-screen-group':
-					dom_element.childNodes[0].player.play(null, 0, function(){})
-				break
-				case 'sw-configuration':
-					var schedule_nodes = []
-					for (var key=0; key<dom_element.childNodes.length; key++) {
-						schedule_nodes.push(dom_element.childNodes[key])
-					}
-
-					schedule_nodes.sort(function compare(a,b) {
-						if (a.swElement.laterSchedule.prev().getTime() > b.swElement.laterSchedule.prev().getTime())
-							return 1
-						if (a.swElement.laterSchedule.prev().getTime() < b.swElement.laterSchedule.prev().getTime())
-							return -1
-						return 0
-					})
-
-					schedule_nodes.forEach(function(child_node) {
-						child_node.player.play(null, 0, function(){})
-					})
-				break
-				case 'sw-schedule':
-					dom_element.childNodes[0].player.play(null, 0, function(){})
-
-					if (properties['cleanup'].values[0].db_value === 1) {
-						var cleanupLayer = properties['ordinal'].values[0].db_value
-						for (var key=0; key<dom_element.parentNode.childNodes.length; key++) {
-							var sibling_node = dom_element.parentNode.childNodes[key]
-							if (element.id === sibling_node.swElement.id) {
-								continue
-							}
-							if (sibling_node.is_playing === false) {
-								continue
-							}
-							// console.log(util.inspect(schedule,{depth:6}))
-							var sibling_node_cleanup_layer = sibling_node.swElement.properties.ordinal.values[0].db_value
-							console.log('Schedule ' + util.inspect(element.id)
-								+ ' sibling_node_cleanup_layer LE cleanupLayer ' + sibling_node_cleanup_layer + ' LE ' + cleanupLayer
-								+ ' checking for cleanup of schedule ' + sibling_node.swElement.id)
-							if (sibling_node_cleanup_layer <= cleanupLayer) {
-								// console.log('|-- Schedule ' + element.id + ' cleaning up schedule ' + sibling_node.swElement.id)
-								sibling_node.player.stop()
-							}
-						}
-					}
-				break
-				case 'sw-layout':
-					for (var key=0; key<dom_element.childNodes.length; key++) {
-						dom_element.childNodes[key].player.play(null, 0, function(){})
-					}
-				break
-				case 'sw-layout-playlist':
-					dom_element.childNodes[0].player.play(null, 0, function(){})
-				break
-				case 'sw-playlist':
-					dom_element.childNodes[0].player.play(null, 0, function(){})
-				break
-				case 'sw-playlist-media':
-					if (dom_element.childNodes.length > 0) {
-						console.log('TODO: playlist-media has its expired media removed - why are we here?')
-						dom_element.childNodes[0].player.play(null, 0, function(){})
-					}
-				break
-				case 'sw-media':
-					var mediatype = properties.type.values === undefined ? '#NA' : properties.type.values[0].value
-					if (mediatype === 'Video') {
-						var media_dom_element = dom_element.childNodes[0]
-						media_dom_element.play()
-						media_dom_element.addEventListener('ended', function() {
-							dom_element.parentNode.player.stop(null, 0, function(){})
-						})
-
-					} else if (mediatype === 'Image' || mediatype === 'URL') {
-						var duration_ms = __DEFAULT_DURATION_MS
-						if (properties.duration.values !== undefined)
-							duration_ms = Number(properties.duration.values[0].db_value) * 1000
-						dom_element.parentNode.player.stop(null, duration_ms, function(){})
-
-					} else {
-						dom_element.appendChild(document.createTextNode(mediatype + ' ' + entity.definition.keyname + ': ' + entity.id))
-					}
-
-				break
-				default:
-					callback('Unrecognised definition: ' + element.definition.keyname, swElement)
-					return
-			}
-			return this
-		},
-		stop: function(err, timeout, callback) {
-			if (err) {
-				console.log('SwPlayer.play err:', err, element.id)
-				return this
-			}
-			if (timeout && timeout > 0) {
-				var self = this
-				console.log('Postponing STOP on ' + element.definition.keyname + ' ' + element.id + ' for ' + msToTime(timeout))
-				sw_timeouts.push(setTimeout(function() {
-									self.stop(null, false, callback)
-								}, timeout))
-				return self
-			}
-			console.log('STOP ' + element.id, is_playing ? 'Was playing' : 'Already in stopped state')
-			if (is_playing === false)
-				return this
-			is_playing = false
-			dom_element.style.display = 'none'
-			if (element.next !== undefined ) {
-				var next_eid = element.next
-				var next_dom_id = dom_element.parentNode.id + '_' + next_eid
-				console.log(element.id, next_eid, next_dom_id)
-				var delay_ms = __DEFAULT_DELAY_MS
-				if (properties.delay.values !== undefined)
-					delay_ms = Number(properties.delay.values[0].db_value) * 1000
-				document.getElementById(next_dom_id).player.play(null, delay_ms, callback)
-			}
-			if (element.definition.keyname === 'sw-media') {
-				// var mediatype = properties.type.values === undefined ? '#NA' : properties.type.values[0].value
-				// if (mediatype === 'Video') {
-				// 	var media_dom_element = dom_element.childNodes[0]
-				// 	media_dom_element.stop()
-				// }
-				return this
-			}
-			for (var key=0; key<dom_element.childNodes.length; key++) {
-				dom_element.childNodes[key].player.stop()
-			}
-			return this
-		},
-		restart: function(err, callback) {
-			console.log('RESTART ' + element.id, 'Current state: ' + (is_playing ? 'playing' : 'stopped'))
-			return this.stop(null, 0, function(err, data) {
-				if (err) {
-					console.log('SwPlayer.restart err:', err, data)
-					callback(err, data)
-				}
-			}).play(null, 0, function(err, data) {
-				if (err) {
-					console.log('SwPlayer.restart err:', err, data)
-					callback(err, data)
-				}
-			})
-		},
-		childs: function() {
-			return dom_element.childNodes
+		restart: function(screen_dom_element) {
+			console.log('Starting ScreenWerk player for screen ' + screen_id)
+			screen_dom_element.player = new SwScreen(screen_dom_element)
+			return screen_dom_element.player.play()
 		}
 	}
 }
@@ -237,6 +30,11 @@ function SwScreen(dom_element) {
 	var element = entity
 	var properties = element.properties
 
+	// console.log(entity.definition.keyname + ' ' + entity.id + ' has ' + dom_element.childNodes.length + ' childNodes.')
+	for (var key=0; key<dom_element.childNodes.length; key++) {
+		var child_node = dom_element.childNodes[key]
+		child_node.player = new SwScreenGroup(child_node)
+	}
 	return {
 		play: function() {
 			if (is_playing) {
@@ -285,6 +83,10 @@ function SwScreenGroup(dom_element) {
 	var element = entity
 	var properties = element.properties
 	// console.log(entity.definition.keyname + ' ' + entity.id + ' has ' + dom_element.childNodes.length + ' childNodes.')
+	for (var key=0; key<dom_element.childNodes.length; key++) {
+		var child_node = dom_element.childNodes[key]
+		child_node.player = new SwConfiguration(child_node)
+	}
 	return {
 		play: function() {
 			if (is_playing) {
@@ -331,6 +133,15 @@ function SwConfiguration(dom_element) {
 	var entity = dom_element.swElement
 	var element = entity
 	var properties = element.properties
+	// var element = dom_element.swElement.element
+	// var properties = dom_element.swElement.element.properties
+
+	console.log('New ' + entity.definition.keyname + ' ' + entity.id) // + ' Style: ' + util.inspect(entity.dom_element.style))
+	// console.log(entity.definition.keyname + ' ' + entity.id + ' has ' + dom_element.childNodes.length + ' childNodes.')
+	for (var key=0; key<dom_element.childNodes.length; key++) {
+		var child_node = dom_element.childNodes[key]
+		child_node.player = new SwSchedule(child_node)
+	}
 
 	return {
 		play: function() {
@@ -396,14 +207,19 @@ function SwSchedule(dom_element) {
 	var entity = dom_element.swElement
 	var element = entity
 	var properties = element.properties
+	// var element = dom_element.swElement.element
+	// var properties = dom_element.swElement.element.properties
 
 	var cleanupLayer = element.properties['ordinal'].values[0].db_value
 	var cleanup = this.cleanup = element.properties['cleanup'].values[0].db_value
 	var document = window.document
 	var is_playing = this.is_playing = false
 	console.log('New ' + entity.definition.keyname + ' ' + entity.id)
+	// console.log('|-- ' + util.inspect({'cleanup':cleanup, 'cleanupLayer':cleanupLayer}))
 
+	// console.log(util.inspect(properties.crontab.values[0]))
 	var cronSched = this.cronSched = later.parse.cron(properties.crontab.values[0].db_value)
+	// console.log(util.inspect(cronSched))
 	if (properties['valid-from'].values !== undefined) {
 		var startDate = properties['valid-from'].values[0]
 		var startTime = (startDate.getTime());
@@ -414,10 +230,12 @@ function SwSchedule(dom_element) {
 		var endTime = (endDate.getTime());
 		cronSched.schedules[0].fd_b = [endTime];
 	}
+	// console.log(entity.definition.keyname + ' ' + entity.id + ' has ' + dom_element.childNodes.length + ' childNodes.')
 	for (var key=0; key<dom_element.childNodes.length; key++) {
 		var child_node = dom_element.childNodes[key]
 		child_node.player = new SwLayout(child_node)
 	}
+	// console.log('There are ' + layouts.length + ' layouts in schedule ' + entity.id)
 	var playLayouts = function playLayouts() {
 		console.log(' DOM id: ' + dom_element.id + '. ' + entity.definition.keyname + ' attempting play on ' + dom_element.childNodes.length + ' layouts')
 		for (var key=0; key<dom_element.childNodes.length; key++) {
@@ -450,6 +268,7 @@ function SwSchedule(dom_element) {
 		}
 	}
 	var stopLayouts = function stopLayouts() {
+		// console.log(' DOM id: ' + dom_element.id + '. ' + entity.definition.keyname + ' attempting stop on ' + dom_element.childNodes.length + ' layouts')
 		for (var key=0; key<dom_element.childNodes.length; key++) {
 			dom_element.childNodes[key].player.stop()
 		}
@@ -514,9 +333,15 @@ function SwLayout(dom_element) {
 	var entity = dom_element.swElement
 	var element = entity
 	var properties = element.properties
+	// var element = dom_element.swElement.element
+	// var properties = dom_element.swElement.element.properties
 
 	var is_playing = this.is_playing = false
 	console.log('New ' + entity.definition.keyname + ' ' + entity.id)
+	for (var key=0; key<dom_element.childNodes.length; key++) {
+		var child_node = dom_element.childNodes[key]
+		child_node.player = new SwLayoutPlaylist(child_node)
+	}
 	return {
 		play: function() {
 			if (is_playing) {
@@ -562,9 +387,15 @@ function SwLayoutPlaylist(dom_element) {
 	var entity = dom_element.swElement
 	var element = entity
 	var properties = element.properties
+	// var element = dom_element.swElement.element
+	// var properties = dom_element.swElement.element.properties
 
 	var is_playing = false
 	console.log('New ' + entity.definition.keyname + ' ' + entity.id)
+	for (var key=0; key<dom_element.childNodes.length; key++) {
+		var child_node = dom_element.childNodes[key]
+		child_node.player = new SwPlaylist(child_node)
+	}
 
 	return {
 		play: function() {
@@ -611,9 +442,15 @@ function SwPlaylist(dom_element) {
 	var entity = dom_element.swElement
 	var element = entity
 	var properties = element.properties
+	// var element = dom_element.swElement.element
+	// var properties = dom_element.swElement.element.properties
 
 	var is_playing = this.is_playing = false
 	console.log('New ' + entity.definition.keyname + ' ' + entity.id)
+	for (var key=0; key<dom_element.childNodes.length; key++) {
+		var child_node = dom_element.childNodes[key]
+		child_node.player = new SwPlaylistMedia(child_node)
+	}
 
 	return {
 		play: function() {
@@ -659,8 +496,13 @@ function SwPlaylistMedia(dom_element) {
 	var entity = dom_element.swElement
 	var element = entity
 	var properties = element.properties
+	// var element = dom_element.swElement.element
+	// var properties = dom_element.swElement.element.properties
 	var is_playing = this.is_playing = false
+	console.log('New ' + entity.definition.keyname + ' ' + entity.id) // + ' Style: ' + util.inspect(entity.dom_element.style))
+	// console.log('New ' + entity.definition.keyname + ' ' + entity.id + ' Style: ' + util.inspect(dom_element.style))
 
+	// console.log(entity.definition.keyname + ' ' + entity.id + ' has ' + dom_element.childNodes.length + ' childNodes.')
 	var medias = []
 	for (var key=0; key<dom_element.childNodes.length; key++) {
 		var child_node = dom_element.childNodes[key]
@@ -805,8 +647,11 @@ function SwMedia(dom_element, muted, duration_ms) {
 	var entity = dom_element.swElement
 	var element = entity
 	var properties = element.properties
+	// var element = dom_element.swElement.element
+	// var properties = dom_element.swElement.element.properties
 
 	var is_playing = this.is_playing = false
+	// console.log(util.inspect(properties.type.values))
 	var mediatype = properties.type.values === undefined ? '#NA' : properties.type.values[0].value
 	var media_dom_element = {}
 
