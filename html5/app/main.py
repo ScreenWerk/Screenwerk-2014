@@ -283,7 +283,14 @@ class ShowPlayerJSON(myRequestHandler, Entity, Schedule):
 
 class ShowFile(myRequestHandler, Entity):
     def get(self, file_id):
-        files = self.get_file(file_id)
+
+        file_name = '/www/screenwerk/files/%s' % file_id
+        if path.isfile(file_name):
+            only_meta = True
+        else:
+            only_meta = False
+
+        files = self.get_file(file_id, only_meta=only_meta)
         if not files:
             return self.missing()
 
@@ -295,14 +302,27 @@ class ShowFile(myRequestHandler, Entity):
         self.add_header('Content-Type', mime)
         self.add_header('Cache-Control', 'private,max-age=31536000')
         self.add_header('Content-Disposition', 'inline; filename="%s"' % mediafile.filename)
-        self.write(mediafile.file)
+
+        if only_meta:
+            buf_size = 4096
+            with open(file_name, 'r') as f:
+                while True:
+                    data = f.read(buf_size)
+                    if not data:
+                        break
+                    self.write(data)
+        else:
+            with open(file_name, 'w') as f:
+                f.write(mediafile.file)
+            self.write(mediafile.file)
+
 
 
 
 
 class NoPage(myRequestHandler):
     def get(self, url):
-        self.missing()
+        self.write('OK')
 
 
 

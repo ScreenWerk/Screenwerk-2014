@@ -1316,7 +1316,7 @@ class Entity():
                 items.setdefault('%s' % ent.get('label_plural', ''), []).append(ent)
         return items
 
-    def get_file(self, file_id, sharing_key=None):
+    def get_file(self, file_id, sharing_key=None, only_meta=False):
         """
         Returns file object. File properties are id, file, filename.
 
@@ -1344,11 +1344,16 @@ class Entity():
         else:
             user_where = 'AND pd.public = 1'
 
+        if only_meta:
+            file_select = 'NULL AS file'
+        else:
+            file_select = 'f.file'
+
         sql = """
             SELECT DISTINCT
                 f.id,
                 f.created,
-                f.file,
+                %(file_select)s,
                 f.filename,
                 f.is_link
             FROM
@@ -1360,7 +1365,7 @@ class Entity():
             AND f.id IN (%(file_id)s)
             %(user_where)s
             AND p.is_deleted = 0
-            """ % {'file_id': ','.join(map(str, file_id)), 'user_where': user_where}
+            """ % {'file_id': ','.join(map(str, file_id)), 'user_where': user_where, 'file_select': file_select}
         # logging.debug(sql)
 
         return self.db.query(sql)
