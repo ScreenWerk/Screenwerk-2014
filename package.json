@@ -20,7 +20,7 @@
     "toolbar": true,
     "frame": true,
     "show": true,
-    "position": "right",
+    "position": "center",
     "width": 900,
     "height": 500
   },

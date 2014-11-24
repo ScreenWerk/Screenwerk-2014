@@ -197,6 +197,9 @@ function registerMeta(err, metadata, callback) {
 			if (metadata.properties.mute.values === undefined) {
 				metadata.properties.mute.values = [{'db_value':1}]
 			}
+			if (metadata.properties.delay.values === undefined) {
+				metadata.properties.delay.values = [{'db_value':0}]
+			}
 		break
 		case 'media':
 			if (metadata.properties.type.values === undefined) {

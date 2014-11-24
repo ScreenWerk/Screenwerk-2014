@@ -57,6 +57,8 @@ function recurseHierarchy(structure, parent_name) {
 recurseHierarchy(__STRUCTURE)
 __DEFAULT_UPDATE_INTERVAL_MINUTES = 10
 __UPDATE_INTERVAL_SECONDS = __DEFAULT_UPDATE_INTERVAL_MINUTES * 60
+__DEFAULT_DURATION_MS = 5 * 1000
+__DEFAULT_DELAY_MS = 0
 
 __API_KEY = ''
 var uuid_path = __SCREEN_ID + '.uuid'
@@ -75,6 +77,7 @@ var EntuLib = new EntuLib(__SCREEN_ID, __API_KEY, __HOSTNAME)
 
 console.log ( 'launching in fullscreen mode')
 var player_window = gui.Window.get()
+player_window.moveTo(0,30)
 // player_window.isFullscreen = true
 
 
