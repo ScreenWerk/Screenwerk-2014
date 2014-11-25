@@ -57,7 +57,7 @@ function recurseHierarchy(structure, parent_name) {
 recurseHierarchy(__STRUCTURE)
 __DEFAULT_UPDATE_INTERVAL_MINUTES = 10
 __UPDATE_INTERVAL_SECONDS = __DEFAULT_UPDATE_INTERVAL_MINUTES * 60
-__DEFAULT_DURATION_MS = 5 * 1000
+// __DEFAULT_DURATION_MS = 5 * 1000
 __DEFAULT_DELAY_MS = 0
 
 __API_KEY = ''
@@ -75,10 +75,16 @@ if (fs.existsSync(uuid_path)) {
 console.log('initialize EntuLib with ' + __SCREEN_ID + '|' + __API_KEY + '|' + __HOSTNAME)
 var EntuLib = new EntuLib(__SCREEN_ID, __API_KEY, __HOSTNAME)
 
-console.log ( 'launching in fullscreen mode')
 var player_window = gui.Window.get()
-player_window.moveTo(0,30)
-// player_window.isFullscreen = true
+if (gui.App.argv.length > 1 && gui.App.argv[1] === 'debug') {
+	console.log ( 'launching in debug mode')
+	player_window.moveTo(0,30)
+	player_window.isFullscreen = false
+	player_window.showDevTools()
+} else {
+	console.log ( 'launching in fullscreen mode')
+	player_window.isFullscreen = true
+}
 
 
 // Make sure folders for metadata, media and logs are in place
@@ -162,7 +168,7 @@ EntuLib.getEntity(__SCREEN_ID, function(err, result) {
 	}
 	else if (result.error !== undefined) {
 		remote_published = false
-		console.log (result.error, definition + ': ' + 'Failed to load from Entu EID=' + eid + '.')
+		console.log (result.error, 'Failed to load screen from Entu.')
 		if (local_published) {
 			console.log('Trying to play with local content.')
 			loadMeta(null, null, __SCREEN_ID, __STRUCTURE, startDigester)
@@ -249,13 +255,13 @@ function startDigester(err, data) {
 		var stacksize = swElements.length
 		swElements.every(function(swElement, idx) {
 			if (swElement.definition.keyname !== 'sw-media' && swElement.childs.length === 0) {
-				console.log(swElement.id)
+				console.log('Unregister empty element ' + swElement.id)
 				unregisterMeta(null, idx, function(err, data) {
 					if (err) {
 						console.log('flushMeta err:', err, data)
 					}
+					flushMeta(null)
 				})
-				flushMeta(null)
 				return false
 			}
 			var meta_path = __META_DIR + swElement.id + ' ' + swElement.definition.keyname.split('sw-')[1] + '.json'

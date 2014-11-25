@@ -123,6 +123,7 @@ function unregisterMeta(err, eidx, callback) {
 	swElementsById[parent_eid].childs.splice(swElementsById[parent_eid].childs.indexOf(eid), 1)
 	swElements.splice(eidx, 1)
 	delete swElementsById[eid]
+	callback()
 	// if (swElementsById[parent_eid].childs.length === 0) {
 	// 	unregisterMeta(null, parent_eid, callback)
 	// }

@@ -22,7 +22,7 @@ function SwPlayer(err, dom_element, callback) {
 		callback('foo', dom_element)
 		return
 	}
-	var is_playing = this.is_playing = false
+	var is_playing = false
 	var element = dom_element.swElement
 	var properties = element.properties
 
@@ -42,7 +42,7 @@ function SwPlayer(err, dom_element, callback) {
 				console.log('SwPlayer.play err:', err, element.id)
 				return this
 			}
-			console.log('Attempting PLAY on ' + element.definition.keyname + ' ' + element.id)
+			// console.log('Attempting PLAY on ' + element.definition.keyname + ' ' + element.id)
 			if (properties['valid-from'] !== undefined) {
 				if (properties['valid-from'].values !== undefined) {
 					var vf_date = new Date(properties['valid-from'].values[0].db_value)
@@ -65,13 +65,13 @@ function SwPlayer(err, dom_element, callback) {
 			}
 			if (timeout && timeout > 0) {
 				var self = this
-				console.log('Postponing PLAY on ' + element.definition.keyname + ' ' + element.id + ' for ' + msToTime(timeout))
+				console.log(dom_element.id + ' Scheduling PLAY on ' + element.definition.keyname + ' ' + element.id + ' in ' + msToTime(timeout))
 				sw_timeouts.push(setTimeout(function() {
 									self.play(null, false, callback)
 								}, timeout))
 				return self
 			}
-			console.log('PLAY ' + element.id, is_playing ? 'Already playing' : 'Was stopped')
+			console.log(dom_element.id + ' PLAY ' + element.definition.keyname + ' ', is_playing ? '(Already playing)' : '(Was stopped)')
 			if (is_playing === true)
 				return this
 			is_playing = true
@@ -140,8 +140,10 @@ function SwPlayer(err, dom_element, callback) {
 				break
 				case 'sw-playlist-media':
 					if (dom_element.childNodes.length > 0) {
-						console.log('TODO: playlist-media has its expired media removed - why are we here?')
 						dom_element.childNodes[0].player.play(null, 0, function(){})
+					}
+					if (properties.duration.values !== undefined) {
+						this.stop(null, Number(properties.duration.values[0].db_value) * 1000, function(){})
 					}
 				break
 				case 'sw-media':
@@ -149,18 +151,15 @@ function SwPlayer(err, dom_element, callback) {
 					if (mediatype === 'Video') {
 						var media_dom_element = dom_element.childNodes[0]
 						media_dom_element.play()
-						media_dom_element.addEventListener('ended', function() {
-							dom_element.parentNode.player.stop(null, 0, function(){})
-						})
+						if (media_dom_element.has_event_listener === undefined) {
+							media_dom_element.has_event_listener = true
+							media_dom_element.addEventListener('ended', function() {
+								dom_element.parentNode.player.stop(null, 0, function(){})
+							})
+						}
 
 					} else if (mediatype === 'Image' || mediatype === 'URL') {
-						var duration_ms = __DEFAULT_DURATION_MS
-						if (properties.duration.values !== undefined)
-							duration_ms = Number(properties.duration.values[0].db_value) * 1000
-						dom_element.parentNode.player.stop(null, duration_ms, function(){})
-
 					} else {
-						dom_element.appendChild(document.createTextNode(mediatype + ' ' + entity.definition.keyname + ': ' + entity.id))
 					}
 
 				break
@@ -177,36 +176,31 @@ function SwPlayer(err, dom_element, callback) {
 			}
 			if (timeout && timeout > 0) {
 				var self = this
-				console.log('Postponing STOP on ' + element.definition.keyname + ' ' + element.id + ' for ' + msToTime(timeout))
+				console.log(dom_element.id + ' Scheduling STOP on ' + element.definition.keyname + ' ' + element.id + ' in ' + msToTime(timeout))
 				sw_timeouts.push(setTimeout(function() {
 									self.stop(null, false, callback)
 								}, timeout))
 				return self
 			}
-			console.log('STOP ' + element.id, is_playing ? 'Was playing' : 'Already in stopped state')
+			console.log(dom_element.id + ' STOP ' + element.definition.keyname, is_playing ? '(Was playing)' : '(Already stopped)')
 			if (is_playing === false)
 				return this
 			is_playing = false
 			dom_element.style.display = 'none'
-			if (element.next !== undefined ) {
-				var next_eid = element.next
-				var next_dom_id = dom_element.parentNode.id + '_' + next_eid
-				console.log(element.id, next_eid, next_dom_id)
-				var delay_ms = __DEFAULT_DELAY_MS
-				if (properties.delay.values !== undefined)
-					delay_ms = Number(properties.delay.values[0].db_value) * 1000
-				document.getElementById(next_dom_id).player.play(null, delay_ms, callback)
-			}
 			if (element.definition.keyname === 'sw-media') {
-				// var mediatype = properties.type.values === undefined ? '#NA' : properties.type.values[0].value
-				// if (mediatype === 'Video') {
-				// 	var media_dom_element = dom_element.childNodes[0]
-				// 	media_dom_element.stop()
-				// }
 				return this
 			}
 			for (var key=0; key<dom_element.childNodes.length; key++) {
 				dom_element.childNodes[key].player.stop()
+			}
+			if (element.next !== undefined ) {
+				var next_eid = element.next
+				var next_dom_id = dom_element.parentNode.id + '_' + next_eid
+				console.log(dom_element.id + ' STOPPED, coming up:', next_dom_id)
+				var delay_ms = __DEFAULT_DELAY_MS
+				if (properties.delay.values !== undefined)
+					delay_ms = Number(properties.delay.values[0].db_value) * 1000
+				document.getElementById(next_dom_id).player.play(null, delay_ms, callback)
 			}
 			return this
 		},
