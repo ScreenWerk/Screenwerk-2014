@@ -158,7 +158,12 @@ function SwPlayer(err, dom_element, callback) {
 					var mediatype = properties.type.values === undefined ? '#NA' : properties.type.values[0].value
 					if (mediatype === 'Video') {
 						var media_dom_element = dom_element.childNodes[0]
-						media_dom_element.play()
+						try {
+							media_dom_element.play()
+						} catch (e) {
+						    console.log('WARNING: Media DOM element has no play() function.', e)
+						    process.exit(99)
+						}
 						if (media_dom_element.has_event_listener === undefined) {
 							media_dom_element.has_event_listener = true
 							media_dom_element.addEventListener('ended', function() {

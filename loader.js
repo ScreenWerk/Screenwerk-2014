@@ -92,7 +92,7 @@ function loadMedia(err, entity_id, file_id, callback) {
 			try {
 				fs.rename(download_filename, filename)
 			} catch (e) {
-			    console.log('CRITICAL: Messed up with parallel downloading of ' + filename + '. Cleanup and relaunch, please. Closing down.', e);
+			    console.log('CRITICAL: Messed up with parallel downloading of ' + filename + '. Cleanup and relaunch, please. Closing down.', e)
 				process.exit(99)
 			}
 			decrementProcessCount()
@@ -280,7 +280,7 @@ function loadMeta(err, parent_eid, eid, struct_node, callback) {
 			try {
 				meta_json = JSON.parse(data)
 			} catch (e) {
-			    console.log('WARNING: Data got corrupted while reading from ' + meta_path + '. Retrying.', e);
+			    console.log('WARNING: Data got corrupted while reading from ' + meta_path + '. Retrying.', e)
 				loadMeta(null, parent_eid, eid, struct_node, callback)
 				decrementProcessCount()
 				return // form readFile -> loadMeta
