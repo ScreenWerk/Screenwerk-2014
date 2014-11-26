@@ -105,7 +105,6 @@ function loadMedia(err, entity_id, file_id, callback) {
 
 var swElements = []
 var swElementsById = {}
-// var element_register = []
 
 function unregisterMeta(err, eidx, callback) {
 	var eid = swElements[eidx].id
@@ -124,18 +123,11 @@ function unregisterMeta(err, eidx, callback) {
 	swElements.splice(eidx, 1)
 	delete swElementsById[eid]
 	callback()
-	// if (swElementsById[parent_eid].childs.length === 0) {
-	// 	unregisterMeta(null, parent_eid, callback)
-	// }
 }
 
 // Integrity check and element validation
 function registerMeta(err, metadata, callback) {
-	// if (element_register.indexOf(metadata.id) > -1)
-	// if (swElementsById[metadata.id] !== undefined)
-	// 	return true
 	incrementProcessCount()
-	// element_register.push(metadata.id)
 	if (err) {
 		console.log('registerMeta err', err)
 		callback(err, metadata) //
