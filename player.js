@@ -117,9 +117,9 @@ function SwPlayer(err, dom_element, callback) {
 							}
 							// console.log(util.inspect(schedule,{depth:6}))
 							var sibling_node_cleanup_layer = sibling_node.swElement.properties.ordinal.values[0].db_value
-							console.log('Schedule ' + util.inspect(element.id)
-								+ ' sibling_node_cleanup_layer LE cleanupLayer ' + sibling_node_cleanup_layer + ' LE ' + cleanupLayer
-								+ ' checking for cleanup of schedule ' + sibling_node.swElement.id)
+							// console.log('Schedule ' + util.inspect(element.id)
+							// 	+ ' sibling_node_cleanup_layer LE cleanupLayer ' + sibling_node_cleanup_layer + ' LE ' + cleanupLayer
+							// 	+ ' checking for cleanup of schedule ' + sibling_node.swElement.id)
 							if (sibling_node_cleanup_layer <= cleanupLayer) {
 								// console.log('|-- Schedule ' + element.id + ' cleaning up schedule ' + sibling_node.swElement.id)
 								sibling_node.player.stop()
@@ -131,7 +131,7 @@ function SwPlayer(err, dom_element, callback) {
 						var time_to_play = properties.duration.values[0].db_value * 1000 - time_from_start
 						if (time_to_play < 0)
 							time_to_play = 0
-						console.log(msToTime(time_from_start) + ' passed, ' + msToTime(time_to_play) + ' left.')
+						// console.log(msToTime(time_from_start) + ' passed, ' + msToTime(time_to_play) + ' left.')
 						this.stop(null, time_to_play, function(){})
 					}
 				break
