@@ -57,8 +57,8 @@ function recurseHierarchy(structure, parent_name) {
 recurseHierarchy(__STRUCTURE)
 __DEFAULT_UPDATE_INTERVAL_MINUTES = 10
 __UPDATE_INTERVAL_SECONDS = __DEFAULT_UPDATE_INTERVAL_MINUTES * 60
-// __DEFAULT_DURATION_MS = 5 * 1000
 __DEFAULT_DELAY_MS = 0
+__DEBUG_MODE = (gui.App.argv.length > 1 && gui.App.argv[1] === 'debug')
 
 __API_KEY = ''
 var uuid_path = __SCREEN_ID + '.uuid'
@@ -76,7 +76,7 @@ console.log('initialize EntuLib with ' + __SCREEN_ID + '|' + __API_KEY + '|' + _
 var EntuLib = new EntuLib(__SCREEN_ID, __API_KEY, __HOSTNAME)
 
 var player_window = gui.Window.get()
-if (gui.App.argv.length > 1 && gui.App.argv[1] === 'debug') {
+if (__DEBUG_MODE) {
 	console.log ( 'launching in debug mode')
 	player_window.moveTo(0,30)
 	player_window.isFullscreen = false

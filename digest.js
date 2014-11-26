@@ -169,7 +169,7 @@ function buildDom(err, callback) {
 			media_dom_element.overflow = 'hidden'
 			dom_element.appendChild(media_dom_element)
 			media_dom_element.autoplay = false
-			media_dom_element.controls = false
+			media_dom_element.controls = __DEBUG_MODE
 			media_dom_element.muted = parentSwElement.properties.mute.values[0].db_value === 1
 
 		} else if (mediatype === 'Image') {

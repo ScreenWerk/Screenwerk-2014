@@ -126,6 +126,14 @@ function SwPlayer(err, dom_element, callback) {
 							}
 						}
 					}
+					if (properties.duration.values !== undefined) {
+						var time_from_start = Date.now() - element.laterSchedule.prev().getTime()
+						var time_to_play = properties.duration.values[0].db_value * 1000 - time_from_start
+						if (time_to_play < 0)
+							time_to_play = 0
+						console.log(msToTime(time_from_start) + ' passed, ' + msToTime(time_to_play) + ' left.')
+						this.stop(null, time_to_play, function(){})
+					}
 				break
 				case 'sw-layout':
 					for (var key=0; key<dom_element.childNodes.length; key++) {
@@ -187,11 +195,45 @@ function SwPlayer(err, dom_element, callback) {
 				return this
 			is_playing = false
 			dom_element.style.display = 'none'
-			if (element.definition.keyname === 'sw-media') {
-				return this
-			}
-			for (var key=0; key<dom_element.childNodes.length; key++) {
-				dom_element.childNodes[key].player.stop()
+
+			switch (element.definition.keyname) {
+				case 'sw-screen':
+					dom_element.childNodes[0].player.stop()
+				break
+				case 'sw-screen-group':
+					dom_element.childNodes[0].player.stop()
+				break
+				case 'sw-configuration':
+					for (var key=0; key<dom_element.childNodes.length; key++) {
+						dom_element.childNodes[key].player.stop()
+					}
+				break
+				case 'sw-schedule':
+					dom_element.childNodes[0].player.stop()
+					this.play(null, element.laterSchedule.next().getTime() - Date.now(), function(){})
+				break
+				case 'sw-layout':
+					for (var key=0; key<dom_element.childNodes.length; key++) {
+						dom_element.childNodes[key].player.stop()
+					}
+				break
+				case 'sw-layout-playlist':
+					dom_element.childNodes[0].player.stop()
+				break
+				case 'sw-playlist':
+					for (var key=0; key<dom_element.childNodes.length; key++) {
+						dom_element.childNodes[key].player.stop()
+					}
+				break
+				case 'sw-playlist-media':
+					dom_element.childNodes[0].player.stop()
+				break
+				case 'sw-media':
+					return this
+				break
+				default:
+					callback('Unrecognised definition: ' + element.definition.keyname, swElement)
+					return this
 			}
 			if (element.next !== undefined ) {
 				var next_eid = element.next
