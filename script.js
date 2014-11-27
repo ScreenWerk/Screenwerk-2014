@@ -21,7 +21,7 @@ var os      = require('os-utils')
 
 
 // 3. Own modules
-var EntuLib     = require('./entulib/entulib.js')
+var EntuLib     = require('./entulib.js')
 var stringifier = require('./stringifier.js')
 
 
@@ -88,7 +88,7 @@ if (__DEBUG_MODE) {
 
 
 // Make sure folders for metadata, media and logs are in place
-var a = [__META_DIR, __MEDIA_DIR, __LOG_DIR]
+var a = [__META_DIR, __MEDIA_DIR]
 a.forEach(function(foldername) {
 	fs.lstat(foldername, function(err, stats) {
 		if (err) {

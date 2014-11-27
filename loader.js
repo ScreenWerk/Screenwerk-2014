@@ -21,7 +21,7 @@ var os      = require('os-utils')
 
 
 // 3. Own modules
-var EntuLib     = require('./entulib/entulib.js')
+var EntuLib     = require('./entulib.js')
 var stringifier = require('./stringifier.js')
 
 
@@ -302,6 +302,7 @@ function loadMeta(err, parent_eid, eid, struct_node, callback) {
 						callback(new Error(struct_node.name + ' ' + eid + ' has no ' + ref_entity_name + "'s."))
 						decrementProcessCount()
 					}
+					// console.log(ref_entity_name, meta_json)
 					ref_entity_id = meta_json.properties[ref_entity_name].values[0].db_value
 					registerChild(null, parent_eid, meta_json, ref_entity_id, function(err) {
 						// console.log(ref_entity_id)

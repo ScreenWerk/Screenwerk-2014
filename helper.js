@@ -3,6 +3,24 @@ var stringifier = require('./stringifier.js')
 
 __LOG_DIR = 'sw-log/'
 
+// Make sure folders for metadata, media and logs are in place
+var a = [__LOG_DIR]
+a.forEach(function(foldername) {
+    fs.lstat(foldername, function(err, stats) {
+        if (err) {
+            console.log ('Creating folder for ' + foldername)
+            fs.mkdir(foldername)
+        }
+        else if (!stats.isDirectory()) {
+            console.log ('Renaming existing file "' + foldername + '" to "' + foldername + '.bak')
+            fs.renameSync(foldername, foldername + '.bak')
+            console.log ('Creating folder for ' + foldername)
+            fs.mkdir(foldername)
+        }
+    })
+})
+
+
 var datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '')
 var c_stream_path = __LOG_DIR + './Console ' + datestring + '.log'
 var s_stream_path = __LOG_DIR + './System ' + datestring + '.log'
