@@ -21,7 +21,7 @@ var os      = require('os-utils')
 
 
 // 3. Own modules
-var EntuLib     = require('./entulib/entulib.js')
+var EntuLib     = require('./entulib.js')
 var stringifier = require('./stringifier.js')
 
 
@@ -92,7 +92,7 @@ function loadMedia(err, entity_id, file_id, callback) {
 			try {
 				fs.rename(download_filename, filename)
 			} catch (e) {
-			    console.log('CRITICAL: Messed up with parallel downloading of ' + filename + '. Cleanup and relaunch, please. Closing down.', e);
+			    console.log('CRITICAL: Messed up with parallel downloading of ' + filename + '. Cleanup and relaunch, please. Closing down.', e)
 				process.exit(99)
 			}
 			decrementProcessCount()
@@ -105,7 +105,6 @@ function loadMedia(err, entity_id, file_id, callback) {
 
 var swElements = []
 var swElementsById = {}
-// var element_register = []
 
 function unregisterMeta(err, eidx, callback) {
 	var eid = swElements[eidx].id
@@ -123,18 +122,12 @@ function unregisterMeta(err, eidx, callback) {
 	swElementsById[parent_eid].childs.splice(swElementsById[parent_eid].childs.indexOf(eid), 1)
 	swElements.splice(eidx, 1)
 	delete swElementsById[eid]
-	// if (swElementsById[parent_eid].childs.length === 0) {
-	// 	unregisterMeta(null, parent_eid, callback)
-	// }
+	callback()
 }
 
 // Integrity check and element validation
 function registerMeta(err, metadata, callback) {
-	// if (element_register.indexOf(metadata.id) > -1)
-	// if (swElementsById[metadata.id] !== undefined)
-	// 	return true
 	incrementProcessCount()
-	// element_register.push(metadata.id)
 	if (err) {
 		console.log('registerMeta err', err)
 		callback(err, metadata) //
@@ -287,7 +280,7 @@ function loadMeta(err, parent_eid, eid, struct_node, callback) {
 			try {
 				meta_json = JSON.parse(data)
 			} catch (e) {
-			    console.log('WARNING: Data got corrupted while reading from ' + meta_path + '. Retrying.', e);
+			    console.log('WARNING: Data got corrupted while reading from ' + meta_path + '. Retrying.', e)
 				loadMeta(null, parent_eid, eid, struct_node, callback)
 				decrementProcessCount()
 				return // form readFile -> loadMeta
@@ -309,6 +302,7 @@ function loadMeta(err, parent_eid, eid, struct_node, callback) {
 						callback(new Error(struct_node.name + ' ' + eid + ' has no ' + ref_entity_name + "'s."))
 						decrementProcessCount()
 					}
+					// console.log(ref_entity_name, meta_json)
 					ref_entity_id = meta_json.properties[ref_entity_name].values[0].db_value
 					registerChild(null, parent_eid, meta_json, ref_entity_id, function(err) {
 						// console.log(ref_entity_id)
