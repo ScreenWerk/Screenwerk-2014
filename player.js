@@ -77,6 +77,15 @@ function SwPlayer(err, dom_element, callback) {
 			is_playing = true
 			dom_element.style.display = 'block'
 
+			if (element.begin_animation === undefined) {
+			} else {
+				var current_class = dom_element.className
+				dom_element.className = current_class + element.begin_animation
+				setTimeout(function() {
+					dom_element.className = current_class
+				}, 1000)
+			}
+
 			switch (element.definition.keyname) {
 				case 'sw-screen':
 					dom_element.childNodes[0].player.play(null, 0, function(){})
@@ -147,11 +156,6 @@ function SwPlayer(err, dom_element, callback) {
 					dom_element.childNodes[0].player.play(null, 0, function(){})
 				break
 				case 'sw-playlist-media':
-					var current_class = dom_element.className
-					dom_element.className = current_class + " zoomInRight animated"
-					setTimeout(function() {
-						dom_element.className = current_class
-					}, 1000)
 					if (dom_element.childNodes.length > 0) {
 						dom_element.childNodes[0].player.play(null, 0, function(){})
 					}
@@ -205,55 +209,50 @@ function SwPlayer(err, dom_element, callback) {
 				return this
 			is_playing = false
 
+			if (element.end_animation === undefined) {
+				dom_element.style.display = 'none'
+			} else {
+				var current_class = dom_element.className
+				dom_element.className = current_class + ' ' + element.end_animation
+				setTimeout(function() {
+					dom_element.style.display = 'none'
+					dom_element.className = current_class
+				}, 1000)
+			}
+
 			switch (element.definition.keyname) {
 				case 'sw-screen':
-					dom_element.style.display = 'none'
 					dom_element.childNodes[0].player.stop()
 				break
 				case 'sw-screen-group':
-					dom_element.style.display = 'none'
 					dom_element.childNodes[0].player.stop()
 				break
 				case 'sw-configuration':
-					dom_element.style.display = 'none'
 					for (var key=0; key<dom_element.childNodes.length; key++) {
 						dom_element.childNodes[key].player.stop()
 					}
 				break
 				case 'sw-schedule':
-					dom_element.style.display = 'none'
 					dom_element.childNodes[0].player.stop()
 					this.play(null, element.laterSchedule.next().getTime() - Date.now(), function(){})
 				break
 				case 'sw-layout':
-					dom_element.style.display = 'none'
 					for (var key=0; key<dom_element.childNodes.length; key++) {
 						dom_element.childNodes[key].player.stop()
 					}
 				break
 				case 'sw-layout-playlist':
-					dom_element.style.display = 'none'
 					dom_element.childNodes[0].player.stop()
 				break
 				case 'sw-playlist':
-					dom_element.style.display = 'none'
 					for (var key=0; key<dom_element.childNodes.length; key++) {
 						dom_element.childNodes[key].player.stop()
 					}
 				break
 				case 'sw-playlist-media':
-					var current_class = dom_element.className
-					dom_element.className = current_class + " zoomOutLeft animated"
-					setTimeout(function() {
-						dom_element.style.display = 'none'
-						dom_element.className = current_class
-					}, 1000)
 					dom_element.childNodes[0].player.stop()
 				break
 				case 'sw-media':
-					setTimeout(function() {
-						dom_element.style.display = 'none'
-					}, 1000)
 					return this
 				break
 				default:

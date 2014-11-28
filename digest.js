@@ -112,6 +112,10 @@ function buildDom(err, callback) {
 		var unit = '%'
 		dom_element.style.width = '100%'
 		dom_element.style.height = '100%'
+		dom_element.style['z-index'] = '1'
+		if (swElement.properties['zindex'] !== undefined)
+			if (swElement.properties['zindex'].values !== undefined)
+				dom_element.style['z-index'] = swElement.properties['zindex'].values[0].db_value
 		if (swElement.properties['in-pixels'] !== undefined)
 			if (swElement.properties['in-pixels'].values !== undefined)
 				if (swElement.properties['in-pixels'].values[0].db_value === 1)
@@ -171,6 +175,14 @@ function buildDom(err, callback) {
 			media_dom_element.autoplay = false
 			media_dom_element.controls = __DEBUG_MODE
 			media_dom_element.muted = parentSwElement.properties.mute.values[0].db_value === 1
+
+		} else if (mediatype === 'Flash') {
+			media_dom_element = document.createElement('EMBED')
+			// console.log(util.inspect(swElement.properties.filepath.values[0]))
+			media_dom_element.src = swElement.properties.filepath.values[0].db_value
+			media_dom_element.type = 'application/x-shockwave-flash'
+			// media_dom_element.type = 'application/vnd.adobe.flash-movie'
+			dom_element.appendChild(media_dom_element)
 
 		} else if (mediatype === 'Image') {
 			media_dom_element = document.createElement('IMG')
