@@ -262,18 +262,53 @@ function loadMeta(err, parent_eid, eid, struct_node, callback) {
 					decrementProcessCount()
 					return
 				} else {
-					fs.writeFile(meta_path, stringifier(result.result), function(err) {
-						if (err) {
-							console.log(definition + ': ' + util.inspect(result))
-							callback(err)
-							decrementProcessCount()
-							return // form writeFile -> getEntity -> readFile -> loadMeta
-						} else {
-							loadMeta(null, parent_eid, eid, struct_node, callback)
-							decrementProcessCount()
-							return // form writeFile -> getEntity -> readFile -> loadMeta
-						}
-					})
+					var properties = result.result.properties
+					if (properties.animate !== undefined && properties.animate.values !== undefined) {
+						var animation_eid = properties.animate.values[0].db_value
+						EntuLib.getEntity(animation_eid, function(err, animate_result) {
+							if (err) {
+								console.log(definition + ': ' + util.inspect(animate_result), err, animate_result)
+								callback(err)
+								decrementProcessCount()
+								return
+							} else if (animate_result.error !== undefined) {
+								console.log (animate_result.error, definition + ': ' + 'Failed to load from Entu EID=' + eid + '.')
+								callback(animate_result.error, animate_result)
+								decrementProcessCount()
+								return
+							} else {
+								var animate_properties = animate_result.result.properties
+								properties.animate.values[0].begin = animate_properties.begin.values[0].db_value
+								properties.animate.values[0].end = animate_properties.end.values[0].db_value
+								fs.writeFile(meta_path, stringifier(result.result), function(err) {
+									if (err) {
+										console.log(definition + ': ' + util.inspect(result))
+										callback(err)
+										decrementProcessCount()
+										return // form writeFile -> getEntity -> getEntity -> readFile -> loadMeta
+									} else {
+										console.log('calling back', parent_eid, eid, struct_node, callback)
+										loadMeta(null, parent_eid, eid, struct_node, callback)
+										decrementProcessCount()
+										return // form writeFile -> getEntity -> getEntity -> readFile -> loadMeta
+									}
+								})
+							}
+						})
+					} else {
+						fs.writeFile(meta_path, stringifier(result.result), function(err) {
+							if (err) {
+								console.log(definition + ': ' + util.inspect(result))
+								callback(err)
+								decrementProcessCount()
+								return // form writeFile -> getEntity -> readFile -> loadMeta
+							} else {
+								loadMeta(null, parent_eid, eid, struct_node, callback)
+								decrementProcessCount()
+								return // form writeFile -> getEntity -> readFile -> loadMeta
+							}
+						})
+					}
 				}
 			})
 		} else { // read from file succeeded

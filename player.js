@@ -77,10 +77,10 @@ function SwPlayer(err, dom_element, callback) {
 			is_playing = true
 			dom_element.style.display = 'block'
 
-			if (element.begin_animation === undefined) {
+			if (element.animate === undefined || element.animate.begin === undefined) {
 			} else {
 				var current_class = dom_element.className
-				dom_element.className = current_class + element.begin_animation
+				dom_element.className = current_class + ' ' + element.animate.begin
 				setTimeout(function() {
 					dom_element.className = current_class
 				}, 1000)
@@ -209,11 +209,11 @@ function SwPlayer(err, dom_element, callback) {
 				return this
 			is_playing = false
 
-			if (element.end_animation === undefined) {
+			if (element.animate === undefined || element.animate.end === undefined) {
 				dom_element.style.display = 'none'
 			} else {
 				var current_class = dom_element.className
-				dom_element.className = current_class + ' ' + element.end_animation
+				dom_element.className = current_class + ' ' + element.animate.end
 				setTimeout(function() {
 					dom_element.style.display = 'none'
 					dom_element.className = current_class

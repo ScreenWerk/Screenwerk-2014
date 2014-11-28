@@ -51,6 +51,15 @@ function processElements(err, callback) {
 				swElement.childs.sort(function compare(a,b) {
 					return swElementsById[a].properties.ordinal.values[0].db_value - swElementsById[b].properties.ordinal.values[0].db_value
 				})
+				if (swElement.properties.animate !== undefined && swElement.properties.animate.values !== undefined) {
+					for (var i = 0; i < swElement.childs.length; i++) {
+						swElementsById[swElement.childs[i]].animate = {
+							"begin": swElement.properties.animate.values[0].begin,
+							"end": swElement.properties.animate.values[0].end
+						}
+					}
+
+				}
 				for (var i = 0; i < swElement.childs.length; i++) {
 					if (i === 0) {
 						if (loop) {
