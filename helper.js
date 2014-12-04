@@ -122,15 +122,37 @@ var bytesToSize = function bytesToSize(bytes) {
     var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB']
     if (bytes == 0) return '0'
     var i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)))
-    return Math.round(bytes / Math.pow(1024, i) * 1, 2)/1 + ' ' + sizes[i]
+    var decimals = Math.max(0, i-1)
+    return (bytes / Math.pow(1024, i)).toFixed(decimals) + ' ' + sizes[i]
 }
 
 var msToTime = function msToTime(ms) {
-    var sizes = ['sec', 'min', 'h', 'd', 'w']
-    if (ms === 0) return '0'
-    if (ms < 1000 * 60) return Math.round(ms / 1000 * 10)/10 + ' ' + sizes[0]
-    if (ms < 1000 * 60 * 60) return Math.round(ms / 1000 / 60 * 10)/10 + ' ' + sizes[1]
-    if (ms < 1000 * 60 * 60 * 24) return Math.round(ms / 1000 / 60 / 60 * 10)/10 + ' ' + sizes[2]
-    if (ms < 1000 * 60 * 60 * 24 * 7) return Math.round(ms / 1000 / 60 / 60 / 24 * 10)/10 + ' ' + sizes[3]
-    return Math.round(ms / 1000 / 60 / 60 / 24 / 7 * 10)/10 + ' ' + sizes[4]
+    if (ms === 0) {
+        return '0'
+    }
+    var decimals = 0
+    var unit = ''
+    var amount = 0
+    if (ms < 1000 * 60) {
+        decimals = 1
+        unit = 'sec'
+        amount = ms / 1000
+    } else if (ms < 1000 * 60 * 60) {
+        decimals = 1
+        unit = 'min'
+        amount = ms / 1000
+    } else if (ms < 1000 * 60 * 60 * 24) {
+        decimals = 1
+        unit = 'h'
+        amount = ms / 1000
+    } else if (ms < 1000 * 60 * 60 * 24 * 7) {
+        decimals = 2
+        unit = 'd'
+        amount = ms / 1000
+    } else {
+        decimals = 2
+        unit = 'w'
+        amount = ms / 1000 / 60 / 60 / 24 / 7
+    }
+    return amount.toFixed(decimals) + ' ' + unit
 }

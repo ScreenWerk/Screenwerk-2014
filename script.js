@@ -217,7 +217,7 @@ function startDigester(err, data) {
 
 	var doTimeout = function() {
 		setTimeout(function() {
-			console.log('RRRRRRRRRRR: Pinging Entu for news.')
+			// console.log('RRRRRRRRRRR: Pinging Entu for news.')
 			EntuLib.getEntity(__SCREEN_ID, function(err, result) {
 				if (err) {
 					console.log('Can\'t reach Entu', err, result)
@@ -226,7 +226,7 @@ function startDigester(err, data) {
 					console.log ('Failed to load from Entu.', result)
 				} else {
 					remote_published = new Date(Date.parse(result.result.properties.published.values[0].value))
-					console.log('Remote published: ', remote_published.toJSON())
+					// console.log('Remote published: ', remote_published.toJSON())
 				}
 
 				if (remote_published
@@ -243,7 +243,7 @@ function startDigester(err, data) {
 				}
 			})
 		}, 1000 * __UPDATE_INTERVAL_SECONDS)
-		console.log('RRRRRRRRRRR: Check for news scheduled in ' + __UPDATE_INTERVAL_SECONDS + ' seconds.')
+		// console.log('RRRRRRRRRRR: Check for news scheduled in ' + __UPDATE_INTERVAL_SECONDS + ' seconds.')
 	}
 	doTimeout()
 
