@@ -13,6 +13,7 @@ var fs      = require('fs')
 var https   = require('https')
 var events  = require('events')
 var uuid    = require('node-uuid')
+var my_crypto  = require('crypto')
 var domain  = require('domain').create()
 
 
@@ -30,7 +31,10 @@ var loading_process_count = 0
 var total_download_size = 0
 var bytes_downloaded = 0
 
-function loadMedia(err, entity_id, file_id, callback) {
+function loadMedia(err, entity_id, file_value, callback) {
+	var file_id = file_value.db_value
+	var file_md5 = file_value.md5
+	console.log('loadMedia ',file_value)
 	incrementProcessCount()
 	if (err) {
 		console.log('loadMedia err', err)
@@ -76,27 +80,38 @@ function loadMedia(err, entity_id, file_id, callback) {
 	})
 	request.on('response', function response_handler( response ) {
 		var filesize = response.headers['content-length']
+		var md5sum = my_crypto.createHash('md5')
 
 		total_download_size += Number(filesize)
 		console.log('Downloading:' + bytesToSize(bytes_downloaded) + ' of ' + bytesToSize(total_download_size))
 		progress(loading_process_count + '| ' + bytesToSize(total_download_size) + ' - ' + bytesToSize(bytes_downloaded) + ' = ' + bytesToSize(total_download_size - bytes_downloaded) )
 		response.on('data', function(chunk){
+			md5sum.update(chunk)
 			bytes_downloaded += chunk.length
 			progress(loading_process_count + '| ' + bytesToSize(total_download_size) + ' - ' + bytesToSize(bytes_downloaded) + ' = ' + bytesToSize(total_download_size - bytes_downloaded) )
 			writable.write(chunk)
 		})
 		response.on('end', function() {
-			console.log('Downloading:' + bytesToSize(bytes_downloaded) + ' of ' + bytesToSize(total_download_size))
 			progress(loading_process_count + '| ' + bytesToSize(total_download_size) + ' - ' + bytesToSize(bytes_downloaded) + ' = ' + bytesToSize(total_download_size - bytes_downloaded) )
 			writable.end()
-			try {
-				fs.rename(download_filename, filename)
-			} catch (e) {
-			    console.log('CRITICAL: Messed up with parallel downloading of ' + filename + '. Cleanup and relaunch, please. Closing down.', e)
-				process.exit(99)
+			// MD5 check
+			var my_md5 = md5sum.digest('hex')
+			if (file_md5 === my_md5) {
+				console.log('Downloaded media to ' + filename + ' MD5: ' + my_md5)
+				try {
+					fs.rename(download_filename, filename)
+				} catch (e) {
+				    console.log('CRITICAL: Messed up with parallel downloading of ' + filename + '. Cleanup and relaunch, please. Closing down.', e)
+					process.exit(99)
+				}
+				decrementProcessCount()
+				callback(null)
+			} else {
+				fs.unlinkSync(download_filename)
+				decrementProcessCount()
+				console.log('Downloaded media ' + filename + ' checksum fail. Got ' + my_md5 + ', expected ' + file_md5 + '. Trying again...')
+				loadMedia(null, entity_id, file_value, callback)
 			}
-			decrementProcessCount()
-			callback(null)
 		})
 	})
 	request.end()
@@ -203,7 +218,7 @@ function registerMeta(err, metadata, callback) {
 				throw ('"URL" or "file" property must be set for ' + metadata.id)
 			if (metadata.properties.file.values !== undefined) {
 				metadata.properties.filepath = {'values': [{'db_value':__MEDIA_DIR + metadata.id + '_' + metadata.properties.file.values[0].db_value}]}
-				loadMedia(null, metadata.id, metadata.properties.file.values[0].db_value, callback)
+				loadMedia(null, metadata.id, metadata.properties.file.values[0], callback)
 			}
 		break
 		default:
@@ -262,18 +277,53 @@ function loadMeta(err, parent_eid, eid, struct_node, callback) {
 					decrementProcessCount()
 					return
 				} else {
-					fs.writeFile(meta_path, stringifier(result.result), function(err) {
-						if (err) {
-							console.log(definition + ': ' + util.inspect(result))
-							callback(err)
-							decrementProcessCount()
-							return // form writeFile -> getEntity -> readFile -> loadMeta
-						} else {
-							loadMeta(null, parent_eid, eid, struct_node, callback)
-							decrementProcessCount()
-							return // form writeFile -> getEntity -> readFile -> loadMeta
-						}
-					})
+					var properties = result.result.properties
+					if (properties.animate !== undefined && properties.animate.values !== undefined) {
+						var animation_eid = properties.animate.values[0].db_value
+						EntuLib.getEntity(animation_eid, function(err, animate_result) {
+							if (err) {
+								console.log(definition + ': ' + util.inspect(animate_result), err, animate_result)
+								callback(err)
+								decrementProcessCount()
+								return
+							} else if (animate_result.error !== undefined) {
+								console.log (animate_result.error, definition + ': ' + 'Failed to load from Entu EID=' + eid + '.')
+								callback(animate_result.error, animate_result)
+								decrementProcessCount()
+								return
+							} else {
+								var animate_properties = animate_result.result.properties
+								properties.animate.values[0].begin = animate_properties.begin.values[0].db_value
+								properties.animate.values[0].end = animate_properties.end.values[0].db_value
+								fs.writeFile(meta_path, stringifier(result.result), function(err) {
+									if (err) {
+										console.log(definition + ': ' + util.inspect(result))
+										callback(err)
+										decrementProcessCount()
+										return // form writeFile -> getEntity -> getEntity -> readFile -> loadMeta
+									} else {
+										console.log('calling back', parent_eid, eid, struct_node, callback)
+										loadMeta(null, parent_eid, eid, struct_node, callback)
+										decrementProcessCount()
+										return // form writeFile -> getEntity -> getEntity -> readFile -> loadMeta
+									}
+								})
+							}
+						})
+					} else {
+						fs.writeFile(meta_path, stringifier(result.result), function(err) {
+							if (err) {
+								console.log(definition + ': ' + util.inspect(result))
+								callback(err)
+								decrementProcessCount()
+								return // form writeFile -> getEntity -> readFile -> loadMeta
+							} else {
+								loadMeta(null, parent_eid, eid, struct_node, callback)
+								decrementProcessCount()
+								return // form writeFile -> getEntity -> readFile -> loadMeta
+							}
+						})
+					}
 				}
 			})
 		} else { // read from file succeeded

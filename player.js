@@ -25,6 +25,7 @@ function SwPlayer(err, dom_element, callback) {
 	var is_playing = false
 	var element = dom_element.swElement
 	var properties = element.properties
+	var my_timeouts = []
 
 	// TODO: Consider forEach
 	if (element.definition.keyname !== 'sw-media') {
@@ -66,9 +67,11 @@ function SwPlayer(err, dom_element, callback) {
 			if (timeout && timeout > 0) {
 				var self = this
 				console.log(dom_element.id + ' Scheduling PLAY on ' + element.definition.keyname + ' ' + element.id + ' in ' + msToTime(timeout))
-				sw_timeouts.push(setTimeout(function() {
+				var play_timeout = setTimeout(function() {
 									self.play(null, false, callback)
-								}, timeout))
+								}, timeout)
+				my_timeouts.push(play_timeout)
+				sw_timeouts.push(play_timeout)
 				return self
 			}
 			console.log(dom_element.id + ' PLAY ' + element.definition.keyname + ' ', is_playing ? '(Already playing)' : '(Was stopped)')
@@ -76,6 +79,15 @@ function SwPlayer(err, dom_element, callback) {
 				return this
 			is_playing = true
 			dom_element.style.display = 'block'
+
+			if (element.animate === undefined || element.animate.begin === undefined) {
+			} else {
+				var current_class = dom_element.className
+				dom_element.className = current_class + ' ' + element.animate.begin
+				setTimeout(function() {
+					dom_element.className = current_class
+				}, 1000)
+			}
 
 			switch (element.definition.keyname) {
 				case 'sw-screen':
@@ -104,6 +116,9 @@ function SwPlayer(err, dom_element, callback) {
 				break
 				case 'sw-schedule':
 					dom_element.childNodes[0].player.play(null, 0, function(){})
+
+					// console.log('clearSwTimeouts()', sw_timeouts.length)
+					// clearSwTimeouts()
 
 					if (properties['cleanup'].values[0].db_value === 1) {
 						var cleanupLayer = properties['ordinal'].values[0].db_value
@@ -147,11 +162,6 @@ function SwPlayer(err, dom_element, callback) {
 					dom_element.childNodes[0].player.play(null, 0, function(){})
 				break
 				case 'sw-playlist-media':
-					var current_class = dom_element.className
-					dom_element.className = current_class + " zoomInRight animated"
-					setTimeout(function() {
-						dom_element.className = current_class
-					}, 1000)
 					if (dom_element.childNodes.length > 0) {
 						dom_element.childNodes[0].player.play(null, 0, function(){})
 					}
@@ -195,9 +205,11 @@ function SwPlayer(err, dom_element, callback) {
 			if (timeout && timeout > 0) {
 				var self = this
 				console.log(dom_element.id + ' Scheduling STOP on ' + element.definition.keyname + ' ' + element.id + ' in ' + msToTime(timeout))
-				sw_timeouts.push(setTimeout(function() {
+				var stop_timeout = setTimeout(function() {
 									self.stop(null, false, callback)
-								}, timeout))
+								}, timeout)
+				my_timeouts.push(stop_timeout)
+				sw_timeouts.push(stop_timeout)
 				return self
 			}
 			console.log(dom_element.id + ' STOP ' + element.definition.keyname, is_playing ? '(Was playing)' : '(Already stopped)')
@@ -205,55 +217,69 @@ function SwPlayer(err, dom_element, callback) {
 				return this
 			is_playing = false
 
+			if (element.animate === undefined || element.animate.end === undefined) {
+				dom_element.style.display = 'none'
+			} else {
+				var current_class = dom_element.className
+				dom_element.className = current_class + ' ' + element.animate.end
+				setTimeout(function() {
+					dom_element.style.display = 'none'
+					dom_element.className = current_class
+				}, 1000)
+			}
+
 			switch (element.definition.keyname) {
 				case 'sw-screen':
-					dom_element.style.display = 'none'
 					dom_element.childNodes[0].player.stop()
+					dom_element.childNodes[0].player.clearMyTimeouts()
 				break
 				case 'sw-screen-group':
-					dom_element.style.display = 'none'
 					dom_element.childNodes[0].player.stop()
+					dom_element.childNodes[0].player.clearMyTimeouts()
 				break
 				case 'sw-configuration':
-					dom_element.style.display = 'none'
 					for (var key=0; key<dom_element.childNodes.length; key++) {
 						dom_element.childNodes[key].player.stop()
+						dom_element.childNodes[key].player.clearMyTimeouts()
 					}
 				break
 				case 'sw-schedule':
-					dom_element.style.display = 'none'
 					dom_element.childNodes[0].player.stop()
+					dom_element.childNodes[0].player.clearMyTimeouts()
 					this.play(null, element.laterSchedule.next().getTime() - Date.now(), function(){})
 				break
 				case 'sw-layout':
-					dom_element.style.display = 'none'
 					for (var key=0; key<dom_element.childNodes.length; key++) {
 						dom_element.childNodes[key].player.stop()
+						dom_element.childNodes[key].player.clearMyTimeouts()
 					}
 				break
 				case 'sw-layout-playlist':
-					dom_element.style.display = 'none'
 					dom_element.childNodes[0].player.stop()
+					dom_element.childNodes[0].player.clearMyTimeouts()
 				break
 				case 'sw-playlist':
-					dom_element.style.display = 'none'
 					for (var key=0; key<dom_element.childNodes.length; key++) {
 						dom_element.childNodes[key].player.stop()
+						dom_element.childNodes[key].player.clearMyTimeouts()
 					}
 				break
 				case 'sw-playlist-media':
-					var current_class = dom_element.className
-					dom_element.className = current_class + " zoomOutLeft animated"
-					setTimeout(function() {
-						dom_element.style.display = 'none'
-						dom_element.className = current_class
-					}, 1000)
 					dom_element.childNodes[0].player.stop()
+					dom_element.childNodes[0].player.clearMyTimeouts()
 				break
 				case 'sw-media':
-					setTimeout(function() {
-						dom_element.style.display = 'none'
-					}, 1000)
+					var mediatype = properties.type.values === undefined ? '#NA' : properties.type.values[0].value
+					if (mediatype === 'Video') {
+						var media_dom_element = dom_element.childNodes[0]
+						try {
+							media_dom_element.pause()
+							media_dom_element.currentTime = 0
+						} catch (e) {
+						    console.log('WARNING: Media DOM element has no pause() function.', e)
+						    process.exit(99)
+						}
+					}
 					return this
 				break
 				default:
@@ -270,6 +296,11 @@ function SwPlayer(err, dom_element, callback) {
 				document.getElementById(next_dom_id).player.play(null, delay_ms, callback)
 			}
 			return this
+		},
+		clearMyTimeouts: function(err, callback) {
+			while (my_timeouts.length > 0) {
+				clearTimeout(my_timeouts.pop())
+			}
 		},
 		restart: function(err, callback) {
 			console.log('RESTART ' + element.id, 'Current state: ' + (is_playing ? 'playing' : 'stopped'))

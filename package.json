@@ -24,5 +24,8 @@
     "width": 900,
     "height": 500
   },
+  "webkit": {
+    "plugin": true
+  },
   "chromium-args": "--ignore-gpu-blacklist"
 }
