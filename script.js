@@ -35,10 +35,11 @@ assert.equal(typeof(gui.App.argv[0]), 'string'
 assert.ok(Number(gui.App.argv[0]) > 0
 			, "Screen ID must be number greater than zero.")
 
+__VERSION = '0.2-alpha.10'
+
 console.log ( "= ScreenWerk v." + __VERSION + " ==================================")
 console.log ( os.platform(), 'SYSTEM')
 
-__VERSION = '0.2-alpha.9'
 __HOSTNAME = 'piletilevi.entu.ee'
 __SCREEN_ID = Number(gui.App.argv[0])
 __META_DIR = 'sw-meta/'
