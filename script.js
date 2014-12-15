@@ -146,8 +146,11 @@ try {
 }
 
 // Register timeouts that need to be cleared on player restart
+var timeout_counter = 0
 var sw_timeouts = []
 function clearSwTimeouts() {
+	console.log('Clearing ' + sw_timeouts.length + ' sw_timeouts.', 'Timeouts set total: ' + timeout_counter)
+	swLog('Clearing ' + sw_timeouts.length + ' sw_timeouts. Timeouts set total: ' + timeout_counter)
 	while (sw_timeouts.length > 0) {
 		clearTimeout(sw_timeouts.pop())
 	}
@@ -205,6 +208,7 @@ progress(loading_process_count + '| ' + bytesToSize(total_download_size) + ' - '
 function startDigester(err, data) {
 	if (err) {
 		console.log('startDigester err:', err, data)
+		timeout_counter ++
 		setTimeout(function() {
 			process.exit(0)
 		}, 300)
@@ -218,6 +222,7 @@ function startDigester(err, data) {
 	fs.writeFileSync('elements.debug.json', stringifier(swElementsById))
 
 	var doTimeout = function() {
+		timeout_counter ++
 		setTimeout(function() {
 			// console.log('RRRRRRRRRRR: Pinging Entu for news.')
 			EntuLib.getEntity(__SCREEN_ID, function(err, result) {
@@ -365,8 +370,10 @@ function captureScreenshot(err, callback) {
 			}
 		})
 	}, { format : 'jpeg', datatype : 'buffer'})
+	timeout_counter ++
 	setTimeout(function() { callback(null, callback) }, 30*1000)
 }
+// timeout_counter ++
 // setTimeout(function() {
 // 	captureScreenshot(null, captureScreenshot)
 // }, 1*1000)

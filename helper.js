@@ -3,21 +3,17 @@ var stringifier = require('./stringifier.js')
 
 __LOG_DIR = 'sw-log/'
 
-// Make sure folders for metadata, media and logs are in place
-var a = [__LOG_DIR]
-a.forEach(function(foldername) {
-    fs.lstat(foldername, function(err, stats) {
-        if (err) {
-            console.log ('Creating folder for ' + foldername)
-            fs.mkdir(foldername)
-        }
-        else if (!stats.isDirectory()) {
-            console.log ('Renaming existing file "' + foldername + '" to "' + foldername + '.bak')
-            fs.renameSync(foldername, foldername + '.bak')
-            console.log ('Creating folder for ' + foldername)
-            fs.mkdir(foldername)
-        }
-    })
+fs.lstat(__LOG_DIR, function(err, stats) {
+    if (err) {
+        console.log ('Creating folder for ' + __LOG_DIR)
+        fs.mkdir(__LOG_DIR)
+    }
+    else if (!stats.isDirectory()) {
+        console.log ('Renaming existing file "' + __LOG_DIR + '" to "' + __LOG_DIR + '.bak')
+        fs.renameSync(__LOG_DIR, __LOG_DIR + '.bak')
+        console.log ('Creating folder for ' + __LOG_DIR)
+        fs.mkdir(__LOG_DIR)
+    }
 })
 
 
@@ -31,7 +27,7 @@ var message_q = []
 var swLog = window.swLog = function swLog(message, scope) {
     console.log(message)
     if (log_streams_are_closed) {
-        console.log('Log files are closed allready.')
+        console.log('Log files are closed already.')
         return { end: function() {return false}}
     }
     if (scope === undefined)
