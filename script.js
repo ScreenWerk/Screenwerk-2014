@@ -41,7 +41,7 @@ console.log ( "= ScreenWerk v." + __VERSION + " ================================
 console.log ( os.platform(), 'SYSTEM')
 
 __HOSTNAME = 'piletilevi.entu.ee'
-__SCREEN_ID = Number(gui.App.argv[0])
+__SCREEN_ID = Number(gui.App.argv.shift())
 __META_DIR = 'sw-meta/'
 __MEDIA_DIR = 'sw-media/'
 __STRUCTURE = {"name":"screen","reference":{"name":"screen-group","reference":{"name":"configuration","child":{"name":"schedule","reference":{"name":"layout","child":{"name":"layout-playlist","reference":{"name":"playlist","child":{"name":"playlist-media","reference":{"name":"media"}}}}}}}}}
@@ -60,7 +60,17 @@ recurseHierarchy(__STRUCTURE)
 __DEFAULT_UPDATE_INTERVAL_MINUTES = 10
 __UPDATE_INTERVAL_SECONDS = __DEFAULT_UPDATE_INTERVAL_MINUTES * 60
 __DEFAULT_DELAY_MS = 0
-__DEBUG_MODE = (gui.App.argv.length > 1 && gui.App.argv[1] === 'debug')
+__DEBUG_MODE = false
+__SCREEN = 1
+
+while (gui.App.argv.length > 0) {
+	var arg = gui.App.argv.shift()
+	if (arg === 'debug') {
+		__DEBUG_MODE = true
+	} else if (arg.substring(0,7) === 'screen=') {
+		__SCREEN = Number(arg.substring(7))
+	}
+}
 
 __API_KEY = ''
 var uuid_path = __SCREEN_ID + '.uuid'
@@ -85,6 +95,7 @@ if (__DEBUG_MODE) {
 	player_window.showDevTools()
 } else {
 	console.log ( 'launching in fullscreen mode')
+	player_window.moveTo(window.screen.width * (__SCREEN - 1) + 1, 30)
 	player_window.isFullscreen = true
 }
 
