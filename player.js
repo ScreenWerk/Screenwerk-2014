@@ -48,8 +48,12 @@ function SwPlayer(err, dom_element, callback) {
 				if (properties['valid-from'].values !== undefined) {
 					var vf_date = new Date(properties['valid-from'].values[0].db_value)
 					if (vf_date.getTime() > Date.now()) {
-						console.log('DOM id: ' + element.id + ' valid-from not reached.', properties['valid-from'].values[0].db_value)
-						callback('not valid until', vf_date.getTime(), element.id)
+						console.log('DOM id: ' + element.id + ' valid-from not reached.', vf_date.getTime())
+						callback('not valid until', [vf_date.getTime(), element.id])
+						if (element.next !== undefined ) {
+							document.getElementById(dom_element.parentNode.id + '_' + element.next)
+						    	.player.play(null, 0, callback)
+						}
 						return this
 					}
 				}
@@ -58,8 +62,12 @@ function SwPlayer(err, dom_element, callback) {
 				if (properties['valid-to'].values !== undefined) {
 					var vt_date = new Date(properties['valid-to'].values[0].db_value)
 					if (vt_date.getTime() < Date.now()) {
-						console.log('DOM id: ' + element.id + ' valid-to expired.', properties['valid-to'].values[0].db_value)
-						callback('expired', element.id)
+						console.log('DOM id: ' + element.id + ' valid-to expired.', vt_date.getTime())
+						callback('expired', [vt_date.getTime(), element.id])
+						if (element.next !== undefined ) {
+							document.getElementById(dom_element.parentNode.id + '_' + element.next)
+						    	.player.play(null, 0, callback)
+						}
 						return this
 					}
 				}
@@ -160,14 +168,28 @@ function SwPlayer(err, dom_element, callback) {
 					dom_element.childNodes[0].player.play(null, 0, function(){})
 				break
 				case 'sw-playlist':
-					dom_element.childNodes[0].player.play(null, 0, function(){})
+					dom_element.childNodes[0].player.play(null, 0, function(err, data){
+						if (err) {
+							console.log('Cant play', err, data)
+						}
+					})
 				break
 				case 'sw-playlist-media':
+					var start_succeeded = true
 					if (dom_element.childNodes.length > 0) {
-						dom_element.childNodes[0].player.play(null, 0, function(){})
+						dom_element.childNodes[0].player.play(null, 0, function(err, data){
+							if (err) {
+								console.log('Cant play', err, data)
+								start_succeeded = false
+							}
+						})
 					}
-					if (properties.duration.values !== undefined) {
-						this.stop(null, Number(properties.duration.values[0].db_value) * 1000, function(){})
+					if (start_succeeded && properties.duration.values !== undefined) {
+						this.stop(null, Number(properties.duration.values[0].db_value) * 1000, function(err, data) {
+							if (err) {
+								console.log('Cant play', err, data)
+							}
+						})
 					}
 				break
 				case 'sw-media':
@@ -183,7 +205,11 @@ function SwPlayer(err, dom_element, callback) {
 						if (media_dom_element.has_event_listener === undefined) {
 							media_dom_element.has_event_listener = true
 							media_dom_element.addEventListener('ended', function() {
-								dom_element.parentNode.player.stop(null, 0, function(){})
+								dom_element.parentNode.player.stop(null, 0, function(err, data) {
+									if (err) {
+										console.log('Cant play', err, data)
+									}
+								})
 							})
 						}
 

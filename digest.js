@@ -24,7 +24,7 @@ function processElements(err, callback) {
 			case 'sw-schedule':
 				var sched = later.parse.cron(swElement.properties.crontab.values[0].db_value)
 				if (swElement.properties['valid-from'].values !== undefined) {
-					var startDate = swElement.properties['valid-from'].values[0]
+					var startDate = swElement.properties['valid-from'].values[0].db_value
 					var startTime = (startDate.getTime())
 					sched.schedules[0].fd_a = [startTime]
 				}
@@ -82,6 +82,27 @@ function processElements(err, callback) {
 			case 'sw-playlist-media':
 			break
 			case 'sw-media':
+				if (swElement.properties['valid-from'].values !== undefined) {
+					var db_value = swElement.properties['valid-from'].values[0].db_value
+					var parentSwElement = swElementsById[swElement.parents[0]]
+					if (parentSwElement.properties['valid-from'].values === undefined) {
+						parentSwElement.properties['valid-from'].values = [{"db_value":db_value}]
+					} else {
+						var parent_db_value = parentSwElement.properties['valid-from'].values[0].db_value
+						parentSwElement.properties['valid-from'].values[0].db_value = Math.max(parent_db_value, db_value)
+					}
+				}
+				if (swElement.properties['valid-to'].values !== undefined) {
+					var db_value = swElement.properties['valid-to'].values[0].db_value
+					var parentSwElement = swElementsById[swElement.parents[0]]
+					if (parentSwElement.properties['valid-to'].values === undefined) {
+						parentSwElement.properties['valid-to'].values = [{"db_value":db_value}]
+					} else {
+						var parent_db_value = parentSwElement.properties['valid-to'].values[0].db_value
+						parentSwElement.properties['valid-to'].values[0].db_value = Math.min(parent_db_value, db_value)
+					}
+				}
+
 			break
 			default:
 				callback('Unrecognised definition: ' + swElement.definition.keyname, swElement)
@@ -107,7 +128,7 @@ function buildDom(err, callback) {
 	}
 
 	var createDomRec = function createDomRec(eid, parent_dom_id) {
-		// console.log(eid, parent_dom_id)
+		console.log(eid, parent_dom_id)
 		var dom_element = document.createElement('div')
 		var swElement = swElementsById[eid]
 		var parentSwElement = swElementsById[swElement.parents[0]]
