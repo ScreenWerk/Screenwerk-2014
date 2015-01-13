@@ -131,6 +131,11 @@ function buildDom(err, callback) {
 		console.log(eid, parent_dom_id)
 		var dom_element = document.createElement('div')
 		var swElement = swElementsById[eid]
+		if (swElement === undefined) {
+			console.log('Error: Missing element eid=' + eid, util.inspect(swElementsById, {'depth':null}))
+			callback('Error: Missing element eid=' + eid)
+			return
+		}
 		var parentSwElement = swElementsById[swElement.parents[0]]
 		// console.log(stringifier(dom_element))
 		// console.log(eid)

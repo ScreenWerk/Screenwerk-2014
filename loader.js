@@ -150,17 +150,17 @@ function registerMeta(err, metadata, callback) {
 		return false
 	}
 	var properties = metadata.properties
-	if (properties['valid-to'] !== undefined) {
-		if (properties['valid-to'].values !== undefined) {
-			var vt_date = new Date(properties['valid-to'].values[0].db_value)
-			var now = Date.now()
-			if (vt_date.getTime() < now) {
-				decrementProcessCount()
-				// console.log('valid-to in past:', properties)
-				return false
-			}
-		}
-	}
+	// if (properties['valid-to'] !== undefined) {
+	// 	if (properties['valid-to'].values !== undefined) {
+	// 		var vt_date = new Date(properties['valid-to'].values[0].db_value)
+	// 		var now = Date.now()
+	// 		if (vt_date.getTime() < now) {
+	// 			decrementProcessCount()
+	// 			// console.log('valid-to in past:', properties)
+	// 			return false
+	// 		}
+	// 	}
+	// }
 	var definition = metadata.definition.keyname.split('sw-')[1]
 
 	switch (definition) {
@@ -377,7 +377,12 @@ function loadMeta(err, parent_eid, eid, struct_node, callback) {
 							decrementProcessCount()
 							return
 						}
-						// console.log(ch_def_name + ': ' + util.inspect(ch_result, {depth:null}))
+						if (!ch_result.result['sw-'+ch_def_name]) {
+							var err = definition + ' ' + eid + ': Missing expected elements of ' + ch_def_name + '.'
+							console.log(err + util.inspect(ch_result.result, {depth:null}))
+							callback(err)
+							return
+						}
 						if (ch_result.result['sw-'+ch_def_name].entities.length === 0) {
 							callback(new Error(struct_node.name + ' ' + eid + ' has no ' + ch_def_name + "'s."))
 							decrementProcessCount()
