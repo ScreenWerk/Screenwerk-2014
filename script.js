@@ -35,7 +35,7 @@ assert.equal(typeof(gui.App.argv[0]), 'string'
 assert.ok(Number(gui.App.argv[0]) > 0
 			, "Screen ID must be number greater than zero.")
 
-__VERSION = '0.2-alpha.10'
+__VERSION = gui.App.manifest.version
 
 console.log ( "= ScreenWerk v." + __VERSION + " ==================================")
 console.log ( os.platform(), 'SYSTEM')
@@ -83,6 +83,7 @@ if (fs.existsSync(uuid_path)) {
 	console.log ( 'Created key for screen: ' + __SCREEN_ID + '. Now register this key in Entu: ' + __API_KEY)
 	process.exit(0)
 }
+
 
 // console.log('initialize EntuLib with ' + __SCREEN_ID + '|' + __API_KEY + '|' + __HOSTNAME)
 var EntuLib = new EntuLib(__SCREEN_ID, __API_KEY, __HOSTNAME)
@@ -164,6 +165,30 @@ function clearSwTimeouts() {
 	swLog('Clearing ' + sw_timeouts.length + ' sw_timeouts. Timeouts set total: ' + timeout_counter)
 	while (sw_timeouts.length > 0) {
 		clearTimeout(sw_timeouts.pop())
+	}
+}
+
+var tcIncr = function() {
+	timeout_counter ++
+	if (timeout_counter > 4300) {
+		// document.location.reload(true)
+		// window.location.reload(3)
+		console.log("=====================================")
+		console.log("== RELAUNCHING! =====================")
+		console.log("=====================================")
+
+		//Restart node-webkit app
+		var child_process = require("child_process")
+
+		//Start new app
+		var child = child_process.spawn(process.execPath, ['./', __SCREEN_ID, 'screen='+__SCREEN], {detached: true})
+
+		//Don't wait for it
+		child.unref()
+
+		//Quit current
+		player_window.hide() // hide window to prevent black display
+		process.exit(1)  // quit node-webkit app
 	}
 }
 

@@ -74,7 +74,7 @@ function SwPlayer(err, dom_element, callback) {
 			}
 			if (timeout && timeout > 0) {
 				var self = this
-				timeout_counter ++
+				tcIncr()
 				swLog('timeout_counter: ' + timeout_counter)
 				console.log(dom_element.id + ' Scheduling PLAY on ' + element.definition.keyname + ' ' + element.id + ' in ' + msToTime(timeout), "Timeouts set: " + timeout_counter)
 				var play_timeout = setTimeout(function() {
@@ -94,7 +94,7 @@ function SwPlayer(err, dom_element, callback) {
 			} else {
 				var current_class = dom_element.className
 				dom_element.className = current_class + ' ' + element.animate.begin
-				timeout_counter ++
+				tcIncr()
 				swLog('timeout_counter: ' + timeout_counter)
 				setTimeout(function() {
 					dom_element.className = current_class
@@ -231,7 +231,7 @@ function SwPlayer(err, dom_element, callback) {
 			}
 			if (timeout && timeout > 0) {
 				var self = this
-				timeout_counter ++
+				tcIncr()
 				swLog('timeout_counter: ' + timeout_counter)
 				console.log(dom_element.id + ' Scheduling STOP on ' + element.definition.keyname + ' ' + element.id + ' in ' + msToTime(timeout), "Timeouts set: " + timeout_counter)
 				var stop_timeout = setTimeout(function() {
@@ -251,7 +251,7 @@ function SwPlayer(err, dom_element, callback) {
 			} else {
 				var current_class = dom_element.className
 				dom_element.className = current_class + ' ' + element.animate.end
-				timeout_counter ++
+				tcIncr()
 				swLog('timeout_counter: ' + timeout_counter)
 				setTimeout(function() {
 					dom_element.style.display = 'none'
