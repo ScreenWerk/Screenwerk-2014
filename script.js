@@ -89,6 +89,24 @@ while (gui.App.argv.length > 0) {
     }
 }
 
+// Make sure folders for metadata, media and logs are in place
+var a = [home_path, __META_DIR, __MEDIA_DIR]
+a.forEach(function(foldername) {
+    fs.lstat(foldername, function(err, stats) {
+        if (err) {
+            console.log ('Creating folder for ' + foldername)
+            fs.mkdir(foldername)
+        }
+        else if (!stats.isDirectory()) {
+            console.log ('Renaming existing file "' + foldername + '" to "' + foldername + '.bak')
+            fs.renameSync(foldername, foldername + '.bak')
+            console.log ('Creating folder for ' + foldername)
+            fs.mkdir(foldername)
+        }
+    })
+})
+
+
 __API_KEY = ''
 // window.alert(util.inspect(process.env))
 var uuid_path = path.resolve(home_path, __SCREEN_ID + '.uuid')
@@ -124,24 +142,6 @@ try {
 } catch (ex) {
   console.log(ex.message)
 }
-
-
-// Make sure folders for metadata, media and logs are in place
-var a = [home_path, __META_DIR, __MEDIA_DIR]
-a.forEach(function(foldername) {
-    fs.lstat(foldername, function(err, stats) {
-        if (err) {
-            console.log ('Creating folder for ' + foldername)
-            fs.mkdir(foldername)
-        }
-        else if (!stats.isDirectory()) {
-            console.log ('Renaming existing file "' + foldername + '" to "' + foldername + '.bak')
-            fs.renameSync(foldername, foldername + '.bak')
-            console.log ('Creating folder for ' + foldername)
-            fs.mkdir(foldername)
-        }
-    })
-})
 
 
 // Cleanup unfinished downloads if any
