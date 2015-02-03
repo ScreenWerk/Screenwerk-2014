@@ -73,6 +73,7 @@ while (gui.App.argv.length > 0) {
 }
 
 __API_KEY = ''
+// window.alert(util.inspect(process.env))
 var uuid_path = __SCREEN_ID + '.uuid'
 if (fs.existsSync(uuid_path)) {
 	__API_KEY = fs.readFileSync(uuid_path)
@@ -80,7 +81,7 @@ if (fs.existsSync(uuid_path)) {
 } else {
 	__API_KEY = uuid.v1()
 	fs.writeFileSync(uuid_path, __API_KEY)
-	console.log ( 'Created key for screen: ' + __SCREEN_ID + '. Now register this key in Entu: ' + __API_KEY)
+	console.log ( 'Created key for screen: ' + __SCREEN_ID + '(' + uuid_path + '). Now register this key in Entu: ' + __API_KEY)
 	process.exit(0)
 }
 
@@ -98,6 +99,13 @@ if (__DEBUG_MODE) {
 	console.log ( 'launching in fullscreen mode')
 	player_window.moveTo(window.screen.width * (__SCREEN - 1) + 1, 30)
 	player_window.isFullscreen = true
+}
+var nativeMenuBar = new gui.Menu({ type: "menubar" })
+try {
+  nativeMenuBar.createMacBuiltin(gui.App.manifest.name + ' ' + __VERSION)
+  player_window.menu = nativeMenuBar
+} catch (ex) {
+  console.log(ex.message)
 }
 
 

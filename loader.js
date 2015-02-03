@@ -362,8 +362,7 @@ function loadMeta(err, parent_eid, eid, struct_node, callback) {
 					// console.log(struct_node.reference)
 				}
 				else if (struct_node.child !== undefined) {
-					ch_def_name = struct_node.child.name
-					// console.log(struct_node.child)
+					var ch_def_name = struct_node.child.name
 					EntuLib.getChilds(eid, function(err, ch_result) {
 						if (err) {
 							console.log('loadMeta ' + eid + ' err:', err)
