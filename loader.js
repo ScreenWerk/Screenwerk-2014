@@ -42,7 +42,7 @@ function loadMedia(err, entity_id, file_value, callback) {
 		decrementProcessCount()
 		return
 	}
-	var filename = __MEDIA_DIR + entity_id + '_' + file_id
+	var filename = path.resolve(__MEDIA_DIR, entity_id + '_' + file_id)
 	var download_filename = filename + '.download'
 
 	// console.log ('Looking for ' + filename)
@@ -217,7 +217,7 @@ function registerMeta(err, metadata, callback) {
 			if (metadata.properties.file.values === undefined && metadata.properties.url.values === undefined)
 				throw ('"URL" or "file" property must be set for ' + metadata.id)
 			if (metadata.properties.file.values !== undefined) {
-				metadata.properties.filepath = {'values': [{'db_value':__MEDIA_DIR + metadata.id + '_' + metadata.properties.file.values[0].db_value}]}
+				metadata.properties.filepath = {'values': [{'db_value': path.resolve(__MEDIA_DIR, metadata.id + '_' + metadata.properties.file.values[0].db_value)}]}
 				loadMedia(null, metadata.id, metadata.properties.file.values[0], callback)
 			}
 		break
@@ -238,9 +238,9 @@ function reloadMeta(err, callback) {
 		return
 	}
 	fs.readdirSync(__META_DIR).forEach(function(meta_fileName) {
-		var result = fs.unlinkSync(__META_DIR + meta_fileName)
+		var result = fs.unlinkSync(path.resolve(__META_DIR, meta_fileName))
 		if (result instanceof Error) {
-		    console.log("Can't unlink " + __META_DIR + meta_fileName, result)
+		    console.log("Can't unlink " + path.resolve(__META_DIR, meta_fileName, result))
 		}
     })
 	loadMeta(null, null, __SCREEN_ID, __STRUCTURE, callback)
@@ -259,7 +259,7 @@ function loadMeta(err, parent_eid, eid, struct_node, callback) {
 		return
 	}
 	var definition = struct_node.name
-	var meta_path = __META_DIR + eid + ' ' + definition + '.json'
+	var meta_path = path.resolve(__META_DIR, eid + ' ' + definition + '.json')
 	var meta_json = ''
 
 	fs.readFile(meta_path, function(err, data) {

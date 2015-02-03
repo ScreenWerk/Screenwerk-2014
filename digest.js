@@ -109,7 +109,7 @@ function processElements(err, callback) {
 				return
 		}
 		// console.log('Processed ' + swElement.definition.keyname + ':' + swElement.id + ' - ' + swElement.displayname)
-		var meta_path = __META_DIR + swElement.id + ' ' + swElement.definition.keyname.split('sw-')[1] + '.json'
+		var meta_path = path.resolve(__META_DIR, swElement.id + ' ' + swElement.definition.keyname.split('sw-')[1] + '.json')
 		fs.writeFileSync(meta_path, stringifier(swElement))
 
 		if(-- stacksize === 0) {

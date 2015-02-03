@@ -17,6 +17,7 @@ var https   = require('https')
 var events  = require('events')
 var uuid    = require('node-uuid')
 var domain  = require('domain').create()
+var path    = require('path')
 
 
 // 2. public modules from npm
@@ -43,10 +44,20 @@ __VERSION = gui.App.manifest.version
 console.log ( "= ScreenWerk v." + __VERSION + " ==================================")
 console.log ( os.platform(), 'SYSTEM')
 
+
+var home_path = ''
+if (process.env.HOME !== undefined) {
+    home_path = process.env.HOME
+} else if (process.env.HOMEPATH !== undefined) {
+    home_path = process.env.HOMEDRIVE + process.env.HOMEPATH
+}
+home_path = path.resolve(home_path, gui.App.manifest.name)
+
+
 __HOSTNAME = 'piletilevi.entu.ee'
 __SCREEN_ID = Number(gui.App.argv.shift())
-__META_DIR = 'sw-meta/'
-__MEDIA_DIR = 'sw-media/'
+__META_DIR = path.resolve(home_path, 'sw-meta')
+__MEDIA_DIR = path.resolve(home_path, 'sw-media')
 __STRUCTURE = {"name":"screen","reference":{"name":"screen-group","reference":{"name":"configuration","child":{"name":"schedule","reference":{"name":"layout","child":{"name":"layout-playlist","reference":{"name":"playlist","child":{"name":"playlist-media","reference":{"name":"media"}}}}}}}}}
 __HIERARCHY = {'child_of': {}, 'parent_of': {}}
 function recurseHierarchy(structure, parent_name) {
@@ -80,7 +91,7 @@ while (gui.App.argv.length > 0) {
 
 __API_KEY = ''
 // window.alert(util.inspect(process.env))
-var uuid_path = __SCREEN_ID + '.uuid'
+var uuid_path = path.resolve(home_path, __SCREEN_ID + '.uuid')
 if (fs.existsSync(uuid_path)) {
     __API_KEY = fs.readFileSync(uuid_path)
     console.log ( 'Read key: ' + __API_KEY, 'INFO')
@@ -116,7 +127,7 @@ try {
 
 
 // Make sure folders for metadata, media and logs are in place
-var a = [__META_DIR, __MEDIA_DIR]
+var a = [home_path, __META_DIR, __MEDIA_DIR]
 a.forEach(function(foldername) {
     fs.lstat(foldername, function(err, stats) {
         if (err) {
@@ -147,10 +158,10 @@ fs.stat(__MEDIA_DIR, function(err, stats) {
         fs.readdirSync(__MEDIA_DIR).forEach(function(download_filename) {
             if (download_filename.split('.').pop() !== 'download')
                 return
-            console.log("Unlink " + __MEDIA_DIR + download_filename)
-            var result = fs.unlinkSync(__MEDIA_DIR + download_filename)
+            console.log("Unlink " + path.resolve(__MEDIA_DIR, download_filename))
+            var result = fs.unlinkSync(path.resolve(__MEDIA_DIR, download_filename))
             if (result instanceof Error) {
-                console.log("Can't unlink " + __MEDIA_DIR + download_filename, result)
+                console.log("Can't unlink " + path.resolve(__MEDIA_DIR, download_filename), result)
             }
         })
     }
@@ -158,7 +169,7 @@ fs.stat(__MEDIA_DIR, function(err, stats) {
 
 
 // Read existing screen meta, if local data available
-var meta_path = __META_DIR + __SCREEN_ID + ' ' + 'screen.json'
+var meta_path = path.resolve(__META_DIR, __SCREEN_ID + ' ' + 'screen.json')
 var local_published = new Date(Date.parse('2004-01-01'))
 var remote_published = new Date(Date.parse('2004-01-01'))
 var meta_obj = {}
@@ -321,7 +332,7 @@ function startDigester(err, data) {
                 })
                 return false
             }
-            var meta_path = __META_DIR + swElement.id + ' ' + swElement.definition.keyname.split('sw-')[1] + '.json'
+            var meta_path = path.resolve(__META_DIR, swElement.id + ' ' + swElement.definition.keyname.split('sw-')[1] + '.json')
             fs.writeFileSync(meta_path, stringifier(swElement))
             if(-- stacksize === 0) {
                 console.log('====== Metadata flushed')
