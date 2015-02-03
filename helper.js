@@ -67,7 +67,7 @@ var progress = window.progress = function progress(message) {
             progress_DOM.id = 'progress'
             document.body.appendChild(progress_DOM)
         }
-        progress_DOM.textContent = message
+        progress_DOM.textContent = __VERSION + '\n' + message
         document.getElementById('progress').style.display = 'block'
     }
 }
