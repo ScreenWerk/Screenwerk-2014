@@ -195,7 +195,7 @@ var tcIncr = function() {
         var child_process = require("child_process")
 
         //Start new app
-        var child = child_process.spawn(process.execPath, ['./', __SCREEN_ID, 'screen='+__SCREEN], {detached: true})
+        var child = child_process.spawn(process.execPath, ['./', __SCREEN_ID, 'screen='+__SCREEN, 'relaunch='+__RELAUNCH_THRESHOLD], {detached: true})
 
         //Don't wait for it
         child.unref()
