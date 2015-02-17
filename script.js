@@ -34,10 +34,6 @@ domain.on('error', function(err){
 })
 
 
-assert.equal(typeof(gui.App.argv[0]), 'string'
-            , "Screen ID should be passed as first argument.")
-assert.ok(Number(gui.App.argv[0]) > 0
-            , "Screen ID must be number greater than zero.")
 
 __VERSION = gui.App.manifest.version
 
@@ -52,12 +48,19 @@ if (process.env.HOME !== undefined) {
     home_path = process.env.HOMEDRIVE + process.env.HOMEPATH
 }
 home_path = path.resolve(home_path, gui.App.manifest.name)
-
-
+if (!fs.existsSync(home_path)) {
+    fs.mkdirSync(home_path)
+}
 __HOSTNAME = 'piletilevi.entu.ee'
-__SCREEN_ID = Number(gui.App.argv.shift())
 __META_DIR = path.resolve(home_path, 'sw-meta')
+if (!fs.existsSync(__META_DIR)) {
+    fs.mkdirSync(__META_DIR)
+}
 __MEDIA_DIR = path.resolve(home_path, 'sw-media')
+if (!fs.existsSync(__MEDIA_DIR)) {
+    fs.mkdirSync(__MEDIA_DIR)
+}
+
 __STRUCTURE = {"name":"screen","reference":{"name":"screen-group","reference":{"name":"configuration","child":{"name":"schedule","reference":{"name":"layout","child":{"name":"layout-playlist","reference":{"name":"playlist","child":{"name":"playlist-media","reference":{"name":"media"}}}}}}}}}
 __HIERARCHY = {'child_of': {}, 'parent_of': {}}
 function recurseHierarchy(structure, parent_name) {
@@ -89,26 +92,27 @@ while (gui.App.argv.length > 0) {
     }
 }
 
-// Make sure folders for metadata, media and logs are in place
-var a = [home_path, __META_DIR, __MEDIA_DIR]
-a.forEach(function(foldername) {
-    fs.lstat(foldername, function(err, stats) {
-        if (err) {
-            console.log ('Creating folder for ' + foldername)
-            fs.mkdir(foldername)
-        }
-        else if (!stats.isDirectory()) {
-            console.log ('Renaming existing file "' + foldername + '" to "' + foldername + '.bak')
-            fs.renameSync(foldername, foldername + '.bak')
-            console.log ('Creating folder for ' + foldername)
-            fs.mkdir(foldername)
-        }
-    })
-})
-
 
 __API_KEY = ''
 // window.alert(util.inspect(process.env))
+var uuids = []
+fs.readdirSync(home_path).forEach(function scanHome(filename) {
+    if (filename.substr(-5) === '.uuid') {
+        uuids.push(filename)
+    }
+})
+__SCREEN_ID = -1
+if (uuids.length === 1) {
+    __SCREEN_ID = uuids[0].slice(0,-5)
+} else {
+    assert.equal(typeof(gui.App.argv[0]), 'string'
+                , "Screen ID should be passed as first argument.")
+    assert.ok(Number(gui.App.argv[0]) > 0
+                , "Screen ID must be number greater than zero.")
+    __SCREEN_ID = Number(gui.App.argv.shift())
+}
+
+
 var uuid_path = path.resolve(home_path, __SCREEN_ID + '.uuid')
 if (fs.existsSync(uuid_path)) {
     __API_KEY = fs.readFileSync(uuid_path)
@@ -234,7 +238,7 @@ EntuLib.getEntity(__SCREEN_ID, function(err, result) {
     }
     else if (result.error !== undefined) {
         remote_published = false
-        console.log (result.error, 'Failed to load screen from Entu.')
+        console.log (result.error, 'Failed to load screen ' + __SCREEN_ID + ' from Entu.')
         if (local_published) {
             console.log('Trying to play with local content.')
             loadMeta(null, null, __SCREEN_ID, __STRUCTURE, startDigester)
