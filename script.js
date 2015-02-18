@@ -2,31 +2,30 @@
  * Screenwerk main executable. Arguments:
  *
  * argv[0]          Screen's Entu ID
- * screen=num       Default 1, run on num'th screen
- * relaunch=num     Default 0, does not relaunch
- * debug            Run in debug mode
  *
  */
 
-// 1. core modules
-var gui     = require('nw.gui')
-var assert  = require('assert')
-var util    = require('util')
-var fs      = require('fs')
-var https   = require('https')
-var events  = require('events')
-var uuid    = require('node-uuid')
-var domain  = require('domain').create()
-var path    = require('path')
+// 1. Core modules
+var gui             = require('nw.gui')
+var assert          = require('assert')
+var util            = require('util')
+var fs              = require('fs')
+var https           = require('https')
+var events          = require('events')
+var uuid            = require('node-uuid')
+var domain          = require('domain').create()
+var path            = require('path')
 
 
-// 2. public modules from npm
-var os      = require('os-utils')
+// 2. Public modules from npm
+var os              = require('os-utils')
 
 
 // 3. Own modules
-var EntuLib     = require('./entulib.js')
-var stringifier = require('./stringifier.js')
+var EntuLib         = require('./entulib.js')
+var stringifier     = require('./stringifier.js')
+var c               = require('./c.js')
+var configuration   = require('./configuration.json')
 
 
 domain.on('error', function(err){
@@ -35,9 +34,9 @@ domain.on('error', function(err){
 
 
 
-__VERSION = gui.App.manifest.version
+c.__VERSION = gui.App.manifest.version
 
-console.log ( "= ScreenWerk v." + __VERSION + " ==================================")
+console.log ( "= ScreenWerk v." + c.__VERSION + " ==================================")
 console.log ( os.platform(), 'SYSTEM')
 
 
@@ -51,97 +50,84 @@ home_path = path.resolve(home_path, gui.App.manifest.name)
 if (!fs.existsSync(home_path)) {
     fs.mkdirSync(home_path)
 }
-__HOSTNAME = 'piletilevi.entu.ee'
-__META_DIR = path.resolve(home_path, 'sw-meta')
-if (!fs.existsSync(__META_DIR)) {
-    fs.mkdirSync(__META_DIR)
+c.__HOSTNAME = 'piletilevi.entu.ee'
+c.__META_DIR = path.resolve(home_path, 'sw-meta')
+if (!fs.existsSync(c.__META_DIR)) {
+    fs.mkdirSync(c.__META_DIR)
 }
-__MEDIA_DIR = path.resolve(home_path, 'sw-media')
-if (!fs.existsSync(__MEDIA_DIR)) {
-    fs.mkdirSync(__MEDIA_DIR)
+c.__MEDIA_DIR = path.resolve(home_path, 'sw-media')
+if (!fs.existsSync(c.__MEDIA_DIR)) {
+    fs.mkdirSync(c.__MEDIA_DIR)
 }
 
-__STRUCTURE = {"name":"screen","reference":{"name":"screen-group","reference":{"name":"configuration","child":{"name":"schedule","reference":{"name":"layout","child":{"name":"layout-playlist","reference":{"name":"playlist","child":{"name":"playlist-media","reference":{"name":"media"}}}}}}}}}
-__HIERARCHY = {'child_of': {}, 'parent_of': {}}
+c.__STRUCTURE = {"name":"screen","reference":{"name":"screen-group","reference":{"name":"configuration","child":{"name":"schedule","reference":{"name":"layout","child":{"name":"layout-playlist","reference":{"name":"playlist","child":{"name":"playlist-media","reference":{"name":"media"}}}}}}}}}
+c.__HIERARCHY = {'child_of': {}, 'parent_of': {}}
 function recurseHierarchy(structure, parent_name) {
     if (parent_name) {
-        __HIERARCHY.child_of[parent_name] = structure.name
-        __HIERARCHY.parent_of[structure.name] = parent_name
+        c.__HIERARCHY.child_of[parent_name] = structure.name
+        c.__HIERARCHY.parent_of[structure.name] = parent_name
     }
     if (structure.child !== undefined)
         recurseHierarchy(structure.child, structure.name)
     else if (structure.reference !== undefined)
         recurseHierarchy(structure.reference, structure.name)
 }
-recurseHierarchy(__STRUCTURE)
-__DEFAULT_UPDATE_INTERVAL_MINUTES = 10
-__UPDATE_INTERVAL_SECONDS = __DEFAULT_UPDATE_INTERVAL_MINUTES * 60
-__DEFAULT_DELAY_MS = 0
-__DEBUG_MODE = false
-__SCREEN = 1
-__RELAUNCH_THRESHOLD = 0
-
-while (gui.App.argv.length > 0) {
-    var arg = gui.App.argv.shift()
-    if (arg === 'debug') {
-        __DEBUG_MODE = true
-    } else if (arg.substring(0,7) === 'screen=') {
-        __SCREEN = Number(arg.substring(7))
-    } else if (arg.substring(0,9) === 'relaunch=') {
-        __RELAUNCH_THRESHOLD = Number(arg.substring(9))
-    }
-}
+recurseHierarchy(c.__STRUCTURE)
+c.__DEFAULT_UPDATE_INTERVAL_MINUTES = 10
+c.__UPDATE_INTERVAL_SECONDS = c.__DEFAULT_UPDATE_INTERVAL_MINUTES * 60
+c.__DEFAULT_DELAY_MS = 0
+c.__DEBUG_MODE = configuration.debug
+c.__SCREEN = configuration.run_on_screen
+c.__RELAUNCH_THRESHOLD = configuration.relaunch
 
 
-__API_KEY = ''
-// window.alert(util.inspect(process.env))
 var uuids = []
 fs.readdirSync(home_path).forEach(function scanHome(filename) {
     if (filename.substr(-5) === '.uuid') {
         uuids.push(filename)
     }
 })
-__SCREEN_ID = -1
 if (uuids.length === 1) {
-    __SCREEN_ID = uuids[0].slice(0,-5)
+    c.__SCREEN_ID = uuids[0].slice(0,-5)
 } else {
+    console.log(gui.App.argv)
     assert.equal(typeof(gui.App.argv[0]), 'string'
                 , "Screen ID should be passed as first argument.")
     assert.ok(Number(gui.App.argv[0]) > 0
                 , "Screen ID must be number greater than zero.")
-    __SCREEN_ID = Number(gui.App.argv.shift())
+    c.__SCREEN_ID = Number(gui.App.argv.shift())
 }
 
 
-var uuid_path = path.resolve(home_path, __SCREEN_ID + '.uuid')
+var uuid_path = path.resolve(home_path, c.__SCREEN_ID + '.uuid')
 if (fs.existsSync(uuid_path)) {
-    __API_KEY = fs.readFileSync(uuid_path)
-    console.log ( 'Read key: ' + __API_KEY, 'INFO')
+    c.__API_KEY = fs.readFileSync(uuid_path)
+    console.log ( 'Read key: ' + c.__API_KEY, 'INFO')
 } else {
-    __API_KEY = uuid.v1()
-    fs.writeFileSync(uuid_path, __API_KEY)
-    console.log ( 'Created key for screen: ' + __SCREEN_ID + '(' + uuid_path + '). Now register this key in Entu: ' + __API_KEY)
+    c.__API_KEY = uuid.v1()
+    fs.writeFileSync(uuid_path, c.__API_KEY)
+    console.log ( 'Created key for screen: ' + c.__SCREEN_ID + '(' + uuid_path + '). Now register this key in Entu: ' + c.__API_KEY)
     process.exit(0)
 }
 
 
-// console.log('initialize EntuLib with ' + __SCREEN_ID + '|' + __API_KEY + '|' + __HOSTNAME)
-var EntuLib = new EntuLib(__SCREEN_ID, __API_KEY, __HOSTNAME)
+// console.log('initialize EntuLib with ' + c.__SCREEN_ID + '|' + c.__API_KEY + '|' + c.__HOSTNAME)
+var EntuLib = new EntuLib(c.__SCREEN_ID, c.__API_KEY, c.__HOSTNAME)
 
 var player_window = gui.Window.get()
-if (__DEBUG_MODE) {
+if (c.__DEBUG_MODE) {
     console.log ( 'launching in debug mode')
     player_window.moveTo(0,30)
     player_window.isFullscreen = false
     player_window.showDevTools()
 } else {
     console.log ( 'launching in fullscreen mode')
-    player_window.moveTo(window.screen.width * (__SCREEN - 1) + 1, 30)
+    player_window.moveTo(window.screen.width * (c.__SCREEN - 1) + 1, 30)
     player_window.isFullscreen = true
 }
 var nativeMenuBar = new gui.Menu({ type: "menubar" })
 try {
-  nativeMenuBar.createMacBuiltin(gui.App.manifest.name + ' ' + __VERSION)
+  nativeMenuBar.createMacBuiltin(gui.App.manifest.name + ' ' + c.__VERSION)
   player_window.menu = nativeMenuBar
 } catch (ex) {
   console.log(ex.message)
@@ -149,23 +135,23 @@ try {
 
 
 // Cleanup unfinished downloads if any
-fs.stat(__MEDIA_DIR, function(err, stats) {
+fs.stat(c.__MEDIA_DIR, function(err, stats) {
     if (err) {
         if (err.code === 'ENOENT') {
-            console.log(__MEDIA_DIR + ' will be OK in a sec')
+            console.log(c.__MEDIA_DIR + ' will be OK in a sec')
         } else {
-            console.log(__MEDIA_DIR + ' err', err)
+            console.log(c.__MEDIA_DIR + ' err', err)
             return
         }
     }
     else if (stats.isDirectory()) {
-        fs.readdirSync(__MEDIA_DIR).forEach(function(download_filename) {
+        fs.readdirSync(c.__MEDIA_DIR).forEach(function(download_filename) {
             if (download_filename.split('.').pop() !== 'download')
                 return
-            console.log("Unlink " + path.resolve(__MEDIA_DIR, download_filename))
-            var result = fs.unlinkSync(path.resolve(__MEDIA_DIR, download_filename))
+            console.log("Unlink " + path.resolve(c.__MEDIA_DIR, download_filename))
+            var result = fs.unlinkSync(path.resolve(c.__MEDIA_DIR, download_filename))
             if (result instanceof Error) {
-                console.log("Can't unlink " + path.resolve(__MEDIA_DIR, download_filename), result)
+                console.log("Can't unlink " + path.resolve(c.__MEDIA_DIR, download_filename), result)
             }
         })
     }
@@ -173,7 +159,7 @@ fs.stat(__MEDIA_DIR, function(err, stats) {
 
 
 // Read existing screen meta, if local data available
-var meta_path = path.resolve(__META_DIR, __SCREEN_ID + ' ' + 'screen.json')
+var meta_path = path.resolve(c.__META_DIR, c.__SCREEN_ID + ' ' + 'screen.json')
 var local_published = new Date(Date.parse('2004-01-01'))
 var remote_published = new Date(Date.parse('2004-01-01'))
 var meta_obj = {}
@@ -199,7 +185,7 @@ function clearSwTimeouts() {
 
 var tcIncr = function() {
     timeout_counter ++
-    if (__RELAUNCH_THRESHOLD > 0 && timeout_counter > __RELAUNCH_THRESHOLD) {
+    if (c.__RELAUNCH_THRESHOLD > 0 && timeout_counter > c.__RELAUNCH_THRESHOLD) {
         // document.location.reload(true)
         // window.location.reload(3)
         console.log("=====================================")
@@ -210,7 +196,7 @@ var tcIncr = function() {
         var child_process = require("child_process")
 
         //Start new app
-        var child = child_process.spawn(process.execPath, ['./', __SCREEN_ID, 'screen='+__SCREEN, 'relaunch='+__RELAUNCH_THRESHOLD], {detached: true})
+        var child = child_process.spawn(process.execPath, ['./', c.__SCREEN_ID, 'screen='+c.__SCREEN, 'relaunch='+c.__RELAUNCH_THRESHOLD], {detached: true})
 
         //Don't wait for it
         child.unref()
@@ -223,13 +209,13 @@ var tcIncr = function() {
 
 // Fetch publishing time for screen, if Entu is reachable
 //   and start the show
-EntuLib.getEntity(__SCREEN_ID, function(err, result) {
+EntuLib.getEntity(c.__SCREEN_ID, function(err, result) {
     if (err) {
         remote_published = false
         console.log('Can\'t reach Entu', err, result)
         if (local_published) {
             console.log('Trying to play with local content.')
-            loadMeta(null, null, __SCREEN_ID, __STRUCTURE, startDigester)
+            loadMeta(null, null, c.__SCREEN_ID, c.__STRUCTURE, startDigester)
             return
         } else {
             console.log('Remote and local both unreachable. Terminating.')
@@ -238,10 +224,10 @@ EntuLib.getEntity(__SCREEN_ID, function(err, result) {
     }
     else if (result.error !== undefined) {
         remote_published = false
-        console.log (result.error, 'Failed to load screen ' + __SCREEN_ID + ' from Entu.')
+        console.log (result.error, 'Failed to load screen ' + c.__SCREEN_ID + ' from Entu.')
         if (local_published) {
             console.log('Trying to play with local content.')
-            loadMeta(null, null, __SCREEN_ID, __STRUCTURE, startDigester)
+            loadMeta(null, null, c.__SCREEN_ID, c.__STRUCTURE, startDigester)
             return
         } else {
             console.log('Remote and local both unreachable. Terminating.')
@@ -255,7 +241,7 @@ EntuLib.getEntity(__SCREEN_ID, function(err, result) {
     if (local_published &&
         local_published.toJSON() === remote_published.toJSON()) {
         console.log('Trying to play with local content.')
-        loadMeta(null, null, __SCREEN_ID, __STRUCTURE, startDigester)
+        loadMeta(null, null, c.__SCREEN_ID, c.__STRUCTURE, startDigester)
     }
     else {
         console.log('Remove local content. Fetch new from Entu!')
@@ -290,7 +276,7 @@ function startDigester(err, data) {
         timeout_counter ++
         setTimeout(function() {
             // console.log('RRRRRRRRRRR: Pinging Entu for news.')
-            EntuLib.getEntity(__SCREEN_ID, function(err, result) {
+            EntuLib.getEntity(c.__SCREEN_ID, function(err, result) {
                 if (err) {
                     console.log('Can\'t reach Entu', err, result)
                 }
@@ -311,11 +297,11 @@ function startDigester(err, data) {
                     reloadMeta(null, startDigester)
                 } else {
                     doTimeout()
-                    // loadMeta(null, null, __SCREEN_ID, __STRUCTURE, startDigester)
+                    // loadMeta(null, null, c.__SCREEN_ID, c.__STRUCTURE, startDigester)
                 }
             })
-        }, 1000 * __UPDATE_INTERVAL_SECONDS)
-        // console.log('RRRRRRRRRRR: Check for news scheduled in ' + __UPDATE_INTERVAL_SECONDS + ' seconds.')
+        }, 1000 * c.__UPDATE_INTERVAL_SECONDS)
+        // console.log('RRRRRRRRRRR: Check for news scheduled in ' + c.__UPDATE_INTERVAL_SECONDS + ' seconds.')
     }
     doTimeout()
 
@@ -336,7 +322,7 @@ function startDigester(err, data) {
                 })
                 return false
             }
-            var meta_path = path.resolve(__META_DIR, swElement.id + ' ' + swElement.definition.keyname.split('sw-')[1] + '.json')
+            var meta_path = path.resolve(c.__META_DIR, swElement.id + ' ' + swElement.definition.keyname.split('sw-')[1] + '.json')
             fs.writeFileSync(meta_path, stringifier(swElement))
             if(-- stacksize === 0) {
                 console.log('====== Metadata flushed')
@@ -388,7 +374,7 @@ function captureScreenshot(err, callback) {
         return
     }
     var datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '')
-    var screenshot_path = __LOG_DIR + 'screencapture ' + datestring + '.jpeg'
+    var screenshot_path = c.__LOG_DIR + 'screencapture ' + datestring + '.jpeg'
     var writer = fs.createWriteStream(screenshot_path)
     player_window.capturePage(function(buffer) {
         if (writer.write(buffer) === false) {
@@ -398,14 +384,14 @@ function captureScreenshot(err, callback) {
         writer.close()
         function addScreenshot() {
             // console.log('Saving screenshot')
-            EntuLib.addFile(__SCREEN_ID, 'sw-screen-photo', screenshot_path, function(err, data) {
+            EntuLib.addFile(c.__SCREEN_ID, 'sw-screen-photo', screenshot_path, function(err, data) {
                 if (err) {
                     console.log('captureScreenshot err:', util.inspect(err), util.inspect(data))
                 }
                 // console.log(util.inspect(data))
             })
         }
-        EntuLib.getEntity(__SCREEN_ID, function(err, entity) {
+        EntuLib.getEntity(c.__SCREEN_ID, function(err, entity) {
             if (err) {
                 if (err.code === 'ENOTFOUND') {
                     // console.log('Not connected')
@@ -421,7 +407,7 @@ function captureScreenshot(err, callback) {
                 // console.log(stack)
                 var stacksize = stack.length
                 stack.forEach(function(item) {
-                    EntuLib.removeProperty(__SCREEN_ID, 'sw-screen-photo', item.id, function(err, data) {
+                    EntuLib.removeProperty(c.__SCREEN_ID, 'sw-screen-photo', item.id, function(err, data) {
                         if (err) {
                             console.log('captureScreenshot err:', util.inspect(item), util.inspect(err), util.inspect(data))
                         }

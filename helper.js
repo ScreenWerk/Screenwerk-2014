@@ -1,25 +1,30 @@
+// 1. Core modules
 var fs          = require('fs')
+
+
+// 3. Own modules
 var stringifier = require('./stringifier.js')
+var c           = require('./c.js')
 
-__LOG_DIR = 'sw-log/'
+c.__LOG_DIR = 'sw-log/'
 
-fs.lstat(__LOG_DIR, function(err, stats) {
+fs.lstat(c.__LOG_DIR, function(err, stats) {
     if (err) {
-        console.log ('Creating folder for ' + __LOG_DIR)
-        fs.mkdir(__LOG_DIR)
+        console.log ('Creating folder for ' + c.__LOG_DIR)
+        fs.mkdir(c.__LOG_DIR)
     }
     else if (!stats.isDirectory()) {
-        console.log ('Renaming existing file "' + __LOG_DIR + '" to "' + __LOG_DIR + '.bak')
-        fs.renameSync(__LOG_DIR, __LOG_DIR + '.bak')
-        console.log ('Creating folder for ' + __LOG_DIR)
-        fs.mkdir(__LOG_DIR)
+        console.log ('Renaming existing file "' + c.__LOG_DIR + '" to "' + c.__LOG_DIR + '.bak')
+        fs.renameSync(c.__LOG_DIR, c.__LOG_DIR + '.bak')
+        console.log ('Creating folder for ' + c.__LOG_DIR)
+        fs.mkdir(c.__LOG_DIR)
     }
 })
 
 
 var datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '')
-var c_stream_path = __LOG_DIR + './Console ' + datestring + '.log'
-var s_stream_path = __LOG_DIR + './System ' + datestring + '.log'
+var c_stream_path = c.__LOG_DIR + './Console ' + datestring + '.log'
+var s_stream_path = c.__LOG_DIR + './System ' + datestring + '.log'
 var consoleStream = fs.createWriteStream(c_stream_path, {flags:'a'})
 var sysLogStream = fs.createWriteStream(s_stream_path, {flags:'a'})
 var log_streams_are_closed = false
@@ -67,7 +72,7 @@ var progress = window.progress = function progress(message) {
             progress_DOM.id = 'progress'
             document.body.appendChild(progress_DOM)
         }
-        progress_DOM.textContent = __VERSION + '\n' + message
+        progress_DOM.textContent = c.__VERSION + '\n' + message
         document.getElementById('progress').style.display = 'block'
     }
 }

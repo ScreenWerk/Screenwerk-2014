@@ -1,4 +1,11 @@
+// 2. Public modules from npm
 var later  = require("later")
+
+
+// 3. Own modules
+var stringifier = require('./stringifier.js')
+var c           = require('./c.js')
+
 
 // var update_interval_ms = 10 * 60 * 1000 // set default update interval to 10 minutes
 
@@ -109,7 +116,7 @@ function processElements(err, callback) {
 				return
 		}
 		// console.log('Processed ' + swElement.definition.keyname + ':' + swElement.id + ' - ' + swElement.displayname)
-		var meta_path = path.resolve(__META_DIR, swElement.id + ' ' + swElement.definition.keyname.split('sw-')[1] + '.json')
+		var meta_path = path.resolve(c.__META_DIR, swElement.id + ' ' + swElement.definition.keyname.split('sw-')[1] + '.json')
 		fs.writeFileSync(meta_path, stringifier(swElement))
 
 		if(-- stacksize === 0) {
@@ -208,7 +215,7 @@ function buildDom(err, callback) {
 			media_dom_element.overflow = 'hidden'
 			dom_element.appendChild(media_dom_element)
 			media_dom_element.autoplay = false
-			media_dom_element.controls = __DEBUG_MODE
+			media_dom_element.controls = c.__DEBUG_MODE
 			media_dom_element.muted = parentSwElement.properties.mute.values[0].db_value === 1
 
 		} else if (mediatype === 'Flash') {
@@ -241,8 +248,8 @@ function buildDom(err, callback) {
 		return dom_element
 	}
 	console.log('Start createDomRec')
-	var screen_dom_element = createDomRec(__SCREEN_ID)
-	// var scrdom = document.findElementByID(__SCREEN_ID)
+	var screen_dom_element = createDomRec(c.__SCREEN_ID)
+	// var scrdom = document.findElementByID(c.__SCREEN_ID)
 	// scrdom.delete()
 	document.body.appendChild(screen_dom_element)
 	callback(null, screen_dom_element)

@@ -159,29 +159,29 @@ module.exports = EntuLib
 
 // Sample usage
 
-var print_result = function print_result(data) {
-    console.log(stringifier(data))
-}
+// var print_result = function print_result(data) {
+//     console.log(stringifier(data))
+// }
 
-var stringifier = function stringifier(o) {
-    var cache = [];
-    return JSON.stringify(o, function(key, value) {
-        if (typeof value === 'object' && value !== null) {
-            if (cache.indexOf(value) !== -1) {
-                // Circular reference found, replace key
-                return 'Circular reference to: ' + key
-            }
-            // Store value in our collection
-            cache.push(value)
-        }
-        return value
-    }, '\t')
-}
+// var stringifier = function stringifier(o) {
+//     var cache = [];
+//     return JSON.stringify(o, function(key, value) {
+//         if (typeof value === 'object' && value !== null) {
+//             if (cache.indexOf(value) !== -1) {
+//                 // Circular reference found, replace key
+//                 return 'Circular reference to: ' + key
+//             }
+//             // Store value in our collection
+//             cache.push(value)
+//         }
+//         return value
+//     }, '\t')
+// }
 
-var entu_user_id = 1001
-var entu_user_key = 'Write your Entu key here'
-var entu_url = 'yourdomain.entu.ee'
-var EntuLib = new EntuLib(entu_user_id, entu_user_key, entu_url)
+// var entu_user_id = 1001
+// var entu_user_key = 'Write your Entu key here'
+// var entu_url = 'yourdomain.entu.ee'
+// var EntuLib = new EntuLib(entu_user_id, entu_user_key, entu_url)
 // EntuLib.getEntity(print_result, 684)
 // EntuLib.getChilds(print_result, 684)
 // EntuLib.getReferrals(print_result, 684)

@@ -1,9 +1,11 @@
+// 1. Core modules
 var util   = require("util")
 var events = require('events')
 var fs     = require('fs')
-// var helper = require('./helper')
 
-var swEmitter = new events.EventEmitter()
+
+// 3. Own modules
+var c           = require('./c.js')
 
 
 var console = window.console
@@ -321,7 +323,7 @@ function SwPlayer(err, dom_element, callback) {
 				var next_eid = element.next
 				var next_dom_id = dom_element.parentNode.id + '_' + next_eid
 				console.log(dom_element.id + ' STOPPED, coming up:', next_dom_id)
-				var delay_ms = __DEFAULT_DELAY_MS
+				var delay_ms = c.__DEFAULT_DELAY_MS
 				if (properties.delay.values !== undefined)
 					delay_ms = Number(properties.delay.values[0].db_value) * 1000
 				document.getElementById(next_dom_id).player.play(null, delay_ms, callback)
