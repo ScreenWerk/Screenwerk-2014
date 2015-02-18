@@ -28,6 +28,7 @@ var c               = require('./c.js')
 var configuration   = require('./configuration.json')
 var helper          = require('./helper.js')
 var loader          = require('./loader.js')
+var digest          = require('./digest.js')
 
 
 domain.on('error', function(err){
@@ -329,7 +330,7 @@ function startDigester(err, data) {
             fs.writeFileSync(meta_path, stringifier(swElement))
             if(-- stacksize === 0) {
                 console.log('====== Metadata flushed')
-                processElements(null, startDOM)
+                digest.processElements(null, startDOM)
             }
             return true
         })
@@ -347,7 +348,7 @@ function startDOM(err, options) {
     if (screen_dom_element)
         document.body.removeChild(screen_dom_element)
     console.log('====== Start startDOM')
-    buildDom(null, function(err, dom_element) {
+    digest.buildDom(null, function(err, dom_element) {
         screen_dom_element = dom_element
         console.log('DOM rebuilt')
     })

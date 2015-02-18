@@ -1,5 +1,10 @@
+// 1. Core modules
+var path            = require('path')
+var fs              = require('fs')
+
+
 // 2. Public modules from npm
-var later  = require("later")
+var later           = require("later")
 
 
 // 3. Own modules
@@ -257,3 +262,7 @@ function buildDom(err, callback) {
     callback(null, screen_dom_element)
     console.log('Finish createDomRec')
 }
+
+
+module.exports.processElements = processElements
+module.exports.buildDom = buildDom
