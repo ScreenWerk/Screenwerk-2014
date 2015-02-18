@@ -1,33 +1,59 @@
 // 1. Core modules
-var gui         = require('nw.gui')
-var assert      = require('assert')
 var util        = require('util')
 var fs          = require('fs')
+var path        = require('path')
 var https       = require('https')
-var events      = require('events')
 var uuid        = require('node-uuid')
 var my_crypto   = require('crypto')
-var domain      = require('domain').create()
 
 
 // 2. Public modules from npm
-var os      = require('os-utils')
 
 
 // 3. Own modules
 var EntuLib     = require('./entulib.js')
 var stringifier = require('./stringifier.js')
 var c           = require('./c.js')
+var helper      = require('./helper.js')
 
+
+var document = window.document
 
 var loading_process_count = 0
 var total_download_size = 0
 var bytes_downloaded = 0
+var decrementProcessCount = function decrementProcessCount() {
+    -- loading_process_count
+    // console.log('loading_process_count: ' + loading_process_count)
+    progress(loading_process_count + '| ' + helper.bytesToSize(total_download_size) + ' - ' + helper.bytesToSize(bytes_downloaded) + ' = ' + helper.bytesToSize(total_download_size - bytes_downloaded) )
+}
+var incrementProcessCount = function incrementProcessCount() {
+    ++ loading_process_count
+    // console.log('loading_process_count: ' + loading_process_count)
+    progress(loading_process_count + '| ' + helper.bytesToSize(total_download_size) + ' - ' + helper.bytesToSize(bytes_downloaded) + ' = ' + helper.bytesToSize(total_download_size - bytes_downloaded) )
+}
+var countLoadingProcesses = function countLoadingProcesses() {
+    return loading_process_count
+}
+
+var progress = function progress(message) {
+    if (document.body !== null) {
+        var progress_DOM = document.getElementById('progress')
+        if (progress_DOM === null) {
+            progress_DOM = document.createElement('pre')
+            progress_DOM.id = 'progress'
+            document.body.appendChild(progress_DOM)
+        }
+        progress_DOM.textContent = c.__VERSION + '\n' + message
+        document.getElementById('progress').style.display = 'block'
+    }
+}
+
 
 function loadMedia(err, entity_id, file_value, callback) {
     var file_id = file_value.db_value
     var file_md5 = file_value.md5
-    console.log('loadMedia ',file_value)
+    // console.log('loadMedia ',file_value)
     incrementProcessCount()
     if (err) {
         console.log('loadMedia err', err)
@@ -76,16 +102,16 @@ function loadMedia(err, entity_id, file_value, callback) {
         var md5sum = my_crypto.createHash('md5')
 
         total_download_size += Number(filesize)
-        console.log('Downloading:' + bytesToSize(bytes_downloaded) + ' of ' + bytesToSize(total_download_size))
-        progress(loading_process_count + '| ' + bytesToSize(total_download_size) + ' - ' + bytesToSize(bytes_downloaded) + ' = ' + bytesToSize(total_download_size - bytes_downloaded) )
+        console.log('Downloading:' + helper.bytesToSize(bytes_downloaded) + ' of ' + helper.bytesToSize(total_download_size))
+        progress(loading_process_count + '| ' + helper.bytesToSize(total_download_size) + ' - ' + helper.bytesToSize(bytes_downloaded) + ' = ' + helper.bytesToSize(total_download_size - bytes_downloaded) )
         response.on('data', function(chunk){
             md5sum.update(chunk)
             bytes_downloaded += chunk.length
-            progress(loading_process_count + '| ' + bytesToSize(total_download_size) + ' - ' + bytesToSize(bytes_downloaded) + ' = ' + bytesToSize(total_download_size - bytes_downloaded) )
+            progress(loading_process_count + '| ' + helper.bytesToSize(total_download_size) + ' - ' + helper.bytesToSize(bytes_downloaded) + ' = ' + helper.bytesToSize(total_download_size - bytes_downloaded) )
             writable.write(chunk)
         })
         response.on('end', function() {
-            progress(loading_process_count + '| ' + bytesToSize(total_download_size) + ' - ' + bytesToSize(bytes_downloaded) + ' = ' + bytesToSize(total_download_size - bytes_downloaded) )
+            progress(loading_process_count + '| ' + helper.bytesToSize(total_download_size) + ' - ' + helper.bytesToSize(bytes_downloaded) + ' = ' + helper.bytesToSize(total_download_size - bytes_downloaded) )
             writable.end()
             // MD5 check
             var my_md5 = md5sum.digest('hex')
@@ -142,6 +168,7 @@ function registerMeta(err, metadata, callback) {
         decrementProcessCount()
         return false
     }
+    // console.log('registerMeta ', metadata.id)
     var properties = metadata.properties
     // if (properties['valid-to'] !== undefined) {
     //  if (properties['valid-to'].values !== undefined) {
@@ -435,3 +462,12 @@ function registerChild(err, parent_eid, element, child_eid, callback) {
     callback(null)
 }
 
+module.exports.countLoadingProcesses = countLoadingProcesses
+// module.exports.total_download_size = total_download_size
+// module.exports.bytes_downloaded = bytes_downloaded
+// module.exports.decrementProcessCount = decrementProcessCount
+// module.exports.incrementProcessCount = incrementProcessCount
+module.exports.loadMeta = loadMeta
+module.exports.reloadMeta = reloadMeta
+module.exports.swElements = swElements
+module.exports.swElementsById = swElementsById

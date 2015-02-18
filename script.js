@@ -26,6 +26,8 @@ var EntuLib         = require('./entulib.js')
 var stringifier     = require('./stringifier.js')
 var c               = require('./c.js')
 var configuration   = require('./configuration.json')
+var helper          = require('./helper.js')
+var loader          = require('./loader.js')
 
 
 domain.on('error', function(err){
@@ -215,7 +217,7 @@ EntuLib.getEntity(c.__SCREEN_ID, function(err, result) {
         console.log('Can\'t reach Entu', err, result)
         if (local_published) {
             console.log('Trying to play with local content.')
-            loadMeta(null, null, c.__SCREEN_ID, c.__STRUCTURE, startDigester)
+            loader.loadMeta(null, null, c.__SCREEN_ID, c.__STRUCTURE, startDigester)
             return
         } else {
             console.log('Remote and local both unreachable. Terminating.')
@@ -227,7 +229,7 @@ EntuLib.getEntity(c.__SCREEN_ID, function(err, result) {
         console.log (result.error, 'Failed to load screen ' + c.__SCREEN_ID + ' from Entu.')
         if (local_published) {
             console.log('Trying to play with local content.')
-            loadMeta(null, null, c.__SCREEN_ID, c.__STRUCTURE, startDigester)
+            loader.loadMeta(null, null, c.__SCREEN_ID, c.__STRUCTURE, startDigester)
             return
         } else {
             console.log('Remote and local both unreachable. Terminating.')
@@ -241,20 +243,20 @@ EntuLib.getEntity(c.__SCREEN_ID, function(err, result) {
     if (local_published &&
         local_published.toJSON() === remote_published.toJSON()) {
         console.log('Trying to play with local content.')
-        loadMeta(null, null, c.__SCREEN_ID, c.__STRUCTURE, startDigester)
+        loader.loadMeta(null, null, c.__SCREEN_ID, c.__STRUCTURE, startDigester)
     }
     else {
         console.log('Remove local content. Fetch new from Entu!')
         clearSwTimeouts()
         local_published = new Date(Date.parse(remote_published.toJSON()))
-        reloadMeta(null, startDigester)
+        loader.reloadMeta(null, startDigester)
     }
 })
 
 // var swEmitter = new events.EventEmitter()
 
 
-progress(loading_process_count + '| ' + bytesToSize(total_download_size) + ' - ' + bytesToSize(bytes_downloaded) + ' = ' + bytesToSize(total_download_size - bytes_downloaded) )
+// progress(loader.countLoadingProcesses() + '| ' + bytesToSize(total_download_size) + ' - ' + bytesToSize(bytes_downloaded) + ' = ' + bytesToSize(total_download_size - bytes_downloaded) )
 
 function startDigester(err, data) {
     if (err) {
@@ -265,12 +267,13 @@ function startDigester(err, data) {
         }, 300)
         return
     }
-    if (loading_process_count > 0) {
-        // console.log('Waiting for loaders to calm down. Active processes: ' + loading_process_count)
+    // console.log('loader.countLoadingProcesses(): ' + loader.countLoadingProcesses())
+    if (loader.countLoadingProcesses() > 0) {
+        // console.log('Waiting for loaders to calm down. Active processes: ' + loader.countLoadingProcesses())
         return
     }
     console.log('Reached stable state. Flushing metadata and starting preprocessing elements.')
-    fs.writeFileSync('elements.debug.json', stringifier(swElementsById))
+    fs.writeFileSync('elements.debug.json', stringifier(loader.swElementsById))
 
     var doTimeout = function() {
         timeout_counter ++
@@ -294,10 +297,10 @@ function startDigester(err, data) {
                     console.log('Remove local content. Fetch new from Entu!')
                     clearSwTimeouts()
                     local_published = new Date(Date.parse(remote_published.toJSON()))
-                    reloadMeta(null, startDigester)
+                    loader.reloadMeta(null, startDigester)
                 } else {
                     doTimeout()
-                    // loadMeta(null, null, c.__SCREEN_ID, c.__STRUCTURE, startDigester)
+                    // loader.loadMeta(null, null, c.__SCREEN_ID, c.__STRUCTURE, startDigester)
                 }
             })
         }, 1000 * c.__UPDATE_INTERVAL_SECONDS)
@@ -310,8 +313,8 @@ function startDigester(err, data) {
             console.log('flushMeta err:', err)
             process.exit(99)
         }
-        var stacksize = swElements.length
-        swElements.every(function(swElement, idx) {
+        var stacksize = loader.swElements.length
+        loader.swElements.every(function(swElement, idx) {
             if (swElement.definition.keyname !== 'sw-media' && swElement.childs.length === 0) {
                 console.log('Unregister empty element ' + swElement.id)
                 unregisterMeta(null, idx, function(err, data) {

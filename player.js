@@ -5,6 +5,7 @@ var fs     = require('fs')
 
 
 // 3. Own modules
+var helper      = require('./helper.js')
 var c           = require('./c.js')
 
 
@@ -78,7 +79,7 @@ function SwPlayer(err, dom_element, callback) {
 				var self = this
 				tcIncr()
 				swLog('timeout_counter: ' + timeout_counter)
-				console.log(dom_element.id + ' Scheduling PLAY on ' + element.definition.keyname + ' ' + element.id + ' in ' + msToTime(timeout), "Timeouts set: " + timeout_counter)
+				console.log(dom_element.id + ' Scheduling PLAY on ' + element.definition.keyname + ' ' + element.id + ' in ' + helper.msToTime(timeout), "Timeouts set: " + timeout_counter)
 				var play_timeout = setTimeout(function() {
 									self.play(null, false, callback)
 								}, timeout)
@@ -157,7 +158,7 @@ function SwPlayer(err, dom_element, callback) {
 						var time_to_play = properties.duration.values[0].db_value * 1000 - time_from_start
 						if (time_to_play < 0)
 							time_to_play = 0
-						// console.log(msToTime(time_from_start) + ' passed, ' + msToTime(time_to_play) + ' left.')
+						// console.log(helper.msToTime(time_from_start) + ' passed, ' + helper.msToTime(time_to_play) + ' left.')
 						this.stop(null, time_to_play, function(){})
 					}
 				break
@@ -235,7 +236,7 @@ function SwPlayer(err, dom_element, callback) {
 				var self = this
 				tcIncr()
 				swLog('timeout_counter: ' + timeout_counter)
-				console.log(dom_element.id + ' Scheduling STOP on ' + element.definition.keyname + ' ' + element.id + ' in ' + msToTime(timeout), "Timeouts set: " + timeout_counter)
+				console.log(dom_element.id + ' Scheduling STOP on ' + element.definition.keyname + ' ' + element.id + ' in ' + helper.msToTime(timeout), "Timeouts set: " + timeout_counter)
 				var stop_timeout = setTimeout(function() {
 									self.stop(null, false, callback)
 								}, timeout)

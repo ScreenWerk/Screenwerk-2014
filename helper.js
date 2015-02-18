@@ -65,27 +65,7 @@ var swLog = window.swLog = function swLog(message, scope) {
     }
 }
 
-var progress = window.progress = function progress(message) {
-    if (window.document.body !== null) {
-        var progress_DOM = window.document.getElementById('progress')
-        if (progress_DOM === null) {
-            progress_DOM = document.createElement('pre')
-            progress_DOM.id = 'progress'
-            document.body.appendChild(progress_DOM)
-        }
-        progress_DOM.textContent = c.__VERSION + '\n' + message
-        document.getElementById('progress').style.display = 'block'
-    }
-}
 
-var decrementProcessCount = function decrementProcessCount() {
-    -- loading_process_count
-    progress(loading_process_count + '| ' + bytesToSize(total_download_size) + ' - ' + bytesToSize(bytes_downloaded) + ' = ' + bytesToSize(total_download_size - bytes_downloaded) )
-}
-var incrementProcessCount = function decrementProcessCount() {
-    ++ loading_process_count
-    progress(loading_process_count + '| ' + bytesToSize(total_download_size) + ' - ' + bytesToSize(bytes_downloaded) + ' = ' + bytesToSize(total_download_size - bytes_downloaded) )
-}
 
 
 var bytesToSize = function bytesToSize(bytes) {
@@ -126,3 +106,6 @@ var msToTime = function msToTime(ms) {
     }
     return amount.toFixed(decimals) + ' ' + unit
 }
+
+module.exports.bytesToSize = bytesToSize
+module.exports.msToTime = msToTime
