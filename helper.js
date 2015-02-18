@@ -1,45 +1,33 @@
-var fs          = require('fs')
+// 1. core modules
+var path    = require('path')
+var fs      = require('fs')
+
+
+// 3. Own modules
 var stringifier = require('./stringifier.js')
+var c           = require('./c.js')
 
-__LOG_DIR = 'sw-log/'
+var document = window.document
 
-// Make sure folders for metadata, media and logs are in place
-var a = [__LOG_DIR]
-a.forEach(function(foldername) {
-    fs.lstat(foldername, function(err, stats) {
-        if (err) {
-            console.log ('Creating folder for ' + foldername)
-            fs.mkdir(foldername)
-        }
-        else if (!stats.isDirectory()) {
-            console.log ('Renaming existing file "' + foldername + '" to "' + foldername + '.bak')
-            fs.renameSync(foldername, foldername + '.bak')
-            console.log ('Creating folder for ' + foldername)
-            fs.mkdir(foldername)
-        }
-    })
-})
-
-
-var datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '')
-var c_stream_path = __LOG_DIR + './Console ' + datestring + '.log'
-var s_stream_path = __LOG_DIR + './System ' + datestring + '.log'
-var consoleStream = fs.createWriteStream(c_stream_path, {flags:'a'})
-var sysLogStream = fs.createWriteStream(s_stream_path, {flags:'a'})
 var log_streams_are_closed = false
 var message_q = []
 var swLog = window.swLog = function swLog(message, scope) {
+    var datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '')
+    var c_stream_path = path.resolve(c.__LOG_DIR, './Console ' + datestring + '.log')
+    var s_stream_path = path.resolve(c.__LOG_DIR, './System ' + datestring + '.log')
+    var consoleStream = fs.createWriteStream(c_stream_path, {flags:'a'})
+    var sysLogStream = fs.createWriteStream(s_stream_path, {flags:'a'})
     console.log(message)
     if (log_streams_are_closed) {
-        console.log('Log files are closed allready.')
+        console.log('Log files are closed already.')
         return { end: function() {return false}}
     }
     if (scope === undefined)
         scope = 'INFO'
     now = new Date()
     message_q.push(scope + ' ' + message)
-    if (window.document.body !== null) {
-        var console_DOM = window.document.getElementById('console')
+    if (document.body !== null) {
+        var console_DOM = document.getElementById('console')
         if (console_DOM === null) {
             console_DOM = document.createElement('pre')
             console_DOM.id = 'console'
@@ -62,20 +50,27 @@ var swLog = window.swLog = function swLog(message, scope) {
         }
     }
 }
+module.exports.swLog = swLog
+
 
 var progress = window.progress = function progress(message) {
-    if (window.document.body !== null) {
-        var progress_DOM = window.document.getElementById('progress')
+    if (document.body !== null) {
+        var progress_DOM = document.getElementById('progress')
         if (progress_DOM === null) {
             progress_DOM = document.createElement('pre')
             progress_DOM.id = 'progress'
             document.body.appendChild(progress_DOM)
         }
-        progress_DOM.textContent = message
+        console.log(c.__VERSION + '\n' + message)
+        progress_DOM.textContent = c.__VERSION + '\n' + message
         document.getElementById('progress').style.display = 'block'
     }
 }
+module.exports.progress = progress
 
+var loading_process_count = 0
+var total_download_size = 0
+var bytes_downloaded = 0
 var decrementProcessCount = function decrementProcessCount() {
     -- loading_process_count
     progress(loading_process_count + '| ' + bytesToSize(total_download_size) + ' - ' + bytesToSize(bytes_downloaded) + ' = ' + bytesToSize(total_download_size - bytes_downloaded) )
@@ -84,39 +79,12 @@ var incrementProcessCount = function decrementProcessCount() {
     ++ loading_process_count
     progress(loading_process_count + '| ' + bytesToSize(total_download_size) + ' - ' + bytesToSize(bytes_downloaded) + ' = ' + bytesToSize(total_download_size - bytes_downloaded) )
 }
+module.exports.decrementProcessCount = decrementProcessCount
+module.exports.incrementProcessCount = incrementProcessCount
+module.exports.loading_process_count = loading_process_count
+module.exports.total_download_size = total_download_size
+module.exports.bytes_downloaded = bytes_downloaded
 
-var error = window.error = function error(message, link) {
-    if (window.document.body !== null) {
-        var error_DOM = window.document.getElementById('error')
-        if (error_DOM === null) {
-            error_DOM = document.createElement('div')
-            error_DOM.id = 'error'
-            document.body.appendChild(error_DOM)
-        }
-        if (link === undefined)
-            error_DOM.textContent = message
-        else {
-            var a_DOM = document.createElement('a')
-            a_DOM.href = link
-            a_DOM.textContent = message
-            error_DOM.appendChild(a_DOM)
-        }
-
-        document.getElementById('error').style.display = 'block'
-    }
-    return {
-        finish: function() {
-            document.getElementById('error').style.display = 'none'
-        }
-    }
-}
-
-function noOp(err) {
-    if (err) {
-        console.log('noOp err', err)
-    }
-    console.log('noOp')
-}
 
 var bytesToSize = function bytesToSize(bytes) {
     var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB']
@@ -125,6 +93,8 @@ var bytesToSize = function bytesToSize(bytes) {
     var decimals = Math.max(0, i-1)
     return (bytes / Math.pow(1024, i)).toFixed(decimals) + ' ' + sizes[i]
 }
+module.exports.bytesToSize = bytesToSize
+
 
 var msToTime = function msToTime(ms) {
     if (ms === 0) {
@@ -156,3 +126,5 @@ var msToTime = function msToTime(ms) {
     }
     return amount.toFixed(decimals) + ' ' + unit
 }
+module.exports.msToTime = msToTime
+

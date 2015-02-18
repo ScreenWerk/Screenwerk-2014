@@ -1,10 +1,11 @@
 {
   "name": "ScreenWerk-2014",
   "description": "Digital signage made simple!",
-  "version": "0.0.1",
+  "version": "0.2.0-alpha.22",
   "main": "index.html",
   "license": "CC-SA",
   "private": true,
+  "single-instance": false,
   "repository": {
     "type": "git",
     "url": "https://github.com/argoroots/Screenwerk"

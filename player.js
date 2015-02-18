@@ -48,8 +48,12 @@ function SwPlayer(err, dom_element, callback) {
 				if (properties['valid-from'].values !== undefined) {
 					var vf_date = new Date(properties['valid-from'].values[0].db_value)
 					if (vf_date.getTime() > Date.now()) {
-						console.log('DOM id: ' + element.id + ' valid-from not reached.', properties['valid-from'].values[0].db_value)
-						callback('not valid until', vf_date.getTime(), element.id)
+						console.log('DOM id: ' + element.id + ' valid-from not reached.', vf_date.getTime())
+						callback('not valid until', [vf_date.getTime(), element.id])
+						if (element.next !== undefined ) {
+							document.getElementById(dom_element.parentNode.id + '_' + element.next)
+						    	.player.play(null, 0, callback)
+						}
 						return this
 					}
 				}
@@ -58,15 +62,21 @@ function SwPlayer(err, dom_element, callback) {
 				if (properties['valid-to'].values !== undefined) {
 					var vt_date = new Date(properties['valid-to'].values[0].db_value)
 					if (vt_date.getTime() < Date.now()) {
-						console.log('DOM id: ' + element.id + ' valid-to expired.', properties['valid-to'].values[0].db_value)
-						callback('expired', element.id)
+						console.log('DOM id: ' + element.id + ' valid-to expired.', vt_date.getTime())
+						callback('expired', [vt_date.getTime(), element.id])
+						if (element.next !== undefined ) {
+							document.getElementById(dom_element.parentNode.id + '_' + element.next)
+						    	.player.play(null, 0, callback)
+						}
 						return this
 					}
 				}
 			}
 			if (timeout && timeout > 0) {
 				var self = this
-				console.log(dom_element.id + ' Scheduling PLAY on ' + element.definition.keyname + ' ' + element.id + ' in ' + msToTime(timeout))
+				tcIncr()
+				swLog('timeout_counter: ' + timeout_counter)
+				console.log(dom_element.id + ' Scheduling PLAY on ' + element.definition.keyname + ' ' + element.id + ' in ' + msToTime(timeout), "Timeouts set: " + timeout_counter)
 				var play_timeout = setTimeout(function() {
 									self.play(null, false, callback)
 								}, timeout)
@@ -84,6 +94,8 @@ function SwPlayer(err, dom_element, callback) {
 			} else {
 				var current_class = dom_element.className
 				dom_element.className = current_class + ' ' + element.animate.begin
+				tcIncr()
+				swLog('timeout_counter: ' + timeout_counter)
 				setTimeout(function() {
 					dom_element.className = current_class
 				}, 1000)
@@ -116,9 +128,6 @@ function SwPlayer(err, dom_element, callback) {
 				break
 				case 'sw-schedule':
 					dom_element.childNodes[0].player.play(null, 0, function(){})
-
-					// console.log('clearSwTimeouts()', sw_timeouts.length)
-					// clearSwTimeouts()
 
 					if (properties['cleanup'].values[0].db_value === 1) {
 						var cleanupLayer = properties['ordinal'].values[0].db_value
@@ -159,14 +168,28 @@ function SwPlayer(err, dom_element, callback) {
 					dom_element.childNodes[0].player.play(null, 0, function(){})
 				break
 				case 'sw-playlist':
-					dom_element.childNodes[0].player.play(null, 0, function(){})
+					dom_element.childNodes[0].player.play(null, 0, function(err, data){
+						if (err) {
+							console.log('Cant play', err, data)
+						}
+					})
 				break
 				case 'sw-playlist-media':
+					var start_succeeded = true
 					if (dom_element.childNodes.length > 0) {
-						dom_element.childNodes[0].player.play(null, 0, function(){})
+						dom_element.childNodes[0].player.play(null, 0, function(err, data){
+							if (err) {
+								console.log('Cant play', err, data)
+								start_succeeded = false
+							}
+						})
 					}
-					if (properties.duration.values !== undefined) {
-						this.stop(null, Number(properties.duration.values[0].db_value) * 1000, function(){})
+					if (start_succeeded && properties.duration.values !== undefined) {
+						this.stop(null, Number(properties.duration.values[0].db_value) * 1000, function(err, data) {
+							if (err) {
+								console.log('Cant play', err, data)
+							}
+						})
 					}
 				break
 				case 'sw-media':
@@ -182,7 +205,11 @@ function SwPlayer(err, dom_element, callback) {
 						if (media_dom_element.has_event_listener === undefined) {
 							media_dom_element.has_event_listener = true
 							media_dom_element.addEventListener('ended', function() {
-								dom_element.parentNode.player.stop(null, 0, function(){})
+								dom_element.parentNode.player.stop(null, 0, function(err, data) {
+									if (err) {
+										console.log('Cant play', err, data)
+									}
+								})
 							})
 						}
 
@@ -204,7 +231,9 @@ function SwPlayer(err, dom_element, callback) {
 			}
 			if (timeout && timeout > 0) {
 				var self = this
-				console.log(dom_element.id + ' Scheduling STOP on ' + element.definition.keyname + ' ' + element.id + ' in ' + msToTime(timeout))
+				tcIncr()
+				swLog('timeout_counter: ' + timeout_counter)
+				console.log(dom_element.id + ' Scheduling STOP on ' + element.definition.keyname + ' ' + element.id + ' in ' + msToTime(timeout), "Timeouts set: " + timeout_counter)
 				var stop_timeout = setTimeout(function() {
 									self.stop(null, false, callback)
 								}, timeout)
@@ -222,6 +251,8 @@ function SwPlayer(err, dom_element, callback) {
 			} else {
 				var current_class = dom_element.className
 				dom_element.className = current_class + ' ' + element.animate.end
+				tcIncr()
+				swLog('timeout_counter: ' + timeout_counter)
 				setTimeout(function() {
 					dom_element.style.display = 'none'
 					dom_element.className = current_class
@@ -298,6 +329,8 @@ function SwPlayer(err, dom_element, callback) {
 			return this
 		},
 		clearMyTimeouts: function(err, callback) {
+			console.log('Clearing ' + my_timeouts.length + ' my_timeouts.', 'Timeouts set total: ' + timeout_counter)
+			swLog('Clearing ' + my_timeouts.length + ' my_timeouts. Timeouts set total: ' + timeout_counter)
 			while (my_timeouts.length > 0) {
 				clearTimeout(my_timeouts.pop())
 			}
@@ -322,4 +355,4 @@ function SwPlayer(err, dom_element, callback) {
 		}
 	}
 }
-
+module.exports = SwPlayer

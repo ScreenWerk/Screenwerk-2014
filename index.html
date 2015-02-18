@@ -1,71 +1,72 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>ScreenWerk 2014</title>
-<link rel="stylesheet" href="animate.css">
-<style>
-* {
-  cursor: none;
-  margin: 0px 0px 0px 0px;
-  padding: 0px 0px 0px 0px;
-  border-width: 0px;
-}
-body {
-  overflow: hidden;
-  background-color: black;
-  /*background-image: url('imgs/penrose_11520x1080.jpg');*/
-}
-html, body {
-/*  height: 100%;
-  width: 100%;
-*/}
-
-#console {
-  background-color: white;
-  opacity: 0.8;
-  width: 485px;
-  padding: 20px;
-  display: none;
-}
-#progress{
-  background-color: yellow;
-  z-index: 1000;
-}
-#error {
-  background-color: red;
-}
-#progress, #error {
-  opacity: 0.6;
-  float: right;
-  display: block;
-  padding: 10px;
-  margin: 100px;
-  border-radius: 15px;
-  text-align: left;
-}
-iframe {
-    overflow:hidden;
-}
-
-.sw-layout {
+  <title>ScreenWerk 2014</title>
+  <link rel="stylesheet" href="animate.css">
+  <meta charset="UTF-8"/>
+  <style>
+  * {
+    cursor: none;
+    margin: 0px 0px 0px 0px;
+    padding: 0px 0px 0px 0px;
+    border-width: 0px;
+  }
+  body {
+    overflow: hidden;
     background-color: black;
-}
+    /*background-image: url('imgs/penrose_11520x1080.jpg');*/
+  }
+  html, body {
+  /*  height: 100%;
+    width: 100%;
+  */}
 
-img {
-    width: 100%;
-}
-video {
-    width: 100%;
-    /*object-fit: fill;*/
-    height: 100%;
-    background-color: black;
-}
-</style>
-<script src="helper.js"></script>
-<script src="digest.js"></script>
-<script src="loader.js"></script>
-<script src="player.js"></script>
-<script src="script.js"></script>
+  #console {
+    background-color: white;
+    opacity: 0.8;
+    width: 485px;
+    padding: 20px;
+    display: none;
+  }
+  #progress{
+    background-color: yellow;
+    z-index: 1000;
+  }
+  #error {
+    background-color: red;
+  }
+  #progress, #error {
+    opacity: 0.6;
+    float: right;
+    display: block;
+    padding: 10px;
+    margin: 100px;
+    border-radius: 15px;
+    text-align: left;
+  }
+  iframe {
+      overflow:hidden;
+  }
+
+  .sw-layout {
+      background-color: black;
+  }
+
+  img {
+      width: 100%;
+  }
+  video {
+      width: 100%;
+      /*object-fit: fill;*/
+      height: 100%;
+      background-color: black;
+  }
+  </style>
+  <!-- <script src="helper.js"></script>
+  <script src="digest.js"></script>
+  <script src="loader.js"></script>
+  <script src="player.js"></script> -->
+  <script src="script.js" charset="utf-8"></script>
 </head>
 <body>
   <pre id='progress'></pre>

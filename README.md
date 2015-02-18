@@ -1,5 +1,7 @@
 # ScreenWerk 2014
 
+[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/argoroots/Screenwerk?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+
 ### Important notes
 > SW14 uses node-webkit >= v0.10.5
 > Out of the box SW14 supports only webm video type.

@@ -1,10 +1,18 @@
-var https   = require('https')
-var crypto = require('crypto')
+// 1. core modules
+var https       = require('https')
+var crypto      = require('crypto')
 var querystring = require('querystring')
-var fs       = require('fs')
+var fs          = require('fs')
 
 
-var EntuLib = function EntuLib(entu_user_id, entu_user_key, entu_url) {
+// 3. Own modules
+var stringifier = require('./stringifier.js')
+
+
+var EntuLib = function EntuLib(entu_user_id, entu_api_key, entu_url) {
+    // console.log('Accessing Entu with ', entu_user_id)
+    console.log('Accessing Entu with ' + entu_api_key)
+    // console.log('Accessing Entu with ', entu_url)
 
     var POLICY_EXPIRATION_MINUTES = 15
     var API_VERSION = '/api2/'
@@ -26,7 +34,9 @@ var EntuLib = function EntuLib(entu_user_id, entu_user_key, entu_url) {
         var policy = { 'expiration': expiration_time.toISOString(), 'conditions': conditions }
         policy = JSON.stringify(policy)
         encoded_policy = new Buffer(new Buffer(policy).toString('utf8')).toString('base64')
-        var signature = crypto.createHmac('sha1', entu_user_key).update(encoded_policy).digest().toString('base64')
+        var signature = crypto.createHmac('sha1', entu_api_key)
+            .update(encoded_policy)
+            .digest().toString('base64')
         entu_query.policy = encoded_policy
         entu_query.user = entu_user_id
         entu_query.signature = signature
@@ -159,29 +169,15 @@ module.exports = EntuLib
 
 // Sample usage
 
-var print_result = function print_result(data) {
-    console.log(stringifier(data))
-}
+// var print_result = function print_result(data) {
+//     console.log(stringifier(data))
+// }
 
-var stringifier = function stringifier(o) {
-    var cache = [];
-    return JSON.stringify(o, function(key, value) {
-        if (typeof value === 'object' && value !== null) {
-            if (cache.indexOf(value) !== -1) {
-                // Circular reference found, replace key
-                return 'Circular reference to: ' + key
-            }
-            // Store value in our collection
-            cache.push(value)
-        }
-        return value
-    }, '\t')
-}
 
-var entu_user_id = 1001
-var entu_user_key = 'Write your Entu key here'
-var entu_url = 'yourdomain.entu.ee'
-var EntuLib = new EntuLib(entu_user_id, entu_user_key, entu_url)
+// var entu_user_id = 1001
+// var entu_api_key = 'Write your Entu key here'
+// var entu_url = 'yourdomain.entu.ee'
+// var EntuLib = new EntuLib(entu_user_id, entu_api_key, entu_url)
 // EntuLib.getEntity(print_result, 684)
 // EntuLib.getChilds(print_result, 684)
 // EntuLib.getReferrals(print_result, 684)
