@@ -23,6 +23,7 @@ var os              = require('os-utils')
 
 // 3. Own modules
 var EntuLib         = require('./entulib.js')
+var player          = require('./player.js')
 var stringifier     = require('./stringifier.js')
 var c               = require('./c.js')
 var configuration   = require('./configuration.json')
@@ -175,40 +176,6 @@ try {
     local_published = false
 }
 
-// Register timeouts that need to be cleared on player restart
-var timeout_counter = 0
-var sw_timeouts = []
-function clearSwTimeouts() {
-    console.log('Clearing ' + sw_timeouts.length + ' sw_timeouts.', 'Timeouts set total: ' + timeout_counter)
-    swLog('Clearing ' + sw_timeouts.length + ' sw_timeouts. Timeouts set total: ' + timeout_counter)
-    while (sw_timeouts.length > 0) {
-        clearTimeout(sw_timeouts.pop())
-    }
-}
-
-var tcIncr = function() {
-    timeout_counter ++
-    if (c.__RELAUNCH_THRESHOLD > 0 && timeout_counter > c.__RELAUNCH_THRESHOLD) {
-        // document.location.reload(true)
-        // window.location.reload(3)
-        console.log("=====================================")
-        console.log("== RELAUNCHING! =====================")
-        console.log("=====================================")
-
-        //Restart node-webkit app
-        var child_process = require("child_process")
-
-        //Start new app
-        var child = child_process.spawn(process.execPath, ['./', c.__SCREEN_ID, 'screen='+c.__SCREEN, 'relaunch='+c.__RELAUNCH_THRESHOLD], {detached: true})
-
-        //Don't wait for it
-        child.unref()
-
-        //Quit current
-        player_window.hide() // hide window to prevent black display
-        process.exit(1)  // quit node-webkit app
-    }
-}
 
 // Fetch publishing time for screen, if Entu is reachable
 //   and start the show
@@ -248,7 +215,7 @@ EntuLib.getEntity(c.__SCREEN_ID, function(err, result) {
     }
     else {
         console.log('Remove local content. Fetch new from Entu!')
-        clearSwTimeouts()
+        player.clearSwTimeouts()
         local_published = new Date(Date.parse(remote_published.toJSON()))
         loader.reloadMeta(null, startDigester)
     }
@@ -277,7 +244,7 @@ function startDigester(err, data) {
     fs.writeFileSync('elements.debug.json', stringifier(loader.swElementsById))
 
     var doTimeout = function() {
-        timeout_counter ++
+        player.tcIncr()
         setTimeout(function() {
             // console.log('RRRRRRRRRRR: Pinging Entu for news.')
             EntuLib.getEntity(c.__SCREEN_ID, function(err, result) {
@@ -296,7 +263,7 @@ function startDigester(err, data) {
                     && (new Date()).toJSON() > remote_published.toJSON()
                     ) {
                     console.log('Remove local content. Fetch new from Entu!')
-                    clearSwTimeouts()
+                    player.clearSwTimeouts()
                     local_published = new Date(Date.parse(remote_published.toJSON()))
                     loader.reloadMeta(null, startDigester)
                 } else {
@@ -353,8 +320,8 @@ function startDOM(err, options) {
         console.log('DOM rebuilt')
     })
     console.log('====== Finish startDOM', options)
-    clearSwTimeouts()
-    screen_dom_element.player = new SwPlayer(null, screen_dom_element, function(err, data) {
+    player.clearSwTimeouts()
+    screen_dom_element.player = new player.SwPlayer(null, screen_dom_element, function(err, data) {
         console.log('startDOM err:', err, util.inspect(data))
         process.exit(99)
     })

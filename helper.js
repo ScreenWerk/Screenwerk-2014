@@ -109,3 +109,4 @@ var msToTime = function msToTime(ms) {
 
 module.exports.bytesToSize = bytesToSize
 module.exports.msToTime = msToTime
+module.exports.swLog = swLog

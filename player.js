@@ -10,6 +10,7 @@ var c           = require('./c.js')
 
 
 var console = window.console
+var document = window.document
 
 // var consoleStream = fs.createWriteStream('./console.log', {flags:'a'})
 // var sysLogStream = fs.createWriteStream('./system.log', {flags:'a'})
@@ -78,7 +79,7 @@ function SwPlayer(err, dom_element, callback) {
 			if (timeout && timeout > 0) {
 				var self = this
 				tcIncr()
-				swLog('timeout_counter: ' + timeout_counter)
+				helper.swLog('timeout_counter: ' + timeout_counter)
 				console.log(dom_element.id + ' Scheduling PLAY on ' + element.definition.keyname + ' ' + element.id + ' in ' + helper.msToTime(timeout), "Timeouts set: " + timeout_counter)
 				var play_timeout = setTimeout(function() {
 									self.play(null, false, callback)
@@ -98,7 +99,7 @@ function SwPlayer(err, dom_element, callback) {
 				var current_class = dom_element.className
 				dom_element.className = current_class + ' ' + element.animate.begin
 				tcIncr()
-				swLog('timeout_counter: ' + timeout_counter)
+				helper.swLog('timeout_counter: ' + timeout_counter)
 				setTimeout(function() {
 					dom_element.className = current_class
 				}, 1000)
@@ -235,7 +236,7 @@ function SwPlayer(err, dom_element, callback) {
 			if (timeout && timeout > 0) {
 				var self = this
 				tcIncr()
-				swLog('timeout_counter: ' + timeout_counter)
+				helper.swLog('timeout_counter: ' + timeout_counter)
 				console.log(dom_element.id + ' Scheduling STOP on ' + element.definition.keyname + ' ' + element.id + ' in ' + helper.msToTime(timeout), "Timeouts set: " + timeout_counter)
 				var stop_timeout = setTimeout(function() {
 									self.stop(null, false, callback)
@@ -255,7 +256,7 @@ function SwPlayer(err, dom_element, callback) {
 				var current_class = dom_element.className
 				dom_element.className = current_class + ' ' + element.animate.end
 				tcIncr()
-				swLog('timeout_counter: ' + timeout_counter)
+				helper.swLog('timeout_counter: ' + timeout_counter)
 				setTimeout(function() {
 					dom_element.style.display = 'none'
 					dom_element.className = current_class
@@ -333,7 +334,7 @@ function SwPlayer(err, dom_element, callback) {
 		},
 		clearMyTimeouts: function(err, callback) {
 			console.log('Clearing ' + my_timeouts.length + ' my_timeouts.', 'Timeouts set total: ' + timeout_counter)
-			swLog('Clearing ' + my_timeouts.length + ' my_timeouts. Timeouts set total: ' + timeout_counter)
+			helper.swLog('Clearing ' + my_timeouts.length + ' my_timeouts. Timeouts set total: ' + timeout_counter)
 			while (my_timeouts.length > 0) {
 				clearTimeout(my_timeouts.pop())
 			}
@@ -359,3 +360,41 @@ function SwPlayer(err, dom_element, callback) {
 	}
 }
 
+// Register timeouts that need to be cleared on player restart
+var timeout_counter = 0
+var sw_timeouts = []
+function clearSwTimeouts() {
+    console.log('Clearing ' + sw_timeouts.length + ' sw_timeouts.', 'Timeouts set total: ' + timeout_counter)
+    helper.swLog('Clearing ' + sw_timeouts.length + ' sw_timeouts. Timeouts set total: ' + timeout_counter)
+    while (sw_timeouts.length > 0) {
+        clearTimeout(sw_timeouts.pop())
+    }
+}
+
+var tcIncr = function() {
+    timeout_counter ++
+    if (c.__RELAUNCH_THRESHOLD > 0 && timeout_counter > c.__RELAUNCH_THRESHOLD) {
+        // document.location.reload(true)
+        // window.location.reload(3)
+        console.log("=====================================")
+        console.log("== RELAUNCHING! =====================")
+        console.log("=====================================")
+
+        //Restart node-webkit app
+        var child_process = require("child_process")
+
+        //Start new app
+        var child = child_process.spawn(process.execPath, ['./', c.__SCREEN_ID, 'screen='+c.__SCREEN, 'relaunch='+c.__RELAUNCH_THRESHOLD], {detached: true})
+
+        //Don't wait for it
+        child.unref()
+
+        //Quit current
+        player_window.hide() // hide window to prevent black display
+        process.exit(1)  // quit node-webkit app
+    }
+}
+
+module.exports.tcIncr = tcIncr
+module.exports.SwPlayer = SwPlayer
+module.exports.clearSwTimeouts = clearSwTimeouts
