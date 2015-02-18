@@ -1,4 +1,5 @@
 module.exports = {
+  __APPLICATION_NAME: undefined,
   __VERSION: undefined,
   __HOSTNAME: undefined,
   __META_DIR: undefined,

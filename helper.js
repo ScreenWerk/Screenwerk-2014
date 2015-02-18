@@ -6,6 +6,7 @@ var fs          = require('fs')
 var stringifier = require('./stringifier.js')
 var c           = require('./c.js')
 
+
 c.__LOG_DIR = 'sw-log/'
 
 fs.lstat(c.__LOG_DIR, function(err, stats) {
@@ -86,38 +87,6 @@ var incrementProcessCount = function decrementProcessCount() {
     progress(loading_process_count + '| ' + bytesToSize(total_download_size) + ' - ' + bytesToSize(bytes_downloaded) + ' = ' + bytesToSize(total_download_size - bytes_downloaded) )
 }
 
-var error = window.error = function error(message, link) {
-    if (window.document.body !== null) {
-        var error_DOM = window.document.getElementById('error')
-        if (error_DOM === null) {
-            error_DOM = document.createElement('div')
-            error_DOM.id = 'error'
-            document.body.appendChild(error_DOM)
-        }
-        if (link === undefined)
-            error_DOM.textContent = message
-        else {
-            var a_DOM = document.createElement('a')
-            a_DOM.href = link
-            a_DOM.textContent = message
-            error_DOM.appendChild(a_DOM)
-        }
-
-        document.getElementById('error').style.display = 'block'
-    }
-    return {
-        finish: function() {
-            document.getElementById('error').style.display = 'none'
-        }
-    }
-}
-
-function noOp(err) {
-    if (err) {
-        console.log('noOp err', err)
-    }
-    console.log('noOp')
-}
 
 var bytesToSize = function bytesToSize(bytes) {
     var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB']

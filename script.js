@@ -33,10 +33,10 @@ domain.on('error', function(err){
 })
 
 
-
 c.__VERSION = gui.App.manifest.version
+c.__APPLICATION_NAME = gui.App.manifest.name
 
-console.log ( "= ScreenWerk v." + c.__VERSION + " ==================================")
+console.log ( '= ' + c.__APPLICATION_NAME + ' v.' + c.__VERSION + ' ==================================')
 console.log ( os.platform(), 'SYSTEM')
 
 
