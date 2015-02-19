@@ -1,5 +1,5 @@
 {
   "run_on_screen": 2,
-  "debug": true,
+  "debug": false,
   "relaunch": 0
 }
