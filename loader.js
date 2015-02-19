@@ -1,21 +1,20 @@
 // 1. Core modules
-var util        = require('util')
-var fs          = require('fs')
-var path        = require('path')
-var https       = require('https')
-var uuid        = require('node-uuid')
-var my_crypto   = require('crypto')
+var util            = require('util')
+var fs              = require('fs')
+var path            = require('path')
+var https           = require('https')
+var uuid            = require('node-uuid')
+var my_crypto       = require('crypto')
 
 
 // 2. Public modules from npm
 
 
 // 3. Own modules
-var EntuLib     = require('./entulib.js')
-var stringifier = require('./stringifier.js')
-var c           = require('./c.js')
-var helper      = require('./helper.js')
-
+var entulib         = require('./entulib.js')
+var stringifier     = require('./stringifier.js')
+var c               = require('./c.js')
+var helper          = require('./helper.js')
 
 var document = window.document
 
@@ -270,6 +269,8 @@ function reloadMeta(err, callback) {
 // Load metafiles.
 // Fetch only if not present
 function loadMeta(err, parent_eid, eid, struct_node, callback) {
+    var EntuLib = entulib(c.__SCREEN_ID, c.__API_KEY, c.__HOSTNAME)
+    console.log('initialize EntuLib with ' + c.__SCREEN_ID + '|' + c.__API_KEY + '|' + c.__HOSTNAME)
     // console.log('loadMeta: ', eid, struct_node)
     incrementProcessCount()
     if (err) {
@@ -284,7 +285,6 @@ function loadMeta(err, parent_eid, eid, struct_node, callback) {
 
     fs.readFile(meta_path, function(err, data) {
         if (err) {
-            // console.log('ENOENT', meta_path, err, data)
             EntuLib.getEntity(eid, function(err, result) {
                 if (err) {
                     console.log(definition + ': ' + util.inspect(result), err, result)
@@ -322,7 +322,7 @@ function loadMeta(err, parent_eid, eid, struct_node, callback) {
                                         decrementProcessCount()
                                         return // form writeFile -> getEntity -> getEntity -> readFile -> loadMeta
                                     } else {
-                                        console.log('calling back', parent_eid, eid, struct_node, callback)
+                                        // console.log('calling back', parent_eid, eid, struct_node, callback)
                                         loadMeta(null, parent_eid, eid, struct_node, callback)
                                         decrementProcessCount()
                                         return // form writeFile -> getEntity -> getEntity -> readFile -> loadMeta

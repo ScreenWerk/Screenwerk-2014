@@ -13,7 +13,6 @@ var fs              = require('fs')
 var https           = require('https')
 var events          = require('events')
 var uuid            = require('node-uuid')
-var domain          = require('domain').create()
 var path            = require('path')
 
 
@@ -22,7 +21,7 @@ var os              = require('os-utils')
 
 
 // 3. Own modules
-var EntuLib         = require('./entulib.js')
+var entulib         = require('./entulib.js')
 var player          = require('./player.js')
 var stringifier     = require('./stringifier.js')
 var c               = require('./c.js')
@@ -31,17 +30,8 @@ var helper          = require('./helper.js')
 var loader          = require('./loader.js')
 var digest          = require('./digest.js')
 
-
-domain.on('error', function(err){
-    console.log(err)
-})
-
-
 c.__VERSION = gui.App.manifest.version
 c.__APPLICATION_NAME = gui.App.manifest.name
-
-console.log ( '= ' + c.__APPLICATION_NAME + ' v.' + c.__VERSION + ' ==================================')
-console.log ( os.platform(), 'SYSTEM')
 
 
 var home_path = ''
@@ -63,6 +53,32 @@ c.__MEDIA_DIR = path.resolve(home_path, 'sw-media')
 if (!fs.existsSync(c.__MEDIA_DIR)) {
     fs.mkdirSync(c.__MEDIA_DIR)
 }
+c.__LOG_DIR = path.resolve(home_path, 'sw-log')
+if (!fs.existsSync(c.__LOG_DIR)) {
+    fs.mkdirSync(c.__LOG_DIR)
+}
+// log_path = path.resolve(c.__LOG_DIR, 'production.log')
+
+// TODO
+// logging problem to solve.
+// Switching logs off till then
+//
+// var consoleStream = fs.createWriteStream(log_path, {flags:'a'})
+// var proxied = console.log
+// console.log = function() {
+//     var datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '')
+//     var arr = [], p, i = 0
+//     for (p in arguments)
+//         arr[i++] = arguments[p]
+
+//     consoleStream.write(datestring + ': ' + arr.join() + '\n')
+//     return proxied.apply(this, arguments)
+// }
+
+
+console.log ( '= ' + c.__APPLICATION_NAME + ' v.' + c.__VERSION + ' ==================================')
+console.log ( os.platform() )
+
 
 c.__STRUCTURE = {"name":"screen","reference":{"name":"screen-group","reference":{"name":"configuration","child":{"name":"schedule","reference":{"name":"layout","child":{"name":"layout-playlist","reference":{"name":"playlist","child":{"name":"playlist-media","reference":{"name":"media"}}}}}}}}}
 c.__HIERARCHY = {'child_of': {}, 'parent_of': {}}
@@ -116,7 +132,7 @@ if (fs.existsSync(uuid_path)) {
 
 
 // console.log('initialize EntuLib with ' + c.__SCREEN_ID + '|' + c.__API_KEY + '|' + c.__HOSTNAME)
-var EntuLib = new EntuLib(c.__SCREEN_ID, c.__API_KEY, c.__HOSTNAME)
+var EntuLib = entulib(c.__SCREEN_ID, c.__API_KEY, c.__HOSTNAME)
 
 var player_window = gui.Window.get()
 if (c.__DEBUG_MODE) {
@@ -179,7 +195,7 @@ try {
 
 // Fetch publishing time for screen, if Entu is reachable
 //   and start the show
-EntuLib.getEntity(c.__SCREEN_ID, function(err, result) {
+EntuLib.getEntity(c.__SCREEN_ID, function getEntityCB(err, result) {
     if (err) {
         remote_published = false
         console.log('Can\'t reach Entu', err, result)
@@ -204,6 +220,7 @@ EntuLib.getEntity(c.__SCREEN_ID, function(err, result) {
             process.exit(99)
         }
     } else {
+        // alert('Result: ' + util.inspect(result.result.properties.published))
         remote_published = new Date(Date.parse(result.result.properties.published.values[0].value))
         console.log('Remote published: ', remote_published.toJSON())
     }
@@ -229,7 +246,7 @@ EntuLib.getEntity(c.__SCREEN_ID, function(err, result) {
 function startDigester(err, data) {
     if (err) {
         console.log('startDigester err:', err, data)
-        timeout_counter ++
+        player.tcIncr()
         setTimeout(function() {
             process.exit(0)
         }, 300)
@@ -392,10 +409,10 @@ function captureScreenshot(err, callback) {
             }
         })
     }, { format : 'jpeg', datatype : 'buffer'})
-    timeout_counter ++
+    player.tcIncr()
     setTimeout(function() { callback(null, callback) }, 30*1000)
 }
-// timeout_counter ++
+// player.tcIncr()
 // setTimeout(function() {
 //  captureScreenshot(null, captureScreenshot)
 // }, 1*1000)

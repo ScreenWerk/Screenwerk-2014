@@ -1,4 +1,4 @@
-module.exports = {
+var constants = {
   __APPLICATION_NAME: undefined,
   __VERSION: undefined,
   __HOSTNAME: undefined,
@@ -16,3 +16,5 @@ module.exports = {
   __API_KEY: undefined,
   __SCREEN_ID: undefined,
 }
+
+module.exports = constants

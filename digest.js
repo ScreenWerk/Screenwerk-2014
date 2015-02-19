@@ -202,7 +202,7 @@ function buildDom(err, callback) {
         dom_element.swElement = swElement
         swElement.childs.forEach(function(child_eid){
             var child_node = createDomRec(child_eid, dom_element.id)
-            console.log(stringifier(child_eid))
+            // console.log(stringifier(child_eid))
             dom_element.appendChild(child_node)
         })
 
