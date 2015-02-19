@@ -45,14 +45,22 @@ if (!fs.existsSync(home_path)) {
     fs.mkdirSync(home_path)
 }
 configuration_path = path.resolve(home_path, 'configuration.json')
-if (fs.existsSync(configuration_path)) {
+function exitWithMessage(message) {
+    window.alert(message)
+    gui.Shell.openItem(home_path)
+    process.exit(1)
+}
+try {
     configuration = require(configuration_path)
-} else {
+} catch (exception) {
     fs.writeFile(configuration_path, JSON.stringify(configuration, null, 4), function(err) {
         if(err) {
-          console.log(err)
+            console.log(err)
         } else {
-          console.log('Default configuration saved to ' + configuration_path + '.')
+            console.log()
+            exitWithMessage('Default configuration saved to \n'
+                + configuration_path + '.\n'
+                + 'Please put Your SCREEN_ID.uuid file in\n' + home_path)
         }
     })
 }
@@ -123,12 +131,17 @@ fs.readdirSync(home_path).forEach(function scanHome(filename) {
 if (uuids.length === 1) {
     c.__SCREEN_ID = uuids[0].slice(0,-5)
 } else {
-    console.log(gui.App.argv)
-    assert.equal(typeof(gui.App.argv[0]), 'string'
-                , "Screen ID should be passed as first argument.")
-    assert.ok(Number(gui.App.argv[0]) > 0
-                , "Screen ID must be number greater than zero.")
-    c.__SCREEN_ID = Number(gui.App.argv.shift())
+    // console.log(gui.App.argv)
+    // assert.equal(typeof(gui.App.argv[0]), 'string'
+    //             , "Screen ID should be passed as first argument.")
+    // assert.ok(Number(gui.App.argv[0]) > 0
+    //             , "Screen ID must be number greater than zero.")
+    // c.__SCREEN_ID = Number(gui.App.argv.shift())
+    try {
+        c.__SCREEN_ID = Number(gui.App.argv.shift())
+    } catch (exception) {
+        exitWithMessage('Provide SCREEN_ID.uuid file \nor pass screen ID as first commandline argument.')
+    }
 }
 
 
@@ -139,8 +152,7 @@ if (fs.existsSync(uuid_path)) {
 } else {
     c.__API_KEY = uuid.v1()
     fs.writeFileSync(uuid_path, c.__API_KEY)
-    console.log ( 'Created key for screen: ' + c.__SCREEN_ID + '(' + uuid_path + '). Now register this key in Entu: ' + c.__API_KEY)
-    process.exit(0)
+    exitWithMessage('Created key for screen: ' + c.__SCREEN_ID + '\n(' + uuid_path + '). \nNow register this key in Entu:\n ' + c.__API_KEY)
 }
 
 
@@ -160,10 +172,10 @@ if (c.__DEBUG_MODE) {
 }
 var nativeMenuBar = new gui.Menu({ type: "menubar" })
 try {
-  nativeMenuBar.createMacBuiltin(gui.App.manifest.name + ' ' + c.__VERSION)
-  player_window.menu = nativeMenuBar
+    nativeMenuBar.createMacBuiltin(gui.App.manifest.name + ' ' + c.__VERSION)
+    player_window.menu = nativeMenuBar
 } catch (ex) {
-  console.log(ex.message)
+    console.log(ex.message)
 }
 
 
