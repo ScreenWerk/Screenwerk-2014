@@ -53,16 +53,10 @@ function exitWithMessage(message) {
 try {
     configuration = require(configuration_path)
 } catch (exception) {
-    fs.writeFile(configuration_path, JSON.stringify(configuration, null, 4), function(err) {
-        if(err) {
-            console.log(err)
-        } else {
-            console.log()
-            exitWithMessage('Default configuration saved to \n'
-                + configuration_path + '.\n'
-                + 'Please put Your SCREEN_ID.uuid file in\n' + home_path)
-        }
-    })
+    fs.writeFileSync(configuration_path, JSON.stringify(configuration, null, 4))
+    exitWithMessage('Default configuration saved to \n'
+        + configuration_path + '.\n'
+        + 'Please put Your SCREEN_ID.uuid file in\n' + home_path)
 }
 
 c.__HOSTNAME = 'piletilevi.entu.ee'
@@ -137,13 +131,16 @@ if (uuids.length === 1) {
     // assert.ok(Number(gui.App.argv[0]) > 0
     //             , "Screen ID must be number greater than zero.")
     // c.__SCREEN_ID = Number(gui.App.argv.shift())
-    try {
+    if (Number(gui.App.argv[0]) > 0) {
         c.__SCREEN_ID = Number(gui.App.argv.shift())
-    } catch (exception) {
+    } else {
         exitWithMessage('Provide SCREEN_ID.uuid file \nor pass screen ID as first commandline argument.')
     }
 }
 
+if (!c.__SCREEN_ID) {
+    exitWithMessage('Missing screen ID, blame programmer.\nExiting.')
+}
 
 var uuid_path = path.resolve(home_path, c.__SCREEN_ID + '.uuid')
 if (fs.existsSync(uuid_path)) {
