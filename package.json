@@ -16,7 +16,7 @@
     "node-uuid": "^1.4.0"
   },
   "window": {
-    "icon": "imgs/sw-p512.png",
+    "icon": "./imgs/sw-p512.png",
     "show_in_taskbar": true,
     "toolbar": false,
     "frame": false,
