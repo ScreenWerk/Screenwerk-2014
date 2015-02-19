@@ -44,6 +44,19 @@ home_path = path.resolve(home_path, gui.App.manifest.name)
 if (!fs.existsSync(home_path)) {
     fs.mkdirSync(home_path)
 }
+configuration_path = path.resolve(home_path, 'configuration.json')
+if (fs.existsSync(configuration_path)) {
+    configuration = require(configuration_path)
+} else {
+    fs.writeFile(configuration_path, JSON.stringify(configuration, null, 4), function(err) {
+        if(err) {
+          console.log(err)
+        } else {
+          console.log('Default configuration saved to ' + configuration_path + '.')
+        }
+    })
+}
+
 c.__HOSTNAME = 'piletilevi.entu.ee'
 c.__META_DIR = path.resolve(home_path, 'sw-meta')
 if (!fs.existsSync(c.__META_DIR)) {
