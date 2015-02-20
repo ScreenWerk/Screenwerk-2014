@@ -88,7 +88,7 @@ function SwPlayer(err, dom_element, callback) {
 				sw_timeouts.push(play_timeout)
 				return self
 			}
-			console.log(dom_element.id + ' PLAY ' + element.definition.keyname + ' ', is_playing ? '(Already playing)' : '(Was stopped)')
+			// console.log(dom_element.id + ' PLAY ' + element.definition.keyname + ' ', is_playing ? '(Already playing)' : '(Was stopped)')
 			if (is_playing === true)
 				return this
 			is_playing = true
@@ -237,7 +237,7 @@ function SwPlayer(err, dom_element, callback) {
 				var self = this
 				tcIncr()
 				// helper.swLog('timeout_counter: ' + timeout_counter)
-				console.log(dom_element.id + ' Scheduling STOP on ' + element.definition.keyname + ' ' + element.id + ' in ' + helper.msToTime(timeout), "Timeouts set: " + timeout_counter)
+				// console.log(dom_element.id + ' Scheduling STOP on ' + element.definition.keyname + ' ' + element.id + ' in ' + helper.msToTime(timeout), "Timeouts set: " + timeout_counter)
 				var stop_timeout = setTimeout(function() {
 									self.stop(null, false, callback)
 								}, timeout)
@@ -245,7 +245,7 @@ function SwPlayer(err, dom_element, callback) {
 				sw_timeouts.push(stop_timeout)
 				return self
 			}
-			console.log(dom_element.id + ' STOP ' + element.definition.keyname, is_playing ? '(Was playing)' : '(Already stopped)')
+			// console.log(dom_element.id + ' STOP ' + element.definition.keyname, is_playing ? '(Was playing)' : '(Already stopped)')
 			if (is_playing === false)
 				return this
 			is_playing = false
@@ -333,8 +333,7 @@ function SwPlayer(err, dom_element, callback) {
 			return this
 		},
 		clearMyTimeouts: function(err, callback) {
-			console.log('Clearing ' + my_timeouts.length + ' my_timeouts.', 'Timeouts set total: ' + timeout_counter)
-			// helper.swLog('Clearing ' + my_timeouts.length + ' my_timeouts. Timeouts set total: ' + timeout_counter)
+			// console.log('Clearing ' + my_timeouts.length + ' my_timeouts.', 'Timeouts set total: ' + timeout_counter)
 			while (my_timeouts.length > 0) {
 				clearTimeout(my_timeouts.pop())
 			}

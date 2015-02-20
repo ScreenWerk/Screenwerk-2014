@@ -270,7 +270,7 @@ function reloadMeta(err, callback) {
 // Fetch only if not present
 function loadMeta(err, parent_eid, eid, struct_node, callback) {
     var EntuLib = entulib(c.__SCREEN_ID, c.__API_KEY, c.__HOSTNAME)
-    console.log('initialize EntuLib with ' + c.__SCREEN_ID + '|' + c.__API_KEY + '|' + c.__HOSTNAME)
+    // console.log('initialize EntuLib with ' + c.__SCREEN_ID + '|' + c.__API_KEY + '|' + c.__HOSTNAME)
     // console.log('loadMeta: ', eid, struct_node)
     incrementProcessCount()
     if (err) {

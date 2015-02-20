@@ -72,23 +72,21 @@ c.__LOG_DIR = path.resolve(home_path, 'sw-log')
 if (!fs.existsSync(c.__LOG_DIR)) {
     fs.mkdirSync(c.__LOG_DIR)
 }
-// log_path = path.resolve(c.__LOG_DIR, 'production.log')
-
-// TODO
-// logging problem to solve.
-// Switching logs off till then
-//
-// var consoleStream = fs.createWriteStream(log_path, {flags:'a'})
-// var proxied = console.log
-// console.log = function() {
-//     var datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '')
-//     var arr = [], p, i = 0
-//     for (p in arguments)
-//         arr[i++] = arguments[p]
-
-//     consoleStream.write(datestring + ': ' + arr.join() + '\n')
-//     return proxied.apply(this, arguments)
-// }
+var datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '').split(' ')[0]
+var log_path = path.resolve(c.__LOG_DIR, datestring + '.log')
+var logStream = fs.createWriteStream(log_path, {flags:'a'})
+datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '')
+logStream.write('\n\nStart logging at ' + datestring + '\n------------------------------------\n')
+console.log = function() {
+    datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '')
+    var arr = [], p, i = 0
+    for (p in arguments) arr[i++] = arguments[p]
+    var stack = new Error().stack.split(' at ')[2].trim()
+    var line = stack[1] + ':' + stack[2] + ':' + stack[3]
+    var output = datestring + ': ' + arr.join(', ') + ' @' + stack + '\n'
+    logStream.write(output)
+    process.stdout.write(output)
+}
 
 
 console.log ( '= ' + c.__APPLICATION_NAME + ' v.' + c.__VERSION + ' ==================================')
