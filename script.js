@@ -81,7 +81,7 @@ console.log = function() {
     datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '')
     var arr = [], p, i = 0
     for (p in arguments) arr[i++] = arguments[p]
-    var stack = new Error().stack.split(' at ')[2].trim()
+    var stack = new Error().stack.split(' at ')[2].trim().replace(/\/.*\//,'')
     var line = stack[1] + ':' + stack[2] + ':' + stack[3]
     var output = datestring + ': ' + arr.join(', ') + ' @' + stack + '\n'
     logStream.write(output)
