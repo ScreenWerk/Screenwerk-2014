@@ -20,10 +20,10 @@
     "show_in_taskbar": true,
     "toolbar": false,
     "frame": false,
-    "show": true,
+    "show": false,
     "position": "center",
-    "width": 900,
-    "height": 500
+    "width": 1200,
+    "height": 800
   },
   "webkit": {
     "plugin": true

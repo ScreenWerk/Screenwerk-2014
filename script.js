@@ -114,45 +114,151 @@ c.__SCREEN = configuration.run_on_screen
 c.__RELAUNCH_THRESHOLD = configuration.relaunch
 
 
-var uuids = []
-fs.readdirSync(home_path).forEach(function scanHome(filename) {
-    if (filename.substr(-5) === '.uuid') {
-        uuids.push(filename)
+
+
+var createUUID = function createUUID(callback) {
+    document.getElementById('createUUID').style.display = 'block'
+    window.document.getElementById('createUUID_id').focus()
+    window.document.getElementById('createUUID_key').value = uuid.v1()
+    window.document.getElementById('createUUID_submit').onclick = function createUUID_submit() {
+        var id = window.document.getElementById('createUUID_id').value
+        var key = window.document.getElementById('createUUID_key').value
+        window.document.getElementById('createUUID').style.display = 'none'
+        callback(id, key)
     }
-})
-if (uuids.length === 1) {
-    c.__SCREEN_ID = uuids[0].slice(0,-5)
-} else {
-    // console.log(gui.App.argv)
-    // assert.equal(typeof(gui.App.argv[0]), 'string'
-    //             , "Screen ID should be passed as first argument.")
-    // assert.ok(Number(gui.App.argv[0]) > 0
-    //             , "Screen ID must be number greater than zero.")
-    // c.__SCREEN_ID = Number(gui.App.argv.shift())
-    if (Number(gui.App.argv[0]) > 0) {
-        c.__SCREEN_ID = Number(gui.App.argv.shift())
+}
+var chooseUUID = function chooseUUID(uuids, callback) {
+    window.alert('Choose!!!')
+    document.getElementById('chooseUUID').style.display = 'block'
+    uuids.forEach(function(id) {
+        id = id.slice(0,-5)
+        var id_element = document.createElement('span')
+        id_element.appendChild( document.createTextNode(id) )
+        id_element.onclick = function chooseUUID_chosen() {
+            window.document.getElementById('chooseUUID').style.display = 'none'
+            callback(id)
+        }
+        document.getElementById('chooseUUID').appendChild(id_element)
+    })
+}
+
+var EntuLib,  local_published, remote_published
+
+//
+// Main funcion to start the loader and then player
+// Essential configuration has been successfully loaded
+//
+var run = function run() {
+
+    if (!c.__SCREEN_ID) {
+        exitWithMessage('Missing screen ID, blame programmer.\nExiting.')
+    }
+
+    var uuid_path = path.resolve(home_path, c.__SCREEN_ID + '.uuid')
+    if (fs.existsSync(uuid_path)) {
+        c.__API_KEY = fs.readFileSync(uuid_path)
+        console.log ( 'Read key: ' + c.__API_KEY, 'INFO')
     } else {
-        exitWithMessage('Provide SCREEN_ID.uuid file \nor pass screen ID as first commandline argument.')
+        if (!c.__API_KEY) {
+            exitWithMessage('Missing API key, blame programmer.\nExiting.')
+        }
+        fs.writeFileSync(uuid_path, c.__API_KEY)
     }
+
+
+    // console.log('initialize EntuLib with ' + c.__SCREEN_ID + '|' + c.__API_KEY + '|' + c.__HOSTNAME)
+    EntuLib = entulib(c.__SCREEN_ID, c.__API_KEY, c.__HOSTNAME)
+
+
+
+
+    // Cleanup unfinished downloads if any
+    fs.stat(c.__MEDIA_DIR, function(err, stats) {
+        if (err) {
+            if (err.code === 'ENOENT') {
+                console.log(c.__MEDIA_DIR + ' will be OK in a sec')
+            } else {
+                console.log(c.__MEDIA_DIR + ' err', err)
+                return
+            }
+        }
+        else if (stats.isDirectory()) {
+            fs.readdirSync(c.__MEDIA_DIR).forEach(function(download_filename) {
+                if (download_filename.split('.').pop() !== 'download')
+                    return
+                console.log("Unlink " + path.resolve(c.__MEDIA_DIR, download_filename))
+                var result = fs.unlinkSync(path.resolve(c.__MEDIA_DIR, download_filename))
+                if (result instanceof Error) {
+                    console.log("Can't unlink " + path.resolve(c.__MEDIA_DIR, download_filename), result)
+                }
+            })
+        }
+    })
+
+
+    // Read existing screen meta, if local data available
+    var meta_path = path.resolve(c.__META_DIR, c.__SCREEN_ID + ' ' + 'screen.json')
+    local_published = new Date(Date.parse('2004-01-01'))
+    remote_published = new Date(Date.parse('2004-01-01'))
+    var meta_obj = {}
+    // var data
+    try {
+        meta_obj = JSON.parse(fs.readFileSync(meta_path, 'utf-8'))
+        local_published = new Date(Date.parse(meta_obj.properties.published.values[0].value))
+        console.log('Local published: ' + local_published.toJSON())
+    } catch (e) {
+        local_published = false
+    }
+
+
+    // Fetch publishing time for screen, if Entu is reachable
+    //   and start the show
+    EntuLib.getEntity(c.__SCREEN_ID, function getEntityCB(err, result) {
+        if (err) {
+            remote_published = false
+            console.log('Can\'t reach Entu', err, result)
+            if (local_published) {
+                console.log('Trying to play with local content.')
+                loader.loadMeta(null, null, c.__SCREEN_ID, c.__STRUCTURE, startDigester)
+                return
+            } else {
+                console.log('Remote and local both unreachable. Terminating.')
+                process.exit(99)
+            }
+        }
+        else if (result.error !== undefined) {
+            remote_published = false
+            console.log (result.error, 'Failed to load screen ' + c.__SCREEN_ID + ' from Entu.')
+            if (local_published) {
+                console.log('Trying to play with local content.')
+                loader.loadMeta(null, null, c.__SCREEN_ID, c.__STRUCTURE, startDigester)
+                return
+            } else {
+                console.log('Remote and local both unreachable. Terminating.')
+                process.exit(99)
+            }
+        } else {
+            // alert('Result: ' + util.inspect(result.result.properties.published))
+            remote_published = new Date(Date.parse(result.result.properties.published.values[0].value))
+            console.log('Remote published: ' + remote_published.toJSON())
+        }
+
+        if (local_published &&
+            local_published.toJSON() === remote_published.toJSON()) {
+            console.log('Trying to play with local content.')
+            loader.loadMeta(null, null, c.__SCREEN_ID, c.__STRUCTURE, startDigester)
+        }
+        else {
+            console.log('Remove local content. Fetch new from Entu!')
+            player.clearSwTimeouts()
+            local_published = new Date(Date.parse(remote_published.toJSON()))
+            loader.reloadMeta(null, startDigester)
+        }
+    })
+
+
 }
 
-if (!c.__SCREEN_ID) {
-    exitWithMessage('Missing screen ID, blame programmer.\nExiting.')
-}
-
-var uuid_path = path.resolve(home_path, c.__SCREEN_ID + '.uuid')
-if (fs.existsSync(uuid_path)) {
-    c.__API_KEY = fs.readFileSync(uuid_path)
-    console.log ( 'Read key: ' + c.__API_KEY, 'INFO')
-} else {
-    c.__API_KEY = uuid.v1()
-    fs.writeFileSync(uuid_path, c.__API_KEY)
-    exitWithMessage('Created key for screen: ' + c.__SCREEN_ID + '\n(' + uuid_path + '). \nNow register this key in Entu:\n ' + c.__API_KEY)
-}
-
-
-// console.log('initialize EntuLib with ' + c.__SCREEN_ID + '|' + c.__API_KEY + '|' + c.__HOSTNAME)
-var EntuLib = entulib(c.__SCREEN_ID, c.__API_KEY, c.__HOSTNAME)
 
 var player_window = gui.Window.get()
 if (c.__DEBUG_MODE) {
@@ -174,94 +280,41 @@ try {
 }
 
 
-// Cleanup unfinished downloads if any
-fs.stat(c.__MEDIA_DIR, function(err, stats) {
-    if (err) {
-        if (err.code === 'ENOENT') {
-            console.log(c.__MEDIA_DIR + ' will be OK in a sec')
-        } else {
-            console.log(c.__MEDIA_DIR + ' err', err)
-            return
-        }
+var uuids = []
+fs.readdirSync(home_path).forEach(function scanHome(filename) {
+    if (filename.substr(-5) === '.uuid') {
+        uuids.push(filename)
     }
-    else if (stats.isDirectory()) {
-        fs.readdirSync(c.__MEDIA_DIR).forEach(function(download_filename) {
-            if (download_filename.split('.').pop() !== 'download')
-                return
-            console.log("Unlink " + path.resolve(c.__MEDIA_DIR, download_filename))
-            var result = fs.unlinkSync(path.resolve(c.__MEDIA_DIR, download_filename))
-            if (result instanceof Error) {
-                console.log("Can't unlink " + path.resolve(c.__MEDIA_DIR, download_filename), result)
-            }
+})
+
+player_window.on('loaded', function playerWindowLoaded() {
+    player_window.removeListener('loaded', playerWindowLoaded)
+    player_window.focus()
+    if (uuids.length === 1) {
+        c.__SCREEN_ID = uuids[0].slice(0,-5)
+        run()
+    } else if (uuids.length === 0) {
+        document.styleSheets[1].rules[0].style.cursor = 'normal'
+        createUUID(function createUUID_cb(id, key) {
+            document.styleSheets[1].rules[0].style.cursor = 'none'
+            alert('ID: ' + id + '<br/>KEY: ' + key)
+            c.__SCREEN_ID = id
+            c.__API_KEY = key
+            run()
         })
+    } else if (uuids.length > 1) {
+        document.styleSheets[1].rules[0].style.cursor = 'normal'
+        chooseUUID(uuids, function chooseUUID_cb(id) {
+            document.styleSheets[1].rules[0].style.cursor = 'none'
+            c.__SCREEN_ID = id
+            run()
+        })
+        c.__SCREEN_ID = Number(gui.App.argv.shift())
     }
 })
 
 
-// Read existing screen meta, if local data available
-var meta_path = path.resolve(c.__META_DIR, c.__SCREEN_ID + ' ' + 'screen.json')
-var local_published = new Date(Date.parse('2004-01-01'))
-var remote_published = new Date(Date.parse('2004-01-01'))
-var meta_obj = {}
-var data
-try {
-    meta_obj = JSON.parse(fs.readFileSync(meta_path, 'utf-8'))
-    local_published = new Date(Date.parse(meta_obj.properties.published.values[0].value))
-    console.log('Local published: ', local_published.toJSON())
-} catch (e) {
-    local_published = false
-}
 
-
-// Fetch publishing time for screen, if Entu is reachable
-//   and start the show
-EntuLib.getEntity(c.__SCREEN_ID, function getEntityCB(err, result) {
-    if (err) {
-        remote_published = false
-        console.log('Can\'t reach Entu', err, result)
-        if (local_published) {
-            console.log('Trying to play with local content.')
-            loader.loadMeta(null, null, c.__SCREEN_ID, c.__STRUCTURE, startDigester)
-            return
-        } else {
-            console.log('Remote and local both unreachable. Terminating.')
-            process.exit(99)
-        }
-    }
-    else if (result.error !== undefined) {
-        remote_published = false
-        console.log (result.error, 'Failed to load screen ' + c.__SCREEN_ID + ' from Entu.')
-        if (local_published) {
-            console.log('Trying to play with local content.')
-            loader.loadMeta(null, null, c.__SCREEN_ID, c.__STRUCTURE, startDigester)
-            return
-        } else {
-            console.log('Remote and local both unreachable. Terminating.')
-            process.exit(99)
-        }
-    } else {
-        // alert('Result: ' + util.inspect(result.result.properties.published))
-        remote_published = new Date(Date.parse(result.result.properties.published.values[0].value))
-        console.log('Remote published: ', remote_published.toJSON())
-    }
-
-    if (local_published &&
-        local_published.toJSON() === remote_published.toJSON()) {
-        console.log('Trying to play with local content.')
-        loader.loadMeta(null, null, c.__SCREEN_ID, c.__STRUCTURE, startDigester)
-    }
-    else {
-        console.log('Remove local content. Fetch new from Entu!')
-        player.clearSwTimeouts()
-        local_published = new Date(Date.parse(remote_published.toJSON()))
-        loader.reloadMeta(null, startDigester)
-    }
-})
-
-// var swEmitter = new events.EventEmitter()
-
-
-// progress(loader.countLoadingProcesses() + '| ' + bytesToSize(total_download_size) + ' - ' + bytesToSize(bytes_downloaded) + ' = ' + bytesToSize(total_download_size - bytes_downloaded) )
 
 function startDigester(err, data) {
     if (err) {

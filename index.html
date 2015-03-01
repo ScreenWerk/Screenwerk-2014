@@ -5,7 +5,7 @@
 <link rel="stylesheet" href="animate.css">
 <style>
 * {
-  cursor: none;
+  /*cursor: none;*/
   margin: 0px 0px 0px 0px;
   padding: 0px 0px 0px 0px;
   border-width: 0px;
@@ -31,10 +31,7 @@ html, body {
   background-color: yellow;
   z-index: 1000;
 }
-#error {
-  background-color: red;
-}
-#progress, #error {
+#progress {
   opacity: 0.6;
   float: right;
   display: block;
@@ -50,7 +47,42 @@ iframe {
 .sw-layout {
     background-color: black;
 }
-
+.dialog {
+  display: none;
+  background-color: white;
+  z-index: 1000;
+  float: left;
+  padding: 2em;
+  margin: 10em;
+  border-radius: 2em;
+}
+.dialog_heading {
+  border-bottom: bisque solid 1px;
+  margin-bottom: 1em;
+  font-weight: bold;
+}
+.dialog>input {
+  display: block;
+  border: bisque solid 1px;
+  height: 2em;
+  padding: 0.5em;
+  margin-bottom: 1em;
+  width: 400px;
+}
+.dialog>button {
+  border-width: 2px;
+  padding: 0.5em;
+  border-radius: 0.5em;
+  width: 100%;
+  cursor: pointer;
+}
+.dialog>span {
+  background: bisque;
+  padding: 0.5em;
+  border-radius: 0.5em;
+  margin: 0.5em;
+  cursor: pointer;
+}
 img {
     width: 100%;
 }
@@ -61,14 +93,21 @@ video {
     background-color: black;
 }
 </style>
-<!-- <script src="helper.js"></script> -->
-<!-- <script src="digest.js"></script> -->
-<!-- <script src="loader.js"></script> -->
-<!-- <script src="player.js"></script> -->
 <script src="script.js"></script>
 </head>
 <body>
-  <pre id='progress'></pre>
-  <div id='console'></div>
+  <pre id="progress"></pre>
+  <div id="createUUID" class="dialog">
+    <div class="dialog_heading">Please enter screen ID and desired key.</div>
+    <label for="createUUID_id">ID</label>
+    <input id="createUUID_id" />
+    <label for="createUUID_key">KEY</label>
+    <input id="createUUID_key" />
+    <button id="createUUID_submit">Ok</button>
+  </div>
+  <div id="chooseUUID" class="dialog">
+    <div class="dialog_heading">You have multiple configurations - please select a screen.</div>
+  </div>
+  <div id="console"></div>
 </body>
 </html>
