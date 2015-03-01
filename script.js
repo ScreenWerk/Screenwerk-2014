@@ -128,6 +128,13 @@ var createUUID = function createUUID(callback) {
     }
 }
 var chooseUUID = function chooseUUID(uuids, callback) {
+    if (typeof(gui.App.argv[0] === 'string')) {
+        if (Number(gui.App.argv[0]) > 0) {
+            callback(Number(gui.App.argv[0]))
+            return
+        }
+    }
+    Number(gui.App.argv.shift())
     window.alert('Choose!!!')
     document.getElementById('chooseUUID').style.display = 'block'
     uuids.forEach(function(id) {
@@ -309,7 +316,6 @@ player_window.on('loaded', function playerWindowLoaded() {
             c.__SCREEN_ID = id
             run()
         })
-        c.__SCREEN_ID = Number(gui.App.argv.shift())
     }
 })
 
