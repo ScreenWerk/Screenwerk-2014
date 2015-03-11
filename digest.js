@@ -155,7 +155,8 @@ function buildDom(err, callback) {
         // console.log(eid)
         dom_element.id = parent_dom_id === undefined ? eid : parent_dom_id + '_' + eid
         dom_element.className = swElement.definition.keyname
-        dom_element.style.visibility = 'hidden'
+        // dom_element.style.visibility = 'hidden'
+        dom_element.style.display = 'none'
         // dom_element.style.border = 'dashed 1px green'
         // dom_element.style.position = 'relative'
         var unit = '%'

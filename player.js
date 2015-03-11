@@ -92,7 +92,8 @@ function SwPlayer(err, dom_element, callback) {
 			if (is_playing === true)
 				return this
 			is_playing = true
-			dom_element.style.visibility = 'visible'
+			// dom_element.style.visibility = 'visible'
+			dom_element.style.display = 'block'
 
 			if (element.animate === undefined || element.animate.begin === undefined) {
 			} else {
@@ -251,14 +252,16 @@ function SwPlayer(err, dom_element, callback) {
 			is_playing = false
 
 			if (element.animate === undefined || element.animate.end === undefined) {
-				dom_element.style.visibility = 'hidden'
+				// dom_element.style.visibility = 'hidden'
+				dom_element.style.display = 'none'
 			} else {
 				var current_class = dom_element.className
 				dom_element.className = current_class + ' ' + element.animate.end
 				tcIncr()
 				// helper.swLog('timeout_counter: ' + timeout_counter)
 				setTimeout(function() {
-					dom_element.style.visibility = 'hidden'
+					// dom_element.style.visibility = 'hidden'
+					dom_element.style.display = 'none'
 					dom_element.className = current_class
 				}, 1000)
 			}
@@ -340,7 +343,8 @@ function SwPlayer(err, dom_element, callback) {
 		},
 		restart: function(err, callback) {
 			console.log('RESTART ' + element.id, 'Current state: ' + (is_playing ? 'playing' : 'stopped'))
-			document.getElementById('progress').style.visibility = 'hidden'
+			// document.getElementById('progress').style.visibility = 'hidden'
+			document.getElementById('progress').style.display = 'none'
 			return this.stop(null, 0, function(err, data) {
 				if (err) {
 					console.log('SwPlayer.restart err:', err, data)

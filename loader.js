@@ -1,13 +1,16 @@
 // 1. Core modules
-var util            = require('util')
+// var util            = require('util')
 var fs              = require('fs')
 var path            = require('path')
+var url             = require('url')
 var https           = require('https')
 var uuid            = require('node-uuid')
 var my_crypto       = require('crypto')
 
 
 // 2. Public modules from npm
+var request       = require('request')
+// var https           = require('follow-redirects').https
 
 
 // 3. Own modules
@@ -49,40 +52,97 @@ var progress = function progress(message) {
 }
 
 
-function loadMedia(err, entity_id, file_value, callback) {
+function loadMedia(err, entity_id, file_value, loadMediaCallback) {
     var file_id = file_value.db_value
     var file_md5 = file_value.md5
     // console.log('loadMedia ',file_value)
     incrementProcessCount()
     if (err) {
         console.log('loadMedia err', err)
-        callback(err)
+        loadMediaCallback(err)
         decrementProcessCount()
         return
     }
     var filename = path.resolve(c.__MEDIA_DIR, entity_id + '_' + file_id)
     var download_filename = filename + '.download'
 
-    // console.log ('Looking for ' + filename)
     if (fs.existsSync(filename)) {
         decrementProcessCount()
-        callback(null)
+        loadMediaCallback(null)
         return
     }
-
-    // console.log ('Looking for ' + download_filename)
     if (fs.existsSync(download_filename)) {
         // console.log('Download for ' + filename + ' already in progress')
         decrementProcessCount()
         return
     }
 
-    }
+    // fs.accessSync will replace fs.existsSync
+    // try {
+    //     // console.log ('Looking for ' + filename)
+    //     fs.accessSync(filename)
+    //     // File already downloaded, return
+    //     decrementProcessCount()
+    //     loadMediaCallback(null)
+    //     return
+    // }
+    // catch(e) {
+    //     console.log(e)
+    //     console.log('File ' + filename + ' not present. Go on.')
+    // }
+    // try {
+    //     // console.log ('Looking for ' + download_filename)
+    //     fs.accessSync(download_filename)
+    //     // console.log('Download for ' + filename + ' already in progress')
+    //     decrementProcessCount()
+    //     return
+    // }
+    // catch(e) {
+    //     console.log('Download file not present. Go on.')
+    // }
 
+    var fetch_uri = 'https://' + c.__HOSTNAME + '/api2/file-' + file_id
+    request
+        .get(fetch_uri)
+        .on('error', function(err) {
+            console.log(err)
         })
+        .on('response', function response_handler( response ) {
+            var filesize = response.headers['content-length']
+            var md5sum = my_crypto.createHash('md5')
+
+            total_download_size += Number(filesize)
+            console.log('Downloading:' + helper.bytesToSize(bytes_downloaded) + ' of ' + helper.bytesToSize(total_download_size))
             progress(loading_process_count + '| ' + helper.bytesToSize(total_download_size) + ' - ' + helper.bytesToSize(bytes_downloaded) + ' = ' + helper.bytesToSize(total_download_size - bytes_downloaded) )
+            response.on('data', function(chunk){
+                md5sum.update(chunk)
+                bytes_downloaded += chunk.length
+                progress(loading_process_count + '| ' + helper.bytesToSize(total_download_size) + ' - ' + helper.bytesToSize(bytes_downloaded) + ' = ' + helper.bytesToSize(total_download_size - bytes_downloaded) )
+            })
+            response.on('end', function() {
+                progress(loading_process_count + '| ' + helper.bytesToSize(total_download_size) + ' - ' + helper.bytesToSize(bytes_downloaded) + ' = ' + helper.bytesToSize(total_download_size - bytes_downloaded) )
+                // MD5 check
+                var my_md5 = md5sum.digest('hex')
+                // MD5 check is disabled for now as we can't get MD5's from Amazon
+                if (true || file_md5 === my_md5) {
+                    console.log('Downloaded media to ' + filename + ' MD5: ' + my_md5)
+                    try {
+                        fs.rename(download_filename, filename)
+                    } catch (e) {
+                        console.log('CRITICAL: Messed up with parallel downloading of ' + filename + '. Cleanup and relaunch, please. Closing down.', e)
+                        process.exit(99)
+                    }
+                    decrementProcessCount()
+                    loadMediaCallback(null)
+                } else {
+                    fs.unlinkSync(download_filename)
+                    decrementProcessCount()
+                    console.log('Downloaded media ' + filename + ' checksum fail. Got ' + my_md5 + ', expected ' + file_md5 + '. Trying again...')
+                    loadMedia(null, entity_id, file_value, loadMediaCallback)
                 }
+            })
         })
+        .pipe(fs.createWriteStream(download_filename))
 }
 
 
@@ -237,6 +297,7 @@ function loadMeta(err, parent_eid, eid, struct_node, callback) {
         if (err) {
             EntuLib.getEntity(eid, function(err, result) {
                 if (err) {
+                    console.log(definition + ': ' + (result), err, result)
                     callback(err)
                     decrementProcessCount()
                     return
@@ -251,6 +312,7 @@ function loadMeta(err, parent_eid, eid, struct_node, callback) {
                         var animation_eid = properties.animate.values[0].db_value
                         EntuLib.getEntity(animation_eid, function(err, animate_result) {
                             if (err) {
+                                console.log(definition + ': ' + (animate_result), err, animate_result)
                                 callback(err)
                                 decrementProcessCount()
                                 return
@@ -265,6 +327,7 @@ function loadMeta(err, parent_eid, eid, struct_node, callback) {
                                 properties.animate.values[0].end = animate_properties.end.values[0].db_value
                                 fs.writeFile(meta_path, stringifier(result.result), function(err) {
                                     if (err) {
+                                        console.log(definition + ': ' + (result))
                                         callback(err)
                                         decrementProcessCount()
                                         return // form writeFile -> getEntity -> getEntity -> readFile -> loadMeta
@@ -280,6 +343,7 @@ function loadMeta(err, parent_eid, eid, struct_node, callback) {
                     } else {
                         fs.writeFile(meta_path, stringifier(result.result), function(err) {
                             if (err) {
+                                console.log(definition + ': ' + (result))
                                 callback(err)
                                 decrementProcessCount()
                                 return // form writeFile -> getEntity -> readFile -> loadMeta
@@ -344,6 +408,7 @@ function loadMeta(err, parent_eid, eid, struct_node, callback) {
                         }
                         if (!ch_result.result['sw-'+ch_def_name]) {
                             var err = definition + ' ' + eid + ': Missing expected elements of ' + ch_def_name + '.'
+                            console.log(err + (ch_result.result, {depth:null}))
                             callback(err)
                             return
                         }
