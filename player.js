@@ -1,5 +1,5 @@
 // 1. Core modules
-var util   = require("util")
+// var util   = require("util")
 var events = require('events')
 var fs     = require('fs')
 
@@ -92,7 +92,7 @@ function SwPlayer(err, dom_element, callback) {
 			if (is_playing === true)
 				return this
 			is_playing = true
-			dom_element.style.display = 'block'
+			dom_element.style.visibility = 'visible'
 
 			if (element.animate === undefined || element.animate.begin === undefined) {
 			} else {
@@ -143,9 +143,9 @@ function SwPlayer(err, dom_element, callback) {
 							if (sibling_node.is_playing === false) {
 								continue
 							}
-							// console.log(util.inspect(schedule,{depth:6}))
+							// console.log((schedule,{depth:6}))
 							var sibling_node_cleanup_layer = sibling_node.swElement.properties.ordinal.values[0].db_value
-							// console.log('Schedule ' + util.inspect(element.id)
+							// console.log('Schedule ' + (element.id)
 							// 	+ ' sibling_node_cleanup_layer LE cleanupLayer ' + sibling_node_cleanup_layer + ' LE ' + cleanupLayer
 							// 	+ ' checking for cleanup of schedule ' + sibling_node.swElement.id)
 							if (sibling_node_cleanup_layer <= cleanupLayer) {
@@ -251,14 +251,14 @@ function SwPlayer(err, dom_element, callback) {
 			is_playing = false
 
 			if (element.animate === undefined || element.animate.end === undefined) {
-				dom_element.style.display = 'none'
+				dom_element.style.visibility = 'hidden'
 			} else {
 				var current_class = dom_element.className
 				dom_element.className = current_class + ' ' + element.animate.end
 				tcIncr()
 				// helper.swLog('timeout_counter: ' + timeout_counter)
 				setTimeout(function() {
-					dom_element.style.display = 'none'
+					dom_element.style.visibility = 'hidden'
 					dom_element.className = current_class
 				}, 1000)
 			}
@@ -340,7 +340,7 @@ function SwPlayer(err, dom_element, callback) {
 		},
 		restart: function(err, callback) {
 			console.log('RESTART ' + element.id, 'Current state: ' + (is_playing ? 'playing' : 'stopped'))
-			document.getElementById('progress').style.display = 'none'
+			document.getElementById('progress').style.visibility = 'hidden'
 			return this.stop(null, 0, function(err, data) {
 				if (err) {
 					console.log('SwPlayer.restart err:', err, data)

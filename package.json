@@ -13,7 +13,8 @@
   "dependencies": {
     "later": "^1.1.0",
     "os-utils": "*",
-    "node-uuid": "^1.4.0"
+    "node-uuid": "^1.4.0",
+    "request": "*"
   },
   "window": {
     "icon": "./imgs/sw-p512.png",

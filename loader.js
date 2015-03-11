@@ -77,62 +77,12 @@ function loadMedia(err, entity_id, file_value, callback) {
         return
     }
 
-    var writable = fs.createWriteStream(download_filename)
-
-    // console.log ('File ' + filename + ' missing. Fetch!')
-
-    // TODO:
-    // implement file fetcher for EntuLib
-    // - with option to pass writable stream
-    // - and returning callback with file path
-    var options = {
-        hostname: c.__HOSTNAME,
-        port: 443,
-        path: '/api2/file-' + file_id,
-        method: 'GET'
     }
-    var request = https.request(options)
-    request.on('error', function error_handler( err ) {
-        console.log('Where\'s net?', err)
-        process.exit(99)
-    })
-    request.on('response', function response_handler( response ) {
-        var filesize = response.headers['content-length']
-        var md5sum = my_crypto.createHash('md5')
 
-        total_download_size += Number(filesize)
-        console.log('Downloading:' + helper.bytesToSize(bytes_downloaded) + ' of ' + helper.bytesToSize(total_download_size))
-        progress(loading_process_count + '| ' + helper.bytesToSize(total_download_size) + ' - ' + helper.bytesToSize(bytes_downloaded) + ' = ' + helper.bytesToSize(total_download_size - bytes_downloaded) )
-        response.on('data', function(chunk){
-            md5sum.update(chunk)
-            bytes_downloaded += chunk.length
-            progress(loading_process_count + '| ' + helper.bytesToSize(total_download_size) + ' - ' + helper.bytesToSize(bytes_downloaded) + ' = ' + helper.bytesToSize(total_download_size - bytes_downloaded) )
-            writable.write(chunk)
         })
-        response.on('end', function() {
             progress(loading_process_count + '| ' + helper.bytesToSize(total_download_size) + ' - ' + helper.bytesToSize(bytes_downloaded) + ' = ' + helper.bytesToSize(total_download_size - bytes_downloaded) )
-            writable.end()
-            // MD5 check
-            var my_md5 = md5sum.digest('hex')
-            if (file_md5 === my_md5) {
-                console.log('Downloaded media to ' + filename + ' MD5: ' + my_md5)
-                try {
-                    fs.rename(download_filename, filename)
-                } catch (e) {
-                    console.log('CRITICAL: Messed up with parallel downloading of ' + filename + '. Cleanup and relaunch, please. Closing down.', e)
-                    process.exit(99)
                 }
-                decrementProcessCount()
-                callback(null)
-            } else {
-                fs.unlinkSync(download_filename)
-                decrementProcessCount()
-                console.log('Downloaded media ' + filename + ' checksum fail. Got ' + my_md5 + ', expected ' + file_md5 + '. Trying again...')
-                loadMedia(null, entity_id, file_value, callback)
-            }
         })
-    })
-    request.end()
 }
 
 
@@ -287,7 +237,6 @@ function loadMeta(err, parent_eid, eid, struct_node, callback) {
         if (err) {
             EntuLib.getEntity(eid, function(err, result) {
                 if (err) {
-                    console.log(definition + ': ' + util.inspect(result), err, result)
                     callback(err)
                     decrementProcessCount()
                     return
@@ -302,7 +251,6 @@ function loadMeta(err, parent_eid, eid, struct_node, callback) {
                         var animation_eid = properties.animate.values[0].db_value
                         EntuLib.getEntity(animation_eid, function(err, animate_result) {
                             if (err) {
-                                console.log(definition + ': ' + util.inspect(animate_result), err, animate_result)
                                 callback(err)
                                 decrementProcessCount()
                                 return
@@ -317,7 +265,6 @@ function loadMeta(err, parent_eid, eid, struct_node, callback) {
                                 properties.animate.values[0].end = animate_properties.end.values[0].db_value
                                 fs.writeFile(meta_path, stringifier(result.result), function(err) {
                                     if (err) {
-                                        console.log(definition + ': ' + util.inspect(result))
                                         callback(err)
                                         decrementProcessCount()
                                         return // form writeFile -> getEntity -> getEntity -> readFile -> loadMeta
@@ -333,7 +280,6 @@ function loadMeta(err, parent_eid, eid, struct_node, callback) {
                     } else {
                         fs.writeFile(meta_path, stringifier(result.result), function(err) {
                             if (err) {
-                                console.log(definition + ': ' + util.inspect(result))
                                 callback(err)
                                 decrementProcessCount()
                                 return // form writeFile -> getEntity -> readFile -> loadMeta
@@ -398,7 +344,6 @@ function loadMeta(err, parent_eid, eid, struct_node, callback) {
                         }
                         if (!ch_result.result['sw-'+ch_def_name]) {
                             var err = definition + ' ' + eid + ': Missing expected elements of ' + ch_def_name + '.'
-                            console.log(err + util.inspect(ch_result.result, {depth:null}))
                             callback(err)
                             return
                         }
