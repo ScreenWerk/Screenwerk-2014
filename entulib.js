@@ -71,7 +71,7 @@ var EntuLib = function EntuLib(entu_user_id, entu_user_key, entu_url) {
             return
         })
         if (data !== undefined) {
-            // console.log(typeof data + ' . ' + util.inspect(data))
+            // console.log(typeof data + ' . ' + (data))
             request.write(data)
         }
         request.end()

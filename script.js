@@ -8,7 +8,6 @@
 // 1. Core modules
 var gui             = require('nw.gui')
 var assert          = require('assert')
-var util            = require('util')
 var fs              = require('fs')
 var https           = require('https')
 var events          = require('events')
@@ -17,7 +16,6 @@ var path            = require('path')
 
 
 // 2. Public modules from npm
-var os              = require('os-utils')
 
 
 // 3. Own modules
@@ -58,6 +56,9 @@ try {
         + configuration_path + '.\n'
         + 'Please put Your SCREEN_ID.uuid file in\n' + home_path)
 }
+c.__DEBUG_MODE = configuration.debug
+c.__SCREEN = configuration.run_on_screen
+c.__RELAUNCH_THRESHOLD = configuration.relaunch
 
 c.__HOSTNAME = 'piletilevi.entu.ee'
 c.__META_DIR = path.resolve(home_path, 'sw-meta')
@@ -77,20 +78,25 @@ var log_path = path.resolve(c.__LOG_DIR, datestring + '.log')
 var logStream = fs.createWriteStream(log_path, {flags:'a'})
 datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '')
 logStream.write('\n\nStart logging at ' + datestring + '\n------------------------------------\n')
-console.log = function() {
-    datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '')
-    var arr = [], p, i = 0
-    for (p in arguments) arr[i++] = arguments[p]
-    var stack = new Error().stack.split(' at ')[2].trim().replace(/\/.*\//,'')
-    var line = stack[1] + ':' + stack[2] + ':' + stack[3]
-    var output = datestring + ': ' + arr.join(', ') + ' @' + stack + '\n'
-    logStream.write(output)
-    process.stdout.write(output)
+
+console.log (c.__DEBUG_MODE)
+console.log (!c.__DEBUG_MODE)
+if (!c.__DEBUG_MODE) {
+    console.log = function() {
+        datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '')
+        var arr = [], p, i = 0
+        for (p in arguments) arr[i++] = arguments[p]
+        var stack = new Error().stack.split(' at ')[2].trim().replace(/\/.*\//,'')
+        var line = stack[1] + ':' + stack[2] + ':' + stack[3]
+        var output = datestring + ': ' + arr.join(', ') + ' @' + stack + '\n'
+        logStream.write(output)
+        process.stdout.write(output)
+    }
 }
 
 
 console.log ( '= ' + c.__APPLICATION_NAME + ' v.' + c.__VERSION + ' ==================================')
-console.log ( os.platform() )
+// console.log ( os.platform() )
 
 
 c.__STRUCTURE = {"name":"screen","reference":{"name":"screen-group","reference":{"name":"configuration","child":{"name":"schedule","reference":{"name":"layout","child":{"name":"layout-playlist","reference":{"name":"playlist","child":{"name":"playlist-media","reference":{"name":"media"}}}}}}}}}
@@ -109,9 +115,6 @@ recurseHierarchy(c.__STRUCTURE)
 c.__DEFAULT_UPDATE_INTERVAL_MINUTES = 10
 c.__UPDATE_INTERVAL_SECONDS = c.__DEFAULT_UPDATE_INTERVAL_MINUTES * 60
 c.__DEFAULT_DELAY_MS = 0
-c.__DEBUG_MODE = configuration.debug
-c.__SCREEN = configuration.run_on_screen
-c.__RELAUNCH_THRESHOLD = configuration.relaunch
 
 
 
@@ -245,7 +248,7 @@ var run = function run() {
                 process.exit(99)
             }
         } else {
-            // alert('Result: ' + util.inspect(result.result.properties.published))
+            // alert('Result: ' + (result.result.properties.published))
             remote_published = new Date(Date.parse(result.result.properties.published.values[0].value))
             console.log('Remote published: ' + remote_published.toJSON())
         }
@@ -283,7 +286,7 @@ try {
     nativeMenuBar.createMacBuiltin(gui.App.manifest.name + ' ' + c.__VERSION)
     player_window.menu = nativeMenuBar
 } catch (ex) {
-    console.log(ex.message)
+    // console.log(ex.message)
 }
 
 
@@ -418,7 +421,7 @@ function startDOM(err, options) {
     console.log('====== Finish startDOM', options)
     player.clearSwTimeouts()
     screen_dom_element.player = new player.SwPlayer(null, screen_dom_element, function(err, data) {
-        console.log('startDOM err:', err, util.inspect(data))
+        console.log('startDOM err:', err, (data))
         process.exit(99)
     })
     screen_dom_element.player.restart(null, function(err, data) {
@@ -453,9 +456,9 @@ function captureScreenshot(err, callback) {
             // console.log('Saving screenshot')
             EntuLib.addFile(c.__SCREEN_ID, 'sw-screen-photo', screenshot_path, function(err, data) {
                 if (err) {
-                    console.log('captureScreenshot err:', util.inspect(err), util.inspect(data))
+                    console.log('captureScreenshot err:', (err), (data))
                 }
-                // console.log(util.inspect(data))
+                // console.log((data))
             })
         }
         EntuLib.getEntity(c.__SCREEN_ID, function(err, entity) {
@@ -463,7 +466,7 @@ function captureScreenshot(err, callback) {
                 if (err.code === 'ENOTFOUND') {
                     // console.log('Not connected')
                 } else {
-                    console.log('captureScreenshot err:', util.inspect(err), util.inspect(entity))
+                    console.log('captureScreenshot err:', (err), (entity))
                 }
                 return
             }
@@ -476,9 +479,9 @@ function captureScreenshot(err, callback) {
                 stack.forEach(function(item) {
                     EntuLib.removeProperty(c.__SCREEN_ID, 'sw-screen-photo', item.id, function(err, data) {
                         if (err) {
-                            console.log('captureScreenshot err:', util.inspect(item), util.inspect(err), util.inspect(data))
+                            console.log('captureScreenshot err:', (item), (err), (data))
                         }
-                        // console.log(util.inspect(item), util.inspect(data))
+                        // console.log((item), (data))
                         if(-- stacksize === 0) {
                             addScreenshot()
                         }

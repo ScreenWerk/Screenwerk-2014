@@ -146,7 +146,7 @@ function buildDom(err, callback) {
         var dom_element = document.createElement('div')
         var swElement = loader.swElementsById[eid]
         if (swElement === undefined) {
-            console.log('Error: Missing element eid=' + eid, util.inspect(loader.swElementsById, {'depth':null}))
+            console.log('Error: Missing element eid=' + eid, (loader.swElementsById, {'depth':null}))
             callback('Error: Missing element eid=' + eid)
             return
         }
@@ -155,6 +155,7 @@ function buildDom(err, callback) {
         // console.log(eid)
         dom_element.id = parent_dom_id === undefined ? eid : parent_dom_id + '_' + eid
         dom_element.className = swElement.definition.keyname
+        // dom_element.style.visibility = 'hidden'
         dom_element.style.display = 'none'
         // dom_element.style.border = 'dashed 1px green'
         // dom_element.style.position = 'relative'
@@ -227,7 +228,7 @@ function buildDom(err, callback) {
 
         } else if (mediatype === 'Flash') {
             media_dom_element = document.createElement('EMBED')
-            // console.log(util.inspect(swElement.properties.filepath.values[0]))
+            // console.log((swElement.properties.filepath.values[0]))
             media_dom_element.src = swElement.properties.filepath.values[0].db_value
             media_dom_element.type = 'application/x-shockwave-flash'
             // media_dom_element.type = 'application/vnd.adobe.flash-movie'
@@ -235,13 +236,13 @@ function buildDom(err, callback) {
 
         } else if (mediatype === 'Image') {
             media_dom_element = document.createElement('IMG')
-            // console.log(util.inspect(swElement.properties.filepath.values[0]))
+            // console.log((swElement.properties.filepath.values[0]))
             media_dom_element.src = swElement.properties.filepath.values[0].db_value
             dom_element.appendChild(media_dom_element)
 
         } else if (mediatype === 'URL') {
             media_dom_element = document.createElement('IFRAME')
-            // console.log(util.inspect(swElement.properties.filepath.values[0]))
+            // console.log((swElement.properties.filepath.values[0]))
             media_dom_element.src = swElement.properties.url.values[0].db_value
             media_dom_element.width = '100%'
             media_dom_element.height = '100%'
