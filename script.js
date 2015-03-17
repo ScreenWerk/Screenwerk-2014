@@ -138,7 +138,6 @@ var chooseUUID = function chooseUUID(uuids, callback) {
         }
     }
     Number(gui.App.argv.shift())
-    window.alert('Choose!!!')
     document.getElementById('chooseUUID').style.display = 'block'
     uuids.forEach(function(id) {
         id = id.slice(0,-5)
@@ -297,25 +296,42 @@ fs.readdirSync(home_path).forEach(function scanHome(filename) {
     }
 })
 
+// player_window.on('focus', function() {
+//   alert('Player is focused')
+// })
+
+var first_load = true
 player_window.on('loaded', function playerWindowLoaded() {
-    player_window.removeListener('loaded', playerWindowLoaded)
+    document.body.style.cursor = 'normal'
+    document.body.style.cursor = 'none'
+    // console.log('window loaded')
+    // player_window.removeListener('loaded', playerWindowLoaded)
+    if (!first_load) {
+        return
+    }
+    first_load = false
+    player_window.show()
     player_window.focus()
     if (uuids.length === 1) {
         c.__SCREEN_ID = uuids[0].slice(0,-5)
         run()
     } else if (uuids.length === 0) {
-        document.styleSheets[1].rules[0].style.cursor = 'normal'
+        // document.styleSheets[1].rules[0].style.cursor = 'normal'
+        // document.body.style.cursor = 'normal'
         createUUID(function createUUID_cb(id, key) {
-            document.styleSheets[1].rules[0].style.cursor = 'none'
+            // document.styleSheets[1].rules[0].style.cursor = 'none'
+            // document.body.style.cursor = 'none'
             alert('ID: ' + id + '<br/>KEY: ' + key)
             c.__SCREEN_ID = id
             c.__API_KEY = key
             run()
         })
     } else if (uuids.length > 1) {
-        document.styleSheets[1].rules[0].style.cursor = 'normal'
+        // document.styleSheets[1].rules[0].style.cursor = 'normal'
+        // document.body.style.cursor = 'normal'
         chooseUUID(uuids, function chooseUUID_cb(id) {
-            document.styleSheets[1].rules[0].style.cursor = 'none'
+            // document.styleSheets[1].rules[0].style.cursor = 'none'
+            // document.body.style.cursor = 'none'
             c.__SCREEN_ID = id
             run()
         })
