@@ -1,5 +1,4 @@
 // 1. Core modules
-// var util            = require('util')
 var fs              = require('fs')
 var path            = require('path')
 var url             = require('url')

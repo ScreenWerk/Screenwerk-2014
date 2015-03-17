@@ -11,6 +11,7 @@ var later           = require("later")
 var stringifier     = require('./stringifier.js')
 var c               = require('./c.js')
 var loader          = require('./loader.js')
+var helper          = require('./helper.js')
 
 
 var document = window.document
@@ -99,21 +100,31 @@ function processElements(err, callback) {
                 if (swElement.properties['valid-from'].values !== undefined) {
                     var db_value = swElement.properties['valid-from'].values[0].db_value
                     var parentSwElement = loader.swElementsById[swElement.parents[0]]
-                    if (parentSwElement.properties['valid-from'].values === undefined) {
-                        parentSwElement.properties['valid-from'].values = [{"db_value":db_value}]
+                    if (parentSwElement.properties['valid-from'].values === undefined
+                        || parentSwElement.properties['valid-from'].values[0].db_value === null) {
+                        parentSwElement.properties['valid-from'].values = swElement.properties['valid-from'].values
                     } else {
                         var parent_db_value = parentSwElement.properties['valid-from'].values[0].db_value
-                        parentSwElement.properties['valid-from'].values[0].db_value = Math.max(parent_db_value, db_value)
+                        if (helper.dates.compare(parent_db_value, db_value) === 1) { // if parent is later
+                            swElement.properties['valid-from'].values = parentSwElement.properties['valid-from'].values
+                        } else { // if child is later
+                            parentSwElement.properties['valid-from'].values = swElement.properties['valid-from'].values
+                        }
                     }
                 }
                 if (swElement.properties['valid-to'].values !== undefined) {
                     var db_value = swElement.properties['valid-to'].values[0].db_value
                     var parentSwElement = loader.swElementsById[swElement.parents[0]]
-                    if (parentSwElement.properties['valid-to'].values === undefined) {
-                        parentSwElement.properties['valid-to'].values = [{"db_value":db_value}]
+                    if (parentSwElement.properties['valid-to'].values === undefined
+                        || parentSwElement.properties['valid-to'].values[0].db_value === null) {
+                        parentSwElement.properties['valid-to'].values = swElement.properties['valid-to'].values
                     } else {
                         var parent_db_value = parentSwElement.properties['valid-to'].values[0].db_value
-                        parentSwElement.properties['valid-to'].values[0].db_value = Math.min(parent_db_value, db_value)
+                        if (helper.dates.compare(parent_db_value, db_value) === 1) { // if parent is later
+                            parentSwElement.properties['valid-to'].values = swElement.properties['valid-to'].values
+                        } else { // if child is later
+                            swElement.properties['valid-to'].values = parentSwElement.properties['valid-to'].values
+                        }
                     }
                 }
 
