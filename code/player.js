@@ -4,8 +4,8 @@ var fs     = require('fs')
 
 
 // 3. Own modules
-var helper      = require('./helper.js')
-var c           = require('./c.js')
+var helper      = require('../code/helper.js')
+var c           = require('../code/c.js')
 
 
 var console = window.console

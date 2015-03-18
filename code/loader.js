@@ -13,10 +13,10 @@ var request       = require('request')
 
 
 // 3. Own modules
-var entulib         = require('./entulib.js')
-var stringifier     = require('./stringifier.js')
-var c               = require('./c.js')
-var helper          = require('./helper.js')
+var entulib         = require('../code/entulib.js')
+var stringifier     = require('../code/stringifier.js')
+var c               = require('../code/c.js')
+var helper          = require('../code/helper.js')
 
 var document = window.document
 

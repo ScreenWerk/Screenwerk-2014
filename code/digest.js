@@ -8,10 +8,10 @@ var later           = require("later")
 
 
 // 3. Own modules
-var stringifier     = require('./stringifier.js')
-var c               = require('./c.js')
-var loader          = require('./loader.js')
-var helper          = require('./helper.js')
+var stringifier     = require('../code/stringifier.js')
+var c               = require('../code/c.js')
+var loader          = require('../code/loader.js')
+var helper          = require('../code/helper.js')
 
 
 var document = window.document

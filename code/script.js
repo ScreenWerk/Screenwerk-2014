@@ -19,14 +19,14 @@ var path            = require('path')
 
 
 // 3. Own modules
-var entulib         = require('./entulib.js')
-var player          = require('./player.js')
-var stringifier     = require('./stringifier.js')
-var c               = require('./c.js')
-var configuration   = require('./configuration.json')
-var helper          = require('./helper.js')
-var loader          = require('./loader.js')
-var digest          = require('./digest.js')
+var entulib         = require('./code/entulib.js')
+var player          = require('./code/player.js')
+var stringifier     = require('./code/stringifier.js')
+var c               = require('./code/c.js')
+var configuration   = require('./code/configuration.json')
+var helper          = require('./code/helper.js')
+var loader          = require('./code/loader.js')
+var digest          = require('./code/digest.js')
 
 c.__VERSION = gui.App.manifest.version
 c.__APPLICATION_NAME = gui.App.manifest.name
