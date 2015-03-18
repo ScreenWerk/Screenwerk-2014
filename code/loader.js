@@ -76,7 +76,7 @@ function loadMedia(err, entity_id, file_value, loadMediaCallback) {
         return
     }
 
-    // fs.accessSync will replace fs.existsSync
+    // fs.accessSync will replace fs.existsSync with newer version of nw.js
     // try {
     //     // console.log ('Looking for ' + filename)
     //     fs.accessSync(filename)
@@ -123,7 +123,7 @@ function loadMedia(err, entity_id, file_value, loadMediaCallback) {
                 // MD5 check
                 var my_md5 = md5sum.digest('hex')
                 // MD5 check is disabled for now as we can't get MD5's from Amazon
-                if (true || file_md5 === my_md5) {
+                if (response.statusCode === 200) {
                     console.log('Downloaded media to ' + filename + ' MD5: ' + my_md5)
                     try {
                         fs.rename(download_filename, filename)
