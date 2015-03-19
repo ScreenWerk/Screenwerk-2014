@@ -1,10 +1,18 @@
 #!/bin/sh
+# Make osx32
 
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )"/.. && pwd )
 cd ${DIR}
 
-rm -rf ${DIR}/bin
-# Make osx32
+applicationName="Screenwerk.app"
+DMGName="${DIR}/bin/temp.dmg"
+finalDMGName="${DIR}/bin/Screenwerk.dmg"
+sizeOfDmg="200M"
+diskTitle="Screenwerk 2014"
+nwAppPath="${DIR}/bin/osx32/${applicationName}"
+backgroundPictureName="dmgback.png"
+
+rm -rf ${DIR}/bin/*
 mkdir -p ${DIR}/bin/osx32
 
 cp -r ${DIR}/code ${DIR}/bin/osx32
@@ -15,46 +23,40 @@ cp -r ${DIR}/package.json ${DIR}/bin/osx32
 cp -r ${DIR}/LICENSE.md ${DIR}/bin/osx32
 
 pushd ${DIR}/bin/osx32
-zip -r ../app.nw ./*
-rm -r *
+  zip -r ../app.nw ./*
+  rm -r *
 popd
 
-cp -r ${DIR}/../nwbuilder/cache/0.8.6/osx32/node-webkit.app ${DIR}/bin/osx32/
-cp "${DIR}/ffmpegsumo for 0.8.6/ffmpegsumo.so" "${DIR}/bin/osx32/node-webkit.app/Contents/Frameworks/node-webkit Framework.framework/Libraries/"
-mv ${DIR}/bin/app.nw "${DIR}/bin/osx32/node-webkit.app/Contents/resources/"
-cp ${DIR}/imgs/sw.icns "${DIR}/bin/osx32/node-webkit.app/Contents/resources/nw.icns"
+cp -r "${DIR}/../nwbuilder/cache/0.8.6/osx32/node-webkit.app" "${nwAppPath}"
+cp "${DIR}/ffmpegsumo for 0.8.6/ffmpegsumo.so" "${nwAppPath}/Contents/Frameworks/node-webkit Framework.framework/Libraries/"
+mv "${DIR}/bin/app.nw" "${nwAppPath}/Contents/resources/"
+cp "${DIR}/imgs/sw.icns" "${nwAppPath}/Contents/resources/nw.icns"
 
-patch ${DIR}/bin/osx32/node-webkit.app/Contents/Info.plist make/info_plist.patch
+# Replace information in Node-Webkit's Info.plist
+patch "${nwAppPath}/Contents/Info.plist" "make/info_plist.patch"
 
-# ln -s /Applications ${DIR}/bin/osx32
 
-applicationName="Screenwerk.app"
-mv ${DIR}/bin/osx32/node-webkit.app "${DIR}/bin/osx32/${applicationName}"
+# mv ${nwAppPath} "${DIR}/bin/osx32/${applicationName}"
+
 
 # Create a R/W DMG
-DMGName=${DIR}/bin/temp.dmg
-finalDMGName=${DIR}/bin/Screenwerk.dmg
-sizeOfDmg=200M
-diskTitle="Screenwerk 2014"
 hdiutil create -srcfolder "${DIR}/bin/osx32" -volname "${diskTitle}" \
         -fs HFS+ -fsargs "-c c=64,a=16,e=16" -format UDRW -size ${sizeOfDmg} "${DMGName}"
+
 
 # Mount the image
 device=$(hdiutil attach -readwrite -noverify -noautoopen "${DMGName}" | \
          egrep '^/dev/' | sed 1q | awk '{print $1}')
 
-# Give some time for finder to mount
-# sleep 5
 
-# prepare for ascript
-backgroundPictureName="dmgback.png"
+# Prepare for ascript
 pushd "/Volumes/${diskTitle}"
-mkdir -p .background
-cp ${DIR}/imgs/${backgroundPictureName} .background
+  mkdir -p .background
+  cp "${DIR}/imgs/${backgroundPictureName}" .background
 popd
 
-echo "Run ascript"
 
+# Run ascript
 echo '
    tell application "Finder"
      tell disk "Screenwerk 2014"
@@ -62,7 +64,7 @@ echo '
            set current view of container window to icon view
            set toolbar visible of container window to false
            set statusbar visible of container window to false
-           set the bounds of container window to {400, 100, 885, 430}
+           set the bounds of container window to {400, 100, 885, 330}
            set theViewOptions to the icon view options of container window
            set arrangement of theViewOptions to not arranged
            set icon size of theViewOptions to 72
@@ -77,19 +79,13 @@ echo '
    end tell
 ' | osascript
 
-echo "Try chmod -Rf go-w /Volumes/${diskTitle}"
-chmod -Rf go-w /Volumes/"${diskTitle}"
+chmod -Rf go-w "/Volumes/${diskTitle}"
 sync
-sync
-# echo "sleep 5"
-# sleep 5
-echo "Try hdiutil detach ${device}"
 hdiutil detach ${device}
 
-echo "Try hdiutil convert ${DMGName} -format UDZO -imagekey zlib-level=9 -o ${finalDMGName}"
 hdiutil convert "${DMGName}" -format UDZO -imagekey zlib-level=9 -o "${finalDMGName}"
 rm -f "${DMGName}"
-
+rm -rf "${DIR}/bin/osx32"
 
 
 
