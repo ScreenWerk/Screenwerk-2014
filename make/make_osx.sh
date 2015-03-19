@@ -13,7 +13,7 @@ diskTitle="Screenwerk 2014"
 nwAppPath="${workingDir}/${applicationName}"
 backgroundPictureName="dmgback.png"
 
-rm -rf "${workingDir}"
+rm -rf "${workingDir}" "${finalDMGName}"
 mkdir -p "${workingDir}"
 
 cp -r "${DIR}/code" "${workingDir}"
