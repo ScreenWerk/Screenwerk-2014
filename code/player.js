@@ -1,12 +1,11 @@
 // 1. Core modules
-// var util   = require("util")
 var events = require('events')
 var fs     = require('fs')
 
 
 // 3. Own modules
-var helper      = require('./helper.js')
-var c           = require('./c.js')
+var helper      = require('../code/helper.js')
+var c           = require('../code/c.js')
 
 
 var console = window.console
@@ -175,7 +174,7 @@ function SwPlayer(err, dom_element, callback) {
 				case 'sw-playlist':
 					dom_element.childNodes[0].player.play(null, 0, function(err, data){
 						if (err) {
-							console.log('Cant play', err, data)
+							console.log('Can\'t play playlist-media' + dom_element.childNodes[0].swElement.displayname + ' [eid:' + dom_element.childNodes[0].swElement.id + ']', err, data)
 						}
 					})
 				break
@@ -184,7 +183,7 @@ function SwPlayer(err, dom_element, callback) {
 					if (dom_element.childNodes.length > 0) {
 						dom_element.childNodes[0].player.play(null, 0, function(err, data){
 							if (err) {
-								console.log('Cant play', err, data)
+								console.log('Can\'t play media' + dom_element.childNodes[0].swElement.displayname + ' [eid:' + dom_element.childNodes[0].swElement.id + ']', err, data)
 								start_succeeded = false
 							}
 						})
@@ -192,7 +191,7 @@ function SwPlayer(err, dom_element, callback) {
 					if (start_succeeded && properties.duration.values !== undefined) {
 						this.stop(null, Number(properties.duration.values[0].db_value) * 1000, function(err, data) {
 							if (err) {
-								console.log('Cant play', err, data)
+								console.log('Can\'t play media' + dom_element.childNodes[0].swElement.displayname + ' [eid:' + dom_element.childNodes[0].swElement.id + ']', err, data)
 							}
 						})
 					}
