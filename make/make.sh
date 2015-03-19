@@ -4,25 +4,26 @@
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )"/.. && pwd )
 cd ${DIR}
 
+workingDir="${DIR}/bin/osx32"
 applicationName="Screenwerk.app"
 DMGName="${DIR}/bin/temp.dmg"
 finalDMGName="${DIR}/bin/Screenwerk.dmg"
 sizeOfDmg="200M"
 diskTitle="Screenwerk 2014"
-nwAppPath="${DIR}/bin/osx32/${applicationName}"
+nwAppPath="${workingDir}/${applicationName}"
 backgroundPictureName="dmgback.png"
 
-rm -rf ${DIR}/bin/*
-mkdir -p ${DIR}/bin/osx32
+rm -rf "${workingDir}"
+mkdir -p "${workingDir}"
 
-cp -r ${DIR}/code ${DIR}/bin/osx32
-cp -r ${DIR}/imgs ${DIR}/bin/osx32
-cp -r ${DIR}/node_modules ${DIR}/bin/osx32
-cp -r ${DIR}/index.html ${DIR}/bin/osx32
-cp -r ${DIR}/package.json ${DIR}/bin/osx32
-cp -r ${DIR}/LICENSE.md ${DIR}/bin/osx32
+cp -r "${DIR}/code" "${workingDir}"
+cp -r "${DIR}/imgs" "${workingDir}"
+cp -r "${DIR}/node_modules" "${workingDir}"
+cp -r "${DIR}/index.html" "${workingDir}"
+cp -r "${DIR}/package.json" "${workingDir}"
+cp -r "${DIR}/LICENSE.md" "${workingDir}"
 
-pushd ${DIR}/bin/osx32
+pushd "${workingDir}"
   zip -r ../app.nw ./*
   rm -r *
 popd
@@ -36,11 +37,8 @@ cp "${DIR}/imgs/sw.icns" "${nwAppPath}/Contents/resources/nw.icns"
 patch "${nwAppPath}/Contents/Info.plist" "make/info_plist.patch"
 
 
-# mv ${nwAppPath} "${DIR}/bin/osx32/${applicationName}"
-
-
 # Create a R/W DMG
-hdiutil create -srcfolder "${DIR}/bin/osx32" -volname "${diskTitle}" \
+hdiutil create -srcfolder "${workingDir}" -volname "${diskTitle}" \
         -fs HFS+ -fsargs "-c c=64,a=16,e=16" -format UDRW -size ${sizeOfDmg} "${DMGName}"
 
 
@@ -85,7 +83,7 @@ hdiutil detach ${device}
 
 hdiutil convert "${DMGName}" -format UDZO -imagekey zlib-level=9 -o "${finalDMGName}"
 rm -f "${DMGName}"
-rm -rf "${DIR}/bin/osx32"
+rm -rf "${workingDir}"
 
 
 
