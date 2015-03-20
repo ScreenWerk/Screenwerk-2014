@@ -7,8 +7,7 @@
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
 AppId={{03E45E20-DD4C-4960-9028-BE74E588DF77}
 AppName=Screenwerk
-AppVersion=beta.1
-;AppVerName=Screenwerk beta.1
+AppVersion=beta.2.1
 DefaultDirName={pf}\Screenwerk
 DisableDirPage=yes
 DefaultGroupName=Screenwerk
@@ -18,6 +17,8 @@ OutputBaseFilename=swsetup
 Compression=lzma
 SolidCompression=yes
 
+
+
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
 
@@ -26,12 +27,12 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked; OnlyBelowVersion: 0,6.1
 
 [Files]
-Source: "Y:\Screenwerk\bin\ScreenWerk-2014\win32\ScreenWerk-2014.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "Y:\Screenwerk\bin\ScreenWerk-2014\win32\ffmpegsumo.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "Y:\Screenwerk\bin\ScreenWerk-2014\win32\icudt.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "Y:\Screenwerk\bin\ScreenWerk-2014\win32\libEGL.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "Y:\Screenwerk\bin\ScreenWerk-2014\win32\libGLESv2.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "Y:\Screenwerk\bin\ScreenWerk-2014\win32\nw.pak"; DestDir: "{app}"; Flags: ignoreversion
+Source: "Y:\Screenwerk\bin\ScreenWerk 2014\screenwerk.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "Y:\Screenwerk\bin\ScreenWerk 2014\ffmpegsumo.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "Y:\Screenwerk\bin\ScreenWerk 2014\icudt.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "Y:\Screenwerk\bin\ScreenWerk 2014\libEGL.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "Y:\Screenwerk\bin\ScreenWerk 2014\libGLESv2.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "Y:\Screenwerk\bin\ScreenWerk 2014\nw.pak"; DestDir: "{app}"; Flags: ignoreversion
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
