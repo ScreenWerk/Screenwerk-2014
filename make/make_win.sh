@@ -47,7 +47,7 @@ popd
 cat "${DIR}/make/unzipsfx.exe" "${DIR}/bin/screenwerk_win32.zip" > "${DIR}/bin/swsetup.exe"
 zip -A "${DIR}/bin/swsetup.exe"
 
-rm -rf "${workingDir}" "${DIR}/bin/screenwerk_win32.zip"
+# rm -rf "${workingDir}" "${DIR}/bin/screenwerk_win32.zip"
 
 
 
