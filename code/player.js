@@ -217,7 +217,10 @@ function SwPlayer(err, dom_element, callback) {
 							})
 						}
 
-					} else if (mediatype === 'Image' || mediatype === 'URL') {
+					} else if (mediatype === 'Image') {
+					} else if (mediatype === 'URL') {
+						document.getElementById('if' + element.id).contentWindow.postMessage(
+							'play', dom_element.childNodes[0].src)
 					} else {
 					}
 
@@ -316,6 +319,9 @@ function SwPlayer(err, dom_element, callback) {
 						    console.log('WARNING: Media DOM element has no pause() function.', e)
 						    process.exit(99)
 						}
+					} else if (mediatype === 'URL') {
+						document.getElementById('if' + element.id).contentWindow.postMessage(
+							'stop', dom_element.childNodes[0].src)
 					}
 					return this
 				break

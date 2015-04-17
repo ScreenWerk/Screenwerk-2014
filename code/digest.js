@@ -254,6 +254,7 @@ function buildDom(err, callback) {
         } else if (mediatype === 'URL') {
             media_dom_element = document.createElement('IFRAME')
             // console.log((swElement.properties.filepath.values[0]))
+            media_dom_element.id = 'if' + eid
             media_dom_element.src = swElement.properties.url.values[0].db_value
             media_dom_element.width = '100%'
             media_dom_element.height = '100%'
