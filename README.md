@@ -26,7 +26,7 @@
 #### Screengroup
 
 - ***published-at***
-  Set the desired publishing time for screens in this group. If player detects change in ***published-at*** property, it starts to fetch new content and restarts its schedules as soon as poosible but not earlier than specified by ***published-at***.
+  Set the desired publishing time for screens in this group. If player detects change in ***published-at*** property, it starts to fetch new content and restarts its schedules as soon as possible but not earlier than specified by ***published-at***.
 
 #### Schedule
 
