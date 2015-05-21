@@ -73,14 +73,15 @@ c.__LOG_DIR = path.resolve(home_path, 'sw-log')
 if (!fs.existsSync(c.__LOG_DIR)) {
     fs.mkdirSync(c.__LOG_DIR)
 }
+
 var datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '').split(' ')[0]
 var log_path = path.resolve(c.__LOG_DIR, datestring + '.log')
 var logStream = fs.createWriteStream(log_path, {flags:'a'})
 datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '')
 logStream.write('\n\nStart logging at ' + datestring + '\n------------------------------------\n')
 
-console.log (c.__DEBUG_MODE)
-console.log (!c.__DEBUG_MODE)
+// console.log (c.__DEBUG_MODE)
+// console.log (!c.__DEBUG_MODE)
 if (!c.__DEBUG_MODE) {
     console.log = function() {
         datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '')
@@ -336,6 +337,7 @@ player_window.on('loaded', function playerWindowLoaded() {
             run()
         })
     }
+    registerLastSeen(null, 100*1000)
 })
 
 
@@ -355,7 +357,7 @@ function startDigester(err, data) {
         // console.log('Waiting for loaders to calm down. Active processes: ' + loader.countLoadingProcesses())
         return
     }
-    console.log('Reached stable state. Flushing metadata and starting preprocessing elements.')
+    window.console.log('Reached stable state. Flushing metadata and starting preprocessing elements.')
     fs.writeFileSync('elements.debug.json', stringifier(loader.swElementsById))
 
     var doTimeout = function() {
@@ -452,6 +454,34 @@ function startDOM(err, options) {
     return
 }
 
+function registerLastSeen(err, timeout_ms) {
+    // console.log('Register "last seen"')
+    EntuLib.getEntity(c.__SCREEN_ID, function(err, data) {
+        if (data.result.properties['last-check'].values !== undefined) {
+            var stack = data.result.properties['last-check'].values
+            // console.log(stack)
+            stack.forEach(function(item) {
+                EntuLib.removeProperty(c.__SCREEN_ID, 'sw-screen-last-check', item.id, function(err, data) {
+                    if (err) {
+                        console.log('registerLastSeen err:', (item), (err), (data))
+                    }
+                })
+            })
+        }
+        var datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, ':').replace(/\..+/, '')
+        EntuLib.addProperties(c.__SCREEN_ID, 'sw-screen', {'last-check':datestring}, function(err, data) {
+            if (err) {
+                console.log('registerLastSeen err:', (err), (data))
+            }
+            // console.log((datestring), (data))
+        })
+    })
+
+    setTimeout(function() {
+        registerLastSeen(null, timeout_ms)
+    }, timeout_ms);
+}
+
 
 // Begin capturing screenshots
 function captureScreenshot(err, callback) {
@@ -459,6 +489,7 @@ function captureScreenshot(err, callback) {
         console.log('captureScreenshot err:', err)
         return
     }
+    // console.log('Shoot the screen... \n')
     var datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '')
     var screenshot_path = c.__LOG_DIR + 'screencapture ' + datestring + '.jpeg'
     var writer = fs.createWriteStream(screenshot_path)
@@ -511,6 +542,7 @@ function captureScreenshot(err, callback) {
     setTimeout(function() { callback(null, callback) }, 30*1000)
 }
 // player.tcIncr()
+// console.log('\n\nStart screenshotting.\n')
 // setTimeout(function() {
-//  captureScreenshot(null, captureScreenshot)
-// }, 1*1000)
+//     captureScreenshot(null, captureScreenshot)
+// }, 10*1000)

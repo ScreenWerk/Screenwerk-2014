@@ -2,6 +2,13 @@
 
 [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/argoroots/Screenwerk?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
+### Latest installers
+- Windows https://github.com/argoroots/Screenwerk/releases/download/0.2.0-beta.1/swsetup.exe
+- Linux 32 bit https://github.com/argoroots/Screenwerk/releases/download/0.2.0-beta.2.1/linux32.2.zip
+- Linux 64 bit https://github.com/argoroots/Screenwerk/releases/download/0.2.0-beta.2.1/linux64.2.zip
+- Mac https://github.com/argoroots/Screenwerk/releases/download/0.2.0-beta.2.1/Screenwerk.dmg
+
+
 ### Important notes
 > SW14 uses node-webkit >= v0.10.5
 > Out of the box SW14 supports only webm video type.
