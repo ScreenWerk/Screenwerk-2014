@@ -76,30 +76,6 @@ function loadMedia(err, entity_id, file_value, loadMediaCallback) {
         return
     }
 
-    // fs.accessSync will replace fs.existsSync with newer version of nw.js
-    // try {
-    //     // console.log ('Looking for ' + filename)
-    //     fs.accessSync(filename)
-    //     // File already downloaded, return
-    //     decrementProcessCount()
-    //     loadMediaCallback(null)
-    //     return
-    // }
-    // catch(e) {
-    //     console.log(e)
-    //     console.log('File ' + filename + ' not present. Go on.')
-    // }
-    // try {
-    //     // console.log ('Looking for ' + download_filename)
-    //     fs.accessSync(download_filename)
-    //     // console.log('Download for ' + filename + ' already in progress')
-    //     decrementProcessCount()
-    //     return
-    // }
-    // catch(e) {
-    //     console.log('Download file not present. Go on.')
-    // }
-
     var fetch_uri = 'https://' + c.__HOSTNAME + '/api2/file-' + file_id
     request
         .get(fetch_uri)
@@ -113,7 +89,7 @@ function loadMedia(err, entity_id, file_value, loadMediaCallback) {
             total_download_size += Number(filesize)
             console.log('Downloading:' + helper.bytesToSize(bytes_downloaded) + ' of ' + helper.bytesToSize(total_download_size))
             progress(loading_process_count + '| ' + helper.bytesToSize(total_download_size) + ' - ' + helper.bytesToSize(bytes_downloaded) + ' = ' + helper.bytesToSize(total_download_size - bytes_downloaded) )
-            response.on('data', function(chunk){
+            response.on('data', function(chunk) {
                 md5sum.update(chunk)
                 bytes_downloaded += chunk.length
                 progress(loading_process_count + '| ' + helper.bytesToSize(total_download_size) + ' - ' + helper.bytesToSize(bytes_downloaded) + ' = ' + helper.bytesToSize(total_download_size - bytes_downloaded) )
@@ -136,7 +112,7 @@ function loadMedia(err, entity_id, file_value, loadMediaCallback) {
                 } else {
                     fs.unlinkSync(download_filename)
                     decrementProcessCount()
-                    console.log('Downloaded media ' + filename + ' checksum fail. Got ' + my_md5 + ', expected ' + file_md5 + '. Trying again...')
+                    console.log('Downloading media ' + filename + ' Response statusCode: ' + response.statusCode + ', message: ' + response.statusMessage + '. Trying again...')
                     loadMedia(null, entity_id, file_value, loadMediaCallback)
                 }
             })
@@ -359,7 +335,7 @@ function loadMeta(err, parent_eid, eid, struct_node, callback) {
             try {
                 meta_json = JSON.parse(data)
             } catch (e) {
-                console.log('WARNING: Data got corrupted while reading from ' + meta_path + '. Retrying.', e)
+                console.log('WARNING: Data got corrupted while reading from ' + meta_path + '. Retrying.')
                 loadMeta(null, parent_eid, eid, struct_node, callback)
                 decrementProcessCount()
                 return // form readFile -> loadMeta
