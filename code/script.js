@@ -97,7 +97,6 @@ if (!c.__DEBUG_MODE) {
 
 
 console.log ( '= ' + c.__APPLICATION_NAME + ' v.' + c.__VERSION + ' ==================================')
-// console.log ( os.platform() )
 
 
 c.__STRUCTURE = {"name":"screen","reference":{"name":"screen-group","reference":{"name":"configuration","child":{"name":"schedule","reference":{"name":"layout","child":{"name":"layout-playlist","reference":{"name":"playlist","child":{"name":"playlist-media","reference":{"name":"media"}}}}}}}}}
@@ -167,7 +166,8 @@ var run = function run() {
     var uuid_path = path.resolve(home_path, c.__SCREEN_ID + '.uuid')
     if (fs.existsSync(uuid_path)) {
         c.__API_KEY = fs.readFileSync(uuid_path)
-        console.log ( 'Read key: ' + c.__API_KEY, 'INFO')
+        c.__KEY_ID = fs.statSync(uuid_path).ino
+        console.log ( 'Read key: ' + c.__API_KEY, 'INFO' )
     } else {
         if (!c.__API_KEY) {
             exitWithMessage('Missing API key, blame programmer.\nExiting.')
@@ -337,7 +337,7 @@ player_window.on('loaded', function playerWindowLoaded() {
             run()
         })
     }
-    registerLastSeen(null, 100*1000)
+    registerLastSeen(null, 5*60*1000)
 })
 
 
@@ -362,6 +362,7 @@ function startDigester(err, data) {
 
     var doTimeout = function() {
         player.tcIncr()
+        CheckInToEntu(null, 'last-update')
         setTimeout(function() {
             // console.log('RRRRRRRRRRR: Pinging Entu for news.')
             EntuLib.getEntity(c.__SCREEN_ID, function(err, result) {
@@ -455,31 +456,40 @@ function startDOM(err, options) {
 }
 
 function registerLastSeen(err, timeout_ms) {
-    // console.log('Register "last seen"')
-    EntuLib.getEntity(c.__SCREEN_ID, function(err, data) {
-        if (data.result.properties['last-check'].values !== undefined) {
-            var stack = data.result.properties['last-check'].values
-            // console.log(stack)
-            stack.forEach(function(item) {
-                EntuLib.removeProperty(c.__SCREEN_ID, 'sw-screen-last-check', item.id, function(err, data) {
-                    if (err) {
-                        console.log('registerLastSeen err:', (item), (err), (data))
-                    }
-                })
-            })
-        }
-        var datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, ':').replace(/\..+/, '')
-        EntuLib.addProperties(c.__SCREEN_ID, 'sw-screen', {'last-check':datestring}, function(err, data) {
-            if (err) {
-                console.log('registerLastSeen err:', (err), (data))
-            }
-            // console.log((datestring), (data))
-        })
-    })
-
+    CheckInToEntu(null, 'last-check')
     setTimeout(function() {
         registerLastSeen(null, timeout_ms)
     }, timeout_ms);
+}
+
+
+function CheckInToEntu(err, register_property) {
+    EntuLib.getEntity(c.__SCREEN_ID, function(err, data) {
+        if (data.result.properties[register_property].values !== undefined) {
+            var stack = data.result.properties[register_property].values
+            var remove_stack_length = stack.length - 4
+            if (remove_stack_length > 0) {
+                stack.forEach(function(item) {
+                    if (remove_stack_length > 0) {
+                        EntuLib.removeProperty(c.__SCREEN_ID, 'sw-screen-' + register_property, item.id, function(err, data) {
+                            if (err) {
+                                console.log('CheckInToEntu err:', (item), (err), (data))
+                            }
+                        })
+                        remove_stack_length --
+                    }
+                })
+            }
+        }
+        var logstring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, ':').replace(/\..+/, '') + 'UTC; v.' + c.__VERSION + '; KEY_ID:' + c.__KEY_ID
+        var options = {}
+        options[register_property] = logstring
+        EntuLib.addProperties(c.__SCREEN_ID, 'sw-screen', options, function(err, data) {
+            if (err) {
+                console.log('CheckInToEntu err:', (err), (data))
+            }
+        })
+    })
 }
 
 
@@ -489,23 +499,23 @@ function captureScreenshot(err, callback) {
         console.log('captureScreenshot err:', err)
         return
     }
-    // console.log('Shoot the screen... \n')
+
     var datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '')
-    var screenshot_path = c.__LOG_DIR + 'screencapture ' + datestring + '.jpeg'
+    var screenshot_path = c.__LOG_DIR + '/screencapture ' + datestring + '.raw.jpeg'
+    var thumbnail_path = c.__LOG_DIR + '/screencapture ' + datestring + '.jpeg'
     var writer = fs.createWriteStream(screenshot_path)
     player_window.capturePage(function(buffer) {
         if (writer.write(buffer) === false) {
-            // console.log('Shouldnt happen!   ...always does...')
             writer.once('drain', function() {writer.write(buffer)})
         }
         writer.close()
-        function addScreenshot() {
-            // console.log('Saving screenshot')
-            EntuLib.addFile(c.__SCREEN_ID, 'sw-screen-photo', screenshot_path, function(err, data) {
+        var addScreenshot = function addScreenshot() {
+            console.log('Taking screenshot')
+            var filesize = fs.statSync(screenshot_path).size
+            EntuLib.addFile(c.__SCREEN_ID, 'sw-screen-photo', datestring + '.jpeg', 'image/jpeg', filesize, screenshot_path, function(err, data) {
                 if (err) {
                     console.log('captureScreenshot err:', (err), (data))
                 }
-                // console.log((data))
             })
         }
         EntuLib.getEntity(c.__SCREEN_ID, function(err, entity) {
@@ -534,15 +544,16 @@ function captureScreenshot(err, callback) {
                         }
                     })
                 })
-
             }
         })
     }, { format : 'jpeg', datatype : 'buffer'})
     player.tcIncr()
-    setTimeout(function() { callback(null, callback) }, 30*1000)
+    // setTimeout(function() { callback(null, callback) }, 30*1000)
 }
 // player.tcIncr()
-// console.log('\n\nStart screenshotting.\n')
-// setTimeout(function() {
-//     captureScreenshot(null, captureScreenshot)
-// }, 10*1000)
+setTimeout(function() {
+    captureScreenshot(null, captureScreenshot)
+}, 30*1000)
+setTimeout(function() {
+    captureScreenshot(null, captureScreenshot)
+}, 30*60*1000)

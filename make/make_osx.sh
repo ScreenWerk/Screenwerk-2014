@@ -28,8 +28,8 @@ pushd "${workingDir}"
   rm -r *
 popd
 
-cp -r "${DIR}/../nwbuilder/cache/0.8.6/osx32/node-webkit.app" "${nwAppPath}"
-cp "${DIR}/ffmpegsumo for 0.8.6/ffmpegsumo.so" "${nwAppPath}/Contents/Frameworks/node-webkit Framework.framework/Libraries/"
+cp -r "${DIR}/../nwbuilder/cache/0.11.6/osx32/node-webkit.app" "${nwAppPath}"
+cp "${DIR}/ffmpegsumo for 0.11.6/ffmpegsumo.so" "${nwAppPath}/Contents/Frameworks/node-webkit Framework.framework/Libraries/"
 mv "${DIR}/bin/app.nw" "${nwAppPath}/Contents/resources/"
 cp "${DIR}/imgs/sw.icns" "${nwAppPath}/Contents/resources/nw.icns"
 

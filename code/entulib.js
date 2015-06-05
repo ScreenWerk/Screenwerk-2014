@@ -2,6 +2,7 @@ var https   = require('https')
 var crypto = require('crypto')
 var querystring = require('querystring')
 var fs       = require('fs')
+var request = require('request')
 
 
 var EntuLib = function EntuLib(entu_user_id, entu_user_key, entu_url) {
@@ -138,18 +139,44 @@ var EntuLib = function EntuLib(entu_user_id, entu_user_key, entu_url) {
         // property_definition in form of entity_keyname + "-" + property_keyname
         // as for entity with definition "person" and property with definition "photo"
         // property_definition = "person-photo"
-        addFile: function (entity_id, property_definition, abspath, callback) {
-            if (!fs.existsSync(abspath))
-                callback({'Error':'No such file','Path':abspath})
+        addFile: function (entity_id, property_definition, filename, filetype, filesize, filepath, callback) {
+
             var entu_query = {
-                'filename': abspath,
                 'entity': entity_id,
-                'property': property_definition
+                'property': property_definition,
+                'filename': filename,
+                'filetype': filetype,
+                'filesize': filesize
             }
             var data = __create_policy(entu_query)
-            var path = API_VERSION + 'file?' + data
-            file_contents = fs.readFileSync(abspath)
-            __submit_it(path, 'POST', file_contents, callback)
+            var path = API_VERSION + 'file/s3'
+            __submit_it(path, 'POST', data, function addFileCB(err, data) {
+                if (err) {
+                    console.log('addFileCB: Can\'t reach Entu on ' + path)
+                    console.log(err)
+                    console.log(data)
+                    process.exit(99)
+                }
+
+                var formData
+                try {
+                    formData = data.result.s3.data
+                } catch (err) {
+                    console.log('EntuLib err: ', entu_query, data)
+                    console.log('EntuLib err: ', err)
+                    // callback(err, str)
+                    // return
+                }
+                // formData = data.result.s3.data
+                formData['file'] = fs.createReadStream(filepath)
+
+                request.post({url: data.result.s3.url, formData: formData}, function optionalCallback(err, httpResponse, body) {
+                    if (err) {
+                        callback(err, 'Upload failed!')
+                    }
+                    callback(null, 'Upload successful!')
+                })
+            })
         }
     }
 }

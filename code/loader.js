@@ -87,7 +87,7 @@ function loadMedia(err, entity_id, file_value, loadMediaCallback) {
             var md5sum = my_crypto.createHash('md5')
 
             total_download_size += Number(filesize)
-            console.log('Downloading:' + helper.bytesToSize(bytes_downloaded) + ' of ' + helper.bytesToSize(total_download_size))
+            // console.log('Downloading:' + helper.bytesToSize(bytes_downloaded) + ' of ' + helper.bytesToSize(total_download_size))
             progress(loading_process_count + '| ' + helper.bytesToSize(total_download_size) + ' - ' + helper.bytesToSize(bytes_downloaded) + ' = ' + helper.bytesToSize(total_download_size - bytes_downloaded) )
             response.on('data', function(chunk) {
                 md5sum.update(chunk)
