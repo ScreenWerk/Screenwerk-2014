@@ -362,7 +362,35 @@ function startDigester(err, data) {
 
     var doTimeout = function() {
         player.tcIncr()
-        CheckInToEntu(null, 'last-update')
+        CheckInToEntu(null, 'last-update', function CheckInCB(err, interval, sw_screen) {
+            if (err) {
+                console.log(err)
+            }
+            // console.log('"Last updated" registered with interval ' + helper.msToTime(interval) + ' ' + interval)
+            var color = 'green'
+            if (1000 * c.__UPDATE_INTERVAL_SECONDS / interval < 0.9) {
+                color = 'orange'
+            } else if (1000 * c.__UPDATE_INTERVAL_SECONDS / interval < 0.3) {
+                color = 'red'
+            }
+
+            if (sw_screen.result.properties['health'].values !== undefined) {
+                sw_screen.result.properties['health'].values.forEach(function(item) {
+                    EntuLib.removeProperty(c.__SCREEN_ID, 'sw-screen-' + 'health', item.id, function(err, sw_screen) {
+                        if (err) {
+                            console.log('RegisterHealth err:', (item), (err), (sw_screen))
+                        }
+                    })
+                })
+            }
+
+            var options = {'health': '<span style="color:' + color + ';">' + helper.msToTime(interval) + '</span>'}
+            EntuLib.addProperties(c.__SCREEN_ID, 'sw-screen', options, function(err, data) {
+                if (err) {
+                    console.log('RegisterHealth err:', (err))
+                }
+            })
+        })
         setTimeout(function() {
             // console.log('RRRRRRRRRRR: Pinging Entu for news.')
             EntuLib.getEntity(c.__SCREEN_ID, function(err, result) {
@@ -456,14 +484,22 @@ function startDOM(err, options) {
 }
 
 function registerLastSeen(err, timeout_ms) {
-    CheckInToEntu(null, 'last-check')
+    CheckInToEntu(null, 'last-check', function CheckInCB(err, interval) {
+        if (err) {
+            console.log(err)
+        }
+        // console.log('"Last seen" registered with interval ' + helper.msToTime(interval) + ' ' + interval)
+    })
     setTimeout(function() {
         registerLastSeen(null, timeout_ms)
     }, timeout_ms);
 }
 
 
-function CheckInToEntu(err, register_property) {
+function CheckInToEntu(err, register_property, callback) {
+
+    var checkins = []
+
     EntuLib.getEntity(c.__SCREEN_ID, function(err, data) {
         if (data.result.properties[register_property].values !== undefined) {
             var stack = data.result.properties[register_property].values
@@ -477,11 +513,25 @@ function CheckInToEntu(err, register_property) {
                             }
                         })
                         remove_stack_length --
+                    } else {
+                        var item_a = item.value.split('; ')
+                        checkins.push({timestamp: item_a[0], parsedtimestamp: new Date(item_a[0].replace('UTC', 'Z')), version: item_a[1], UUID_INO: item_a[2]})
                     }
                 })
             }
         }
         var logstring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, ':').replace(/\..+/, '') + 'UTC; v.' + c.__VERSION + '; KEY_ID:' + c.__KEY_ID
+        if (checkins.length) {
+            // console.log(checkins.length)
+            var prev_checkin = checkins.pop()
+            var item_a = logstring.split('; ')
+            var curr_checkin = {timestamp: item_a[0], parsedtimestamp: new Date(item_a[0].replace('UTC', 'Z')), version: item_a[1], UUID_INO: item_a[2]}
+            // console.log(checkins)
+            // console.log(prev_checkin)
+            // console.log(curr_checkin)
+            var last_interval = (curr_checkin.parsedtimestamp.getTime() - prev_checkin.parsedtimestamp.getTime())
+            callback(null, last_interval, data)
+        }
         var options = {}
         options[register_property] = logstring
         EntuLib.addProperties(c.__SCREEN_ID, 'sw-screen', options, function(err, data) {

@@ -5,8 +5,8 @@
 PrivilegesRequired=admin
 AppId={{8F7C3DA3-E34D-434D-8984-13AB1937EFAE}
 AppName=Screenwerk 2014
-AppVersion=1.0.0
-;AppVerName=Screenwerk 2014 1.0.0
+AppVersion=1.0.1
+;AppVerName=Screenwerk 2014 1.0.1
 AppPublisher=Entusiastid OÜ
 AppPublisherURL=http://www.entu.ee/
 AppSupportURL=http://www.entu.ee/

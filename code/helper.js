@@ -20,15 +20,15 @@ var msToTime = function msToTime(ms) {
     } else if (ms < 1000 * 60 * 60) {
         decimals = 1
         unit = 'min'
-        amount = ms / 1000
+        amount = ms / 1000 / 60
     } else if (ms < 1000 * 60 * 60 * 24) {
         decimals = 1
         unit = 'h'
-        amount = ms / 1000
+        amount = ms / 1000 / 60 / 60
     } else if (ms < 1000 * 60 * 60 * 24 * 7) {
         decimals = 2
         unit = 'd'
-        amount = ms / 1000
+        amount = ms / 1000 / 60 / 60 / 24
     } else {
         decimals = 2
         unit = 'w'
