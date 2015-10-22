@@ -1,3 +1,21 @@
+var fs              = require('fs')
+var path            = require('path')
+var c               = require('../code/c.js')
+var swmeta          = require('../code/swmeta.js')
+
+
+
+
+var SlackBot = require('slackbots')
+var settings = {
+    token: 'xoxb-12801543831-Bx3UtMRBeDoTMj3eX8d9HsIk',
+    // name: 'noise'
+}
+var slackbot = new SlackBot(settings)
+
+
+
+
 var bytesToSize = function bytesToSize(bytes) {
     var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB']
     if (bytes == 0) return '0'
@@ -55,7 +73,7 @@ var dates = {
             d.constructor === String ? new Date(d) :
             typeof d === "object" ? new Date(d.year,d.month,d.date) :
             NaN
-        );
+        )
     },
     compare:function(a,b) {
         // Compare two dates (could be of any type supported by the convert
@@ -70,7 +88,7 @@ var dates = {
             isFinite(b=this.convert(b).valueOf()) ?
             (a>b)-(a<b) :
             NaN
-        );
+        )
     },
     inRange:function(d,start,end) {
         // Checks if date in d is between dates in start and end.
@@ -85,11 +103,85 @@ var dates = {
             isFinite(end=this.convert(end).valueOf()) ?
             start <= d && d <= end :
             NaN
-        );
+        )
     }
 }
+
+var datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '').split(' ')[0]
+var log_path = c.__DEBUG_MODE ? path.join(path.dirname(), 'debug.log') : path.resolve(c.__LOG_DIR, datestring + '.log')
+var logStream = fs.createWriteStream(log_path, {flags:'w'})
+datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '')
+logStream.write('\n\nStart logging at ' + datestring + '\n------------------------------------\n')
+// TODO: Make it rotating
+var log = function log() {
+    if (!logStream) {
+    }
+    datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '')
+    var arr = [], p, i = 0
+    for (p in arguments) arr[i++] = arguments[p]
+    var stack = new Error().stack.split(' at ')[2].trim().replace(/\/.*\//,'')
+    var line = stack[1] + ':' + stack[2] + ':' + stack[3]
+    var output = datestring + ' @' + stack + ': ' + arr.join(', ') + '\n'
+    // slackbot.postMessageToChannel('test', output, {as_user: true})
+    logStream.write(output)
+}
+
+
+
+slackbot.on('start', function() {
+    slackbot.postMessageToChannel('test', datestring + ':*' + c.__SCREEN_ID + '*: Joining to chatter.', {as_user: true})
+    // slackbot.postMessageToUser('michelek', 'hello bro!')
+    // slackbot.postMessageToGroup('some-private-group', 'hello group chat!')
+})
+
+slackbot.on('message', function(message) {
+    if (message.type !== 'message' || !Boolean(message.text)) {
+        // console.log('Message type ' + message.type + '".')
+        return
+    }
+    datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '')
+
+    switch (message.text.toLowerCase()) {
+        case c.__SCREEN_ID:
+            slackbot.postMessageToChannel('test', datestring + ':*' + c.__SCREEN_ID + '*: Yes, ma\'am!', {as_user: true})
+            break
+        case 'check in':
+            slackbot.postMessageToChannel('test', datestring + ':*' + c.__SCREEN_ID + '*: Checking in.', {as_user: true})
+            break
+        case 'version':
+            slackbot.postMessageToChannel('test', datestring + ':' + c.__SCREEN_ID + ' *' + c.__VERSION + '*: Checking in.', {as_user: true})
+            break
+        default:
+            params = message.text.toLowerCase().split(' ')
+            if (def = swmeta.get([params[0], 'definition'], false)) {
+                ref_id = params.shift()
+                var command = params.join(' ')
+                switch (command) {
+                    case '':
+                        slackbot.postMessageToChannel('test', datestring + ':*' + c.__SCREEN_ID + '*: I have ' + def + ' ' + ref_id + '.', {as_user: true})
+                        break
+                    case 'screenshot':
+                    case 'ss':
+                        slackbot.postMessageToChannel('test', datestring + ':*' + c.__SCREEN_ID + '*: Shooting right away, ma\'am!', {as_user: true})
+                        break
+                    case 'shutup':
+                    case 'shut down':
+                        slackbot.postMessageToChannel('test', datestring + ':*' + c.__SCREEN_ID + '*: I have ' + def + ' ' + ref_id + ', but not going to shut down just like that!', {as_user: true})
+                        break
+                    case 'ver':
+                    case 'version':
+                        slackbot.postMessageToChannel('test', datestring + ':' + c.__SCREEN_ID + ' *' + c.__VERSION + '*: I have ' + def + ' ' + ref_id + '.', {as_user: true})
+                        break
+                }
+            } else if (params[0] === 'version' && params[1] === c.__VERSION) {
+                slackbot.postMessageToChannel('test', datestring + ':*' + c.__SCREEN_ID + '*: I\'m running on ' + c.__VERSION + '.', {as_user: true})
+            }
+    }
+})
 
 
 module.exports.bytesToSize = bytesToSize
 module.exports.msToTime = msToTime
 module.exports.dates = dates
+module.exports.log = log
+module.exports.slackbot = slackbot
