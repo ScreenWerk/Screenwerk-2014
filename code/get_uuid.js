@@ -28,7 +28,7 @@ var main = function getUUID(callback) {
         player_window.show()
         player_window.focus()
         if (uuids.length === 1) {
-            c.__SCREEN_ID = uuids[0].slice(0,-5)
+            c.__SCREEN_ID = parseInt(uuids[0].slice(0,-5))
             c.__API_KEY = fs.readFileSync(path.join(c.__HOME_PATH, uuids[0]), 'utf8')
             helper.log('UUID: ' + c.__SCREEN_ID)
             helper.log('KEY: ' + c.__API_KEY)
@@ -49,7 +49,7 @@ var main = function getUUID(callback) {
             // document.styleSheets[1].rules[0].style.cursor = 'normal'
             // document.body.style.cursor = 'normal'
             chooseUUID(uuids, function chooseUUID_cb(eid, key) {
-                c.__SCREEN_ID = eid
+                c.__SCREEN_ID = parseInt(eid)
                 c.__API_KEY = key
                 helper.log('UUID: ' + c.__SCREEN_ID)
                 helper.log('KEY: ' + c.__API_KEY)
@@ -76,7 +76,7 @@ var createUUID = function createUUID(callback) {
 var chooseUUID = function chooseUUID(uuids, callback) {
     window.document.getElementById('chooseUUID').style.display = 'block'
     for (i=0; i<uuids.length; i++) {
-        var eid = uuids[i].slice(0,-5)
+        var eid = parseInt(uuids[i].slice(0,-5))
 
         var id_element = window.document.createElement('span')
         id_element.appendChild( window.document.createTextNode(eid) )

@@ -48,15 +48,20 @@ var main = function cacheFromEntu(reloadPlayerCB, callback) {
             var screen_group_changed = !Boolean(swmeta.get(['by_eid', screen_group_eid, 'properties', 'entu-changed-at', 'value']) === screen_group_e.get(['properties', 'entu-changed-at', 'value']))
             helper.log('screen_group ' + screen_group_eid + (screen_group_changed ? ' cached.' : ' not changed.'))
             cache_changed = Boolean(cache_changed || screen_group_changed)
-            if (screen_group_changed) {
-                tmpmeta.set([screen_group_eid], screen_group_e.get())
-            }
+
+            tmpmeta.set([screen_group_eid], screen_group_e.get())
+            relate(c.__SCREEN_ID, screen_group_eid)
             var configuration_eid = screen_group_e.get(['properties', 'configuration', 'reference'])
-            fetchConfigurationAndSchedules(configuration_eid, callback)
+            fetchConfigurationAndSchedules(screen_group_eid, configuration_eid, callback)
         })
     }
 
-    var fetchConfigurationAndSchedules = function fetchConfigurationAndSchedules(configuration_eid, callback) {
+    var relate = function relate(parent_eid, child_eid) {
+        tmpmeta.set([parent_eid, 'childs', String(child_eid)], child_eid)
+        tmpmeta.set([child_eid, 'parents', String(parent_eid)], parent_eid)
+    }
+
+    var fetchConfigurationAndSchedules = function fetchConfigurationAndSchedules(screen_group_eid, configuration_eid, callback) {
         // helper.log('Fetch configuration ' + configuration_eid)
         // helper.log(JSON.stringify(swmeta.get(), null, 4))
         entu.get_entity(configuration_eid, null, null, function(err, configuration_e) {
@@ -70,9 +75,8 @@ var main = function cacheFromEntu(reloadPlayerCB, callback) {
             var configuration_changed = !Boolean(swmeta.get(['by_eid', configuration_eid, 'properties', 'entu-changed-at', 'value']) === configuration_e.get(['properties', 'entu-changed-at', 'value']))
             helper.log('configuration ' + configuration_eid + (configuration_changed ? ' cached.' : ' not changed.'))
             cache_changed = Boolean(cache_changed || configuration_changed)
-            if (configuration_changed) {
-                tmpmeta.set([configuration_eid], configuration_e.get())
-            }
+            tmpmeta.set([configuration_eid], configuration_e.get())
+            relate(screen_group_eid, configuration_eid)
             entu.get_childs(configuration_eid, 'sw-schedule', null, null, function(err, schedule_ea) {
                 // helper.log('Got schedules')
                 if (err) {
@@ -88,12 +92,10 @@ var main = function cacheFromEntu(reloadPlayerCB, callback) {
                         var schedule_changed = !Boolean(swmeta.get(['by_eid', schedule_eid, 'properties', 'entu-changed-at', 'value']) === schedule_e.get(['properties', 'entu-changed-at', 'value']))
                         helper.log('schedule ' + schedule_eid + (schedule_changed ? ' cached.' : ' not changed.'))
                         cache_changed = Boolean(cache_changed || schedule_changed)
-                        tmpmeta.set([configuration_eid, 'schedules', String(schedule_eid)], schedule_eid)
-                        if (schedule_changed) {
-                            tmpmeta.set([schedule_eid], schedule_e.get())
-                        }
+                        tmpmeta.set([schedule_eid], schedule_e.get())
+                        relate(configuration_eid, schedule_eid)
                         var layout_eid = schedule_e.get(['properties', 'layout', 'reference'])
-                        fetchLayoutAndLayoutPlaylist(layout_eid, callback)
+                        fetchLayoutAndLayoutPlaylist(schedule_eid, layout_eid, callback)
                     },
                     function(err) {
                         if (err) {
@@ -120,7 +122,7 @@ var main = function cacheFromEntu(reloadPlayerCB, callback) {
         })
     }
 
-    var fetchLayoutAndLayoutPlaylist = function fetchLayoutAndLayoutPlaylist(layout_eid, callback) {
+    var fetchLayoutAndLayoutPlaylist = function fetchLayoutAndLayoutPlaylist(schedule_eid, layout_eid, callback) {
         // helper.log('Fetch layout ' + layout_eid)
         // helper.log(JSON.stringify(swmeta.get(), null, 4))
         entu.get_entity(layout_eid, null, null, function(err, layout_e) {
@@ -134,9 +136,8 @@ var main = function cacheFromEntu(reloadPlayerCB, callback) {
             var layout_changed = !Boolean(swmeta.get(['by_eid', layout_eid, 'properties', 'entu-changed-at', 'value']) === layout_e.get(['properties', 'entu-changed-at', 'value']))
             helper.log('layout ' + layout_eid + (layout_changed ? ' cached.' : ' not changed.'))
             cache_changed = Boolean(cache_changed || layout_changed)
-            if (layout_changed) {
-                tmpmeta.set([layout_eid], layout_e.get())
-            }
+            tmpmeta.set([layout_eid], layout_e.get())
+            relate(schedule_eid, layout_eid)
             entu.get_childs(layout_eid, 'sw-layout-playlist', null, null, function(err, layout_playlist_ea) {
                 // helper.log('Got layout-playlists')
                 if (err) {
@@ -152,12 +153,10 @@ var main = function cacheFromEntu(reloadPlayerCB, callback) {
                         var layout_playlist_changed = !Boolean(swmeta.get(['by_eid', layout_playlist_eid, 'properties', 'entu-changed-at', 'value']) === layout_playlist_e.get(['properties', 'entu-changed-at', 'value']))
                         helper.log('layout_playlist ' + layout_playlist_eid + (layout_playlist_changed ? ' cached.' : ' not changed.'))
                         cache_changed = Boolean(cache_changed || layout_playlist_changed)
-                        tmpmeta.set([layout_eid, 'layout-playlists', String(layout_playlist_eid)], layout_playlist_eid)
-                        if (layout_playlist_changed) {
-                            tmpmeta.set([layout_playlist_eid], layout_playlist_e.get())
-                        }
+                        tmpmeta.set([layout_playlist_eid], layout_playlist_e.get())
+                        relate(layout_eid, layout_playlist_eid)
                         var playlist_eid = layout_playlist_e.get(['properties', 'playlist', 'reference'])
-                        fetchPlaylistAndPlaylistMedia(playlist_eid, callback)
+                        fetchPlaylistAndPlaylistMedia(layout_playlist_eid, playlist_eid, callback)
                     },
                     function(err) {
                         if (err) {
@@ -172,7 +171,7 @@ var main = function cacheFromEntu(reloadPlayerCB, callback) {
         })
     }
 
-    var fetchPlaylistAndPlaylistMedia = function fetchPlaylistAndPlaylistMedia(playlist_eid, callback) {
+    var fetchPlaylistAndPlaylistMedia = function fetchPlaylistAndPlaylistMedia(layout_playlist_eid, playlist_eid, callback) {
         // helper.log('Fetch playlist ' + playlist_eid)
         // helper.log(JSON.stringify(swmeta.get(), null, 4))
         entu.get_entity(playlist_eid, null, null, function(err, playlist_e) {
@@ -186,9 +185,8 @@ var main = function cacheFromEntu(reloadPlayerCB, callback) {
             var playlist_changed = !Boolean(swmeta.get(['by_eid', playlist_eid, 'properties', 'entu-changed-at', 'value']) === playlist_e.get(['properties', 'entu-changed-at', 'value']))
             helper.log('playlist ' + playlist_eid + (playlist_changed ? ' cached.' : ' not changed.'))
             cache_changed = Boolean(cache_changed || playlist_changed)
-            if (playlist_changed) {
-                tmpmeta.set([playlist_eid], playlist_e.get())
-            }
+            tmpmeta.set([playlist_eid], playlist_e.get())
+            relate(layout_playlist_eid, playlist_eid)
             entu.get_childs(playlist_eid, 'sw-playlist-media', null, null, function(err, playlist_media_ea) {
                 // helper.log('Got playlist-medias')
                 if (err) {
@@ -204,12 +202,10 @@ var main = function cacheFromEntu(reloadPlayerCB, callback) {
                         var playlist_media_changed = !Boolean(swmeta.get(['by_eid', playlist_media_eid, 'properties', 'entu-changed-at', 'value']) === playlist_media_e.get(['properties', 'entu-changed-at', 'value']))
                         helper.log('playlist_media ' + playlist_media_eid + (playlist_media_changed ? ' cached.' : ' not changed.'))
                         cache_changed = Boolean(cache_changed || playlist_media_changed)
-                        tmpmeta.set([playlist_eid, 'playlist-medias', String(playlist_media_eid)], playlist_media_eid)
-                        if (playlist_media_changed) {
-                            tmpmeta.set([playlist_media_eid], playlist_media_e.get())
-                        }
+                        tmpmeta.set([playlist_media_eid], playlist_media_e.get())
+                        relate(playlist_eid, playlist_media_eid)
                         var media_eid = playlist_media_e.get(['properties', 'media', 'reference'])
-                        fetchMedia(media_eid, callback)
+                        fetchMedia(playlist_media_eid, media_eid, callback)
                     },
                     function(err) {
                         if (err) {
@@ -224,7 +220,7 @@ var main = function cacheFromEntu(reloadPlayerCB, callback) {
         })
     }
 
-    var fetchMedia = function fetchMedia(media_eid, callback) {
+    var fetchMedia = function fetchMedia(playlist_media_eid, media_eid, callback) {
         // helper.log('Fetch media ' + media_eid)
         // helper.log(JSON.stringify(swmeta.get(), null, 4))
         entu.get_entity(media_eid, null, null, function(err, media_e) {
@@ -239,9 +235,8 @@ var main = function cacheFromEntu(reloadPlayerCB, callback) {
             var media_changed = !Boolean(swmeta.get(['by_eid', media_eid, 'properties', 'entu-changed-at', 'value']) === media_e.get(['properties', 'entu-changed-at', 'value']))
             helper.log('media ' + media_eid + (media_changed ? ' cached.' : ' not changed.'))
             cache_changed = Boolean(cache_changed || media_changed)
-            if (media_changed) {
-                tmpmeta.set([media_eid], media_e.get())
-            }
+            tmpmeta.set([media_eid], media_e.get())
+            relate(playlist_media_eid, media_eid)
             callback() // to fetchPlaylistAndPlaylistMedia
         })
     }
