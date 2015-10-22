@@ -17,7 +17,6 @@ var main = function getUUID(callback) {
             uuids.push(filename)
         }
     })
-
     // helper.log('UUIDs: ' + JSON.stringify(uuids, null, 2))
 
     var player_window = gui.Window.get()
@@ -49,19 +48,18 @@ var main = function getUUID(callback) {
         } else if (uuids.length > 1) {
             // document.styleSheets[1].rules[0].style.cursor = 'normal'
             // document.body.style.cursor = 'normal'
-            chooseUUID(uuids, function chooseUUID_cb(id) {
-                // document.styleSheets[1].rules[0].style.cursor = 'none'
-                // document.body.style.cursor = 'none'
-                c.__SCREEN_ID = id
-                run()
+            chooseUUID(uuids, function chooseUUID_cb(eid, key) {
+                c.__SCREEN_ID = eid
+                c.__API_KEY = key
+                helper.log('UUID: ' + c.__SCREEN_ID)
+                helper.log('KEY: ' + c.__API_KEY)
+                callback()
             })
         }
     })
 
     // callback()
 }
-
-
 
 
 var createUUID = function createUUID(callback) {
@@ -76,24 +74,21 @@ var createUUID = function createUUID(callback) {
     }
 }
 var chooseUUID = function chooseUUID(uuids, callback) {
-    if (typeof(gui.App.argv[0] === 'string')) {
-        if (Number(gui.App.argv[0]) > 0) {
-            callback(Number(gui.App.argv[0]))
-            return
-        }
-    }
-    Number(gui.App.argv.shift())
-    document.getElementById('chooseUUID').style.display = 'block'
-    uuids.forEach(function(id) {
-        id = id.slice(0,-5)
-        var id_element = document.createElement('span')
-        id_element.appendChild( document.createTextNode(id) )
+    window.document.getElementById('chooseUUID').style.display = 'block'
+    for (i=0; i<uuids.length; i++) {
+        var eid = uuids[i].slice(0,-5)
+
+        var id_element = window.document.createElement('span')
+        id_element.appendChild( window.document.createTextNode(eid) )
+        id_element.setAttribute('eid', eid)
+        id_element.setAttribute('key', fs.readFileSync(path.join(c.__HOME_PATH, uuids[i]), 'utf8'))
         id_element.onclick = function chooseUUID_chosen() {
             window.document.getElementById('chooseUUID').style.display = 'none'
-            callback(id)
+            helper.log('chose ' + this.getAttribute('eid') + '|' + this.getAttribute('key'))
+            callback(this.getAttribute('eid'), this.getAttribute('key'))
         }
-        document.getElementById('chooseUUID').appendChild(id_element)
-    })
+        window.document.getElementById('chooseUUID').appendChild(id_element)
+    }
 }
 
 module.exports = main

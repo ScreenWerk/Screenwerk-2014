@@ -2,16 +2,17 @@ var fs              = require('fs')
 var path            = require('path')
 var c               = require('../code/c.js')
 var swmeta          = require('../code/swmeta.js')
+var gui             = global.window.nwDispatcher.requireNwGui()
 
 
 
 
 var SlackBot = require('slackbots')
-var settings = {
+var slackbot_settings = {
     token: 'xoxb-12801543831-Bx3UtMRBeDoTMj3eX8d9HsIk',
     // name: 'noise'
 }
-var slackbot = new SlackBot(settings)
+var slackbot = new SlackBot(slackbot_settings)
 
 
 
@@ -129,10 +130,14 @@ var log = function log() {
 
 
 slackbot.on('start', function() {
-    slackbot.postMessageToChannel('test', datestring + ':*' + c.__SCREEN_ID + '*: Joining to chatter.', {as_user: true})
+    // slackbot.postMessageToChannel('test', datestring + ':*' + c.__SCREEN_ID + '*: Joining to chatter.', {as_user: true})
     // slackbot.postMessageToUser('michelek', 'hello bro!')
     // slackbot.postMessageToGroup('some-private-group', 'hello group chat!')
 })
+
+slackbot.chatter = function(message, callback) {
+    slackbot.postMessageToChannel('test', datestring + ':*' + c.__SCREEN_ID + '*: ' + message, {as_user: true}, callback)
+}
 
 slackbot.on('message', function(message) {
     if (message.type !== 'message' || !Boolean(message.text)) {
@@ -153,7 +158,7 @@ slackbot.on('message', function(message) {
             break
         default:
             params = message.text.toLowerCase().split(' ')
-            if (def = swmeta.get([params[0], 'definition'], false)) {
+            if (def = swmeta.get(['by_eid', params[0], 'definition'], false)) {
                 ref_id = params.shift()
                 var command = params.join(' ')
                 switch (command) {
@@ -163,6 +168,9 @@ slackbot.on('message', function(message) {
                     case 'screenshot':
                     case 'ss':
                         slackbot.postMessageToChannel('test', datestring + ':*' + c.__SCREEN_ID + '*: Shooting right away, ma\'am!', {as_user: true})
+                        gui.window.capturePage(function() {
+                            slackbot.postMessageToChannel('test', datestring + ':*' + c.__SCREEN_ID + '*: Here\'s my screen.', {as_user: true})
+                        }, { format : "png", datatype : "raw" })
                         break
                     case 'shutup':
                     case 'shut down':
@@ -171,6 +179,21 @@ slackbot.on('message', function(message) {
                     case 'ver':
                     case 'version':
                         slackbot.postMessageToChannel('test', datestring + ':' + c.__SCREEN_ID + ' *' + c.__VERSION + '*: I have ' + def + ' ' + ref_id + '.', {as_user: true})
+                        break
+                    case 'log':
+                        slackbot.postMessageToChannel('test', datestring + ':*' + c.__SCREEN_ID + '*: Here\'s my log.', {as_user: true})
+                        break
+                    case 'restart':
+                        slackbot.postMessageToChannel('test', datestring + ':*' + c.__SCREEN_ID + '*: Restarting right now.', {as_user: true})
+                        // //Restart node-webkit app
+                        // var child_process = require("child_process");
+                        // //Start new app
+                        // var child = child_process.spawn(process.execPath, [], {detached: true});
+                        // //Don't wait for it
+                        // child.unref();
+                        // //Quit current
+                        // // gui.window.hide(); // hide window to prevent black display
+                        // gui.app.quit();  // quit node-webkit app
                         break
                 }
             } else if (params[0] === 'version' && params[1] === c.__VERSION) {

@@ -1,10 +1,3 @@
-/*
- * Screenwerk main executable. Arguments:
- *
- * argv[0]          Screen's Entu ID
- *
- */
-
 var async           = require('async')
 var events          = require('events')
 var fs              = require('fs')
@@ -19,6 +12,7 @@ var stringifier     = require('./code/stringifier.js')
 var c               = require('./code/c.js')
 var configuration   = require('./code/configuration.json')
 var swmeta          = require('./code/swmeta.js')
+
 
 
 c.__VERSION = gui.App.manifest.version
@@ -40,8 +34,6 @@ try {
     gui.Shell.openItem(c.__HOME_PATH)
     process.exit(0)
 }
-
-var routine_timeout
 
 
 c.__DEBUG_MODE = configuration.debug
@@ -69,13 +61,14 @@ var helper          = require('./code/helper.js')
 helper.log('= ' + c.__APPLICATION_NAME + ' v.' + c.__VERSION + ' ==================================')
 
 
+
 var getUUID = require('./code/get_uuid')
 var readFromCache = require('./code/read_from_cache')
 var cacheFromEntu = require('./code/cache_from_entu')
 var reloadPlayer  = require('./code/reload_player')
 
-
 getUUID(function() {
+    helper.slackbot.chatter('Joining to chatter.')
     readFromCache(reloadPlayer, function() {
         cacheFromEntu(reloadPlayer, function(error) {
             if(error) {
@@ -91,14 +84,13 @@ getUUID(function() {
 })
 
 var routine = function routine() {
-    helper.log('Routine check for news from earth.')
+    helper.log('Routine check for news from underworld.')
     cacheFromEntu(reloadPlayer, function callback() {
         setTimeout(function () {
             routine()
         }, c.__DEFAULT_UPDATE_INTERVAL_MINUTES * 60 * 1000)
     })
 }
-
 
 
 
@@ -121,29 +113,20 @@ try {
     // helper.log(ex.message)
 }
 
+player_window.on('close', function() {
+    if (!c.__SCREEN_ID) {
+        // We haven't checked in anywhere so shut down immediately.
+        process.exit(0)
+    }
+    this.hide(); // Pretend to be closed already
+    console.log("We're almost closed...")
+    helper.slackbot.chatter('Bye.', function(err) {
+        console.log('Now we are done.')
+        // gui.app.quit()
+        process.exit(0)
+    })
+})
 
-// // React to messages received from master
-// process.on('message', function(msg) {
-//     switch(msg.type) {
-//         case 'hello':
-//             console.log('master welcomed me :)')
-//             var datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '')
-//             helper.slackbot.postMessageToChannel('test', datestring + ': Master said "hello"', {as_user: true})
-//         break
-//         case 'message':
-//             console.log('Got message: "' + msg.message + '"')
-//         break
-//         case 'reload':
-//             cacheFromEntu(reloadPlayer, function() {
-//                 helper.log('All systems are go.')
-//                 clearTimeout(routine_timeout)
-//                 routine_timeout = setTimeout(function () {
-//                     routine()
-//                 }, c.__DEFAULT_UPDATE_INTERVAL_MINUTES * 60 * 1000)
-//             })
-//         break
-//     }
-// })
 
 
 var uuids = []
