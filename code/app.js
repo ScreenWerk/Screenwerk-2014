@@ -40,7 +40,6 @@ c.__DEBUG_MODE = configuration.debug
 c.__SCREEN = configuration.run_on_screen
 c.__RELAUNCH_THRESHOLD = configuration.relaunch
 
-c.__HOSTNAME = 'piletilevi.entu.ee'
 c.__API_URL = 'https://' + c.__HOSTNAME + '/api2'
 c.__META_DIR = path.resolve(c.__HOME_PATH, 'sw-meta')
 if (!fs.existsSync(c.__META_DIR)) {
@@ -55,7 +54,6 @@ if (!fs.existsSync(c.__LOG_DIR)) {
     fs.mkdirSync(c.__LOG_DIR)
 }
 
-c.__DEFAULT_UPDATE_INTERVAL_MINUTES = 0.5
 
 var helper          = require('./code/helper.js')
 helper.log('= ' + c.__APPLICATION_NAME + ' v.' + c.__VERSION + ' ==================================')
@@ -72,8 +70,10 @@ getUUID(function() {
     readFromCache(reloadPlayer, function() {
         cacheFromEntu(reloadPlayer, function(error) {
             if(error) {
-                helper.log('Reload failed.', error)
-                process.exit(1)
+                helper.slackbot.error('Tough one. What to do? ' + JSON.stringify(error, null, 4), function() {
+                    helper.log(error)
+                    // process.exit(1)
+                })
             }
             // helper.log(JSON.stringify(swmeta.get(), null, 4))
             setTimeout(function () {
@@ -84,7 +84,7 @@ getUUID(function() {
 })
 
 var routine = function routine() {
-    helper.log('Routine check for news from underworld.')
+    helper.log('======== Routine check for news from underworld.')
     cacheFromEntu(reloadPlayer, function callback() {
         setTimeout(function () {
             routine()

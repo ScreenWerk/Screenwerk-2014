@@ -139,6 +139,10 @@ slackbot.chatter = function(message, callback) {
     slackbot.postMessageToChannel('test', datestring + ':*' + c.__SCREEN_ID + '*: ' + message, {as_user: true}, callback)
 }
 
+slackbot.error = function(message, callback) {
+    slackbot.postMessageToChannel('test', datestring + ':*' + c.__SCREEN_ID + '*: ' + message, {as_user: true}, callback)
+}
+
 slackbot.on('message', function(message) {
     if (message.type !== 'message' || !Boolean(message.text)) {
         // console.log('Message type ' + message.type + '".')
