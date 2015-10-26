@@ -154,10 +154,12 @@ slackbot.on('message', function(message) {
         case c.__SCREEN_ID:
             slackbot.postMessageToChannel('test', datestring + ':*' + c.__SCREEN_ID + '*: Yes, ma\'am!', {as_user: true})
             break
-        case 'check in':
+        case 'hello':
+        case 'hi':
             slackbot.postMessageToChannel('test', datestring + ':*' + c.__SCREEN_ID + '*: Checking in.', {as_user: true})
             break
         case 'version':
+        case 'ver':
             slackbot.postMessageToChannel('test', datestring + ':' + c.__SCREEN_ID + ' *' + c.__VERSION + '*: Checking in.', {as_user: true})
             break
         default:

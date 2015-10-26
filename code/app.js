@@ -67,12 +67,14 @@ var reloadPlayer  = require('./code/reload_player')
 
 getUUID(function() {
     helper.slackbot.chatter('Joining to chatter.')
-    readFromCache(reloadPlayer, function() {
-        cacheFromEntu(reloadPlayer, function(error) {
-            if(error) {
-                helper.slackbot.error('Tough one. What to do? ' + JSON.stringify(error, null, 4), function() {
-                    helper.log(error)
-                    // process.exit(1)
+    readFromCache(reloadPlayer, function(err) {
+        if(err) {
+            helper.log('Problems reading local cache.', err)
+        }
+        cacheFromEntu(reloadPlayer, function(err) {
+            if(err) {
+                helper.slackbot.error('Tough one. What to do? ' + JSON.stringify(err, null, 4), function() {
+                    helper.log(err)
                 })
             }
             // helper.log(JSON.stringify(swmeta.get(), null, 4))
@@ -120,9 +122,9 @@ player_window.on('close', function() {
     }
     this.hide(); // Pretend to be closed already
     console.log("We're almost closed...")
+    setTimeout(function () { process.exit(0) }, 5*1000)
     helper.slackbot.chatter('Bye.', function(err) {
         console.log('Now we are done.')
-        // gui.app.quit()
         process.exit(0)
     })
 })
