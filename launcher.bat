@@ -4,5 +4,6 @@ for /f "delims=" %%a in ('git describe --tags %rev%') do @SET tag=%%a
 ECHO Running on release %tag% (commit %rev%)
 git checkout --force %tag%
 npm update
-nwjs .
+ECHO Starting ScreenWerk
+nwjs
 ECHO uzredzēšanos!
