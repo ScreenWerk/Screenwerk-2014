@@ -27,10 +27,9 @@ You can launch ScreenWerk by opening terminal/cmd app and executing
 
 in Screenwerk folder.
 
-If you want to make sure that you are running latest player, use a launcher script:
-##### launcher.bat (or launcher.sh for linux/osx)
-    git pull
-    nwjs .
+If you want to make sure that you are always running latest player, use a launcher script
+**launcher.bat** for windows or **launcher.sh** for linux/osx
+
 
 ### Troubleshooting
 
@@ -45,7 +44,6 @@ If you want to make sure that you are running latest player, use a launcher scri
    > \> ...
 
 
-That way you could set up your launcher to run two commands in sequence thus making sure You are running latest version of player.
 
 
 ### References
