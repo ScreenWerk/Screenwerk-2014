@@ -5,3 +5,4 @@ ECHO Running on release %tag% (commit %rev%)
 git checkout %tag%
 npm update
 nwjs .
+ECHO uzredzēšanos!
