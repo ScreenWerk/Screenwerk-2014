@@ -44,10 +44,10 @@ That way you could set up your launcher to run two commands in sequence thus mak
     nwjs .
 
 ### References
-node - https://nodejs.org/en/download/
-nwjs package - https://www.npmjs.com/package/nwjs
-SW player - https://github.com/argoroots/Screenwerk/archive/master.zip
-git - https://git-scm.com/download
+node - https://nodejs.org/en/download/  
+nwjs package - https://www.npmjs.com/package/nwjs  
+SW player - https://github.com/argoroots/Screenwerk/archive/master.zip  
+git - https://git-scm.com/download  
 
 ## Latest installers
 
