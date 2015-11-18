@@ -5,5 +5,5 @@ ECHO Running on release %tag% (commit %rev%)
 git checkout --force %tag%
 call npm update
 ECHO Starting ScreenWerk
-nwjs
+call nwjs
 ECHO uzredzēšanos!
