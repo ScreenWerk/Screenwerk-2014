@@ -337,7 +337,6 @@ player_window.on('loaded', function playerWindowLoaded() {
             run()
         })
     }
-    registerLastSeen(null, 5*60*1000)
 })
 
 
@@ -360,67 +359,6 @@ function startDigester(err, data) {
     window.console.log('Reached stable state. Flushing metadata and starting preprocessing elements.')
     fs.writeFileSync('elements.debug.json', stringifier(loader.swElementsById))
 
-    var doTimeout = function() {
-        player.tcIncr()
-        CheckInToEntu(null, 'last-update', function CheckInCB(err, interval, sw_screen) {
-            if (err) {
-                console.log(err)
-            }
-            // console.log('"Last updated" registered with interval ' + helper.msToTime(interval) + ' ' + interval)
-            var color = 'green'
-            if (1000 * c.__UPDATE_INTERVAL_SECONDS / interval < 0.9) {
-                color = 'orange'
-            } else if (1000 * c.__UPDATE_INTERVAL_SECONDS / interval < 0.3) {
-                color = 'red'
-            }
-
-            if (sw_screen.result.properties['health'].values !== undefined) {
-                sw_screen.result.properties['health'].values.forEach(function(item) {
-                    EntuLib.removeProperty(c.__SCREEN_ID, 'sw-screen-' + 'health', item.id, function(err, sw_screen) {
-                        if (err) {
-                            console.log('RegisterHealth err:', (item), (err), (sw_screen))
-                        }
-                    })
-                })
-            }
-
-            var options = {'health': '<span style="color:' + color + ';">' + helper.msToTime(interval) + '</span>'}
-            EntuLib.addProperties(c.__SCREEN_ID, 'sw-screen', options, function(err, data) {
-                if (err) {
-                    console.log('RegisterHealth err:', (err))
-                }
-            })
-        })
-        setTimeout(function() {
-            // console.log('RRRRRRRRRRR: Pinging Entu for news.')
-            EntuLib.getEntity(c.__SCREEN_ID, function(err, result) {
-                if (err) {
-                    console.log('Can\'t reach Entu', err, result)
-                }
-                else if (result.error !== undefined) {
-                    console.log ('Failed to load from Entu.', result)
-                } else {
-                    remote_published = new Date(Date.parse(result.result.properties.published.values[0].value))
-                    // console.log('Remote published: ', remote_published.toJSON())
-                }
-
-                if (remote_published
-                    && local_published.toJSON() !== remote_published.toJSON()
-                    && (new Date()).toJSON() > remote_published.toJSON()
-                    ) {
-                    console.log('Remove local content. Fetch new from Entu!')
-                    player.clearSwTimeouts()
-                    local_published = new Date(Date.parse(remote_published.toJSON()))
-                    loader.reloadMeta(null, startDigester)
-                } else {
-                    doTimeout()
-                    // loader.loadMeta(null, null, c.__SCREEN_ID, c.__STRUCTURE, startDigester)
-                }
-            })
-        }, 1000 * c.__UPDATE_INTERVAL_SECONDS)
-        // console.log('RRRRRRRRRRR: Check for news scheduled in ' + c.__UPDATE_INTERVAL_SECONDS + ' seconds.')
-    }
-    doTimeout()
 
     function flushMeta(err) {
         if (err) {
@@ -483,64 +421,6 @@ function startDOM(err, options) {
     return
 }
 
-function registerLastSeen(err, timeout_ms) {
-    CheckInToEntu(null, 'last-check', function CheckInCB(err, interval) {
-        if (err) {
-            console.log(err)
-        }
-        // console.log('"Last seen" registered with interval ' + helper.msToTime(interval) + ' ' + interval)
-    })
-    setTimeout(function() {
-        registerLastSeen(null, timeout_ms)
-    }, timeout_ms);
-}
-
-
-function CheckInToEntu(err, register_property, callback) {
-
-    var checkins = []
-
-    EntuLib.getEntity(c.__SCREEN_ID, function(err, data) {
-        if (data.result.properties[register_property].values !== undefined) {
-            var stack = data.result.properties[register_property].values
-            var remove_stack_length = stack.length - 4
-            if (remove_stack_length > 0) {
-                stack.forEach(function(item) {
-                    if (remove_stack_length > 0) {
-                        EntuLib.removeProperty(c.__SCREEN_ID, 'sw-screen-' + register_property, item.id, function(err, data) {
-                            if (err) {
-                                console.log('CheckInToEntu err:', (item), (err), (data))
-                            }
-                        })
-                        remove_stack_length --
-                    } else {
-                        var item_a = item.value.split('; ')
-                        checkins.push({timestamp: item_a[0], parsedtimestamp: new Date(item_a[0].replace('UTC', 'Z')), version: item_a[1], UUID_INO: item_a[2]})
-                    }
-                })
-            }
-        }
-        var logstring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, ':').replace(/\..+/, '') + 'UTC; v.' + c.__VERSION + '; KEY_ID:' + c.__KEY_ID
-        if (checkins.length) {
-            // console.log(checkins.length)
-            var prev_checkin = checkins.pop()
-            var item_a = logstring.split('; ')
-            var curr_checkin = {timestamp: item_a[0], parsedtimestamp: new Date(item_a[0].replace('UTC', 'Z')), version: item_a[1], UUID_INO: item_a[2]}
-            // console.log(checkins)
-            // console.log(prev_checkin)
-            // console.log(curr_checkin)
-            var last_interval = (curr_checkin.parsedtimestamp.getTime() - prev_checkin.parsedtimestamp.getTime())
-            callback(null, last_interval, data)
-        }
-        var options = {}
-        options[register_property] = logstring
-        EntuLib.addProperties(c.__SCREEN_ID, 'sw-screen', options, function(err, data) {
-            if (err) {
-                console.log('CheckInToEntu err:', (err), (data))
-            }
-        })
-    })
-}
 
 
 // Begin capturing screenshots
@@ -600,10 +480,3 @@ function captureScreenshot(err, callback) {
     player.tcIncr()
     // setTimeout(function() { callback(null, callback) }, 30*1000)
 }
-// player.tcIncr()
-setTimeout(function() {
-    captureScreenshot(null, captureScreenshot)
-}, 30*1000)
-setTimeout(function() {
-    captureScreenshot(null, captureScreenshot)
-}, 30*60*1000)
