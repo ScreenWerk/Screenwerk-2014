@@ -55,14 +55,14 @@ function EntuLib(entu_user_id, entu_user_key, entu_url) {
             response.on('end', function response_emitter() {
                 var str = buffer.toString()
                 try {
-                    var returned_data = JSON.parse(str)
+                    // var returned_data = JSON.parse(str)
+                    callback(null, JSON.parse(str))
                 }
                 catch (err) {
                     console.log('EntuLib err: ', err)
                     callback(err, str)
                     return
                 }
-                callback(null, returned_data)
             })
         })
         request.on('error', function (e) {
@@ -122,7 +122,9 @@ function EntuLib(entu_user_id, entu_user_key, entu_url) {
         addProperties: function (entity_id, definition, properties, callback) {
             var entu_query = {}
             for (var key in properties) {
-                entu_query[definition + '-' + key] = properties[key]
+                if (properties.hasOwnProperty(key)) {
+                    entu_query[definition + '-' + key] = properties[key]
+                }
             }
             var data = __create_policy(entu_query)
             var path = API_VERSION + 'entity-' + entity_id
