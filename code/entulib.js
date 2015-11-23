@@ -19,8 +19,8 @@ function EntuLib(entu_user_id, entu_user_key, entu_url) {
     //       PUT properties to entity | { ('entitydefinition-propertydefinition':value) }
     //
     function __create_policy(entu_query) {
-        var conditions = []
-        var entu_query = entu_query === undefined ? {} : entu_query
+        // var conditions = []
+        entu_query = entu_query === undefined ? {} : entu_query
         var conditions = Object.keys(entu_query).map(function(v) { return entu_query[v] })
         var expiration_time = new Date()
         expiration_time.setMinutes(expiration_time.getMinutes() + POLICY_EXPIRATION_MINUTES)
@@ -110,7 +110,9 @@ function EntuLib(entu_user_id, entu_user_key, entu_url) {
             var entu_query = {}
             entu_query.definition = definition
             for (var key in properties) {
-                entu_query[definition + '-' + key] = properties[key]
+                if (properties.hasOwnProperty(key)) {
+                    entu_query[definition + '-' + key] = properties[key]
+                }
             }
             var data = __create_policy(entu_query)
             var path = API_VERSION + 'entity-' + parent_id
@@ -168,7 +170,7 @@ function EntuLib(entu_user_id, entu_user_key, entu_url) {
                 // formData = data.result.s3.data
                 formData['file'] = fs.createReadStream(filepath)
 
-                request.post({url: data.result.s3.url, formData: formData}, function optionalCallback(err, httpResponse, body) {
+                request.post({url: data.result.s3.url, formData: formData}, function optionalCallback(err) {
                     if (err) {
                         callback(err, 'Upload failed!')
                     }
