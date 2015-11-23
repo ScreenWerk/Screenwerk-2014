@@ -7,10 +7,10 @@
 
 // 1. Core modules
 var gui             = require('nw.gui')
-var assert          = require('assert')
+// var assert          = require('assert')
 var fs              = require('fs')
-var https           = require('https')
-var events          = require('events')
+// var https           = require('https')
+// var events          = require('events')
 var uuid            = require('node-uuid')
 var path            = require('path')
 
@@ -24,7 +24,7 @@ var player          = require('./code/player.js')
 var stringifier     = require('./code/stringifier.js')
 var c               = require('./code/c.js')
 var configuration   = require('./code/configuration.json')
-var helper          = require('./code/helper.js')
+// var helper          = require('./code/helper.js')
 var loader          = require('./code/loader.js')
 var digest          = require('./code/digest.js')
 
@@ -92,7 +92,7 @@ if (!c.__DEBUG_MODE) {
             }
         }
         var stack = new Error().stack.split(' at ')[2].trim().replace(/\/.*\//,'')
-        var line = stack[1] + ':' + stack[2] + ':' + stack[3]
+        // var line = stack[1] + ':' + stack[2] + ':' + stack[3]
         var output = datestring + ': ' + arr.join(', ') + ' @' + stack + '\n'
         logStream.write(output)
         process.stdout.write(output)
@@ -110,10 +110,8 @@ function recurseHierarchy(structure, parent_name) {
         c.__HIERARCHY.child_of[parent_name] = structure.name
         c.__HIERARCHY.parent_of[structure.name] = parent_name
     }
-    if (structure.child !== undefined)
-        recurseHierarchy(structure.child, structure.name)
-    else if (structure.reference !== undefined)
-        recurseHierarchy(structure.reference, structure.name)
+    if (structure.child !== undefined) { recurseHierarchy(structure.child, structure.name) }
+    else if (structure.reference !== undefined) { recurseHierarchy(structure.reference, structure.name) }
 }
 recurseHierarchy(c.__STRUCTURE)
 c.__DEFAULT_UPDATE_INTERVAL_MINUTES = 10
@@ -123,7 +121,7 @@ c.__DEFAULT_DELAY_MS = 0
 
 
 
-var createUUID = function createUUID(callback) {
+function createUUID(callback) {
     document.getElementById('createUUID').style.display = 'block'
     window.document.getElementById('createUUID_id').focus()
     window.document.getElementById('createUUID_key').value = uuid.v1()
@@ -134,7 +132,7 @@ var createUUID = function createUUID(callback) {
         callback(id, key)
     }
 }
-var chooseUUID = function chooseUUID(uuids, callback) {
+function chooseUUID(uuids, callback) {
     if (typeof(gui.App.argv[0] === 'string')) {
         if (Number(gui.App.argv[0]) > 0) {
             callback(Number(gui.App.argv[0]))
@@ -161,7 +159,7 @@ var EntuLib,  local_published, remote_published
 // Main funcion to start the loader and then player
 // Essential configuration has been successfully loaded
 //
-var run = function run() {
+function run() {
 
     if (!c.__SCREEN_ID) {
         exitWithMessage('Missing screen ID, blame programmer.\nExiting.')
@@ -198,8 +196,7 @@ var run = function run() {
         }
         else if (stats.isDirectory()) {
             fs.readdirSync(c.__MEDIA_DIR).forEach(function(download_filename) {
-                if (download_filename.split('.').pop() !== 'download')
-                    return
+                if (download_filename.split('.').pop() !== 'download') { return }
                 console.log("Unlink " + path.resolve(c.__MEDIA_DIR, download_filename))
                 var result = fs.unlinkSync(path.resolve(c.__MEDIA_DIR, download_filename))
                 if (result instanceof Error) {
@@ -400,8 +397,7 @@ function startDOM(err, options) {
         console.log('startDOM err:', err, options)
         process.exit(99)
     }
-    if (screen_dom_element)
-        document.body.removeChild(screen_dom_element)
+    if (screen_dom_element) { document.body.removeChild(screen_dom_element) }
     console.log('====== Start startDOM')
     digest.buildDom(null, function(err, dom_element) {
         screen_dom_element = dom_element
@@ -431,19 +427,19 @@ function startDOM(err, options) {
 function captureScreenshot(err, callback) {
     if (err) {
         console.log('captureScreenshot err:', err)
-        return
+        return callback(err)
     }
 
     var datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '')
     var screenshot_path = c.__LOG_DIR + '/screencapture ' + datestring + '.raw.jpeg'
-    var thumbnail_path = c.__LOG_DIR + '/screencapture ' + datestring + '.jpeg'
+    // var thumbnail_path = c.__LOG_DIR + '/screencapture ' + datestring + '.jpeg'
     var writer = fs.createWriteStream(screenshot_path)
     player_window.capturePage(function(buffer) {
         if (writer.write(buffer) === false) {
             writer.once('drain', function() {writer.write(buffer)})
         }
         writer.close()
-        var addScreenshot = function addScreenshot() {
+        function addScreenshot() {
             console.log('Taking screenshot')
             var filesize = fs.statSync(screenshot_path).size
             EntuLib.addFile(c.__SCREEN_ID, 'sw-screen-photo', datestring + '.jpeg', 'image/jpeg', filesize, screenshot_path, function(err, data) {
