@@ -1,4 +1,4 @@
-# ScreenWerk 2014
+# ScreenWerk 2014 [![Codacy Badge](https://api.codacy.com/project/badge/grade/28b7ebd9bb5246baa5a3a37dec3f5aa5)](https://www.codacy.com/app/mihkel-putrinsh/Screenwerk)
 
 [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/argoroots/Screenwerk?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
