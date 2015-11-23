@@ -2,8 +2,8 @@
 var fs              = require('fs')
 var path            = require('path')
 // var url             = require('url')
-var https           = require('https')
-var uuid            = require('node-uuid')
+// var https           = require('https')
+// var uuid            = require('node-uuid')
 var my_crypto       = require('crypto')
 
 
@@ -23,21 +23,21 @@ var document = window.document
 var loading_process_count = 0
 var total_download_size = 0
 var bytes_downloaded = 0
-var decrementProcessCount = function decrementProcessCount() {
+function decrementProcessCount() {
     -- loading_process_count
     // console.log('loading_process_count: ' + loading_process_count)
     progress(loading_process_count + '| ' + helper.bytesToSize(total_download_size) + ' - ' + helper.bytesToSize(bytes_downloaded) + ' = ' + helper.bytesToSize(total_download_size - bytes_downloaded) )
 }
-var incrementProcessCount = function incrementProcessCount() {
+function incrementProcessCount() {
     ++ loading_process_count
     // console.log('loading_process_count: ' + loading_process_count)
     progress(loading_process_count + '| ' + helper.bytesToSize(total_download_size) + ' - ' + helper.bytesToSize(bytes_downloaded) + ' = ' + helper.bytesToSize(total_download_size - bytes_downloaded) )
 }
-var countLoadingProcesses = function countLoadingProcesses() {
+function countLoadingProcesses() {
     return loading_process_count
 }
 
-var progress = function progress(message) {
+function progress(message) {
     if (document.body !== null) {
         var progress_DOM = document.getElementById('progress')
         if (progress_DOM === null) {
@@ -53,7 +53,7 @@ var progress = function progress(message) {
 
 function loadMedia(err, entity_id, file_value, loadMediaCallback) {
     var file_id = file_value.db_value
-    var file_md5 = file_value.md5
+    // var file_md5 = file_value.md5
     // console.log('loadMedia ',file_value)
     incrementProcessCount()
     if (err) {
@@ -124,24 +124,24 @@ function loadMedia(err, entity_id, file_value, loadMediaCallback) {
 var swElements = []
 var swElementsById = {}
 
-function unregisterMeta(err, eidx, callback) {
-    var eid = swElements[eidx].id
-    console.log('UNREGISTER ' + eid)
-    if (eid === c.__SCREEN_ID) {
-        callback('Screen has no content. Everything expired?', eid)
-        process.exit(99)
-    }
-    if (swElementsById[eid] === undefined) {
-        callback('Entity absent. Already unregistered?', eid)
-        return
-    }
-    var parent_eid = swElementsById[eid].parents[0]
-    // console.log(swElementsById[eid], swElementsById[parent_eid], parent_eid)
-    swElementsById[parent_eid].childs.splice(swElementsById[parent_eid].childs.indexOf(eid), 1)
-    swElements.splice(eidx, 1)
-    delete swElementsById[eid]
-    callback()
-}
+// function unregisterMeta(err, eidx, callback) {
+//     var eid = swElements[eidx].id
+//     console.log('UNREGISTER ' + eid)
+//     if (eid === c.__SCREEN_ID) {
+//         callback('Screen has no content. Everything expired?', eid)
+//         process.exit(99)
+//     }
+//     if (swElementsById[eid] === undefined) {
+//         callback('Entity absent. Already unregistered?', eid)
+//         return
+//     }
+//     var parent_eid = swElementsById[eid].parents[0]
+//     // console.log(swElementsById[eid], swElementsById[parent_eid], parent_eid)
+//     swElementsById[parent_eid].childs.splice(swElementsById[parent_eid].childs.indexOf(eid), 1)
+//     swElements.splice(eidx, 1)
+//     delete swElementsById[eid]
+//     callback()
+// }
 
 // Integrity check and element validation
 function registerMeta(err, metadata, callback) {
@@ -153,7 +153,7 @@ function registerMeta(err, metadata, callback) {
         return false
     }
     // console.log('registerMeta ', metadata.id)
-    var properties = metadata.properties
+    // var properties = metadata.properties
     // if (properties['valid-to'] !== undefined) {
     //  if (properties['valid-to'].values !== undefined) {
     //      var vt_date = new Date(properties['valid-to'].values[0].db_value)
@@ -384,7 +384,7 @@ function loadMeta(err, parent_eid, eid, struct_node, callback) {
                             return
                         }
                         if (!ch_result.result['sw-'+ch_def_name]) {
-                            var err = definition + ' ' + eid + ': Missing expected elements of ' + ch_def_name + '.'
+                            err = definition + ' ' + eid + ': Missing expected elements of ' + ch_def_name + '.'
                             console.log(err + (ch_result.result, {depth:null}))
                             callback(err)
                             return
