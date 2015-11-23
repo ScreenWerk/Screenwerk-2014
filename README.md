@@ -12,7 +12,7 @@
     Select "**Use Git from the Windows Command Prompt**" as it enables you to make custom launcher for auto-updating the code before starting the player.
 
 2. ** ScreenWerk** - Open terminal/cmd and navigate to your Documents or Desktop folder, then run
-    > \> git pull https://github.com/argoroots/Screenwerk.git
+    > \> git clone https://github.com/argoroots/Screenwerk.git
 
 3. **NODE** - Download appropriate LTS version from https://nodejs.org/en/download/ and install on system.
 
