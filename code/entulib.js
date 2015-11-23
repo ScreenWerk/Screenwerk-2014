@@ -24,11 +24,9 @@ var EntuLib = function EntuLib(entu_user_id, entu_user_key, entu_url) {
         var conditions = Object.keys(entu_query).map(function(v) { return entu_query[v] })
         var expiration_time = new Date()
         expiration_time.setMinutes(expiration_time.getMinutes() + POLICY_EXPIRATION_MINUTES)
-        var policy = { 'expiration': expiration_time.toISOString(), 'conditions': conditions }
-        policy = JSON.stringify(policy)
-        encoded_policy = new Buffer(new Buffer(policy).toString('utf8')).toString('base64')
-        var signature = crypto.createHmac('sha1', entu_user_key).update(encoded_policy).digest().toString('base64')
-        entu_query.policy = encoded_policy
+        var policy = JSON.stringify({ 'expiration': expiration_time.toISOString(), 'conditions': conditions })
+        entu_query.policy = new Buffer(new Buffer(policy).toString('utf8')).toString('base64')
+        var signature = crypto.createHmac('sha1', entu_user_key).update(entu_query.policy).digest().toString('base64')
         entu_query.user = entu_user_id
         entu_query.signature = signature
         return querystring.stringify(entu_query)

@@ -352,13 +352,13 @@ function loadMeta(err, parent_eid, eid, struct_node, callback) {
             if (meta_json.childs === undefined) {
                 meta_json.childs = []
                 if (struct_node.reference !== undefined) {
-                    ref_entity_name = struct_node.reference.name
+                    var ref_entity_name = struct_node.reference.name
                     if (meta_json.properties[ref_entity_name].values === undefined) {
                         callback(new Error(struct_node.name + ' ' + eid + ' has no ' + ref_entity_name + "'s."))
                         decrementProcessCount()
                     }
                     // console.log(ref_entity_name, meta_json)
-                    ref_entity_id = meta_json.properties[ref_entity_name].values[0].db_value
+                    var ref_entity_id = meta_json.properties[ref_entity_name].values[0].db_value
                     registerChild(null, parent_eid, meta_json, ref_entity_id, function(err) {
                         // console.log(ref_entity_id)
                         loadMeta(err, eid, ref_entity_id, struct_node.reference, callback)
