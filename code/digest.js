@@ -58,9 +58,11 @@ function processElements(err, callback) {
                 var loop = false
                 // If any of parent LayoutPlaylist's has loop == true, then loop the playlist
                 swElement.parents.forEach(function(parent_eid) {
-                    if (loader.swElementsById[parent_eid].properties.loop.values !== undefined)
-                        if (loader.swElementsById[parent_eid].properties.loop.values[0].db_value === 1)
+                    if (loader.swElementsById[parent_eid].properties.loop.values !== undefined) {
+                        if (loader.swElementsById[parent_eid].properties.loop.values[0].db_value === 1) {
                             loop = true
+                        }
+                    }
                 })
                 // Sort playlist-medias by ordinal
                 swElement.childs.sort(function compare(a,b) {
@@ -174,36 +176,38 @@ function buildDom(err, callback) {
         dom_element.style.width = '100%'
         dom_element.style.height = '100%'
         dom_element.style['z-index'] = '1'
-        if (swElement.properties['zindex'] !== undefined)
-            if (swElement.properties['zindex'].values !== undefined)
+        if (swElement.properties['zindex'] !== undefined
+            && swElement.properties['zindex'].values !== undefined) {
                 dom_element.style['z-index'] = swElement.properties['zindex'].values[0].db_value
-        if (swElement.properties['in-pixels'] !== undefined)
-            if (swElement.properties['in-pixels'].values !== undefined)
-                if (swElement.properties['in-pixels'].values[0].db_value === 1)
-                    unit = 'px'
-        if (swElement.properties.width !== undefined)
-            if (swElement.properties.width.values !== undefined) {
+            }
+        if (swElement.properties['in-pixels'] !== undefined
+            && swElement.properties['in-pixels'].values !== undefined
+            && swElement.properties['in-pixels'].values[0].db_value === 1) {
+                unit = 'px'
+            }
+        if (swElement.properties.width !== undefined
+            && swElement.properties.width.values !== undefined) {
                 dom_element.style.position = 'absolute'
                 // dom_element.style.border = '2px solid red'
                 dom_element.style.padding = '0px'
                 dom_element.style.width = swElement.properties.width.values[0].db_value + unit
             }
-        if (swElement.properties.height !== undefined)
-            if (swElement.properties.height.values !== undefined) {
+        if (swElement.properties.height !== undefined
+            && swElement.properties.height.values !== undefined) {
                 dom_element.style.position = 'absolute'
                 // dom_element.style.border = '2px solid red'
                 dom_element.style.padding = '0px'
                 dom_element.style.height = swElement.properties.height.values[0].db_value + unit
             }
-        if (swElement.properties.left !== undefined)
-            if (swElement.properties.left.values !== undefined) {
+        if (swElement.properties.left !== undefined
+            && swElement.properties.left.values !== undefined) {
                 dom_element.style.position = 'absolute'
                 // dom_element.style.border = '2px solid red'
                 dom_element.style.padding = '0px'
                 dom_element.style.left = swElement.properties.left.values[0].db_value + unit
             }
-        if (swElement.properties.top !== undefined)
-            if (swElement.properties.top.values !== undefined) {
+        if (swElement.properties.top !== undefined
+            && swElement.properties.top.values !== undefined) {
                 dom_element.style.position = 'absolute'
                 // dom_element.style.border = '2px solid red'
                 dom_element.style.padding = '0px'
@@ -218,8 +222,9 @@ function buildDom(err, callback) {
             dom_element.appendChild(child_node)
         })
 
-        if (swElement.definition.keyname !== 'sw-media')
+        if (swElement.definition.keyname !== 'sw-media') {
             return dom_element
+        }
         // We are here because we have media!
         var mediatype = swElement.properties.type.values === undefined ? '#NA' : swElement.properties.type.values[0].value
         var media_dom_element = {}

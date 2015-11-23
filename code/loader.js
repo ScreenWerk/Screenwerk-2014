@@ -1,7 +1,7 @@
 // 1. Core modules
 var fs              = require('fs')
 var path            = require('path')
-var url             = require('url')
+// var url             = require('url')
 var https           = require('https')
 var uuid            = require('node-uuid')
 var my_crypto       = require('crypto')
@@ -218,8 +218,10 @@ function registerMeta(err, metadata, callback) {
                 callback('Media ' + metadata.id + ' type not specified.', metadata)
                 return
             }
-            if (metadata.properties.file.values === undefined && metadata.properties.url.values === undefined)
-                throw ('"URL" or "file" property must be set for ' + metadata.id)
+            if (metadata.properties.file.values === undefined
+                && metadata.properties.url.values === undefined) {
+                    throw ('"URL" or "file" property must be set for ' + metadata.id)
+            }
             if (metadata.properties.file.values !== undefined) {
                 metadata.properties.filepath = {'values': [{'db_value': path.resolve(c.__MEDIA_DIR, metadata.id + '_' + metadata.properties.file.values[0].db_value)}]}
                 loadMedia(null, metadata.id, metadata.properties.file.values[0], callback)
@@ -434,14 +436,15 @@ function registerChild(err, parent_eid, element, child_eid, callback) {
     }
     if (element.childs === undefined)
         element.childs = []
-    if (child_eid !== undefined && child_eid !== null) {
-        if (element.childs.indexOf(child_eid) === -1)
+    if (child_eid !== undefined && child_eid !== null
+        && element.childs.indexOf(child_eid) === -1) {
             element.childs.push(child_eid)
     }
-    if (element.parents === undefined)
+    if (element.parents === undefined) {
         element.parents = []
-    if (parent_eid !== undefined && parent_eid !== null) {
-        if (element.parents.indexOf(parent_eid) === -1)
+    }
+    if (parent_eid !== undefined && parent_eid !== null
+        && element.parents.indexOf(parent_eid) === -1) {
             element.parents.push(parent_eid)
     }
     callback(null)

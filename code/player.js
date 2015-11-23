@@ -13,7 +13,33 @@ var document = window.document
 
 // var consoleStream = fs.createWriteStream('./console.log', {flags:'a'})
 // var sysLogStream = fs.createWriteStream('./system.log', {flags:'a'})
+var sw_timeouts = []
+var timeout_counter = 0
 
+
+var tcIncr = function() {
+    timeout_counter ++
+    if (c.__RELAUNCH_THRESHOLD > 0 && timeout_counter > c.__RELAUNCH_THRESHOLD) {
+        // document.location.reload(true)
+        // window.location.reload(3)
+        console.log("=====================================")
+        console.log("== RELAUNCHING! =====================")
+        console.log("=====================================")
+
+        //Restart node-webkit app
+        var child_process = require("child_process")
+
+        //Start new app
+        var child = child_process.spawn(process.execPath, ['./', c.__SCREEN_ID], {detached: true})
+
+        //Don't wait for it
+        child.unref()
+
+        //Quit current
+        player_window.hide() // hide window to prevent black display
+        process.exit(1)  // quit node-webkit app
+    }
+}
 
 function SwPlayer(err, dom_element, callback) {
 	if (err) {
@@ -119,10 +145,8 @@ function SwPlayer(err, dom_element, callback) {
 					}
 
 					schedule_nodes.sort(function compare(a,b) {
-						if (a.swElement.laterSchedule.prev().getTime() > b.swElement.laterSchedule.prev().getTime())
-							return 1
-						if (a.swElement.laterSchedule.prev().getTime() < b.swElement.laterSchedule.prev().getTime())
-							return -1
+						if (a.swElement.laterSchedule.prev().getTime() > b.swElement.laterSchedule.prev().getTime()) { return 1 }
+						if (a.swElement.laterSchedule.prev().getTime() < b.swElement.laterSchedule.prev().getTime()) { return -1 }
 						return 0
 					})
 
@@ -157,8 +181,7 @@ function SwPlayer(err, dom_element, callback) {
 					if (properties.duration.values !== undefined) {
 						var time_from_start = Date.now() - element.laterSchedule.prev().getTime()
 						var time_to_play = properties.duration.values[0].db_value * 1000 - time_from_start
-						if (time_to_play < 0)
-							time_to_play = 0
+						if (time_to_play < 0) { time_to_play = 0 }
 						// console.log(helper.msToTime(time_from_start) + ' passed, ' + helper.msToTime(time_to_play) + ' left.')
 						this.stop(null, time_to_play, function(){})
 					}
@@ -369,37 +392,11 @@ function SwPlayer(err, dom_element, callback) {
 }
 
 // Register timeouts that need to be cleared on player restart
-var timeout_counter = 0
-var sw_timeouts = []
 function clearSwTimeouts() {
     console.log('Clearing ' + sw_timeouts.length + ' sw_timeouts.', 'Timeouts set total: ' + timeout_counter)
     // helper.swLog('Clearing ' + sw_timeouts.length + ' sw_timeouts. Timeouts set total: ' + timeout_counter)
     while (sw_timeouts.length > 0) {
         clearTimeout(sw_timeouts.pop())
-    }
-}
-
-var tcIncr = function() {
-    timeout_counter ++
-    if (c.__RELAUNCH_THRESHOLD > 0 && timeout_counter > c.__RELAUNCH_THRESHOLD) {
-        // document.location.reload(true)
-        // window.location.reload(3)
-        console.log("=====================================")
-        console.log("== RELAUNCHING! =====================")
-        console.log("=====================================")
-
-        //Restart node-webkit app
-        var child_process = require("child_process")
-
-        //Start new app
-        var child = child_process.spawn(process.execPath, ['./', c.__SCREEN_ID], {detached: true})
-
-        //Don't wait for it
-        child.unref()
-
-        //Quit current
-        player_window.hide() // hide window to prevent black display
-        process.exit(1)  // quit node-webkit app
     }
 }
 
