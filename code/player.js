@@ -1,6 +1,6 @@
 // 1. Core modules
-var events = require('events')
-var fs     = require('fs')
+// var events = require('events')
+// var fs     = require('fs')
 
 
 // 3. Own modules
@@ -395,7 +395,7 @@ function SwPlayer(err, dom_element, callback) {
             }
             return this
         },
-        clearMyTimeouts: function(err, callback) {
+        clearMyTimeouts: function(err) {
             // console.log('Clearing ' + my_timeouts.length + ' my_timeouts.', 'Timeouts set total: ' + timeout_counter)
             while (my_timeouts.length > 0) {
                 clearTimeout(my_timeouts.pop())

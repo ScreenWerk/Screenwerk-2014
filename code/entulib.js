@@ -9,7 +9,7 @@ function EntuLib(entu_user_id, entu_user_key, entu_url) {
 
     var POLICY_EXPIRATION_MINUTES = 15
     var API_VERSION = '/api2/'
-    var returned_data = false
+    // var returned_data = false
 
     //
     // Possible values for entu_query =
