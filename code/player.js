@@ -56,14 +56,16 @@ function SwPlayer(err, dom_element, callback) {
 	var properties = element.properties
 	var my_timeouts = []
 
-	// TODO: Consider forEach
 	if (element.definition.keyname !== 'sw-media') {
-		for (key=0; key<dom_element.childNodes.length; key++) {
-			var child_node = dom_element.childNodes[key]
-			// console.log(typeof child_node)
-			// console.log(child_node)
+		dom_element.childNodes.forEach(function(child_node) {
 			child_node.player = new SwPlayer(null, child_node, callback)
-		}
+		})
+		// for (key=0; key<dom_element.childNodes.length; key++) {
+		// 	var child_node = dom_element.childNodes[key]
+		// 	// console.log(typeof child_node)
+		// 	// console.log(child_node)
+		// 	child_node.player = new SwPlayer(null, child_node, callback)
+		// }
 	}
 
 	return {
@@ -140,9 +142,12 @@ function SwPlayer(err, dom_element, callback) {
 				break
 				case 'sw-configuration':
 					var schedule_nodes = []
-					for (key=0; key<dom_element.childNodes.length; key++) {
-						schedule_nodes.push(dom_element.childNodes[key])
-					}
+                    dom_element.childNodes.forEach(function(child_node) {
+                        schedule_nodes.push(child_node)
+                    })
+					// for (key=0; key<dom_element.childNodes.length; key++) {
+					// 	schedule_nodes.push(dom_element.childNodes[key])
+					// }
 
 					schedule_nodes.sort(function compare(a,b) {
 						if (a.swElement.laterSchedule.prev().getTime() > b.swElement.laterSchedule.prev().getTime()) { return 1 }
@@ -159,24 +164,36 @@ function SwPlayer(err, dom_element, callback) {
 
 					if (properties['cleanup'].values[0].db_value === 1) {
 						var cleanupLayer = properties['ordinal'].values[0].db_value
-						for (key=0; key<dom_element.parentNode.childNodes.length; key++) {
-							var sibling_node = dom_element.parentNode.childNodes[key]
-							if (element.id === sibling_node.swElement.id) {
-								continue
+                        dom_element.parentNode.childNodes.forEach(function(sibling_node) {
+                            if (element.id === sibling_node.swElement.id) {
+								return
 							}
 							if (sibling_node.is_playing === false) {
-								continue
+								return
 							}
-							// console.log((schedule,{depth:6}))
 							var sibling_node_cleanup_layer = sibling_node.swElement.properties.ordinal.values[0].db_value
-							// console.log('Schedule ' + (element.id)
-							// 	+ ' sibling_node_cleanup_layer LE cleanupLayer ' + sibling_node_cleanup_layer + ' LE ' + cleanupLayer
-							// 	+ ' checking for cleanup of schedule ' + sibling_node.swElement.id)
 							if (sibling_node_cleanup_layer <= cleanupLayer) {
-								// console.log('|-- Schedule ' + element.id + ' cleaning up schedule ' + sibling_node.swElement.id)
 								sibling_node.player.stop()
 							}
-						}
+                        })
+						// for (key=0; key<dom_element.parentNode.childNodes.length; key++) {
+						// 	var sibling_node = dom_element.parentNode.childNodes[key]
+						// 	if (element.id === sibling_node.swElement.id) {
+						// 		continue
+						// 	}
+						// 	if (sibling_node.is_playing === false) {
+						// 		continue
+						// 	}
+						// 	// console.log((schedule,{depth:6}))
+						// 	var sibling_node_cleanup_layer = sibling_node.swElement.properties.ordinal.values[0].db_value
+						// 	// console.log('Schedule ' + (element.id)
+						// 	// 	+ ' sibling_node_cleanup_layer LE cleanupLayer ' + sibling_node_cleanup_layer + ' LE ' + cleanupLayer
+						// 	// 	+ ' checking for cleanup of schedule ' + sibling_node.swElement.id)
+						// 	if (sibling_node_cleanup_layer <= cleanupLayer) {
+						// 		// console.log('|-- Schedule ' + element.id + ' cleaning up schedule ' + sibling_node.swElement.id)
+						// 		sibling_node.player.stop()
+						// 	}
+						// }
 					}
 					if (properties.duration.values !== undefined) {
 						var time_from_start = Date.now() - element.laterSchedule.prev().getTime()
@@ -187,15 +204,18 @@ function SwPlayer(err, dom_element, callback) {
 					}
 				break
 				case 'sw-layout':
-					for (key=0; key<dom_element.childNodes.length; key++) {
-						dom_element.childNodes[key].player.play(null, 0, function(){})
-					}
+                    dom_element.childNodes.forEach(function(child_node) {
+                        child_node.player.play(null, 0, function(){})
+                    })
+					// for (key=0; key<dom_element.childNodes.length; key++) {
+					// 	dom_element.childNodes[key].player.play(null, 0, function(){})
+					// }
 				break
 				case 'sw-layout-playlist':
 					dom_element.childNodes[0].player.play(null, 0, function(){})
 				break
 				case 'sw-playlist':
-					dom_element.childNodes[0].player.play(null, 0, function(err, data){
+					dom_element.childNodes[0].player.play(null, 0, function(err, data) {
 						if (err) {
 							console.log('Can\'t play playlist-media' + dom_element.childNodes[0].swElement.displayname + ' [eid:' + dom_element.childNodes[0].swElement.id + ']', err, data)
 						}
@@ -301,10 +321,14 @@ function SwPlayer(err, dom_element, callback) {
 					dom_element.childNodes[0].player.clearMyTimeouts()
 				break
 				case 'sw-configuration':
-					for (key=0; key<dom_element.childNodes.length; key++) {
-						dom_element.childNodes[key].player.stop()
-						dom_element.childNodes[key].player.clearMyTimeouts()
-					}
+                    dom_element.childNodes.forEach(function(child_node) {
+                        child_node.player.stop()
+						child_node.player.clearMyTimeouts()
+                    })
+					// for (key=0; key<dom_element.childNodes.length; key++) {
+					// 	dom_element.childNodes[key].player.stop()
+					// 	dom_element.childNodes[key].player.clearMyTimeouts()
+					// }
 				break
 				case 'sw-schedule':
 					dom_element.childNodes[0].player.stop()
@@ -312,20 +336,28 @@ function SwPlayer(err, dom_element, callback) {
 					this.play(null, element.laterSchedule.next().getTime() - Date.now(), function(){})
 				break
 				case 'sw-layout':
-					for (key=0; key<dom_element.childNodes.length; key++) {
-						dom_element.childNodes[key].player.stop()
-						dom_element.childNodes[key].player.clearMyTimeouts()
-					}
+                    dom_element.childNodes.forEach(function(child_node) {
+                        child_node.player.stop()
+						child_node.player.clearMyTimeouts()
+                    })
+					// for (key=0; key<dom_element.childNodes.length; key++) {
+					// 	dom_element.childNodes[key].player.stop()
+					// 	dom_element.childNodes[key].player.clearMyTimeouts()
+					// }
 				break
 				case 'sw-layout-playlist':
 					dom_element.childNodes[0].player.stop()
 					dom_element.childNodes[0].player.clearMyTimeouts()
 				break
 				case 'sw-playlist':
-					for (key=0; key<dom_element.childNodes.length; key++) {
-						dom_element.childNodes[key].player.stop()
-						dom_element.childNodes[key].player.clearMyTimeouts()
-					}
+                    dom_element.childNodes.forEach(function(child_node) {
+                        child_node.player.stop()
+                        child_node.player.clearMyTimeouts()
+                    })
+					// for (key=0; key<dom_element.childNodes.length; key++) {
+					// 	dom_element.childNodes[key].player.stop()
+					// 	dom_element.childNodes[key].player.clearMyTimeouts()
+					// }
 				break
 				case 'sw-playlist-media':
 					dom_element.childNodes[0].player.stop()
