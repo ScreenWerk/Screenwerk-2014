@@ -1,4 +1,4 @@
-var stringifier = function stringifier(o) {
+module.exports = function stringifier(o) {
     var cache = [];
     return JSON.stringify(o, function(key, value) {
         if (typeof value === 'object' && value !== null) {
@@ -12,5 +12,3 @@ var stringifier = function stringifier(o) {
         return value
     }, '\t')
 }
-
-module.exports = stringifier

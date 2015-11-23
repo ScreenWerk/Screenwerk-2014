@@ -32,7 +32,7 @@ function SwPlayer(err, dom_element, callback) {
 
 	// TODO: Consider forEach
 	if (element.definition.keyname !== 'sw-media') {
-		for (var key=0; key<dom_element.childNodes.length; key++) {
+		for (key=0; key<dom_element.childNodes.length; key++) {
 			var child_node = dom_element.childNodes[key]
 			// console.log(typeof child_node)
 			// console.log(child_node)
@@ -114,7 +114,7 @@ function SwPlayer(err, dom_element, callback) {
 				break
 				case 'sw-configuration':
 					var schedule_nodes = []
-					for (var key=0; key<dom_element.childNodes.length; key++) {
+					for (key=0; key<dom_element.childNodes.length; key++) {
 						schedule_nodes.push(dom_element.childNodes[key])
 					}
 
@@ -135,7 +135,7 @@ function SwPlayer(err, dom_element, callback) {
 
 					if (properties['cleanup'].values[0].db_value === 1) {
 						var cleanupLayer = properties['ordinal'].values[0].db_value
-						for (var key=0; key<dom_element.parentNode.childNodes.length; key++) {
+						for (key=0; key<dom_element.parentNode.childNodes.length; key++) {
 							var sibling_node = dom_element.parentNode.childNodes[key]
 							if (element.id === sibling_node.swElement.id) {
 								continue
@@ -164,7 +164,7 @@ function SwPlayer(err, dom_element, callback) {
 					}
 				break
 				case 'sw-layout':
-					for (var key=0; key<dom_element.childNodes.length; key++) {
+					for (key=0; key<dom_element.childNodes.length; key++) {
 						dom_element.childNodes[key].player.play(null, 0, function(){})
 					}
 				break
@@ -278,7 +278,7 @@ function SwPlayer(err, dom_element, callback) {
 					dom_element.childNodes[0].player.clearMyTimeouts()
 				break
 				case 'sw-configuration':
-					for (var key=0; key<dom_element.childNodes.length; key++) {
+					for (key=0; key<dom_element.childNodes.length; key++) {
 						dom_element.childNodes[key].player.stop()
 						dom_element.childNodes[key].player.clearMyTimeouts()
 					}
@@ -289,7 +289,7 @@ function SwPlayer(err, dom_element, callback) {
 					this.play(null, element.laterSchedule.next().getTime() - Date.now(), function(){})
 				break
 				case 'sw-layout':
-					for (var key=0; key<dom_element.childNodes.length; key++) {
+					for (key=0; key<dom_element.childNodes.length; key++) {
 						dom_element.childNodes[key].player.stop()
 						dom_element.childNodes[key].player.clearMyTimeouts()
 					}
@@ -299,7 +299,7 @@ function SwPlayer(err, dom_element, callback) {
 					dom_element.childNodes[0].player.clearMyTimeouts()
 				break
 				case 'sw-playlist':
-					for (var key=0; key<dom_element.childNodes.length; key++) {
+					for (key=0; key<dom_element.childNodes.length; key++) {
 						dom_element.childNodes[key].player.stop()
 						dom_element.childNodes[key].player.clearMyTimeouts()
 					}

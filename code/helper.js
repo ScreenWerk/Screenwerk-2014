@@ -1,15 +1,13 @@
-var bytesToSize = function bytesToSize(bytes) {
+function bytesToSize(bytes) {
+    if (bytes === undefined || bytes === 0) return '0'
     var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB']
-    if (bytes == 0) return '0'
     var i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)))
     var decimals = Math.max(0, i-1)
     return (bytes / Math.pow(1024, i)).toFixed(decimals) + ' ' + sizes[i]
 }
 
-var msToTime = function msToTime(ms) {
-    if (ms === 0) {
-        return '0'
-    }
+function msToTime(ms) {
+    if (ms === undefined || ms === 0) { return '0' }
     var decimals = 0
     var unit = ''
     var amount = 0
@@ -38,7 +36,7 @@ var msToTime = function msToTime(ms) {
 }
 
 var dates = {
-    convert:function(d) {
+    convert: function(d) {
         // Converts the date in d to a date-object. The input can be:
         //   a date object: returned without modification
         //  an array      : Interpreted as [year,month,day]. NOTE: month is 0-11.
@@ -55,9 +53,9 @@ var dates = {
             d.constructor === String ? new Date(d) :
             typeof d === "object" ? new Date(d.year,d.month,d.date) :
             NaN
-        );
+        )
     },
-    compare:function(a,b) {
+    compare: function(a,b) {
         // Compare two dates (could be of any type supported by the convert
         // function above) and returns:
         //  -1 : if a < b
@@ -70,9 +68,9 @@ var dates = {
             isFinite(b=this.convert(b).valueOf()) ?
             (a>b)-(a<b) :
             NaN
-        );
+        )
     },
-    inRange:function(d,start,end) {
+    inRange: function(d,start,end) {
         // Checks if date in d is between dates in start and end.
         // Returns a boolean or NaN:
         //    true  : if d is between start and end (inclusive)
@@ -85,7 +83,7 @@ var dates = {
             isFinite(end=this.convert(end).valueOf()) ?
             start <= d && d <= end :
             NaN
-        );
+        )
     }
 }
 

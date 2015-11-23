@@ -5,7 +5,7 @@ var fs       = require('fs')
 var request = require('request')
 
 
-var EntuLib = function EntuLib(entu_user_id, entu_user_key, entu_url) {
+function EntuLib(entu_user_id, entu_user_key, entu_url) {
 
     var POLICY_EXPIRATION_MINUTES = 15
     var API_VERSION = '/api2/'
@@ -18,7 +18,7 @@ var EntuLib = function EntuLib(entu_user_id, entu_user_key, entu_url) {
     //      Search and fetch entities | { 'definition': entitydefinition, 'query': query, 'limit': limit }
     //       PUT properties to entity | { ('entitydefinition-propertydefinition':value) }
     //
-    var __create_policy = function __create_policy(entu_query) {
+    function __create_policy(entu_query) {
         var conditions = []
         var entu_query = entu_query === undefined ? {} : entu_query
         var conditions = Object.keys(entu_query).map(function(v) { return entu_query[v] })
@@ -32,7 +32,7 @@ var EntuLib = function EntuLib(entu_user_id, entu_user_key, entu_url) {
         return querystring.stringify(entu_query)
     }
 
-    var __submit_it = function __submit_it(path, method, data, callback) {
+    function __submit_it(path, method, data, callback) {
         var options = {
             hostname: entu_url,
             path: path,
