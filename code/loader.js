@@ -430,22 +430,20 @@ function loadMeta(err, parent_eid, eid, struct_node, callback) {
 function registerChild(err, parent_eid, element, child_eid, callback) {
     if (err) {
         console.log('registerChild err:', err)
-        callback(err)
         // decrementProcessCount()
-        return
+        return callback(err)
     }
-    if (element.childs === undefined)
+    if (element.childs === undefined) {
         element.childs = []
-    if (child_eid !== undefined && child_eid !== null
-        && element.childs.indexOf(child_eid) === -1) {
-            element.childs.push(child_eid)
+    }
+    if (child_eid !== undefined && child_eid !== null && element.childs.indexOf(child_eid) === -1) {
+        element.childs.push(child_eid)
     }
     if (element.parents === undefined) {
         element.parents = []
     }
-    if (parent_eid !== undefined && parent_eid !== null
-        && element.parents.indexOf(parent_eid) === -1) {
-            element.parents.push(parent_eid)
+    if (parent_eid !== undefined && parent_eid !== null && element.parents.indexOf(parent_eid) === -1) {
+        element.parents.push(parent_eid)
     }
     callback(null)
 }
