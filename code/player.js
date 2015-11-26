@@ -41,7 +41,7 @@ var tcIncr = function() {
     }
 }
 
-function SwPlayer(err, dom_element, callback) {
+var SwPlayer = function SwPlayer(err, dom_element, callback) {
     if (err) {
         console.log('SwPlayer err:', err, dom_element.swElement)
         callback(err)
