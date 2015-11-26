@@ -57,15 +57,16 @@ function SwPlayer(err, dom_element, callback) {
     var my_timeouts = []
 
     if (element.definition.keyname !== 'sw-media') {
-        dom_element.childNodes.forEach(function(child_node) {
-            child_node.player = new SwPlayer(null, child_node, callback)
-        })
-        // for (key=0; key<dom_element.childNodes.length; key++) {
-        //     var child_node = dom_element.childNodes[key]
-        //     // console.log(typeof child_node)
-        //     // console.log(child_node)
+        // TODO: consider forEach
+        // dom_element.childNodes.forEach(function(child_node) {
         //     child_node.player = new SwPlayer(null, child_node, callback)
-        // }
+        // })
+        for (var key=0; key<dom_element.childNodes.length; key++) {
+            var child_node = dom_element.childNodes[key]
+            // console.log(typeof child_node)
+            // console.log(child_node.id)
+            child_node.player = new SwPlayer(null, child_node, callback)
+        }
     }
 
     return {
@@ -142,12 +143,14 @@ function SwPlayer(err, dom_element, callback) {
                 break
                 case 'sw-configuration':
                     var schedule_nodes = []
-                    dom_element.childNodes.forEach(function(child_node) {
-                        schedule_nodes.push(child_node)
-                    })
-                    // for (key=0; key<dom_element.childNodes.length; key++) {
-                    //     schedule_nodes.push(dom_element.childNodes[key])
-                    // }
+                    // console.log(Object.keys(dom_element.childNodes))
+                    // TODO: consider forEach
+                    // dom_element.childNodes.forEach(function(child_node) {
+                    //     schedule_nodes.push(child_node)
+                    // })
+                    for (var key=0; key<dom_element.childNodes.length; key++) {
+                        schedule_nodes.push(dom_element.childNodes[key])
+                    }
 
                     schedule_nodes.sort(function compare(a,b) {
                         if (a.swElement.laterSchedule.prev().getTime() > b.swElement.laterSchedule.prev().getTime()) { return 1 }
@@ -164,36 +167,37 @@ function SwPlayer(err, dom_element, callback) {
 
                     if (properties['cleanup'].values[0].db_value === 1) {
                         var cleanupLayer = properties['ordinal'].values[0].db_value
-                        dom_element.parentNode.childNodes.forEach(function(sibling_node) {
-                            if (element.id === sibling_node.swElement.id) {
-                                return
-                            }
-                            if (sibling_node.is_playing === false) {
-                                return
-                            }
-                            var sibling_node_cleanup_layer = sibling_node.swElement.properties.ordinal.values[0].db_value
-                            if (sibling_node_cleanup_layer <= cleanupLayer) {
-                                sibling_node.player.stop()
-                            }
-                        })
-                        // for (key=0; key<dom_element.parentNode.childNodes.length; key++) {
-                        //     var sibling_node = dom_element.parentNode.childNodes[key]
+                        // TODO: consider forEach
+                        // dom_element.parentNode.childNodes.forEach(function(sibling_node) {
                         //     if (element.id === sibling_node.swElement.id) {
-                        //         continue
+                        //         return
                         //     }
                         //     if (sibling_node.is_playing === false) {
-                        //         continue
+                        //         return
                         //     }
-                        //     // console.log((schedule,{depth:6}))
                         //     var sibling_node_cleanup_layer = sibling_node.swElement.properties.ordinal.values[0].db_value
-                        //     // console.log('Schedule ' + (element.id)
-                        //     //     + ' sibling_node_cleanup_layer LE cleanupLayer ' + sibling_node_cleanup_layer + ' LE ' + cleanupLayer
-                        //     //     + ' checking for cleanup of schedule ' + sibling_node.swElement.id)
                         //     if (sibling_node_cleanup_layer <= cleanupLayer) {
-                        //         // console.log('|-- Schedule ' + element.id + ' cleaning up schedule ' + sibling_node.swElement.id)
                         //         sibling_node.player.stop()
                         //     }
-                        // }
+                        // })
+                        for (key=0; key<dom_element.parentNode.childNodes.length; key++) {
+                            var sibling_node = dom_element.parentNode.childNodes[key]
+                            if (element.id === sibling_node.swElement.id) {
+                                continue
+                            }
+                            if (sibling_node.is_playing === false) {
+                                continue
+                            }
+                            // console.log((schedule,{depth:6}))
+                            var sibling_node_cleanup_layer = sibling_node.swElement.properties.ordinal.values[0].db_value
+                            // console.log('Schedule ' + (element.id)
+                            //     + ' sibling_node_cleanup_layer LE cleanupLayer ' + sibling_node_cleanup_layer + ' LE ' + cleanupLayer
+                            //     + ' checking for cleanup of schedule ' + sibling_node.swElement.id)
+                            if (sibling_node_cleanup_layer <= cleanupLayer) {
+                                // console.log('|-- Schedule ' + element.id + ' cleaning up schedule ' + sibling_node.swElement.id)
+                                sibling_node.player.stop()
+                            }
+                        }
                     }
                     if (properties.duration.values !== undefined) {
                         var time_from_start = Date.now() - element.laterSchedule.prev().getTime()
@@ -204,12 +208,13 @@ function SwPlayer(err, dom_element, callback) {
                     }
                 break
                 case 'sw-layout':
-                    dom_element.childNodes.forEach(function(child_node) {
-                        child_node.player.play(null, 0, function(){})
-                    })
-                    // for (key=0; key<dom_element.childNodes.length; key++) {
-                    //     dom_element.childNodes[key].player.play(null, 0, function(){})
-                    // }
+                    // TODO: consider forEach
+                    // dom_element.childNodes.forEach(function(child_node) {
+                    //     child_node.player.play(null, 0, function(){})
+                    // })
+                    for (var key=0; key<dom_element.childNodes.length; key++) {
+                        dom_element.childNodes[key].player.play(null, 0, function(){})
+                    }
                 break
                 case 'sw-layout-playlist':
                     dom_element.childNodes[0].player.play(null, 0, function(){})
