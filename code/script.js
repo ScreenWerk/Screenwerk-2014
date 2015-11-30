@@ -13,6 +13,7 @@ var fs              = require('fs')
 // var events          = require('events')
 var uuid            = require('node-uuid')
 var path            = require('path')
+var raven           = require('raven')
 
 
 // 2. Public modules from npm
@@ -31,6 +32,11 @@ var digest          = require('./code/digest.js')
 c.__VERSION = gui.App.manifest.version
 c.__APPLICATION_NAME = gui.App.manifest.name
 
+var ravenClient = new raven.Client(
+    'https://3a4f58d351b74ce685d9184eb4c51144:db1bab408f4344c9b3dc1248520ffe14@app.getsentry.com/59891',
+    { 'release': c.__VERSION }
+)
+ravenClient.patchGlobal()
 
 var home_path = ''
 if (process.env.HOME !== undefined) {
@@ -48,6 +54,7 @@ function exitWithMessage(message) {
     gui.Shell.openItem(home_path)
     process.exit(1)
 }
+
 try {
     configuration = require(configuration_path)
 } catch (exception) {
