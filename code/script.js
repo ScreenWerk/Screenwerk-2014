@@ -33,7 +33,7 @@ c.__VERSION = gui.App.manifest.version
 c.__APPLICATION_NAME = gui.App.manifest.name
 
 var ravenClient = new raven.Client(
-    'https://3a4f58d351b74ce685d9184eb4c51144:db1bab408f4344c9b3dc1248520ffe14@app.getsentry.com/59891',
+    'https://9281b52c946e42f2bb199ac62165a003:1d69b0f053964c899f9ab4f1fff6e34b@app.getsentry.com/60050',
     { 'release': c.__VERSION }
 )
 ravenClient.patchGlobal()
