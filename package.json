@@ -15,7 +15,8 @@
     "node-uuid": "^1.4.0",
     "os-utils": "*",
     "raven": "^0.9.0",
-    "request": "*"
+    "request": "*",
+    "slackbots": "^0.5.0"
   },
   "window": {
     "icon": "./imgs/sw-p512.png",

@@ -25,9 +25,10 @@ var player          = require('./code/player.js')
 var stringifier     = require('./code/stringifier.js')
 var c               = require('./code/c.js')
 var configuration   = require('./code/configuration.json')
+var digest          = require('./code/digest.js')
 // var helper          = require('./code/helper.js')
 var loader          = require('./code/loader.js')
-var digest          = require('./code/digest.js')
+var slackbots       = require('./code/slackbots.js')
 
 c.__VERSION = gui.App.manifest.version
 c.__APPLICATION_NAME = gui.App.manifest.name
@@ -167,6 +168,8 @@ var EntuLib,  local_published, remote_published
 // Essential configuration has been successfully loaded
 //
 function run() {
+
+    slackbots.chatter('Joining to chatter.')
 
     if (!c.__SCREEN_ID) {
         exitWithMessage('Missing screen ID, blame programmer.\nExiting.')
