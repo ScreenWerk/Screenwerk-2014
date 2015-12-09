@@ -22,12 +22,12 @@ var tcIncr = function() {
     if (c.__RELAUNCH_THRESHOLD > 0 && timeout_counter > c.__RELAUNCH_THRESHOLD) {
         // document.location.reload(true)
         // window.location.reload(3)
-        console.log("=====================================")
-        console.log("== RELAUNCHING! =====================")
-        console.log("=====================================")
+        console.log('=====================================')
+        console.log('== RELAUNCHING! =====================')
+        console.log('=====================================')
 
         //Restart node-webkit app
-        var child_process = require("child_process")
+        var child_process = require('child_process')
 
         //Start new app
         var child = child_process.spawn(process.execPath, ['./', c.__SCREEN_ID], {detached: true})
@@ -108,7 +108,7 @@ var SwPlayer = function SwPlayer(err, dom_element, callback) {
                 var self = this
                 tcIncr()
                 // helper.swLog('timeout_counter: ' + timeout_counter)
-                console.log(dom_element.id + ' Scheduling PLAY on ' + element.definition.keyname + ' ' + element.id + ' in ' + helper.msToTime(timeout), "Timeouts set: " + timeout_counter)
+                console.log(dom_element.id + ' Scheduling PLAY on ' + element.definition.keyname + ' ' + element.id + ' in ' + helper.msToTime(timeout), 'Timeouts set: ' + timeout_counter)
                 var play_timeout = setTimeout(function() {
                                     self.play(null, false, callback)
                                 }, timeout)
@@ -117,8 +117,7 @@ var SwPlayer = function SwPlayer(err, dom_element, callback) {
                 return self
             }
             // console.log(dom_element.id + ' PLAY ' + element.definition.keyname + ' ', is_playing ? '(Already playing)' : '(Was stopped)')
-            if (is_playing === true)
-                return this
+            if (is_playing === true) { return this }
             is_playing = true
             // dom_element.style.visibility = 'visible'
             dom_element.style.display = 'block'
@@ -165,8 +164,8 @@ var SwPlayer = function SwPlayer(err, dom_element, callback) {
                 case 'sw-schedule':
                     dom_element.childNodes[0].player.play(null, 0, function(){})
 
-                    if (properties['cleanup'].values[0].db_value === 1) {
-                        var cleanupLayer = properties['ordinal'].values[0].db_value
+                    if (properties.cleanup.values[0].db_value === 1) {
+                        var cleanupLayer = properties.ordinal.values[0].db_value
                         // TODO: consider forEach
                         // dom_element.parentNode.childNodes.forEach(function(sibling_node) {
                         //     if (element.id === sibling_node.swElement.id) {
@@ -288,7 +287,7 @@ var SwPlayer = function SwPlayer(err, dom_element, callback) {
                 var self = this
                 tcIncr()
                 // helper.swLog('timeout_counter: ' + timeout_counter)
-                // console.log(dom_element.id + ' Scheduling STOP on ' + element.definition.keyname + ' ' + element.id + ' in ' + helper.msToTime(timeout), "Timeouts set: " + timeout_counter)
+                // console.log(dom_element.id + ' Scheduling STOP on ' + element.definition.keyname + ' ' + element.id + ' in ' + helper.msToTime(timeout), 'Timeouts set: ' + timeout_counter)
                 var stop_timeout = setTimeout(function() {
                                     self.stop(null, false, callback)
                                 }, timeout)
@@ -394,8 +393,9 @@ var SwPlayer = function SwPlayer(err, dom_element, callback) {
                 var next_dom_id = dom_element.parentNode.id + '_' + next_eid
                 console.log(dom_element.id + ' STOPPED, coming up:', next_dom_id)
                 var delay_ms = c.__DEFAULT_DELAY_MS
-                if (properties.delay.values !== undefined)
+                if (properties.delay.values !== undefined) {
                     delay_ms = Number(properties.delay.values[0].db_value) * 1000
+                }
                 document.getElementById(next_dom_id).player.play(null, delay_ms, callback)
             }
             return this

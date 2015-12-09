@@ -49,7 +49,7 @@ slackbot.on('message', function(message) {
             var swElementsById = require('./loader.js').swElementsById
             if (Object.keys(swElementsById).indexOf(params[0]) !== -1) {
                 var def = swElementsById[params[0]].definition.keyname
-                ref_id = params.shift()
+                var ref_id = params.shift()
                 var command = params.join(' ')
                 switch (command) {
                     case '':
@@ -59,7 +59,8 @@ slackbot.on('message', function(message) {
                     case 'ss':
                         slackbot.postMessageToChannel('test', datestring + ':*' + c.__SCREEN_ID + '*: Shooting right away, ma\'am!', {as_user: true})
                         setTimeout(function () {
-                            slackbot.postMessageToChannel('test', datestring + ':*' + c.__SCREEN_ID + '*: ... second thoughts. I have the screenshot but alas - dont know how to post it', {as_user: true})
+                            slackbot.postMessageToChannel('test', datestring + ':*' + c.__SCREEN_ID
+                            + '*: ... second thoughts. I have the screenshot but alas - dont know how to post it', {as_user: true})
                         }, 1800);
                         // gui.window.capturePage(function() {
                         //     slackbot.postMessageToChannel('test', datestring + ':*' + c.__SCREEN_ID + '*: Here\'s my screen.', {as_user: true})
@@ -67,11 +68,13 @@ slackbot.on('message', function(message) {
                         break
                     case 'shutup':
                     case 'shut down':
-                        slackbot.postMessageToChannel('test', datestring + ':*' + c.__SCREEN_ID + '*: I have ' + def + ' ' + ref_id + ', but not going to shut down just like that!', {as_user: true})
+                        slackbot.postMessageToChannel('test', datestring + ':*' + c.__SCREEN_ID + '*: I have ' + def + ' ' + ref_id
+                        + ', but not going to shut down just like that!', {as_user: true})
                         break
                     case 'ver':
                     case 'version':
-                        slackbot.postMessageToChannel('test', datestring + ':' + c.__SCREEN_ID + ' *' + c.__VERSION + '*: I have ' + def + ' ' + ref_id + '.', {as_user: true})
+                        slackbot.postMessageToChannel('test', datestring + ':' + c.__SCREEN_ID + ' *' + c.__VERSION
+                        + '*: I have ' + def + ' ' + ref_id + '.', {as_user: true})
                         break
                     case 'log':
                         slackbot.postMessageToChannel('test', datestring + ':*' + c.__SCREEN_ID + '*: Here\'s my log.', {as_user: true})

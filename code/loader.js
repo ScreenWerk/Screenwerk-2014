@@ -26,12 +26,14 @@ var bytes_downloaded = 0
 function decrementProcessCount() {
     -- loading_process_count
     // console.log('loading_process_count: ' + loading_process_count)
-    progress(loading_process_count + '| ' + helper.bytesToSize(total_download_size) + ' - ' + helper.bytesToSize(bytes_downloaded) + ' = ' + helper.bytesToSize(total_download_size - bytes_downloaded) )
+    progress(loading_process_count + '| ' + helper.bytesToSize(total_download_size) + ' - '
+    + helper.bytesToSize(bytes_downloaded) + ' = ' + helper.bytesToSize(total_download_size - bytes_downloaded) )
 }
 function incrementProcessCount() {
     ++ loading_process_count
     // console.log('loading_process_count: ' + loading_process_count)
-    progress(loading_process_count + '| ' + helper.bytesToSize(total_download_size) + ' - ' + helper.bytesToSize(bytes_downloaded) + ' = ' + helper.bytesToSize(total_download_size - bytes_downloaded) )
+    progress(loading_process_count + '| ' + helper.bytesToSize(total_download_size) + ' - '
+    + helper.bytesToSize(bytes_downloaded) + ' = ' + helper.bytesToSize(total_download_size - bytes_downloaded) )
 }
 function countLoadingProcesses() {
     return loading_process_count
@@ -88,14 +90,17 @@ function loadMedia(err, entity_id, file_value, loadMediaCallback) {
 
             total_download_size += Number(filesize)
             // console.log('Downloading:' + helper.bytesToSize(bytes_downloaded) + ' of ' + helper.bytesToSize(total_download_size))
-            progress(loading_process_count + '| ' + helper.bytesToSize(total_download_size) + ' - ' + helper.bytesToSize(bytes_downloaded) + ' = ' + helper.bytesToSize(total_download_size - bytes_downloaded) )
+            progress(loading_process_count + '| ' + helper.bytesToSize(total_download_size) + ' - '
+            + helper.bytesToSize(bytes_downloaded) + ' = ' + helper.bytesToSize(total_download_size - bytes_downloaded) )
             response.on('data', function(chunk) {
                 md5sum.update(chunk)
                 bytes_downloaded += chunk.length
-                progress(loading_process_count + '| ' + helper.bytesToSize(total_download_size) + ' - ' + helper.bytesToSize(bytes_downloaded) + ' = ' + helper.bytesToSize(total_download_size - bytes_downloaded) )
+                progress(loading_process_count + '| ' + helper.bytesToSize(total_download_size) + ' - '
+                + helper.bytesToSize(bytes_downloaded) + ' = ' + helper.bytesToSize(total_download_size - bytes_downloaded) )
             })
             response.on('end', function() {
-                progress(loading_process_count + '| ' + helper.bytesToSize(total_download_size) + ' - ' + helper.bytesToSize(bytes_downloaded) + ' = ' + helper.bytesToSize(total_download_size - bytes_downloaded) )
+                progress(loading_process_count + '| ' + helper.bytesToSize(total_download_size) + ' - '
+                + helper.bytesToSize(bytes_downloaded) + ' = ' + helper.bytesToSize(total_download_size - bytes_downloaded) )
                 // MD5 check
                 var my_md5 = md5sum.digest('hex')
                 // MD5 check is disabled for now as we can't get MD5's from Amazon
@@ -112,7 +117,8 @@ function loadMedia(err, entity_id, file_value, loadMediaCallback) {
                 } else {
                     fs.unlinkSync(download_filename)
                     decrementProcessCount()
-                    console.log('Downloading media ' + filename + ' Response statusCode: ' + response.statusCode + ', message: ' + response.statusMessage + '. Trying again...')
+                    console.log('Downloading media ' + filename + ' Response statusCode: ' + response.statusCode + ', message: '
+                    + response.statusMessage + '. Trying again...')
                     loadMedia(null, entity_id, file_value, loadMediaCallback)
                 }
             })
@@ -169,8 +175,8 @@ function registerMeta(err, metadata, callback) {
 
     switch (definition) {
         case 'screen':
-            if (metadata.properties['published'].values === undefined) {
-                metadata.properties['published'].values = [{'value':new Date(Date.parse('2004-01-01')).toJSON()}]
+            if (metadata.properties.published.values === undefined) {
+                metadata.properties.published.values = [{'value':new Date(Date.parse('2004-01-01')).toJSON()}]
             }
         break
         case 'screen-group':
@@ -220,10 +226,11 @@ function registerMeta(err, metadata, callback) {
             }
             if (metadata.properties.file.values === undefined
                 && metadata.properties.url.values === undefined) {
-                    throw ('"URL" or "file" property must be set for ' + metadata.id)
+                    throw ('\'URL\' or \'file\' property must be set for ' + metadata.id)
             }
             if (metadata.properties.file.values !== undefined) {
-                metadata.properties.filepath = {'values': [{'db_value': path.resolve(c.__MEDIA_DIR, metadata.id + '_' + metadata.properties.file.values[0].db_value)}]}
+                metadata.properties.filepath = {'values': [{'db_value': path.resolve(c.__MEDIA_DIR, metadata.id + '_'
+                + metadata.properties.file.values[0].db_value)}]}
                 loadMedia(null, metadata.id, metadata.properties.file.values[0], callback)
             }
         break
@@ -246,7 +253,7 @@ function reloadMeta(err, callback) {
     fs.readdirSync(c.__META_DIR).forEach(function(meta_fileName) {
         var result = fs.unlinkSync(path.resolve(c.__META_DIR, meta_fileName))
         if (result instanceof Error) {
-            console.log("Can't unlink " + path.resolve(c.__META_DIR, meta_fileName, result))
+            console.log('Can\'t unlink ' + path.resolve(c.__META_DIR, meta_fileName, result))
         }
     })
     loadMeta(null, null, c.__SCREEN_ID, c.__STRUCTURE, callback)
@@ -356,7 +363,7 @@ function loadMeta(err, parent_eid, eid, struct_node, callback) {
                 if (struct_node.reference !== undefined) {
                     var ref_entity_name = struct_node.reference.name
                     if (meta_json.properties[ref_entity_name].values === undefined) {
-                        callback(new Error(struct_node.name + ' ' + eid + ' has no ' + ref_entity_name + "'s."))
+                        callback(new Error(struct_node.name + ' ' + eid + ' has no ' + ref_entity_name + '\'s.'))
                         decrementProcessCount()
                     }
                     // console.log(ref_entity_name, meta_json)
@@ -390,7 +397,7 @@ function loadMeta(err, parent_eid, eid, struct_node, callback) {
                             return
                         }
                         if (ch_result.result['sw-'+ch_def_name].entities.length === 0) {
-                            callback(new Error(struct_node.name + ' ' + eid + ' has no ' + ch_def_name + "'s."))
+                            callback(new Error(struct_node.name + ' ' + eid + ' has no ' + ch_def_name + '\'s.'))
                             decrementProcessCount()
                         }
                         ch_result.result['sw-'+ch_def_name].entities.forEach(function(entity) {

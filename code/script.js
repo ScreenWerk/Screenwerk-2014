@@ -111,7 +111,15 @@ if (!c.__DEBUG_MODE) {
 console.log ( '= ' + c.__APPLICATION_NAME + ' v.' + c.__VERSION + ' ==================================')
 
 
-c.__STRUCTURE = {"name":"screen","reference":{"name":"screen-group","reference":{"name":"configuration","child":{"name":"schedule","reference":{"name":"layout","child":{"name":"layout-playlist","reference":{"name":"playlist","child":{"name":"playlist-media","reference":{"name":"media"}}}}}}}}}
+c.__STRUCTURE = {'name':'screen','reference':{
+    'name':'screen-group','reference':{
+        'name':'configuration','child':{
+            'name':'schedule','reference':{
+                'name':'layout','child':{
+                    'name':'layout-playlist','reference':{
+                        'name':'playlist','child':{
+                            'name':'playlist-media','reference':{
+                                'name':'media'}}}}}}}}}
 c.__HIERARCHY = {'child_of': {}, 'parent_of': {}}
 function recurseHierarchy(structure, parent_name) {
     if (parent_name) {
@@ -207,10 +215,10 @@ function run() {
         else if (stats.isDirectory()) {
             fs.readdirSync(c.__MEDIA_DIR).forEach(function(download_filename) {
                 if (download_filename.split('.').pop() !== 'download') { return }
-                console.log("Unlink " + path.resolve(c.__MEDIA_DIR, download_filename))
+                console.log('Unlink ' + path.resolve(c.__MEDIA_DIR, download_filename))
                 var result = fs.unlinkSync(path.resolve(c.__MEDIA_DIR, download_filename))
                 if (result instanceof Error) {
-                    console.log("Can't unlink " + path.resolve(c.__MEDIA_DIR, download_filename), result)
+                    console.log('Can\'t unlink ' + path.resolve(c.__MEDIA_DIR, download_filename), result)
                 }
             })
         }
@@ -292,7 +300,7 @@ if (c.__DEBUG_MODE) {
     player_window.moveTo(window.screen.width * (c.__SCREEN - 1) + 1, 30)
     player_window.isFullscreen = true
 }
-var nativeMenuBar = new gui.Menu({ type: "menubar" })
+var nativeMenuBar = new gui.Menu({ type: 'menubar' })
 try {
     nativeMenuBar.createMacBuiltin(gui.App.manifest.name + ' ' + c.__VERSION)
     player_window.menu = nativeMenuBar

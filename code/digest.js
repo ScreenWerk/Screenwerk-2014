@@ -176,9 +176,9 @@ function buildDom(err, callback) {
         dom_element.style.width = '100%'
         dom_element.style.height = '100%'
         dom_element.style['z-index'] = '1'
-        if (swElement.properties['zindex'] !== undefined
-            && swElement.properties['zindex'].values !== undefined) {
-                dom_element.style['z-index'] = swElement.properties['zindex'].values[0].db_value
+        if (swElement.properties.zindex !== undefined
+            && swElement.properties.zindex.values !== undefined) {
+                dom_element.style['z-index'] = swElement.properties.zindex.values[0].db_value
             }
         if (swElement.properties['in-pixels'] !== undefined
             && swElement.properties['in-pixels'].values !== undefined
