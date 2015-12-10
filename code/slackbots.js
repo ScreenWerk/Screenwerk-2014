@@ -42,7 +42,7 @@ slackbot.on('message', function(message) {
             break
         case 'version':
         case 'ver':
-            slackbot.postMessageToChannel('test', datestring + ':' + c.__SCREEN_ID + ' *' + c.__VERSION + '*: Checking in.', {as_user: true})
+            slackbot.postMessageToChannel('test', datestring + ':' + c.__SCREEN_ID + ' *' + c.__VERSION + '*', {as_user: true})
             break
         default:
             var params = message.text.toLowerCase().split(' ')
