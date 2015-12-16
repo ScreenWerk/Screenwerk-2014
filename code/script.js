@@ -12,6 +12,7 @@ var fs              = require('fs')
 // var https           = require('https')
 // var events          = require('events')
 var uuid            = require('node-uuid')
+var op              = require('object-path')
 var path            = require('path')
 var raven           = require('raven')
 
@@ -177,7 +178,7 @@ var EntuLib,  local_published, remote_published
 //
 function run() {
 
-    slackbots.chatter('Joining to chatter.')
+    // slackbots.chatter(':up:')
 
     if (!c.__SCREEN_ID) {
         exitWithMessage('Missing screen ID, blame programmer.\nExiting.')
@@ -269,16 +270,19 @@ function run() {
         } else {
             // alert('Result: ' + (result.result.properties.published))
             remote_published = new Date(Date.parse(result.result.properties.published.values[0].value))
-            console.log('Remote published: ' + remote_published.toJSON())
+            c.__SCREEN_NAME = op.get(result, ['result', 'properties', 'name', 'values', 0, 'value'])
+            console.log(c.__SCREEN_NAME)
+            slackbots.chatter(':up:' + c.__SCREEN_NAME)
+            // console.log('Remote published: ' + remote_published.toJSON())
         }
 
         if (local_published &&
             local_published.toJSON() === remote_published.toJSON()) {
-            console.log('Trying to play with local content.')
+            // console.log('Trying to play with local content.')
             loader.loadMeta(null, null, c.__SCREEN_ID, c.__STRUCTURE, startDigester)
         }
         else {
-            console.log('Remove local content. Fetch new from Entu!')
+            // console.log('Remove local content. Fetch new from Entu!')
             player.clearSwTimeouts()
             local_published = new Date(Date.parse(remote_published.toJSON()))
             loader.reloadMeta(null, startDigester)

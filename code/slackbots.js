@@ -43,14 +43,14 @@ slackbot.on('start', function() {
     // slackbot.postMessageToGroup('some-private-group', 'hello group chat!')
 })
 
-slackbot.chatter = function(message, callback) {
+slackbot.chatter = function(message) {
     var datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '')
-    slackbot.postMessageToChannel('test', datestring + ':*' + c.__SCREEN_ID + '*: ' + message, {as_user: true}, callback)
+    slackbot.postMessageToChannel('test', datestring + ':*' + c.__SCREEN_ID + '*: ' + message, {as_user: true})
 }
 
-slackbot.error = function(message, callback) {
+slackbot.error = function(message) {
     var datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '')
-    slackbot.postMessageToChannel('test', datestring + ':*' + c.__SCREEN_ID + '*: ' + message, {as_user: true}, callback)
+    slackbot.postMessageToChannel('test', datestring + ':*' + c.__SCREEN_ID + '*: ' + message, {as_user: true})
 }
 
 slackbot.on('message', function(message) {
@@ -62,7 +62,7 @@ slackbot.on('message', function(message) {
 
     switch (message.text.toLowerCase()) {
         case c.__SCREEN_ID:
-            slackbot.postMessageToChannel('test', datestring + ':*' + c.__SCREEN_ID + '*: Yes, ma\'am!', {as_user: true})
+            slackbot.postMessageToChannel('test', datestring + ':*' + c.__SCREEN_ID + '|' + c.__SCREEN_NAME + '*', {as_user: true})
             break
         case 'hello':
         case 'hi':
@@ -70,7 +70,7 @@ slackbot.on('message', function(message) {
             break
         case 'version':
         case 'ver':
-            slackbot.postMessageToChannel('test', datestring + ':' + c.__SCREEN_ID + ' *' + c.__VERSION + '*', {as_user: true})
+            slackbot.postMessageToChannel('test', datestring + ':' + c.__SCREEN_ID + ' *' + c.__VERSION + '* ' + c.__SCREEN_NAME, {as_user: true})
             break
         default:
             var params = message.text.toLowerCase().split(' ')
