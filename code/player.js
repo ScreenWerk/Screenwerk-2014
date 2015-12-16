@@ -17,30 +17,6 @@ var sw_timeouts = []
 var timeout_counter = 0
 
 
-var tcIncr = function() {
-    timeout_counter ++
-    if (c.__RELAUNCH_THRESHOLD > 0 && timeout_counter > c.__RELAUNCH_THRESHOLD) {
-        // document.location.reload(true)
-        // window.location.reload(3)
-        console.log('=====================================')
-        console.log('== RELAUNCHING! =====================')
-        console.log('=====================================')
-
-        //Restart node-webkit app
-        var child_process = require('child_process')
-
-        //Start new app
-        var child = child_process.spawn(process.execPath, ['./', c.__SCREEN_ID], {detached: true})
-
-        //Don't wait for it
-        child.unref()
-
-        //Quit current
-        player_window.hide() // hide window to prevent black display
-        process.exit(1)  // quit node-webkit app
-    }
-}
-
 var SwPlayer = function SwPlayer(err, dom_element, callback) {
     if (err) {
         console.log('SwPlayer err:', err, dom_element.swElement)
@@ -106,7 +82,7 @@ var SwPlayer = function SwPlayer(err, dom_element, callback) {
             }
             if (timeout && timeout > 0) {
                 var self = this
-                tcIncr()
+                // tcIncr()
                 // helper.swLog('timeout_counter: ' + timeout_counter)
                 console.log(dom_element.id + ' Scheduling PLAY on ' + element.definition.keyname + ' ' + element.id + ' in ' + helper.msToTime(timeout), 'Timeouts set: ' + timeout_counter)
                 var play_timeout = setTimeout(function() {
@@ -126,7 +102,7 @@ var SwPlayer = function SwPlayer(err, dom_element, callback) {
             } else {
                 var current_class = dom_element.className
                 dom_element.className = current_class + ' ' + element.animate.begin
-                tcIncr()
+                // tcIncr()
                 // helper.swLog('timeout_counter: ' + timeout_counter)
                 setTimeout(function() {
                     dom_element.className = current_class
@@ -285,7 +261,7 @@ var SwPlayer = function SwPlayer(err, dom_element, callback) {
             }
             if (timeout && timeout > 0) {
                 var self = this
-                tcIncr()
+                // tcIncr()
                 // helper.swLog('timeout_counter: ' + timeout_counter)
                 // console.log(dom_element.id + ' Scheduling STOP on ' + element.definition.keyname + ' ' + element.id + ' in ' + helper.msToTime(timeout), 'Timeouts set: ' + timeout_counter)
                 var stop_timeout = setTimeout(function() {
@@ -306,7 +282,7 @@ var SwPlayer = function SwPlayer(err, dom_element, callback) {
             } else {
                 var current_class = dom_element.className
                 dom_element.className = current_class + ' ' + element.animate.end
-                tcIncr()
+                // tcIncr()
                 // helper.swLog('timeout_counter: ' + timeout_counter)
                 setTimeout(function() {
                     // dom_element.style.visibility = 'hidden'
@@ -437,6 +413,6 @@ function clearSwTimeouts() {
     }
 }
 
-module.exports.tcIncr = tcIncr
+// module.exports.tcIncr = tcIncr
 module.exports.SwPlayer = SwPlayer
 module.exports.clearSwTimeouts = clearSwTimeouts

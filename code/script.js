@@ -364,7 +364,7 @@ player_window.on('loaded', function playerWindowLoaded() {
 function startDigester(err, data) {
     if (err) {
         console.log('startDigester err:', err, data)
-        player.tcIncr()
+        // player.tcIncr()
         setTimeout(function() {
             process.exit(0)
         }, 300)
@@ -377,6 +377,69 @@ function startDigester(err, data) {
     }
     window.console.log('Reached stable state. Flushing metadata and starting preprocessing elements.')
     fs.writeFileSync('elements.debug.json', stringifier(loader.swElementsById))
+
+
+    // var doTimeout = function() {
+    //     player.tcIncr()
+    //     CheckInToEntu(null, 'last-update', function CheckInCB(err, interval, sw_screen) {
+    //         if (err) {
+    //             console.log(err)
+    //         }
+    //         // console.log('"Last updated" registered with interval ' + helper.msToTime(interval) + ' ' + interval)
+    //         var color = 'green'
+    //         if (1000 * c.__UPDATE_INTERVAL_SECONDS / interval < 0.9) {
+    //             color = 'orange'
+    //         } else if (1000 * c.__UPDATE_INTERVAL_SECONDS / interval < 0.3) {
+    //             color = 'red'
+    //         }
+    //
+    //         if (sw_screen.result.properties['health'].values !== undefined) {
+    //             sw_screen.result.properties['health'].values.forEach(function(item) {
+    //                 EntuLib.removeProperty(c.__SCREEN_ID, 'sw-screen-' + 'health', item.id, function(err, sw_screen) {
+    //                     if (err) {
+    //                         console.log('RegisterHealth err:', (item), (err), (sw_screen))
+    //                     }
+    //                 })
+    //             })
+    //         }
+    //
+    //         var options = {'health': '<span style="color:' + color + ';">' + helper.msToTime(interval) + '</span>'}
+    //         EntuLib.addProperties(c.__SCREEN_ID, 'sw-screen', options, function(err, data) {
+    //             if (err) {
+    //                 console.log('RegisterHealth err:', (err))
+    //             }
+    //         })
+    //     })
+    //     setTimeout(function() {
+    //         // console.log('RRRRRRRRRRR: Pinging Entu for news.')
+    //         EntuLib.getEntity(c.__SCREEN_ID, function(err, result) {
+    //             if (err) {
+    //                 console.log('Can\'t reach Entu', err, result)
+    //             }
+    //             else if (result.error !== undefined) {
+    //                 console.log ('Failed to load from Entu.', result)
+    //             } else {
+    //                 remote_published = new Date(Date.parse(result.result.properties.published.values[0].value))
+    //                 // console.log('Remote published: ', remote_published.toJSON())
+    //             }
+    //
+    //             if (remote_published
+    //                 && local_published.toJSON() !== remote_published.toJSON()
+    //                 && (new Date()).toJSON() > remote_published.toJSON()
+    //                 ) {
+    //                 console.log('Remove local content. Fetch new from Entu!')
+    //                 player.clearSwTimeouts()
+    //                 local_published = new Date(Date.parse(remote_published.toJSON()))
+    //                 loader.reloadMeta(null, startDigester)
+    //             } else {
+    //                 doTimeout()
+    //                 // loader.loadMeta(null, null, c.__SCREEN_ID, c.__STRUCTURE, startDigester)
+    //             }
+    //         })
+    //     }, 1000 * c.__UPDATE_INTERVAL_SECONDS)
+    //     // console.log('RRRRRRRRRRR: Check for news scheduled in ' + c.__UPDATE_INTERVAL_SECONDS + ' seconds.')
+    // }
+    // doTimeout()
 
 
     function flushMeta(err) {
@@ -495,6 +558,6 @@ function captureScreenshot(err, callback) {
             }
         })
     }, { format : 'jpeg', datatype : 'buffer'})
-    player.tcIncr()
+    // player.tcIncr()
     // setTimeout(function() { callback(null, callback) }, 30*1000)
 }
