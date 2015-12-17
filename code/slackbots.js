@@ -1,4 +1,5 @@
-var SlackBot = require('slackbots')
+// var os          = require('os')
+var SlackBot    = require('slackbots')
 
 var c = require('./c.js')
 
@@ -11,26 +12,59 @@ var slackbot = new SlackBot(slackbot_settings)
 
 function restart() {
     var datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '')
-    slackbot.postMessageToChannel('test', datestring + ':*' + c.__SCREEN_ID + '*: +:sunrise: down. then up again', {as_user: true})
-    // document.location.reload(true)
-    // window.location.reload(3)
+    slackbot.postMessageToChannel('test', datestring + ':*' + c.__SCREEN_ID + '*: :sunrise: down. then up again', {as_user: true})
     console.log('=====================================')
     console.log('== RELAUNCHING! =====================')
     console.log('=====================================')
 
-    console.log('bye')
-    //Restart node-webkit app
+    var child_process = require('child_process')
+
+    if (process.platform === 'darwin') {
+        child_process.exec('nwjs .', function (err, stdout, stderr) {
+            if (err !== null) { throw err }
+            console.log('stdout: ' + stdout)
+            console.log('stderr: ' + stderr)
+        })
+        setTimeout(function () {
+            process.exit(0)
+        }, 500)
+    } else {
+        var child = child_process.spawn(process.execPath, ['./', c.__SCREEN_ID], {detached: true})
+        child.unref()
+
+        setTimeout(function () {
+            process.exit(0)
+        }, 1500)
+    }
+}
+
+
+function upgrade() {
+    var datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '')
+    slackbot.postMessageToChannel('test', datestring + ':*' + c.__SCREEN_ID + '*: :arrow_double_up:', {as_user: true})
+    console.log('=====================================')
+    console.log('== UPGRADING! =======================')
+    console.log('=====================================')
 
     var child_process = require('child_process')
-    var child = child_process.spawn(process.execPath, ['./', c.__SCREEN_ID], {detached: true})
-    child.unref()
 
-    // slackbot.postMessageToChannel('test', datestring + ':*' + c.__SCREEN_ID + '*: (cant rise without falling)', {as_user: true})
+    if (process.platform === 'darwin') {
+        child_process.exec('launcher.sh', function (err, stdout, stderr) {
+            if (err !== null) { throw err }
+            console.log('stdout: ' + stdout)
+            console.log('stderr: ' + stderr)
+        })
+        setTimeout(function () {
+            process.exit(0)
+        }, 500)
+    } else {
+        var child = child_process.spawn(process.execPath, ['./', c.__SCREEN_ID], {detached: true})
+        child.unref()
 
-    setTimeout(function () {
-        // player_window.hide() // hide window to prevent black display
-        process.exit(0) // quit node-webkit app
-    }, 1500)
+        setTimeout(function () {
+            process.exit(0)
+        }, 1500)
+    }
 }
 
 
@@ -67,7 +101,7 @@ slackbot.on('message', function(message) {
             break
         case 'version':
         case 'ver':
-            slackbot.postMessageToChannel('test', datestring + ':' + c.__SCREEN_ID + ' *' + c.__VERSION + '* ' + c.__SCREEN_NAME, {as_user: true})
+            slackbot.postMessageToChannel('test', datestring + ':' + c.__SCREEN_ID + ' *' + c.__VERSION + '* _' + process.platform + '_ ' + c.__SCREEN_NAME + '', {as_user: true})
             break
         default:
             var params = message.text.toLowerCase().split(' ')
@@ -99,22 +133,16 @@ slackbot.on('message', function(message) {
                     case 'ver':
                     case 'version':
                         slackbot.postMessageToChannel('test', datestring + ':' + c.__SCREEN_ID + ' *' + c.__VERSION
-                        + '*: I have ' + def + ' ' + ref_id + '.', {as_user: true})
+                        + '* _' + process.platform + '_: I have ' + def + ' ' + ref_id + '.', {as_user: true})
                         break
                     case 'log':
                         slackbot.postMessageToChannel('test', datestring + ':*' + c.__SCREEN_ID + '*: Here\'s my log.', {as_user: true})
                         break
                     case 'restart':
                         restart()
-                        // //Restart node-webkit app
-                        // var child_process = require("child_process");
-                        // //Start new app
-                        // var child = child_process.spawn(process.execPath, [], {detached: true});
-                        // //Don't wait for it
-                        // child.unref();
-                        // //Quit current
-                        // // gui.window.hide(); // hide window to prevent black display
-                        // gui.app.quit();  // quit node-webkit app
+                        break
+                    case 'upgrade':
+                        upgrade()
                         break
                 }
             } else if (params[0] === 'version' && params[1] === c.__VERSION) {
