@@ -14,9 +14,7 @@ function EntuLib(entu_user_id, entu_user_key, entu_url) {
     //
     // Possible values for entu_query =
     //             Fetch entity by id | {}
-    //                  Create entity | { 'definition': entitydefinition, ('entitydefinition-propertydefinition':value) }
     //      Search and fetch entities | { 'definition': entitydefinition, 'query': query, 'limit': limit }
-    //       PUT properties to entity | { ('entitydefinition-propertydefinition':value) }
     //
     function __create_policy(entu_query) {
         // var conditions = []
@@ -104,81 +102,6 @@ function EntuLib(entu_user_id, entu_user_key, entu_url) {
             var data = __create_policy()
             var path = API_VERSION + 'entity-' + entity_id + '/referrals?' + data
             __submit_it(path, 'GET', undefined, callback)
-        },
-        // definition = property's dataproperty name
-        createEntity: function (parent_id, definition, properties, callback) {
-            var entu_query = {}
-            entu_query.definition = definition
-            for (var key in properties) {
-                if (properties.hasOwnProperty(key)) {
-                    entu_query[definition + '-' + key] = properties[key]
-                }
-            }
-            var data = __create_policy(entu_query)
-            var path = API_VERSION + 'entity-' + parent_id
-            __submit_it(path, 'POST', data, callback)
-        },
-        // definition = property's dataproperty name
-        addProperties: function (entity_id, definition, properties, callback) {
-            var entu_query = {}
-            for (var key in properties) {
-                if (properties.hasOwnProperty(key)) {
-                    entu_query[definition + '-' + key] = properties[key]
-                }
-            }
-            var data = __create_policy(entu_query)
-            var path = API_VERSION + 'entity-' + entity_id
-            __submit_it(path, 'PUT', data, callback)
-        },
-        // definition = property's dataproperty name
-        removeProperty: function (entity_id, property_definition, property_id, callback) {
-            var entu_query = {}
-            entu_query[property_definition + '.' + property_id] = ''
-            var data = __create_policy(entu_query)
-            var path = API_VERSION + 'entity-' + entity_id
-            __submit_it(path, 'PUT', data, callback)
-        },
-        // property_definition in form of entity_keyname + "-" + property_keyname
-        // as for entity with definition "person" and property with definition "photo"
-        // property_definition = "person-photo"
-        addFile: function (entity_id, property_definition, filename, filetype, filesize, filepath, callback) {
-
-            var entu_query = {
-                'entity': entity_id,
-                'property': property_definition,
-                'filename': filename,
-                'filetype': filetype,
-                'filesize': filesize
-            }
-            var data = __create_policy(entu_query)
-            var path = API_VERSION + 'file/s3'
-            __submit_it(path, 'POST', data, function addFileCB(err, data) {
-                if (err) {
-                    console.log('addFileCB: Can\'t reach Entu on ' + path)
-                    console.log(err)
-                    console.log(data)
-                    process.exit(99)
-                }
-
-                var formData
-                try {
-                    formData = data.result.s3.data
-                } catch (err) {
-                    console.log('EntuLib err: ', entu_query, data)
-                    console.log('EntuLib err: ', err)
-                    // callback(err, str)
-                    // return
-                }
-                // formData = data.result.s3.data
-                formData['file'] = fs.createReadStream(filepath)
-
-                request.post({url: data.result.s3.url, formData: formData}, function optionalCallback(err) {
-                    if (err) {
-                        callback(err, 'Upload failed!')
-                    }
-                    callback(null, 'Upload successful!')
-                })
-            })
         }
     }
 }

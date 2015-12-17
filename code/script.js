@@ -12,7 +12,9 @@ var fs              = require('fs')
 // var https           = require('https')
 // var events          = require('events')
 var uuid            = require('node-uuid')
+var op              = require('object-path')
 var path            = require('path')
+var raven           = require('raven')
 
 
 // 2. Public modules from npm
@@ -24,13 +26,19 @@ var player          = require('./code/player.js')
 var stringifier     = require('./code/stringifier.js')
 var c               = require('./code/c.js')
 var configuration   = require('./code/configuration.json')
+var digest          = require('./code/digest.js')
 // var helper          = require('./code/helper.js')
 var loader          = require('./code/loader.js')
-var digest          = require('./code/digest.js')
+var slackbots       = require('./code/slackbots.js')
 
 c.__VERSION = gui.App.manifest.version
 c.__APPLICATION_NAME = gui.App.manifest.name
 
+var ravenClient = new raven.Client(
+    'https://9281b52c946e42f2bb199ac62165a003:1d69b0f053964c899f9ab4f1fff6e34b@app.getsentry.com/60050',
+    { 'release': c.__VERSION }
+)
+ravenClient.patchGlobal()
 
 var home_path = ''
 if (process.env.HOME !== undefined) {
@@ -48,6 +56,7 @@ function exitWithMessage(message) {
     gui.Shell.openItem(home_path)
     process.exit(1)
 }
+
 try {
     configuration = require(configuration_path)
 } catch (exception) {
@@ -103,7 +112,15 @@ if (!c.__DEBUG_MODE) {
 console.log ( '= ' + c.__APPLICATION_NAME + ' v.' + c.__VERSION + ' ==================================')
 
 
-c.__STRUCTURE = {"name":"screen","reference":{"name":"screen-group","reference":{"name":"configuration","child":{"name":"schedule","reference":{"name":"layout","child":{"name":"layout-playlist","reference":{"name":"playlist","child":{"name":"playlist-media","reference":{"name":"media"}}}}}}}}}
+c.__STRUCTURE = {'name':'screen','reference':{
+    'name':'screen-group','reference':{
+        'name':'configuration','child':{
+            'name':'schedule','reference':{
+                'name':'layout','child':{
+                    'name':'layout-playlist','reference':{
+                        'name':'playlist','child':{
+                            'name':'playlist-media','reference':{
+                                'name':'media'}}}}}}}}}
 c.__HIERARCHY = {'child_of': {}, 'parent_of': {}}
 function recurseHierarchy(structure, parent_name) {
     if (parent_name) {
@@ -161,6 +178,8 @@ var EntuLib,  local_published, remote_published
 //
 function run() {
 
+    // slackbots.chatter(':up:')
+
     if (!c.__SCREEN_ID) {
         exitWithMessage('Missing screen ID, blame programmer.\nExiting.')
     }
@@ -197,10 +216,10 @@ function run() {
         else if (stats.isDirectory()) {
             fs.readdirSync(c.__MEDIA_DIR).forEach(function(download_filename) {
                 if (download_filename.split('.').pop() !== 'download') { return }
-                console.log("Unlink " + path.resolve(c.__MEDIA_DIR, download_filename))
+                console.log('Unlink ' + path.resolve(c.__MEDIA_DIR, download_filename))
                 var result = fs.unlinkSync(path.resolve(c.__MEDIA_DIR, download_filename))
                 if (result instanceof Error) {
-                    console.log("Can't unlink " + path.resolve(c.__MEDIA_DIR, download_filename), result)
+                    console.log('Can\'t unlink ' + path.resolve(c.__MEDIA_DIR, download_filename), result)
                 }
             })
         }
@@ -251,16 +270,19 @@ function run() {
         } else {
             // alert('Result: ' + (result.result.properties.published))
             remote_published = new Date(Date.parse(result.result.properties.published.values[0].value))
-            console.log('Remote published: ' + remote_published.toJSON())
+            c.__SCREEN_NAME = op.get(result, ['result', 'properties', 'name', 'values', 0, 'value'])
+            console.log(c.__SCREEN_NAME)
+            slackbots.chatter(':up: ' + c.__SCREEN_NAME)
+            // console.log('Remote published: ' + remote_published.toJSON())
         }
 
         if (local_published &&
             local_published.toJSON() === remote_published.toJSON()) {
-            console.log('Trying to play with local content.')
+            // console.log('Trying to play with local content.')
             loader.loadMeta(null, null, c.__SCREEN_ID, c.__STRUCTURE, startDigester)
         }
         else {
-            console.log('Remove local content. Fetch new from Entu!')
+            // console.log('Remove local content. Fetch new from Entu!')
             player.clearSwTimeouts()
             local_published = new Date(Date.parse(remote_published.toJSON()))
             loader.reloadMeta(null, startDigester)
@@ -282,7 +304,7 @@ if (c.__DEBUG_MODE) {
     player_window.moveTo(window.screen.width * (c.__SCREEN - 1) + 1, 30)
     player_window.isFullscreen = true
 }
-var nativeMenuBar = new gui.Menu({ type: "menubar" })
+var nativeMenuBar = new gui.Menu({ type: 'menubar' })
 try {
     nativeMenuBar.createMacBuiltin(gui.App.manifest.name + ' ' + c.__VERSION)
     player_window.menu = nativeMenuBar
@@ -346,7 +368,7 @@ player_window.on('loaded', function playerWindowLoaded() {
 function startDigester(err, data) {
     if (err) {
         console.log('startDigester err:', err, data)
-        player.tcIncr()
+        // player.tcIncr()
         setTimeout(function() {
             process.exit(0)
         }, 300)
@@ -359,6 +381,69 @@ function startDigester(err, data) {
     }
     window.console.log('Reached stable state. Flushing metadata and starting preprocessing elements.')
     fs.writeFileSync('elements.debug.json', stringifier(loader.swElementsById))
+
+
+    // var doTimeout = function() {
+    //     player.tcIncr()
+    //     CheckInToEntu(null, 'last-update', function CheckInCB(err, interval, sw_screen) {
+    //         if (err) {
+    //             console.log(err)
+    //         }
+    //         // console.log('"Last updated" registered with interval ' + helper.msToTime(interval) + ' ' + interval)
+    //         var color = 'green'
+    //         if (1000 * c.__UPDATE_INTERVAL_SECONDS / interval < 0.9) {
+    //             color = 'orange'
+    //         } else if (1000 * c.__UPDATE_INTERVAL_SECONDS / interval < 0.3) {
+    //             color = 'red'
+    //         }
+    //
+    //         if (sw_screen.result.properties['health'].values !== undefined) {
+    //             sw_screen.result.properties['health'].values.forEach(function(item) {
+    //                 EntuLib.removeProperty(c.__SCREEN_ID, 'sw-screen-' + 'health', item.id, function(err, sw_screen) {
+    //                     if (err) {
+    //                         console.log('RegisterHealth err:', (item), (err), (sw_screen))
+    //                     }
+    //                 })
+    //             })
+    //         }
+    //
+    //         var options = {'health': '<span style="color:' + color + ';">' + helper.msToTime(interval) + '</span>'}
+    //         EntuLib.addProperties(c.__SCREEN_ID, 'sw-screen', options, function(err, data) {
+    //             if (err) {
+    //                 console.log('RegisterHealth err:', (err))
+    //             }
+    //         })
+    //     })
+    //     setTimeout(function() {
+    //         // console.log('RRRRRRRRRRR: Pinging Entu for news.')
+    //         EntuLib.getEntity(c.__SCREEN_ID, function(err, result) {
+    //             if (err) {
+    //                 console.log('Can\'t reach Entu', err, result)
+    //             }
+    //             else if (result.error !== undefined) {
+    //                 console.log ('Failed to load from Entu.', result)
+    //             } else {
+    //                 remote_published = new Date(Date.parse(result.result.properties.published.values[0].value))
+    //                 // console.log('Remote published: ', remote_published.toJSON())
+    //             }
+    //
+    //             if (remote_published
+    //                 && local_published.toJSON() !== remote_published.toJSON()
+    //                 && (new Date()).toJSON() > remote_published.toJSON()
+    //                 ) {
+    //                 console.log('Remove local content. Fetch new from Entu!')
+    //                 player.clearSwTimeouts()
+    //                 local_published = new Date(Date.parse(remote_published.toJSON()))
+    //                 loader.reloadMeta(null, startDigester)
+    //             } else {
+    //                 doTimeout()
+    //                 // loader.loadMeta(null, null, c.__SCREEN_ID, c.__STRUCTURE, startDigester)
+    //             }
+    //         })
+    //     }, 1000 * c.__UPDATE_INTERVAL_SECONDS)
+    //     // console.log('RRRRRRRRRRR: Check for news scheduled in ' + c.__UPDATE_INTERVAL_SECONDS + ' seconds.')
+    // }
+    // doTimeout()
 
 
     function flushMeta(err) {
@@ -477,6 +562,6 @@ function captureScreenshot(err, callback) {
             }
         })
     }, { format : 'jpeg', datatype : 'buffer'})
-    player.tcIncr()
+    // player.tcIncr()
     // setTimeout(function() { callback(null, callback) }, 30*1000)
 }

@@ -1,7 +1,7 @@
 function bytesToSize(bytes) {
     if (bytes === undefined || bytes === 0) { return '0' }
     var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB']
-    var i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)))
+    var i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)), 10)
     var decimals = Math.max(0, i-1)
     return (bytes / Math.pow(1024, i)).toFixed(decimals) + ' ' + sizes[i]
 }
@@ -51,7 +51,7 @@ var dates = {
             d.constructor === Array ? new Date(d[0],d[1],d[2]) :
             d.constructor === Number ? new Date(d) :
             d.constructor === String ? new Date(d) :
-            typeof d === "object" ? new Date(d.year,d.month,d.date) :
+            typeof d === 'object' ? new Date(d.year,d.month,d.date) :
             NaN
         )
     },
