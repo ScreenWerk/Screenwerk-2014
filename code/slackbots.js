@@ -41,10 +41,8 @@ function restart() {
 
 function upgrade() {
     var datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '')
-    slackbot.postMessageToChannel('test', datestring + ':*' + c.__SCREEN_ID + '*: :arrow_double_up:', {as_user: true})
-    console.log('=====================================')
+    slackbot.postMessageToChannel('test', datestring + ':*' + c.__SCREEN_ID + '*: :arrow_double_up: to latest release', {as_user: true})
     console.log('== UPGRADING! =======================')
-    console.log('=====================================')
 
     var child_process = require('child_process')
 
@@ -58,12 +56,27 @@ function upgrade() {
             process.exit(0)
         }, 500)
     } else {
-        var child = child_process.spawn(process.execPath, ['./', c.__SCREEN_ID], {detached: true})
-        child.unref()
+    }
+}
 
+
+function latest() {
+    var datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '')
+    slackbot.postMessageToChannel('test', datestring + ':*' + c.__SCREEN_ID + '*: :warning: installing latest build', {as_user: true})
+    console.log('== UPGRADING! =======================')
+
+    var child_process = require('child_process')
+
+    if (process.platform === 'darwin') {
+        child_process.exec('latest.sh', function (err, stdout, stderr) {
+            if (err !== null) { throw err }
+            console.log('stdout: ' + stdout)
+            console.log('stderr: ' + stderr)
+        })
         setTimeout(function () {
             process.exit(0)
-        }, 1500)
+        }, 500)
+    } else {
     }
 }
 
@@ -143,6 +156,9 @@ slackbot.on('message', function(message) {
                         break
                     case 'upgrade':
                         upgrade()
+                        break
+                    case 'latest':
+                        latest()
                         break
                 }
             } else if (params[0] === 'version' && params[1] === c.__VERSION) {
