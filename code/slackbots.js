@@ -103,11 +103,11 @@ function latest() {
         console.log('== win32: running latest.bat')
         child_process.execFile('latest.bat')
         slackbot.on('message', function(message) {
-            if ((message.text.indexOf(':*' + c.__SCREEN_ID + '*: :up:') > -1) {
-                console.log('New instance started. shutting down.')
+            if ((message.text.indexOf(':*' + c.__SCREEN_ID + '*: :up:') > -1)) {
+                console.log('New instance started. Shutting down.')
                 process.exit(0)
             }
-        }
+        })
     } else {
         slackbot.postMessageToChannel('test', datestring + ':*' + c.__SCREEN_ID + '*: :exclamation: Player doesnot now, what to do with ' + process.platform, {as_user: true})
     }
