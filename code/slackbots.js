@@ -11,29 +11,26 @@ var slackbot = new SlackBot(slackbot_settings)
 
 function restart() {
     var datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '')
-    slackbot.postMessageToChannel('test', datestring + ':*' + c.__SCREEN_ID + '*: +:smiling_imp: going down and then coming up again', {as_user: true})
+    slackbot.postMessageToChannel('test', datestring + ':*' + c.__SCREEN_ID + '*: +:sunrise: down. then up again', {as_user: true})
     // document.location.reload(true)
     // window.location.reload(3)
     console.log('=====================================')
     console.log('== RELAUNCHING! =====================')
     console.log('=====================================')
 
+    console.log('bye')
+    //Restart node-webkit app
+
+    var child_process = require('child_process')
+    var child = child_process.spawn(process.execPath, ['./', c.__SCREEN_ID], {detached: true})
+    child.unref()
+
+    // slackbot.postMessageToChannel('test', datestring + ':*' + c.__SCREEN_ID + '*: (cant rise without falling)', {as_user: true})
+
     setTimeout(function () {
-        slackbot.postMessageToChannel('test', datestring + ':*' + c.__SCREEN_ID + '*: (cant rise without falling)', {as_user: true})
-        console.log('bye')
-        //Restart node-webkit app
-        var child_process = require('child_process')
-
-        //Start new app
-        var child = child_process.spawn(process.execPath, ['./', c.__SCREEN_ID], {detached: true})
-
-        //Don't wait for it
-        child.unref()
-
-        //Quit current
         // player_window.hide() // hide window to prevent black display
         process.exit(0) // quit node-webkit app
-    }, 500)
+    }, 1500)
 }
 
 

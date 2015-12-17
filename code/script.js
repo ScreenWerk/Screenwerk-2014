@@ -272,7 +272,7 @@ function run() {
             remote_published = new Date(Date.parse(result.result.properties.published.values[0].value))
             c.__SCREEN_NAME = op.get(result, ['result', 'properties', 'name', 'values', 0, 'value'])
             console.log(c.__SCREEN_NAME)
-            slackbots.chatter(':up:' + c.__SCREEN_NAME)
+            slackbots.chatter(':up: ' + c.__SCREEN_NAME)
             // console.log('Remote published: ' + remote_published.toJSON())
         }
 
