@@ -4,6 +4,6 @@ for /f "delims=" %%a in ('git describe --tags %rev%') do @SET tag=%%a
 git checkout --force %tag%
 call nwjs use 0.12.3
 call npm update
-ECHO Enjoy ScreenWerk
+@ECHO Enjoy ScreenWerk
 call nwjs
-ECHO Exited ScreenWerk
+@ECHO Exited ScreenWerk
