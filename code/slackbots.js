@@ -47,7 +47,7 @@ function upgrade() {
     var child_process = require('child_process')
 
     if (process.platform === 'darwin') {
-        child_process.exec('launcher.sh', function (err, stdout, stderr) {
+        child_process.exec('. launcher.sh', function (err, stdout, stderr) {
             if (err !== null) { throw err }
             console.log('stdout: ' + stdout)
             console.log('stderr: ' + stderr)
@@ -68,7 +68,7 @@ function latest() {
     var child_process = require('child_process')
 
     if (process.platform === 'darwin') {
-        child_process.exec('latest.sh', function (err, stdout, stderr) {
+        child_process.exec('. latest.sh', function (err, stdout, stderr) {
             if (err !== null) { throw err }
             console.log('stdout: ' + stdout)
             console.log('stderr: ' + stderr)
