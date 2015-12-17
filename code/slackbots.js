@@ -101,21 +101,13 @@ function latest() {
         }, 1500)
     } else if (process.platform === 'win32') {
         console.log('== win32: running latest.bat')
-        child_process.execFile('latest.bat', function (err, stdout, stderr) {
-            setTimeout(function () {
+        child_process.execFile('latest.bat')
+        slackbot.on('message', function(message) {
+            if ((message.text.indexOf(':*' + c.__SCREEN_ID + '*: :up:') > -1) {
+                console.log('New instance started. shutting down.')
                 process.exit(0)
-            }, 1000)
-            console.log('== win32: returned from latest.bat')
-            if (err !== null) {
-                console.log('== win32: latest.bat errored out')
-                slackbot.postMessageToChannel('test', datestring + ':*' + c.__SCREEN_ID + '*: :exclamation: ' + err, {as_user: true})
-                slackbot.postMessageToChannel('test', datestring + ':*' + c.__SCREEN_ID + '*: :exclamation: ' + stdout, {as_user: true})
-                slackbot.postMessageToChannel('test', datestring + ':*' + c.__SCREEN_ID + '*: :exclamation: ' + stderr, {as_user: true})
-                throw err
             }
-            console.log('== win32: latest.bat succeeded')
-            slackbot.postMessageToChannel('test', datestring + ':*' + c.__SCREEN_ID + '*: :exclamation: updated to latest build.', {as_user: true})
-        })
+        }
     } else {
         slackbot.postMessageToChannel('test', datestring + ':*' + c.__SCREEN_ID + '*: :exclamation: Player doesnot now, what to do with ' + process.platform, {as_user: true})
     }
