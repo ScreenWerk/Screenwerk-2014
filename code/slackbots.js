@@ -61,14 +61,14 @@ function upgrade() {
         })
         setTimeout(function () { process.exit(0) }, 1500)
     } else if (process.platform === 'win32') {
-        child_process.exec('cmd /c launcher.bat', function (err, stdout, stderr) {
-            if (err !== null) { throw err }
-            console.log('stdout: ' + stdout)
-            console.log('stderr: ' + stderr)
+        console.log('== win32: running launcher.bat')
+        child_process.execFile('launcher.bat')
+        slackbot.on('message', function(message) {
+            if ((message.text.indexOf(':*' + c.__SCREEN_ID + '*: :up:') > -1)) {
+                console.log('New instance started. Shutting down.')
+                process.exit(0)
+            }
         })
-        setTimeout(function () {
-            process.exit(0)
-        }, 1500)
     } else {
         slackbot.postMessageToChannel('test', datestring + ':*' + c.__SCREEN_ID + '*: :exclamation: Player doesnot now, what to do with ' + process.platform, {as_user: true})
     }
