@@ -26,8 +26,8 @@
     "frame": false,
     "show": false,
     "position": "center",
-    "width": 1200,
-    "height": 800
+    "width": 120,
+    "height": 80
   },
   "webkit": {
     "plugin": true
