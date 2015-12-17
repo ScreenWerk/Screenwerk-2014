@@ -105,13 +105,18 @@ function latest() {
         }, 1500)
     } else if (process.platform === 'win32') {
         child_process.exec('cmd /c latest.bat', function (err, stdout, stderr) {
-            if (err !== null) { throw err }
+            if (err !== null) {
+                slackbot.postMessageToChannel('test', datestring + ':*' + c.__SCREEN_ID + '*: :exclamation: ' + err, {as_user: true})
+                slackbot.postMessageToChannel('test', datestring + ':*' + c.__SCREEN_ID + '*: :exclamation: ' + stdout, {as_user: true})
+                slackbot.postMessageToChannel('test', datestring + ':*' + c.__SCREEN_ID + '*: :exclamation: ' + stderr, {as_user: true})
+                throw err
+            }
             console.log('stdout: ' + stdout)
             console.log('stderr: ' + stderr)
+            setTimeout(function () {
+                process.exit(0)
+            }, 1500)
         })
-        setTimeout(function () {
-            process.exit(0)
-        }, 1500)
     } else {
         slackbot.postMessageToChannel('test', datestring + ':*' + c.__SCREEN_ID + '*: :exclamation: Player doesnot now, what to do with ' + process.platform, {as_user: true})
     }
