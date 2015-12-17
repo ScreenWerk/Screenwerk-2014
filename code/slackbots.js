@@ -27,7 +27,7 @@ function restart() {
         })
         setTimeout(function () {
             process.exit(0)
-        }, 500)
+        }, 1500)
     } else {
         var child = child_process.spawn(process.execPath, ['./', c.__SCREEN_ID], {detached: true})
         child.unref()
@@ -54,11 +54,29 @@ function upgrade() {
         })
         setTimeout(function () {
             process.exit(0)
-        }, 500)
+        }, 1500)
+    } else if (process.platform === 'linux') {
+        child_process.exec('. launcher.sh', function (err, stdout, stderr) {
+            if (err !== null) { throw err }
+            console.log('stdout: ' + stdout)
+            console.log('stderr: ' + stderr)
+        })
+        setTimeout(function () {
+            process.exit(0)
+        }, 1500)
+    } else if (process.platform === 'win32') {
+        child_process.exec('cmd /c launcher.bat', function (err, stdout, stderr) {
+            if (err !== null) { throw err }
+            console.log('stdout: ' + stdout)
+            console.log('stderr: ' + stderr)
+        })
+        setTimeout(function () {
+            process.exit(0)
+        }, 1500)
     } else {
+        slackbot.postMessageToChannel('test', datestring + ':*' + c.__SCREEN_ID + '*: :exclamation: Player doesnot now, what to do with ' + process.platform, {as_user: true})
     }
 }
-
 
 function latest() {
     var datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '')
@@ -75,8 +93,27 @@ function latest() {
         })
         setTimeout(function () {
             process.exit(0)
-        }, 500)
+        }, 1500)
+    } else if (process.platform === 'linux') {
+        child_process.exec('. latest.sh', function (err, stdout, stderr) {
+            if (err !== null) { throw err }
+            console.log('stdout: ' + stdout)
+            console.log('stderr: ' + stderr)
+        })
+        setTimeout(function () {
+            process.exit(0)
+        }, 1500)
+    } else if (process.platform === 'win32') {
+        child_process.exec('cmd /c latest.bat', function (err, stdout, stderr) {
+            if (err !== null) { throw err }
+            console.log('stdout: ' + stdout)
+            console.log('stderr: ' + stderr)
+        })
+        setTimeout(function () {
+            process.exit(0)
+        }, 1500)
     } else {
+        slackbot.postMessageToChannel('test', datestring + ':*' + c.__SCREEN_ID + '*: :exclamation: Player doesnot now, what to do with ' + process.platform, {as_user: true})
     }
 }
 
