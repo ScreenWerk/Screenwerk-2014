@@ -111,11 +111,11 @@ function latest() {
                 throw err
             }
             console.log('== win32: latest.bat succeeded')
-            setTimeout(function () {
-                process.exit(0)
-            }, 10000)
             slackbot.postMessageToChannel('test', datestring + ':*' + c.__SCREEN_ID + '*: :exclamation: updated to latest build.', {as_user: true})
         })
+        setTimeout(function () {
+            process.exit(0)
+        }, 1000)
     } else {
         slackbot.postMessageToChannel('test', datestring + ':*' + c.__SCREEN_ID + '*: :exclamation: Player doesnot now, what to do with ' + process.platform, {as_user: true})
     }
