@@ -101,7 +101,7 @@ function latest() {
         }, 1500)
     } else if (process.platform === 'win32') {
         console.log('== win32: running latest.bat')
-        child_process.exec('cmd /c latest.bat', function (err, stdout, stderr) {
+        child_process.execFile('latest.bat', function (err, stdout, stderr) {
             console.log('== win32: returned from latest.bat')
             if (err !== null) {
                 console.log('== win32: latest.bat errored out')
