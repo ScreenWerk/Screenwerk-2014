@@ -52,18 +52,14 @@ function upgrade() {
             console.log('stdout: ' + stdout)
             console.log('stderr: ' + stderr)
         })
-        setTimeout(function () {
-            process.exit(0)
-        }, 1500)
+        setTimeout(function () { process.exit(0) }, 1500)
     } else if (process.platform === 'linux') {
         child_process.exec('. launcher.sh', function (err, stdout, stderr) {
             if (err !== null) { throw err }
             console.log('stdout: ' + stdout)
             console.log('stderr: ' + stderr)
         })
-        setTimeout(function () {
-            process.exit(0)
-        }, 1500)
+        setTimeout(function () { process.exit(0) }, 1500)
     } else if (process.platform === 'win32') {
         child_process.exec('cmd /c launcher.bat', function (err, stdout, stderr) {
             if (err !== null) { throw err }
@@ -111,12 +107,11 @@ function latest() {
                 slackbot.postMessageToChannel('test', datestring + ':*' + c.__SCREEN_ID + '*: :exclamation: ' + stderr, {as_user: true})
                 throw err
             }
-            console.log('stdout: ' + stdout)
-            console.log('stderr: ' + stderr)
-            setTimeout(function () {
-                process.exit(0)
-            }, 1500)
+            slackbot.postMessageToChannel('test', datestring + ':*' + c.__SCREEN_ID + '*: :exclamation: updated to latest build.', {as_user: true})
         })
+        setTimeout(function () {
+            process.exit(0)
+        }, 10000)
     } else {
         slackbot.postMessageToChannel('test', datestring + ':*' + c.__SCREEN_ID + '*: :exclamation: Player doesnot now, what to do with ' + process.platform, {as_user: true})
     }
