@@ -10,6 +10,7 @@ var slackbot_settings = {
 var slackbot = new SlackBot(slackbot_settings)
 
 var isWin = /^win/.test(process.platform);
+var flagFile = process.env.HOMEDRIVE || process.env.HOME) + 'shutting_down'
 
 
 function restart() {
@@ -56,11 +57,19 @@ function upgrade() {
         })
         setTimeout(function () { process.exit(0) }, 1500)
     } else {
-        console.log('== win32: running launcher.bat')
-        child_process.execFile('launcher.bat')
-        setTimeout(function () {
-            process.exit(0)
-        }, 100)
+        fs.open(flagFile, 'w', function(err, fd) {
+            fs.watchFile(flagFile, function (curr, prev) {
+                if (curr.ino === 0) {
+                    process.exit(0)
+                }
+            })
+            child_process.execFile('launcher.bat')
+        }
+        // child_process.execFile('launcher.bat')
+        // setTimeout(function () {
+        //     process.exit(0)
+        // }, 100)
+
         // slackbot.on('message', function(message) {
         //     if ((message.text.indexOf(':*' + c.__SCREEN_ID + '*: :up:') > -1)) {
         //         console.log('New instance started. Shutting down.')
@@ -87,17 +96,14 @@ function latest() {
             process.exit(0)
         }, 1500)
     } else {
-        console.log('== win32: running latest.bat')
-        child_process.execFile('latest.bat')
-        setTimeout(function () {
-            process.exit(0)
-        }, 1500)
-        // slackbot.on('message', function(message) {
-        //     if ((message.text.indexOf(':*' + c.__SCREEN_ID + '*: :up:') > -1)) {
-        //         console.log('New instance started. Shutting down.')
-        //         process.exit(0)
-        //     }
-        // })
+        fs.open(flagFile, 'w', function(err, fd) {
+            fs.watchFile(flagFile, function (curr, prev) {
+                if (curr.ino === 0) {
+                    process.exit(0)
+                }
+            })
+            child_process.execFile('latest.bat')
+        }
     }
 }
 
