@@ -59,9 +59,8 @@ function upgrade() {
     } else {
         fs.open(flagFile, 'w', function(err, fd) {
             fs.watchFile(flagFile, function (curr, prev) {
-                if (curr.ino === 0) {
-                    process.exit(0)
-                }
+                console.log(flagFile, curr, prev)
+                if (curr.ino === 0) { process.exit(0) }
             })
             child_process.execFile('launcher.bat')
         })
@@ -80,16 +79,12 @@ function latest() {
             console.log('stdout: ' + stdout)
             console.log('stderr: ' + stderr)
         })
-        setTimeout(function () {
-            process.exit(0)
-        }, 1500)
+        setTimeout(function () { process.exit(0) }, 1500)
     } else {
         fs.open(flagFile, 'w', function(err, fd) {
             fs.watchFile(flagFile, function (curr, prev) {
                 console.log(flagFile, curr, prev)
-                if (curr.ino === 0) {
-                    process.exit(0)
-                }
+                if (curr.ino === 0) { process.exit(0) }
             })
             child_process.execFile('latest.bat')
         })
