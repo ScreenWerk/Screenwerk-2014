@@ -10,7 +10,7 @@ var slackbot_settings = {
 var slackbot = new SlackBot(slackbot_settings)
 
 var isWin = /^win/.test(process.platform);
-var flagFile = process.env.HOMEDRIVE || process.env.HOME) + 'shutting_down'
+var flagFile = (process.env.HOMEDRIVE || process.env.HOME) + 'shutting_down'
 
 
 function restart() {
@@ -64,18 +64,7 @@ function upgrade() {
                 }
             })
             child_process.execFile('launcher.bat')
-        }
-        // child_process.execFile('launcher.bat')
-        // setTimeout(function () {
-        //     process.exit(0)
-        // }, 100)
-
-        // slackbot.on('message', function(message) {
-        //     if ((message.text.indexOf(':*' + c.__SCREEN_ID + '*: :up:') > -1)) {
-        //         console.log('New instance started. Shutting down.')
-        //         process.exit(0)
-        //     }
-        // })
+        })
     }
 }
 
@@ -103,7 +92,7 @@ function latest() {
                 }
             })
             child_process.execFile('latest.bat')
-        }
+        })
     }
 }
 
