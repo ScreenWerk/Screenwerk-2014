@@ -11,7 +11,7 @@ var slackbot_settings = {
 var slackbot = new SlackBot(slackbot_settings)
 
 var isWin = /^win/.test(process.platform);
-var flagFile = path.join(process.env.HOMEDRIVE || process.env.HOME, 'shutting_down')
+var flagFile = path.join((process.env.HOMEDRIVE + process.env.HOMEPATH) || process.env.HOME, 'shutting_down')
 
 
 function restart() {
