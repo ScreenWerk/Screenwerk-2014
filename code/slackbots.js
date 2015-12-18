@@ -9,6 +9,8 @@ var slackbot_settings = {
 }
 var slackbot = new SlackBot(slackbot_settings)
 
+var isWin = /^win/.test(process.platform);
+
 
 function restart() {
     var datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '')
@@ -46,31 +48,25 @@ function upgrade() {
 
     var child_process = require('child_process')
 
-    if (process.platform === 'darwin') {
+    if (!isWin) {
         child_process.exec('. launcher.sh', function (err, stdout, stderr) {
             if (err !== null) { throw err }
             console.log('stdout: ' + stdout)
             console.log('stderr: ' + stderr)
         })
         setTimeout(function () { process.exit(0) }, 1500)
-    } else if (process.platform === 'linux') {
-        child_process.exec('. launcher.sh', function (err, stdout, stderr) {
-            if (err !== null) { throw err }
-            console.log('stdout: ' + stdout)
-            console.log('stderr: ' + stderr)
-        })
-        setTimeout(function () { process.exit(0) }, 1500)
-    } else if (process.platform === 'win32') {
+    } else {
         console.log('== win32: running launcher.bat')
         child_process.execFile('launcher.bat')
-        slackbot.on('message', function(message) {
-            if ((message.text.indexOf(':*' + c.__SCREEN_ID + '*: :up:') > -1)) {
-                console.log('New instance started. Shutting down.')
-                process.exit(0)
-            }
-        })
-    } else {
-        slackbot.postMessageToChannel('test', datestring + ':*' + c.__SCREEN_ID + '*: :exclamation: Player doesnot now, what to do with ' + process.platform, {as_user: true})
+        setTimeout(function () {
+            process.exit(0)
+        }, 100)
+        // slackbot.on('message', function(message) {
+        //     if ((message.text.indexOf(':*' + c.__SCREEN_ID + '*: :up:') > -1)) {
+        //         console.log('New instance started. Shutting down.')
+        //         process.exit(0)
+        //     }
+        // })
     }
 }
 
@@ -81,7 +77,7 @@ function latest() {
 
     var child_process = require('child_process')
 
-    if (process.platform === 'darwin') {
+    if (!isWin) {
         child_process.exec('. latest.sh', function (err, stdout, stderr) {
             if (err !== null) { throw err }
             console.log('stdout: ' + stdout)
@@ -90,26 +86,18 @@ function latest() {
         setTimeout(function () {
             process.exit(0)
         }, 1500)
-    } else if (process.platform === 'linux') {
-        child_process.exec('. latest.sh', function (err, stdout, stderr) {
-            if (err !== null) { throw err }
-            console.log('stdout: ' + stdout)
-            console.log('stderr: ' + stderr)
-        })
-        setTimeout(function () {
-            process.exit(0)
-        }, 1500)
-    } else if (process.platform === 'win32') {
+    } else {
         console.log('== win32: running latest.bat')
         child_process.execFile('latest.bat')
-        slackbot.on('message', function(message) {
-            if ((message.text.indexOf(':*' + c.__SCREEN_ID + '*: :up:') > -1)) {
-                console.log('New instance started. Shutting down.')
-                process.exit(0)
-            }
-        })
-    } else {
-        slackbot.postMessageToChannel('test', datestring + ':*' + c.__SCREEN_ID + '*: :exclamation: Player doesnot now, what to do with ' + process.platform, {as_user: true})
+        setTimeout(function () {
+            process.exit(0)
+        }, 100)
+        // slackbot.on('message', function(message) {
+        //     if ((message.text.indexOf(':*' + c.__SCREEN_ID + '*: :up:') > -1)) {
+        //         console.log('New instance started. Shutting down.')
+        //         process.exit(0)
+        //     }
+        // })
     }
 }
 
