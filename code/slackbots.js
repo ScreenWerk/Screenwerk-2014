@@ -91,7 +91,7 @@ function latest() {
         child_process.execFile('latest.bat')
         setTimeout(function () {
             process.exit(0)
-        }, 100)
+        }, 1500)
         // slackbot.on('message', function(message) {
         //     if ((message.text.indexOf(':*' + c.__SCREEN_ID + '*: :up:') > -1)) {
         //         console.log('New instance started. Shutting down.')
