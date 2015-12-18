@@ -274,7 +274,7 @@ function run() {
             console.log(c.__SCREEN_NAME)
 
             slackbots.chatter(':up: ' + c.__SCREEN_NAME)
-            var flagFile = (process.env.HOMEDRIVE || process.env.HOME) + '/shutting_down'
+            var flagFile = path.join(process.env.HOMEDRIVE || process.env.HOME, 'shutting_down')
             fs.unlinkSync(flagFile)
         }
 
