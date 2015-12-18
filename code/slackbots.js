@@ -1,4 +1,5 @@
-// var os          = require('os')
+var path        = require('path')
+var fs          = require('fs')
 var SlackBot    = require('slackbots')
 
 var c = require('./c.js')
@@ -8,6 +9,9 @@ var slackbot_settings = {
     // name: 'noise'
 }
 var slackbot = new SlackBot(slackbot_settings)
+
+var isWin = /^win/.test(process.platform);
+var flagFile = path.join((process.env.HOMEDRIVE + process.env.HOMEPATH) || process.env.HOME, 'shutting_down')
 
 
 function restart() {
@@ -42,74 +46,48 @@ function restart() {
 function upgrade() {
     var datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '')
     slackbot.postMessageToChannel('test', datestring + ':*' + c.__SCREEN_ID + '*: :arrow_double_up: to latest release', {as_user: true})
-    console.log('== UPGRADING! =======================')
 
     var child_process = require('child_process')
 
-    if (process.platform === 'darwin') {
+    if (!isWin) {
         child_process.exec('. launcher.sh', function (err, stdout, stderr) {
             if (err !== null) { throw err }
             console.log('stdout: ' + stdout)
             console.log('stderr: ' + stderr)
         })
         setTimeout(function () { process.exit(0) }, 1500)
-    } else if (process.platform === 'linux') {
-        child_process.exec('. launcher.sh', function (err, stdout, stderr) {
-            if (err !== null) { throw err }
-            console.log('stdout: ' + stdout)
-            console.log('stderr: ' + stderr)
-        })
-        setTimeout(function () { process.exit(0) }, 1500)
-    } else if (process.platform === 'win32') {
-        console.log('== win32: running launcher.bat')
-        child_process.execFile('launcher.bat')
-        slackbot.on('message', function(message) {
-            if ((message.text.indexOf(':*' + c.__SCREEN_ID + '*: :up:') > -1)) {
-                console.log('New instance started. Shutting down.')
-                process.exit(0)
-            }
-        })
     } else {
-        slackbot.postMessageToChannel('test', datestring + ':*' + c.__SCREEN_ID + '*: :exclamation: Player doesnot now, what to do with ' + process.platform, {as_user: true})
+        fs.open(flagFile, 'w', function(err, fd) {
+            fs.watchFile(flagFile, function (curr, prev) {
+                console.log(flagFile, curr, prev)
+                if (curr.ino === 0) { process.exit(0) }
+            })
+            child_process.execFile('launcher.bat')
+        })
     }
 }
 
 function latest() {
     var datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '')
     slackbot.postMessageToChannel('test', datestring + ':*' + c.__SCREEN_ID + '*: :warning: installing latest build', {as_user: true})
-    console.log('== UPGRADING! =======================')
 
     var child_process = require('child_process')
 
-    if (process.platform === 'darwin') {
+    if (!isWin) {
         child_process.exec('. latest.sh', function (err, stdout, stderr) {
             if (err !== null) { throw err }
             console.log('stdout: ' + stdout)
             console.log('stderr: ' + stderr)
         })
-        setTimeout(function () {
-            process.exit(0)
-        }, 1500)
-    } else if (process.platform === 'linux') {
-        child_process.exec('. latest.sh', function (err, stdout, stderr) {
-            if (err !== null) { throw err }
-            console.log('stdout: ' + stdout)
-            console.log('stderr: ' + stderr)
-        })
-        setTimeout(function () {
-            process.exit(0)
-        }, 1500)
-    } else if (process.platform === 'win32') {
-        console.log('== win32: running latest.bat')
-        child_process.execFile('latest.bat')
-        slackbot.on('message', function(message) {
-            if ((message.text.indexOf(':*' + c.__SCREEN_ID + '*: :up:') > -1)) {
-                console.log('New instance started. Shutting down.')
-                process.exit(0)
-            }
-        })
+        setTimeout(function () { process.exit(0) }, 1500)
     } else {
-        slackbot.postMessageToChannel('test', datestring + ':*' + c.__SCREEN_ID + '*: :exclamation: Player doesnot now, what to do with ' + process.platform, {as_user: true})
+        fs.open(flagFile, 'w', function(err, fd) {
+            fs.watchFile(flagFile, function (curr, prev) {
+                console.log(flagFile, curr, prev)
+                if (curr.ino === 0) { process.exit(0) }
+            })
+            child_process.execFile('latest.bat')
+        })
     }
 }
 

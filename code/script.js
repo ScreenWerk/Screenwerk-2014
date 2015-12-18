@@ -173,7 +173,7 @@ function chooseUUID(uuids, callback) {
 var EntuLib,  local_published, remote_published
 
 //
-// Main funcion to start the loader and then player
+// Main function to start the loader and then player
 // Essential configuration has been successfully loaded
 //
 function run() {
@@ -272,8 +272,12 @@ function run() {
             remote_published = new Date(Date.parse(result.result.properties.published.values[0].value))
             c.__SCREEN_NAME = op.get(result, ['result', 'properties', 'name', 'values', 0, 'value'])
             console.log(c.__SCREEN_NAME)
+
             slackbots.chatter(':up: ' + c.__SCREEN_NAME)
-            // console.log('Remote published: ' + remote_published.toJSON())
+            var flagFile = path.join((process.env.HOMEDRIVE + process.env.HOMEPATH) || process.env.HOME, 'shutting_down')
+            fs.unlink(flagFile, function(err) {
+                if (err) { console.log(err) }
+            })
         }
 
         if (local_published &&
