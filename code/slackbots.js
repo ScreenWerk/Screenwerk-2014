@@ -87,8 +87,9 @@ function latest() {
     } else {
         fs.open(flagFile, 'w', function(err, fd) {
             fs.watchFile(flagFile, function (curr, prev) {
+                console.log(curr, prev)
                 if (curr.ino === 0) {
-                    process.exit(0)
+                    // process.exit(0)
                 }
             })
             child_process.execFile('latest.bat')
