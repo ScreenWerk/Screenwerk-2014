@@ -1,4 +1,4 @@
-// var os          = require('os')
+var fs          = require('fs')
 var SlackBot    = require('slackbots')
 
 var c = require('./c.js')
