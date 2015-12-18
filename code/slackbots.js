@@ -46,7 +46,6 @@ function restart() {
 function upgrade() {
     var datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '')
     slackbot.postMessageToChannel('test', datestring + ':*' + c.__SCREEN_ID + '*: :arrow_double_up: to latest release', {as_user: true})
-    console.log('== UPGRADING! =======================')
 
     var child_process = require('child_process')
 
@@ -72,7 +71,6 @@ function upgrade() {
 function latest() {
     var datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '')
     slackbot.postMessageToChannel('test', datestring + ':*' + c.__SCREEN_ID + '*: :warning: installing latest build', {as_user: true})
-    console.log('== UPGRADING! =======================')
 
     var child_process = require('child_process')
 
@@ -90,10 +88,10 @@ function latest() {
             fs.watchFile(flagFile, function (curr, prev) {
                 console.log(flagFile, curr, prev)
                 if (curr.ino === 0) {
-                    // process.exit(0)
+                    process.exit(0)
                 }
             })
-            // child_process.execFile('latest.bat')
+            child_process.execFile('latest.bat')
         })
     }
 }

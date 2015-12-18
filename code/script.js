@@ -275,7 +275,9 @@ function run() {
 
             slackbots.chatter(':up: ' + c.__SCREEN_NAME)
             var flagFile = path.join((process.env.HOMEDRIVE + process.env.HOMEPATH) || process.env.HOME, 'shutting_down')
-            fs.unlinkSync(flagFile)
+            fs.unlink(flagFile, function(err) {
+                if (err) { console.log(err) }
+            })
         }
 
         if (local_published &&
