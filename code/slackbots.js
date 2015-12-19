@@ -63,6 +63,7 @@ function upgrade(upgradeType) {
         setTimeout(function () {
             slackbot.postMessageToChannel('test', datestring + ':*' + c.__SCREEN_ID + '*: and Jina ēbaṁ ṭanika, too', {as_user: true})
         }, 1500)
+        return
     }
 
     var child_process = require('child_process')
