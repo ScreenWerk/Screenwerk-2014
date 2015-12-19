@@ -8,7 +8,13 @@ var slackbot_settings = {
     token: 'xoxb-12801543831-Bx3UtMRBeDoTMj3eX8d9HsIk',
     // name: 'noise'
 }
-var slackbot = new SlackBot(slackbot_settings)
+try {
+    var slackbot = new SlackBot(slackbot_settings)
+    c.logStream('Slackbot initialized.')
+} catch (err) {
+    c.logStream('Failed to init slackbot.')
+    c.logStream('E:' + JSON.stringify(err))
+}
 
 var isWin = /^win/.test(process.platform);
 var flagFile = path.join((process.env.HOMEDRIVE + process.env.HOMEPATH) || process.env.HOME, 'shutting_down')
@@ -43,52 +49,40 @@ function restart() {
 }
 
 
-function upgrade() {
+function upgrade(upgradeType) {
     var datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '')
-    slackbot.postMessageToChannel('test', datestring + ':*' + c.__SCREEN_ID + '*: :arrow_double_up: to latest release', {as_user: true})
+
+    var scriptName = 'launcher'
+    if (upgradeType === 'latest release') {
+        slackbot.postMessageToChannel('test', datestring + ':*' + c.__SCREEN_ID + '*: :arrow_double_up: to latest release', {as_user: true})
+    } else if (upgradeType === 'latest build') {
+        scriptName = 'latest'
+        slackbot.postMessageToChannel('test', datestring + ':*' + c.__SCREEN_ID + '*: :warning: installing latest build', {as_user: true})
+    } else {
+        slackbot.postMessageToChannel('test', datestring + ':*' + c.__SCREEN_ID + '*: mambojambo', {as_user: true})
+        setTimeout(function () {
+            slackbot.postMessageToChannel('test', datestring + ':*' + c.__SCREEN_ID + '*: and Jina ēbaṁ ṭanika, too', {as_user: true})
+        }, 1500)
+    }
 
     var child_process = require('child_process')
 
-    if (!isWin) {
-        child_process.exec('. launcher.sh', function (err, stdout, stderr) {
-            if (err !== null) { throw err }
-            console.log('stdout: ' + stdout)
-            console.log('stderr: ' + stderr)
+    fs.open(flagFile, 'w', function(err, fd) {
+        fs.watchFile(flagFile, function (curr, prev) {
+            console.log(flagFile, curr, prev)
+            if (curr.ino === 0) { process.exit(0) }
         })
-        setTimeout(function () { process.exit(0) }, 1500)
-    } else {
-        fs.open(flagFile, 'w', function(err, fd) {
-            fs.watchFile(flagFile, function (curr, prev) {
-                console.log(flagFile, curr, prev)
-                if (curr.ino === 0) { process.exit(0) }
+        if (isWin) {
+            child_process.execFile(scriptName + '.bat')
+        } else {
+            child_process.exec('. ' + scriptName + '.sh', function (err, stdout, stderr) {
+                if (err !== null) { throw err }
+                console.log('stdout: ' + stdout)
+                console.log('stderr: ' + stderr)
             })
-            child_process.execFile('launcher.bat')
-        })
-    }
-}
+        }
+    })
 
-function latest() {
-    var datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '')
-    slackbot.postMessageToChannel('test', datestring + ':*' + c.__SCREEN_ID + '*: :warning: installing latest build', {as_user: true})
-
-    var child_process = require('child_process')
-
-    if (!isWin) {
-        child_process.exec('. latest.sh', function (err, stdout, stderr) {
-            if (err !== null) { throw err }
-            console.log('stdout: ' + stdout)
-            console.log('stderr: ' + stderr)
-        })
-        setTimeout(function () { process.exit(0) }, 1500)
-    } else {
-        fs.open(flagFile, 'w', function(err, fd) {
-            fs.watchFile(flagFile, function (curr, prev) {
-                console.log(flagFile, curr, prev)
-                if (curr.ino === 0) { process.exit(0) }
-            })
-            child_process.execFile('latest.bat')
-        })
-    }
 }
 
 
@@ -166,10 +160,10 @@ slackbot.on('message', function(message) {
                         restart()
                         break
                     case 'upgrade':
-                        upgrade()
+                        upgrade('latest releases')
                         break
                     case 'latest':
-                        latest()
+                        upgrade('latest build')
                         break
                 }
             } else if (params[0] === 'version' && params[1] === c.__VERSION) {
