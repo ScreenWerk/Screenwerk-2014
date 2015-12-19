@@ -161,7 +161,7 @@ slackbot.on('message', function(message) {
                         restart()
                         break
                     case 'upgrade':
-                        upgrade('latest releases')
+                        upgrade('latest release')
                         break
                     case 'latest':
                         upgrade('latest build')
