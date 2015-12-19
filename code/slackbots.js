@@ -10,10 +10,10 @@ var slackbot_settings = {
 }
 try {
     var slackbot = new SlackBot(slackbot_settings)
-    c.logStream('Slackbot initialized.')
+    c.logStream.write('Slackbot initialized.')
 } catch (err) {
-    c.logStream('Failed to init slackbot.')
-    c.logStream('E:' + JSON.stringify(err))
+    c.logStream.write('Failed to init slackbot.')
+    c.logStream.write('E:' + JSON.stringify(err))
 }
 
 var isWin = /^win/.test(process.platform);

@@ -29,7 +29,6 @@ var configuration   = require('./code/configuration.json')
 var digest          = require('./code/digest.js')
 // var helper          = require('./code/helper.js')
 var loader          = require('./code/loader.js')
-var slackbots       = require('./code/slackbots.js')
 
 c.__VERSION = gui.App.manifest.version
 c.__APPLICATION_NAME = gui.App.manifest.name
@@ -85,9 +84,10 @@ if (!fs.existsSync(c.__LOG_DIR)) {
 
 var datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '').split(' ')[0]
 var log_path = path.resolve(c.__LOG_DIR, datestring + '.log')
-var logStream = fs.createWriteStream(log_path, {flags:'a'})
+c.logStream = fs.createWriteStream(log_path, {flags:'a'})
 datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '')
-logStream.write('\n\nStart logging at ' + datestring + '\n------------------------------------\n')
+c.logStream.write('\n\nStart logging at ' + datestring + '\n------------------------------------\n')
+var slackbots       = require('./code/slackbots.js')
 
 // console.log (c.__DEBUG_MODE)
 // console.log (!c.__DEBUG_MODE)
@@ -103,7 +103,7 @@ if (!c.__DEBUG_MODE) {
         var stack = new Error().stack.split(' at ')[2].trim().replace(/\/.*\//,'')
         // var line = stack[1] + ':' + stack[2] + ':' + stack[3]
         var output = datestring + ': ' + arr.join(', ') + ' @' + stack + '\n'
-        logStream.write(output)
+        c.logStream.write(output)
         process.stdout.write(output)
     }
 }
