@@ -83,8 +83,8 @@ if (!fs.existsSync(c.__LOG_DIR)) {
 }
 
 var datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '').split(' ')[0]
-var log_path = path.resolve(c.__LOG_DIR, datestring + '.log')
-c.logStream = fs.createWriteStream(log_path, {flags:'a'})
+c.log_path = path.resolve(c.__LOG_DIR, datestring + '.log')
+c.logStream = fs.createWriteStream(c.log_path, {flags:'a'})
 datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '')
 c.logStream.write('\n\nStart logging at ' + datestring + '\n------------------------------------\n')
 var slackbots       = require('./code/slackbots.js')

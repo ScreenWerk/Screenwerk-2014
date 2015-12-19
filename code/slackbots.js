@@ -1,11 +1,16 @@
 var path        = require('path')
 var fs          = require('fs')
+var op          = require('object-path')
+var request     = require('request')
 var SlackBot    = require('slackbots')
+var SlackUp     = require('node-slack-upload')
+
+var token = 'xoxb-12801543831-Bx3UtMRBeDoTMj3eX8d9HsIk'
 
 var c = require('./c.js')
 
 var slackbot_settings = {
-    token: 'xoxb-12801543831-Bx3UtMRBeDoTMj3eX8d9HsIk',
+    token: token,
     // name: 'noise'
 }
 try {
@@ -19,6 +24,67 @@ try {
 var isWin = /^win/.test(process.platform);
 var flagFile = path.join((process.env.HOMEDRIVE + process.env.HOMEPATH) || process.env.HOME, 'shutting_down')
 
+
+
+// curl -X POST --data-urlencode 'payload={"text": "This is posted to <# test> and comes from *TEST screen*.", "channel": "#test", "username": "swplayer 75", "icon_emoji": ":monkey_face:"}' https://hooks.slack.com/services/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
+var logWebhook = 'https://hooks.slack.com/services/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'
+function uploadLog() {
+    var datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '')
+    // var payload = {
+    //     text: ':*' + c.__SCREEN_ID + '*: Here\'s my log.',
+    //     channel: '#log'
+    // }
+    var message = datestring + ':*' + c.__SCREEN_ID + '*: Here\'s my log.'
+    var logStream = fs.createReadStream(c.log_path)
+    // logStream.on('data', function(chunk) {
+    //     console.log('got %d bytes of data', chunk.length, chunk)
+    // })
+
+    var params_o = {
+        filetype: 'post',
+        filename: c.__SCREEN_ID + '.log',
+        title: c.__SCREEN_ID + '.log',
+        initialComment: 'foo',
+        channels: '#test,#logs',
+        username: 'noise',
+        // content: 'testin faili sisu',
+        as_user: 'true'
+    }
+    var params_a = []
+    for (var key in params_o) {
+        params_a.push(key + '=' + params_o[key])
+    }
+    var params = params_a.join('&')
+    // var endpoint = 'https://slack.com/api/files.upload?token=' + 'xoxp-12801926784-12801926800-17067950499-84e198e606' + '&' + params
+    var endpoint = 'https://slack.com/api/files.upload?token=' + token + '&' + params
+    console.log('### ', endpoint)
+	var req = request.post(endpoint, function (err, response, body) {
+		console.log('### ', response.headers['content-type'])
+        if (err) {
+            console.log('## ', err)
+			return
+		}
+		if (response.statusCode >= 300) {
+            console.log('## ', response)
+			return
+		}
+		body = JSON.parse(body)
+		if (!body.ok) {
+            console.log('## ', body.error)
+			return
+		}
+        console.log('### ', JSON.stringify(body, null, 4))
+        slackbot.postMessageToChannel('logs', datestring + ':*' + c.__SCREEN_ID + '*: :notebook: ' + body.file.permalink_public, {as_user: true})
+	})
+    req.on('response', function(response) {
+        console.log('### ', response.statusCode) // 200
+        console.log('### ', response.headers['content-type']) // 'image/png'
+    })
+	if (logStream) {
+		var form = req.form()
+		form.append('file', logStream)
+	}
+}
 
 function restart() {
     var datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '')
@@ -155,7 +221,7 @@ slackbot.on('message', function(message) {
                         + '* _' + process.platform + '_: I have ' + def + ' ' + ref_id + '.', {as_user: true})
                         break
                     case 'log':
-                        slackbot.postMessageToChannel('test', datestring + ':*' + c.__SCREEN_ID + '*: Here\'s my log.', {as_user: true})
+                        uploadLog()
                         break
                     case 'restart':
                         restart()
