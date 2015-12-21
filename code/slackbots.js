@@ -83,6 +83,7 @@ function uploadLog() {
             console.log('## ', response)
 			return
 		}
+        slackbot.chatter(body)
 		body = JSON.parse(body)
 		if (!body.ok) {
             console.log('## ', body.error)
@@ -103,7 +104,7 @@ function uploadLog() {
 
 function restart() {
     var datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '')
-    slackbot.chatter(':*' + c.__SCREEN_ID + '*: :sunrise: down. then up again')
+    slackbot.chatter(':sunrise: down. then up again')
     console.log('== RELAUNCHING! =====================')
 
     var child_process = require('child_process')
@@ -129,10 +130,10 @@ function upgrade(upgradeType) {
 
     var scriptName = 'launcher'
     if (upgradeType === 'latest release') {
-        slackbot.chatter(':*' + c.__SCREEN_ID + '*: :arrow_double_up: to latest release')
+        slackbot.chatter(':arrow_double_up: to latest release')
     } else if (upgradeType === 'latest build') {
         scriptName = 'latest'
-        slackbot.chatter(':*' + c.__SCREEN_ID + '*: :warning: installing latest build')
+        slackbot.chatter(':warning: installing latest build')
     } else {
         return mambojambo()
     }
@@ -173,15 +174,15 @@ slackbot.on('message', function(message) {
 
     switch (message.text.toLowerCase()) {
         case c.__SCREEN_ID:
-            slackbot.chatter(':*' + c.__SCREEN_ID + '|' + c.__SCREEN_NAME + '*')
+            slackbot.chatter('*' + c.__SCREEN_NAME + '*')
             break
         case 'hello':
         case 'hi':
-            slackbot.chatter(':*' + c.__SCREEN_ID + '*: Checking in.')
+            slackbot.chatter('Checking in.')
             break
         case 'version':
         case 'ver':
-            slackbot.chatter(':' + c.__SCREEN_ID + ' *' + c.__VERSION + '* _' + process.platform + '_ ' + c.__SCREEN_NAME)
+            slackbot.chatter('*' + c.__VERSION + '* _' + process.platform + '_ ' + c.__SCREEN_NAME)
             break
         default:
             var params = message.text.toLowerCase().split(' ')
@@ -192,7 +193,7 @@ slackbot.on('message', function(message) {
                 var command = params.join(' ')
                 switch (command) {
                     case '':
-                        slackbot.chatter(':*' + c.__SCREEN_ID + '*: I have ' + def + ' ' + ref_id + '.')
+                        slackbot.chatter('I have ' + def + ' ' + ref_id + '.')
                         break
                     case 'screenshot':
                     case 'ss':
@@ -207,8 +208,7 @@ slackbot.on('message', function(message) {
                         break
                     case 'ver':
                     case 'version':
-                        slackbot.chatter(':' + c.__SCREEN_ID + ' *' + c.__VERSION
-                            + '* _' + process.platform + '_: I have ' + def + ' ' + ref_id + '.')
+                        slackbot.chatter('*' + c.__VERSION + '* _' + process.platform + '_: I have ' + def + ' ' + ref_id + '.')
                         break
                     case 'log':
                         uploadLog()
@@ -224,7 +224,7 @@ slackbot.on('message', function(message) {
                         break
                 }
             } else if (params[0] === 'version' && params[1] === c.__VERSION) {
-                slackbot.chatter(':*' + c.__SCREEN_ID + '*: I\'m running on ' + c.__VERSION + '.')
+                slackbot.chatter('I\'m running on ' + c.__VERSION + '.')
             }
     }
 })
