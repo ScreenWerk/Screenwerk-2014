@@ -83,6 +83,7 @@ function uploadLog() {
             console.log('## ', response)
 			return
 		}
+        slackbot.chatter(c.log_path)
         slackbot.chatter(body)
 		body = JSON.parse(body)
 		if (!body.ok) {
