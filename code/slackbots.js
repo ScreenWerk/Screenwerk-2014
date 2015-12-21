@@ -48,12 +48,6 @@ slackbot.error = function(message) {
 // curl -X POST --data-urlencode 'payload={"text": "This is posted to <# test> and comes from *TEST screen*.", "channel": "#test", "username": "swplayer 75", "icon_emoji": ":monkey_face:"}' https://hooks.slack.com/services/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
 var logWebhook = 'https://hooks.slack.com/services/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'
 function uploadLog() {
-    var datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '')
-    // var payload = {
-    //     text: ':*' + c.__SCREEN_ID + '*: Here\'s my log.',
-    //     channel: '#log'
-    // }
-    var message = datestring + ':*' + c.__SCREEN_ID + '*: Here\'s my log.'
     var logStream = fs.createReadStream(c.log_path)
 
     var params_o = {
@@ -63,6 +57,7 @@ function uploadLog() {
         initialComment: 'foo',
         channels: '%23test,%23logs',
         username: 'noise',
+        filetype: 'log',
         // content: 'testin faili sisu',
         as_user: 'true'
     }
