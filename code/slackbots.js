@@ -45,7 +45,7 @@ function uploadLog() {
         filename: c.__SCREEN_ID + '.log',
         title: c.__SCREEN_ID + '.log',
         initialComment: 'foo',
-        channels: '#test,#logs',
+        channels: '%23test,%23logs',
         username: 'noise',
         // content: 'testin faili sisu',
         as_user: 'true'
