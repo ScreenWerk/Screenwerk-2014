@@ -32,6 +32,13 @@ var loader          = require('./code/loader.js')
 
 c.__VERSION = gui.App.manifest.version
 c.__APPLICATION_NAME = gui.App.manifest.name
+c.channels = {
+    'chat': 'test',
+    'log': 'logs',
+    'warning': 'alerts',
+    'error': 'alerts',
+    'debug': 'test'
+}
 
 var ravenClient = new raven.Client(
     'https://9281b52c946e42f2bb199ac62165a003:1d69b0f053964c899f9ab4f1fff6e34b@app.getsentry.com/60050',
@@ -89,8 +96,7 @@ datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').repla
 c.logStream.write('\n\nStart logging at ' + datestring + '\n------------------------------------\n')
 var slackbots       = require('./code/slackbots.js')
 
-// console.log (c.__DEBUG_MODE)
-// console.log (!c.__DEBUG_MODE)
+
 if (!c.__DEBUG_MODE) {
     console.log = function() {
         datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '')
