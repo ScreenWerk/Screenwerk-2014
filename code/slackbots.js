@@ -33,8 +33,9 @@ var flagFile = path.join((process.env.HOMEDRIVE + process.env.HOMEPATH) || proce
 
 slackbot.chatter = function(message, channel) {
     if (!channel) { channel = c.channels.chat }
-    console.log('XXXXXXX', channel, message)
+    // console.log('XXXXXXX', channel, message)
     var datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '')
+    datestring = ''
     slackbot.postMessageToChannel(channel, datestring + ':*' + c.__SCREEN_ID + '*: ' + message, {as_user: true})
 }
 
@@ -73,7 +74,8 @@ function uploadLog() {
     // var endpoint = 'https://slack.com/api/files.upload?token=' + 'xoxp-12801926784-12801926800-17067950499-84e198e606' + '&' + params
     var endpoint = 'https://slack.com/api/files.upload?token=' + token + '&' + params
     console.log('### ', endpoint)
-	var req = request.post(endpoint, function (err, response, body) {
+	var req = request.post({url: endpoint, strictSSL: true, json: true}, function (err, response, body) {
+	// var req = request.post(endpoint, function (err, response, body) {
 		console.log('### ', response.headers['content-type'])
         if (err) {
             console.log('## ', err)
@@ -84,9 +86,10 @@ function uploadLog() {
 			return
 		}
         slackbot.chatter(c.log_path)
-        slackbot.chatter(body)
-		body = JSON.parse(body)
+        slackbot.chatter(JSON.stringify(body, null, 4))
+		// body = JSON.parse(body)
 		if (!body.ok) {
+            slackbot.chatter(body.error)
             console.log('## ', body.error)
 			return
 		}
