@@ -49,7 +49,7 @@ function captureScreenshot() {
     c.log.info('Start ss')
     c.player_window.capturePage(function(buffer) {
         c.log.info('Got ss')
-        var datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '')
+        var datestring = new Date().toISOString().replace(/T/, '_').replace(/:/g, '-').replace(/\..+/, '')
         var screenshot_path = path.join(c.__LOG_DIR, c.__SCREEN_ID + '_' + datestring + '.png')
         var writer = fs.createWriteStream(screenshot_path)
         if (writer.write(buffer) === false) {
