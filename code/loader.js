@@ -17,6 +17,7 @@ var entulib         = require('../code/entulib.js')
 var stringifier     = require('../code/stringifier.js')
 var c               = require('../code/c.js')
 var helper          = require('../code/helper.js')
+var slackbots       = require('../code/slackbots.js')
 
 var document = window.document
 
@@ -25,13 +26,13 @@ var total_download_size = 0
 var bytes_downloaded = 0
 function decrementProcessCount() {
     -- loading_process_count
-    // console.log('loading_process_count: ' + loading_process_count)
+    // c.log.info('loading_process_count: ' + loading_process_count)
     progress(loading_process_count + '| ' + helper.bytesToSize(total_download_size) + ' - '
     + helper.bytesToSize(bytes_downloaded) + ' = ' + helper.bytesToSize(total_download_size - bytes_downloaded) )
 }
 function incrementProcessCount() {
     ++ loading_process_count
-    // console.log('loading_process_count: ' + loading_process_count)
+    // c.log.info('loading_process_count: ' + loading_process_count)
     progress(loading_process_count + '| ' + helper.bytesToSize(total_download_size) + ' - '
     + helper.bytesToSize(bytes_downloaded) + ' = ' + helper.bytesToSize(total_download_size - bytes_downloaded) )
 }
@@ -56,10 +57,10 @@ function progress(message) {
 function loadMedia(err, entity_id, file_value, loadMediaCallback) {
     var file_id = file_value.db_value
     // var file_md5 = file_value.md5
-    // console.log('loadMedia ',file_value)
+    // c.log.info('loadMedia ',file_value)
     incrementProcessCount()
     if (err) {
-        console.log('loadMedia err', err)
+        c.log.info('loadMedia err', err)
         loadMediaCallback(err)
         decrementProcessCount()
         return
@@ -73,7 +74,7 @@ function loadMedia(err, entity_id, file_value, loadMediaCallback) {
         return
     }
     if (fs.existsSync(download_filename)) {
-        // console.log('Download for ' + filename + ' already in progress')
+        // c.log.info('Download for ' + filename + ' already in progress')
         decrementProcessCount()
         return
     }
@@ -82,14 +83,14 @@ function loadMedia(err, entity_id, file_value, loadMediaCallback) {
     request
         .get(fetch_uri)
         .on('error', function(err) {
-            console.log(err)
+            c.log.info(err)
         })
         .on('response', function response_handler( response ) {
             var filesize = response.headers['content-length']
             var md5sum = my_crypto.createHash('md5')
 
             total_download_size += Number(filesize)
-            // console.log('Downloading:' + helper.bytesToSize(bytes_downloaded) + ' of ' + helper.bytesToSize(total_download_size))
+            // c.log.info('Downloading:' + helper.bytesToSize(bytes_downloaded) + ' of ' + helper.bytesToSize(total_download_size))
             progress(loading_process_count + '| ' + helper.bytesToSize(total_download_size) + ' - '
             + helper.bytesToSize(bytes_downloaded) + ' = ' + helper.bytesToSize(total_download_size - bytes_downloaded) )
             response.on('data', function(chunk) {
@@ -105,11 +106,13 @@ function loadMedia(err, entity_id, file_value, loadMediaCallback) {
                 var my_md5 = md5sum.digest('hex')
                 // MD5 check is disabled for now as we can't get MD5's from Amazon
                 if (response.statusCode === 200) {
-                    console.log('Downloaded media to ' + filename + ' MD5: ' + my_md5)
+                    c.log.info('Downloaded media to ' + filename + ' MD5: ' + my_md5)
                     try {
                         fs.rename(download_filename, filename)
                     } catch (e) {
-                        console.log('CRITICAL: Messed up with parallel downloading of ' + filename + '. Cleanup and relaunch, please. Closing down.', e)
+                        c.log.info('CRITICAL: Messed up with parallel downloading of ' + filename + '. Cleanup and relaunch, please. Closing down.', e)
+                        slackbots.error('CRITICAL: Messed up with parallel downloading of ' + filename + '. Cleanup and relaunch, please. Closing down.')
+                        slackbots.uploadLog()
                         process.exit(99)
                     }
                     decrementProcessCount()
@@ -117,7 +120,7 @@ function loadMedia(err, entity_id, file_value, loadMediaCallback) {
                 } else {
                     fs.unlinkSync(download_filename)
                     decrementProcessCount()
-                    console.log('Downloading media ' + filename + ' Response statusCode: ' + response.statusCode + ', message: '
+                    c.log.info('Downloading media ' + filename + ' Response statusCode: ' + response.statusCode + ', message: '
                     + response.statusMessage + '. Trying again...')
                     loadMedia(null, entity_id, file_value, loadMediaCallback)
                 }
@@ -132,7 +135,7 @@ var swElementsById = {}
 
 // function unregisterMeta(err, eidx, callback) {
 //     var eid = swElements[eidx].id
-//     console.log('UNREGISTER ' + eid)
+//     c.log.info('UNREGISTER ' + eid)
 //     if (eid === c.__SCREEN_ID) {
 //         callback('Screen has no content. Everything expired?', eid)
 //         process.exit(99)
@@ -142,7 +145,7 @@ var swElementsById = {}
 //         return
 //     }
 //     var parent_eid = swElementsById[eid].parents[0]
-//     // console.log(swElementsById[eid], swElementsById[parent_eid], parent_eid)
+//     // c.log.info(swElementsById[eid], swElementsById[parent_eid], parent_eid)
 //     swElementsById[parent_eid].childs.splice(swElementsById[parent_eid].childs.indexOf(eid), 1)
 //     swElements.splice(eidx, 1)
 //     delete swElementsById[eid]
@@ -153,12 +156,12 @@ var swElementsById = {}
 function registerMeta(err, metadata, callback) {
     incrementProcessCount()
     if (err) {
-        console.log('registerMeta err', err)
+        c.log.info('registerMeta err', err)
         callback(err, metadata) //
         decrementProcessCount()
         return false
     }
-    // console.log('registerMeta ', metadata.id)
+    // c.log.info('registerMeta ', metadata.id)
     // var properties = metadata.properties
     // if (properties['valid-to'] !== undefined) {
     //  if (properties['valid-to'].values !== undefined) {
@@ -166,7 +169,7 @@ function registerMeta(err, metadata, callback) {
     //      var now = Date.now()
     //      if (vt_date.getTime() < now) {
     //          decrementProcessCount()
-    //          // console.log('valid-to in past:', properties)
+    //          // c.log.info('valid-to in past:', properties)
     //          return false
     //      }
     //  }
@@ -246,14 +249,14 @@ function registerMeta(err, metadata, callback) {
 
 function reloadMeta(err, callback) {
     if (err) {
-        console.log('reloadMeta err', err)
+        c.log.info('reloadMeta err', err)
         callback(err)
         return
     }
     fs.readdirSync(c.__META_DIR).forEach(function(meta_fileName) {
         var result = fs.unlinkSync(path.resolve(c.__META_DIR, meta_fileName))
         if (result instanceof Error) {
-            console.log('Can\'t unlink ' + path.resolve(c.__META_DIR, meta_fileName, result))
+            c.log.info('Can\'t unlink ' + path.resolve(c.__META_DIR, meta_fileName, result))
         }
     })
     loadMeta(null, null, c.__SCREEN_ID, c.__STRUCTURE, callback)
@@ -264,11 +267,11 @@ function reloadMeta(err, callback) {
 // Fetch only if not present
 function loadMeta(err, parent_eid, eid, struct_node, callback) {
     var EntuLib = entulib(c.__SCREEN_ID, c.__API_KEY, c.__HOSTNAME)
-    // console.log('initialize EntuLib with ' + c.__SCREEN_ID + '|' + c.__API_KEY + '|' + c.__HOSTNAME)
-    // console.log('loadMeta: ', eid, struct_node)
+    // c.log.info('initialize EntuLib with ' + c.__SCREEN_ID + '|' + c.__API_KEY + '|' + c.__HOSTNAME)
+    // c.log.info('loadMeta: ', eid, struct_node)
     incrementProcessCount()
     if (err) {
-        console.log('loadMeta err', err)
+        c.log.info('loadMeta err', err)
         callback(err)
         decrementProcessCount()
         return
@@ -281,12 +284,12 @@ function loadMeta(err, parent_eid, eid, struct_node, callback) {
         if (err) {
             EntuLib.getEntity(eid, function(err, result) {
                 if (err) {
-                    console.log(definition + ': ' + (result), err, result)
+                    c.log.info(definition + ': ' + (result), err, result)
                     callback(err)
                     decrementProcessCount()
                     return
                 } else if (result.error !== undefined) {
-                    console.log (result.error, definition + ': ' + 'Failed to load from Entu EID=' + eid + '.')
+                    c.log.info (result.error, definition + ': ' + 'Failed to load from Entu EID=' + eid + '.')
                     callback(result.error, result)
                     decrementProcessCount()
                     return
@@ -296,12 +299,12 @@ function loadMeta(err, parent_eid, eid, struct_node, callback) {
                         var animation_eid = properties.animate.values[0].db_value
                         EntuLib.getEntity(animation_eid, function(err, animate_result) {
                             if (err) {
-                                console.log(definition + ': ' + (animate_result), err, animate_result)
+                                c.log.info(definition + ': ' + (animate_result), err, animate_result)
                                 callback(err)
                                 decrementProcessCount()
                                 return
                             } else if (animate_result.error !== undefined) {
-                                console.log (animate_result.error, definition + ': ' + 'Failed to load from Entu EID=' + eid + '.')
+                                c.log.info (animate_result.error, definition + ': ' + 'Failed to load from Entu EID=' + eid + '.')
                                 callback(animate_result.error, animate_result)
                                 decrementProcessCount()
                                 return
@@ -311,12 +314,12 @@ function loadMeta(err, parent_eid, eid, struct_node, callback) {
                                 properties.animate.values[0].end = animate_properties.end.values[0].db_value
                                 fs.writeFile(meta_path, stringifier(result.result), function(err) {
                                     if (err) {
-                                        console.log(definition + ': ' + (result))
+                                        c.log.info(definition + ': ' + (result))
                                         callback(err)
                                         decrementProcessCount()
                                         return // form writeFile -> getEntity -> getEntity -> readFile -> loadMeta
                                     } else {
-                                        // console.log('calling back', parent_eid, eid, struct_node, callback)
+                                        // c.log.info('calling back', parent_eid, eid, struct_node, callback)
                                         loadMeta(null, parent_eid, eid, struct_node, callback)
                                         decrementProcessCount()
                                         return // form writeFile -> getEntity -> getEntity -> readFile -> loadMeta
@@ -327,7 +330,7 @@ function loadMeta(err, parent_eid, eid, struct_node, callback) {
                     } else {
                         fs.writeFile(meta_path, stringifier(result.result), function(err) {
                             if (err) {
-                                console.log(definition + ': ' + (result))
+                                c.log.info(definition + ': ' + (result))
                                 callback(err)
                                 decrementProcessCount()
                                 return // form writeFile -> getEntity -> readFile -> loadMeta
@@ -344,14 +347,14 @@ function loadMeta(err, parent_eid, eid, struct_node, callback) {
             try {
                 meta_json = JSON.parse(data)
             } catch (e) {
-                console.log('WARNING: Data got corrupted while reading from ' + meta_path + '. Retrying.')
+                c.log.info('WARNING: Data got corrupted while reading from ' + meta_path + '. Retrying.')
                 loadMeta(null, parent_eid, eid, struct_node, callback)
                 decrementProcessCount()
                 return // form readFile -> loadMeta
             }
 
             if (registerMeta(null, meta_json, callback) === false) {
-                console.log('Not registered ' + definition + ' ' + eid)
+                c.log.info('Not registered ' + definition + ' ' + eid)
                 decrementProcessCount()
                 callback(null)
                 swElementsById[parent_eid].childs.splice(swElementsById[parent_eid].childs.indexOf(eid),1)
@@ -366,33 +369,33 @@ function loadMeta(err, parent_eid, eid, struct_node, callback) {
                         callback(new Error(struct_node.name + ' ' + eid + ' has no ' + ref_entity_name + '\'s.'))
                         decrementProcessCount()
                     }
-                    // console.log(ref_entity_name, meta_json)
+                    // c.log.info(ref_entity_name, meta_json)
                     var ref_entity_id = meta_json.properties[ref_entity_name].values[0].db_value
                     registerChild(null, parent_eid, meta_json, ref_entity_id, function(err) {
-                        // console.log(ref_entity_id)
+                        // c.log.info(ref_entity_id)
                         loadMeta(err, eid, ref_entity_id, struct_node.reference, callback)
                     })
                     decrementProcessCount()
-                    // console.log(struct_node.reference)
+                    // c.log.info(struct_node.reference)
                 }
                 else if (struct_node.child !== undefined) {
                     var ch_def_name = struct_node.child.name
                     EntuLib.getChilds(eid, function(err, ch_result) {
                         if (err) {
-                            console.log('loadMeta ' + eid + ' err:', err)
+                            c.log.info('loadMeta ' + eid + ' err:', err)
                             callback(err)
                             decrementProcessCount()
                             return
                         }
                         if (ch_result.error !== undefined) {
-                            console.log (definition + ': ' + 'Failed to load childs for EID=' + eid + '.')
+                            c.log.info (definition + ': ' + 'Failed to load childs for EID=' + eid + '.')
                             callback(new Error(ch_result.error))
                             decrementProcessCount()
                             return
                         }
                         if (!ch_result.result['sw-'+ch_def_name]) {
                             err = definition + ' ' + eid + ': Missing expected elements of ' + ch_def_name + '.'
-                            console.log(err + (ch_result.result, {depth:null}))
+                            c.log.info(err + (ch_result.result, {depth:null}))
                             callback(err)
                             return
                         }
@@ -402,7 +405,7 @@ function loadMeta(err, parent_eid, eid, struct_node, callback) {
                         }
                         ch_result.result['sw-'+ch_def_name].entities.forEach(function(entity) {
                             registerChild(null, parent_eid, meta_json, entity.id, function() {
-                                // console.log(entity.id)
+                                // c.log.info(entity.id)
                                 loadMeta(null, eid, entity.id, struct_node.child, callback)
                             })
                         })
@@ -418,11 +421,11 @@ function loadMeta(err, parent_eid, eid, struct_node, callback) {
             else {
                 meta_json.childs.forEach(function(child) {
                     if (struct_node.reference !== undefined) {
-                        // console.log(child)
+                        // c.log.info(child)
                         loadMeta(null, eid, child, struct_node.reference, callback)
                     }
                     if (struct_node.child !== undefined) {
-                        // console.log(child)
+                        // c.log.info(child)
                         loadMeta(null, eid, child, struct_node.child, callback)
                     }
                 })
@@ -436,7 +439,7 @@ function loadMeta(err, parent_eid, eid, struct_node, callback) {
 
 function registerChild(err, parent_eid, element, child_eid, callback) {
     if (err) {
-        console.log('registerChild err:', err)
+        c.log.info('registerChild err:', err)
         // decrementProcessCount()
         return callback(err)
     }

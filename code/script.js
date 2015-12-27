@@ -1,38 +1,20 @@
-/*
- * Screenwerk main executable. Arguments:
- *
- * argv[0]          Screen's Entu ID
- *
- */
-
-// 1. Core modules
 var gui             = require('nw.gui')
-// var assert          = require('assert')
 var fs              = require('fs')
-// var https           = require('https')
-// var events          = require('events')
 var uuid            = require('node-uuid')
 var op              = require('object-path')
 var path            = require('path')
 var raven           = require('raven')
 
 
-// 2. Public modules from npm
-
-
 // 3. Own modules
 var entulib         = require('./code/entulib.js')
-var player          = require('./code/player.js')
 var stringifier     = require('./code/stringifier.js')
 var c               = require('./code/c.js')
 var configuration   = require('./code/configuration.json')
-var digest          = require('./code/digest.js')
-// var helper          = require('./code/helper.js')
-var loader          = require('./code/loader.js')
 
 c.__VERSION = gui.App.manifest.version
 c.__APPLICATION_NAME = gui.App.manifest.name
-c.channels = {
+c.slackChannels = {
     'chat': 'test',
     'log': 'logs',
     'warning': 'alerts',
@@ -40,82 +22,85 @@ c.channels = {
     'debug': 'test'
 }
 
+c.homePath = path.join((process.env.HOMEDRIVE + process.env.HOMEPATH) || process.env.HOME, c.__APPLICATION_NAME)
+c.flagFile = path.join(c.homePath, 'shutting_down')
+c.__LOG_DIR = path.resolve(c.homePath, 'sw-log')
+c.__META_DIR = path.resolve(c.homePath, 'sw-meta')
+c.__MEDIA_DIR = path.resolve(c.homePath, 'sw-media')
+if (!fs.existsSync(c.__LOG_DIR)) { fs.mkdirSync(c.__LOG_DIR) }
+if (!fs.existsSync(c.__META_DIR)) { fs.mkdirSync(c.__META_DIR) }
+if (!fs.existsSync(c.__MEDIA_DIR)) { fs.mkdirSync(c.__MEDIA_DIR) }
+
+
 var ravenClient = new raven.Client(
     'https://9281b52c946e42f2bb199ac62165a003:1d69b0f053964c899f9ab4f1fff6e34b@app.getsentry.com/60050',
     { 'release': c.__VERSION }
 )
 ravenClient.patchGlobal()
 
-var home_path = ''
-if (process.env.HOME !== undefined) {
-    home_path = process.env.HOME
-} else if (process.env.HOMEPATH !== undefined) {
-    home_path = process.env.HOMEDRIVE + process.env.HOMEPATH
+c.log = {}
+c.log.messages = []
+c.log.infoFile = path.resolve(c.__LOG_DIR, 'info.log')
+c.log.errorFile = path.resolve(c.__LOG_DIR, 'error.log')
+c.log.append = function(message, channel) {
+    var datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '')
+    c.log.messages.push({ts:datestring, ch:channel, msg:message})
+    message = message + '\n'
+    fs.appendFile(c.log.infoFile, datestring + ' ' + channel + ' ' + message)
+    if (slackbots) { slackbots.chatter(message + (new Error()).stack, 'chat') }
+    if (channel === 'error') {
+        fs.appendFile(c.log.errorFile, datestring + ' ' + channel + ' ' + message + (new Error()).stack + '\n')
+        if (slackbots) { slackbots.chatter(message + (new Error()).stack, 'error') }
+    }
 }
-home_path = path.resolve(home_path, gui.App.manifest.name)
-if (!fs.existsSync(home_path)) {
-    fs.mkdirSync(home_path)
+c.log.info = function(message) { c.log.append(message, 'info') }
+c.log.error = function(message) { c.log.append(message, 'error') }
+c.log.setPrefix = function(prx) {
+    c.log.append('info', 'Setting logfile prefix to "' + prx + '".')
+    c.log.infoFile = path.resolve(c.__LOG_DIR, prx + '_' + 'info.log')
+    c.log.errorFile = path.resolve(c.__LOG_DIR, prx + '_' + 'error.log')
 }
-configuration_path = path.resolve(home_path, 'configuration.json')
-function exitWithMessage(message) {
+
+
+var datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '')
+c.log.info('\n\n## Start logging at ' + datestring + '= ' + c.__APPLICATION_NAME + ' v.' + c.__VERSION + ' ##\n')
+
+var slackbots       = require('./code/slackbots.js')
+var player          = require('./code/player.js')
+var digest          = require('./code/digest.js')
+var loader          = require('./code/loader.js')
+
+
+
+c.restart = function() {
+    fs.open(c.flagFile, 'w', function(err, fd) {
+        fs.watchFile(c.flagFile, function (curr, prev) {
+            c.log.info(c.flagFile, curr, prev)
+            if (curr.ino === 0) { process.exit(0) }
+        })
+        child_process.exec('nwjs .')
+    })
+}
+
+c.terminate = function(message) {
+    c.log.error(message)
     window.alert(message)
-    gui.Shell.openItem(home_path)
+    gui.Shell.openItem(c.homePath)
     process.exit(1)
 }
 
+configuration_path = path.resolve(c.homePath, 'configuration.json')
 try {
     configuration = require(configuration_path)
 } catch (exception) {
     fs.writeFileSync(configuration_path, JSON.stringify(configuration, null, 4))
-    exitWithMessage('Default configuration saved to \n'
+    c.terminate('Default configuration saved to \n'
         + configuration_path + '.\n'
-        + 'Please put Your SCREEN_ID.uuid file in\n' + home_path)
+        + 'Please put Your SCREEN_ID.uuid file in\n' + c.homePath)
 }
 c.__DEBUG_MODE = configuration.debug
 c.__SCREEN = configuration.run_on_screen
-c.__RELAUNCH_THRESHOLD = configuration.relaunch
-
 c.__HOSTNAME = 'piletilevi.entu.ee'
-c.__META_DIR = path.resolve(home_path, 'sw-meta')
-if (!fs.existsSync(c.__META_DIR)) {
-    fs.mkdirSync(c.__META_DIR)
-}
-c.__MEDIA_DIR = path.resolve(home_path, 'sw-media')
-if (!fs.existsSync(c.__MEDIA_DIR)) {
-    fs.mkdirSync(c.__MEDIA_DIR)
-}
-c.__LOG_DIR = path.resolve(home_path, 'sw-log')
-if (!fs.existsSync(c.__LOG_DIR)) {
-    fs.mkdirSync(c.__LOG_DIR)
-}
-
-var datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '').split(' ')[0]
-c.log_path = path.resolve(c.__LOG_DIR, datestring + '.log')
-c.logStream = fs.createWriteStream(c.log_path, {flags:'a'})
-datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '')
-c.logStream.write('\n\nStart logging at ' + datestring + '\n------------------------------------\n')
-var slackbots       = require('./code/slackbots.js')
-
-
-if (!c.__DEBUG_MODE) {
-    console.log = function() {
-        datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '')
-        var arr = [], p, i = 0
-        for (p in arguments) {
-            if (arguments.hasOwnProperty(p)) {
-                arr[i++] = arguments[p]
-            }
-        }
-        var stack = new Error().stack.split(' at ')[2].trim().replace(/\/.*\//,'')
-        // var line = stack[1] + ':' + stack[2] + ':' + stack[3]
-        var output = datestring + ': ' + arr.join(', ') + ' @' + stack + '\n'
-        c.logStream.write(output)
-        process.stdout.write(output)
-    }
-}
-
-
-console.log ( '= ' + c.__APPLICATION_NAME + ' v.' + c.__VERSION + ' ==================================')
 
 
 c.__STRUCTURE = {'name':'screen','reference':{
@@ -140,8 +125,6 @@ recurseHierarchy(c.__STRUCTURE)
 c.__DEFAULT_UPDATE_INTERVAL_MINUTES = 10
 c.__UPDATE_INTERVAL_SECONDS = c.__DEFAULT_UPDATE_INTERVAL_MINUTES * 60
 c.__DEFAULT_DELAY_MS = 0
-
-
 
 
 function createUUID(callback) {
@@ -176,34 +159,35 @@ function chooseUUID(uuids, callback) {
     })
 }
 
-var EntuLib,  local_published, remote_published
+var EntuLib, local_published, remote_published
 
 //
 // Main function to start the loader and then player
 // Essential configuration has been successfully loaded
 //
 function run() {
-
     // slackbots.chatter(':up:')
 
     if (!c.__SCREEN_ID) {
-        exitWithMessage('Missing screen ID, blame programmer.\nExiting.')
+        c.terminate('Missing screen ID, blame programmer.\nExiting.')
     }
 
-    var uuid_path = path.resolve(home_path, c.__SCREEN_ID + '.uuid')
+    c.log.setPrefix(c.__SCREEN_ID)
+
+    var uuid_path = path.resolve(c.homePath, c.__SCREEN_ID + '.uuid')
     if (fs.existsSync(uuid_path)) {
         c.__API_KEY = fs.readFileSync(uuid_path)
         c.__KEY_ID = fs.statSync(uuid_path).ino
-        console.log ( 'Read key: ' + c.__API_KEY, 'INFO' )
+        c.log.info ( 'Read key: ' + c.__API_KEY, 'INFO' )
     } else {
         if (!c.__API_KEY) {
-            exitWithMessage('Missing API key, blame programmer.\nExiting.')
+            c.terminate('Missing API key, blame programmer.\nExiting.')
         }
         fs.writeFileSync(uuid_path, c.__API_KEY)
     }
 
 
-    // console.log('initialize EntuLib with ' + c.__SCREEN_ID + '|' + c.__API_KEY + '|' + c.__HOSTNAME)
+    // c.log.info('initialize EntuLib with ' + c.__SCREEN_ID + '|' + c.__API_KEY + '|' + c.__HOSTNAME)
     EntuLib = entulib(c.__SCREEN_ID, c.__API_KEY, c.__HOSTNAME)
 
 
@@ -213,19 +197,19 @@ function run() {
     fs.stat(c.__MEDIA_DIR, function(err, stats) {
         if (err) {
             if (err.code === 'ENOENT') {
-                console.log(c.__MEDIA_DIR + ' will be OK in a sec')
+                c.log.info(c.__MEDIA_DIR + ' will be OK in a sec')
             } else {
-                console.log(c.__MEDIA_DIR + ' err', err)
+                c.log.info(c.__MEDIA_DIR + ' err', err)
                 return
             }
         }
         else if (stats.isDirectory()) {
             fs.readdirSync(c.__MEDIA_DIR).forEach(function(download_filename) {
                 if (download_filename.split('.').pop() !== 'download') { return }
-                console.log('Unlink ' + path.resolve(c.__MEDIA_DIR, download_filename))
+                c.log.info('Unlink ' + path.resolve(c.__MEDIA_DIR, download_filename))
                 var result = fs.unlinkSync(path.resolve(c.__MEDIA_DIR, download_filename))
                 if (result instanceof Error) {
-                    console.log('Can\'t unlink ' + path.resolve(c.__MEDIA_DIR, download_filename), result)
+                    c.log.info('Can\'t unlink ' + path.resolve(c.__MEDIA_DIR, download_filename), result)
                 }
             })
         }
@@ -241,7 +225,7 @@ function run() {
     try {
         meta_obj = JSON.parse(fs.readFileSync(meta_path, 'utf-8'))
         local_published = new Date(Date.parse(meta_obj.properties.published.values[0].value))
-        console.log('Local published: ' + local_published.toJSON())
+        c.log.info('Local published: ' + local_published.toJSON())
     } catch (e) {
         local_published = false
     }
@@ -252,47 +236,46 @@ function run() {
     EntuLib.getEntity(c.__SCREEN_ID, function getEntityCB(err, result) {
         if (err) {
             remote_published = false
-            console.log('Can\'t reach Entu', err, result)
+            c.log.info('Can\'t reach Entu', err, result)
             if (local_published) {
-                console.log('Trying to play with local content.')
+                c.log.info('Trying to play with local content.')
                 loader.loadMeta(null, null, c.__SCREEN_ID, c.__STRUCTURE, startDigester)
                 return
             } else {
-                console.log('Remote and local both unreachable. Terminating.')
+                c.log.info('Remote and local both unreachable. Terminating.')
                 process.exit(99)
             }
         }
         else if (result.error !== undefined) {
             remote_published = false
-            console.log (result.error, 'Failed to load screen ' + c.__SCREEN_ID + ' from Entu.')
+            c.log.info (result.error, 'Failed to load screen ' + c.__SCREEN_ID + ' from Entu.')
             if (local_published) {
-                console.log('Trying to play with local content.')
+                c.log.info('Trying to play with local content.')
                 loader.loadMeta(null, null, c.__SCREEN_ID, c.__STRUCTURE, startDigester)
                 return
             } else {
-                console.log('Remote and local both unreachable. Terminating.')
+                c.log.info('Remote and local both unreachable. Terminating.')
                 process.exit(99)
             }
         } else {
             // alert('Result: ' + (result.result.properties.published))
             remote_published = new Date(Date.parse(result.result.properties.published.values[0].value))
             c.__SCREEN_NAME = op.get(result, ['result', 'properties', 'name', 'values', 0, 'value'])
-            console.log(c.__SCREEN_NAME)
+            c.log.info(c.__SCREEN_NAME)
 
             slackbots.chatter(':up: ' + c.__SCREEN_NAME)
-            var flagFile = path.join((process.env.HOMEDRIVE + process.env.HOMEPATH) || process.env.HOME, 'shutting_down')
-            fs.unlink(flagFile, function(err) {
-                if (err) { console.log(err) }
+            fs.unlink(c.flagFile, function(err) {
+                if (err) {}
             })
         }
 
         if (local_published &&
             local_published.toJSON() === remote_published.toJSON()) {
-            // console.log('Trying to play with local content.')
+            // c.log.info('Trying to play with local content.')
             loader.loadMeta(null, null, c.__SCREEN_ID, c.__STRUCTURE, startDigester)
         }
         else {
-            // console.log('Remove local content. Fetch new from Entu!')
+            // c.log.info('Remove local content. Fetch new from Entu!')
             player.clearSwTimeouts()
             local_published = new Date(Date.parse(remote_published.toJSON()))
             loader.reloadMeta(null, startDigester)
@@ -305,12 +288,12 @@ function run() {
 
 var player_window = gui.Window.get()
 if (c.__DEBUG_MODE) {
-    console.log ( 'launching in debug mode')
+    c.log.info ( 'launching in debug mode')
     player_window.moveTo(0,30)
     player_window.isFullscreen = false
     player_window.showDevTools()
 } else {
-    console.log ( 'launching in fullscreen mode')
+    c.log.info ( 'launching in fullscreen mode')
     player_window.moveTo(window.screen.width * (c.__SCREEN - 1) + 1, 30)
     player_window.isFullscreen = true
 }
@@ -319,26 +302,22 @@ try {
     nativeMenuBar.createMacBuiltin(gui.App.manifest.name + ' ' + c.__VERSION)
     player_window.menu = nativeMenuBar
 } catch (ex) {
-    // console.log(ex.message)
+    // c.log.info(ex.message)
 }
 
 
 var uuids = []
-fs.readdirSync(home_path).forEach(function scanHome(filename) {
+fs.readdirSync(c.homePath).forEach(function scanHome(filename) {
     if (filename.substr(-5) === '.uuid') {
         uuids.push(filename)
     }
 })
 
-// player_window.on('focus', function() {
-//   alert('Player is focused')
-// })
-
 var first_load = true
 player_window.on('loaded', function playerWindowLoaded() {
     document.body.style.cursor = 'normal'
     document.body.style.cursor = 'none'
-    // console.log('window loaded')
+    // c.log.info('window loaded')
     // player_window.removeListener('loaded', playerWindowLoaded)
     if (!first_load) {
         return
@@ -377,19 +356,19 @@ player_window.on('loaded', function playerWindowLoaded() {
 
 function startDigester(err, data) {
     if (err) {
-        console.log('startDigester err:', err, data)
+        c.log.info('startDigester err:', err, data)
         // player.tcIncr()
         setTimeout(function() {
             process.exit(0)
         }, 300)
         return
     }
-    // console.log('loader.countLoadingProcesses(): ' + loader.countLoadingProcesses())
+    // c.log.info('loader.countLoadingProcesses(): ' + loader.countLoadingProcesses())
     if (loader.countLoadingProcesses() > 0) {
-        // console.log('Waiting for loaders to calm down. Active processes: ' + loader.countLoadingProcesses())
+        // c.log.info('Waiting for loaders to calm down. Active processes: ' + loader.countLoadingProcesses())
         return
     }
-    window.console.log('Reached stable state. Flushing metadata and starting preprocessing elements.')
+    window.c.log.info('Reached stable state. Flushing metadata and starting preprocessing elements.')
     fs.writeFileSync('elements.debug.json', stringifier(loader.swElementsById))
 
 
@@ -397,9 +376,9 @@ function startDigester(err, data) {
     //     player.tcIncr()
     //     CheckInToEntu(null, 'last-update', function CheckInCB(err, interval, sw_screen) {
     //         if (err) {
-    //             console.log(err)
+    //             c.log.info(err)
     //         }
-    //         // console.log('"Last updated" registered with interval ' + helper.msToTime(interval) + ' ' + interval)
+    //         // c.log.info('"Last updated" registered with interval ' + helper.msToTime(interval) + ' ' + interval)
     //         var color = 'green'
     //         if (1000 * c.__UPDATE_INTERVAL_SECONDS / interval < 0.9) {
     //             color = 'orange'
@@ -411,7 +390,7 @@ function startDigester(err, data) {
     //             sw_screen.result.properties['health'].values.forEach(function(item) {
     //                 EntuLib.removeProperty(c.__SCREEN_ID, 'sw-screen-' + 'health', item.id, function(err, sw_screen) {
     //                     if (err) {
-    //                         console.log('RegisterHealth err:', (item), (err), (sw_screen))
+    //                         c.log.info('RegisterHealth err:', (item), (err), (sw_screen))
     //                     }
     //                 })
     //             })
@@ -420,28 +399,28 @@ function startDigester(err, data) {
     //         var options = {'health': '<span style="color:' + color + ';">' + helper.msToTime(interval) + '</span>'}
     //         EntuLib.addProperties(c.__SCREEN_ID, 'sw-screen', options, function(err, data) {
     //             if (err) {
-    //                 console.log('RegisterHealth err:', (err))
+    //                 c.log.info('RegisterHealth err:', (err))
     //             }
     //         })
     //     })
     //     setTimeout(function() {
-    //         // console.log('RRRRRRRRRRR: Pinging Entu for news.')
+    //         // c.log.info('RRRRRRRRRRR: Pinging Entu for news.')
     //         EntuLib.getEntity(c.__SCREEN_ID, function(err, result) {
     //             if (err) {
-    //                 console.log('Can\'t reach Entu', err, result)
+    //                 c.log.info('Can\'t reach Entu', err, result)
     //             }
     //             else if (result.error !== undefined) {
-    //                 console.log ('Failed to load from Entu.', result)
+    //                 c.log.info ('Failed to load from Entu.', result)
     //             } else {
     //                 remote_published = new Date(Date.parse(result.result.properties.published.values[0].value))
-    //                 // console.log('Remote published: ', remote_published.toJSON())
+    //                 // c.log.info('Remote published: ', remote_published.toJSON())
     //             }
     //
     //             if (remote_published
     //                 && local_published.toJSON() !== remote_published.toJSON()
     //                 && (new Date()).toJSON() > remote_published.toJSON()
     //                 ) {
-    //                 console.log('Remove local content. Fetch new from Entu!')
+    //                 c.log.info('Remove local content. Fetch new from Entu!')
     //                 player.clearSwTimeouts()
     //                 local_published = new Date(Date.parse(remote_published.toJSON()))
     //                 loader.reloadMeta(null, startDigester)
@@ -451,23 +430,23 @@ function startDigester(err, data) {
     //             }
     //         })
     //     }, 1000 * c.__UPDATE_INTERVAL_SECONDS)
-    //     // console.log('RRRRRRRRRRR: Check for news scheduled in ' + c.__UPDATE_INTERVAL_SECONDS + ' seconds.')
+    //     // c.log.info('RRRRRRRRRRR: Check for news scheduled in ' + c.__UPDATE_INTERVAL_SECONDS + ' seconds.')
     // }
     // doTimeout()
 
 
     function flushMeta(err) {
         if (err) {
-            console.log('flushMeta err:', err)
+            c.log.info('flushMeta err:', err)
             process.exit(99)
         }
         var stacksize = loader.swElements.length
         loader.swElements.every(function(swElement, idx) {
             if (swElement.definition.keyname !== 'sw-media' && swElement.childs.length === 0) {
-                console.log('Unregister empty element ' + swElement.id)
+                c.log.info('Unregister empty element ' + swElement.id)
                 unregisterMeta(null, idx, function(err, data) {
                     if (err) {
-                        console.log('flushMeta err:', err, data)
+                        c.log.info('flushMeta err:', err, data)
                     }
                     flushMeta(null)
                 })
@@ -476,7 +455,7 @@ function startDigester(err, data) {
             var meta_path = path.resolve(c.__META_DIR, swElement.id + ' ' + swElement.definition.keyname.split('sw-')[1] + '.json')
             fs.writeFileSync(meta_path, stringifier(swElement))
             if(-- stacksize === 0) {
-                console.log('====== Metadata flushed')
+                c.log.info('====== Metadata flushed')
                 digest.processElements(null, startDOM)
             }
             return true
@@ -489,25 +468,26 @@ function startDigester(err, data) {
 var screen_dom_element
 function startDOM(err, options) {
     if (err) {
-        console.log('startDOM err:', err, options)
+        c.log.info('startDOM err:', err, options)
         process.exit(99)
     }
     if (screen_dom_element) { document.body.removeChild(screen_dom_element) }
-    console.log('====== Start startDOM')
+    c.log.info('====== Start startDOM')
     digest.buildDom(null, function(err, dom_element) {
         screen_dom_element = dom_element
-        console.log('DOM rebuilt')
+        c.log.info('DOM rebuilt')
     })
-    console.log('====== Finish startDOM', options)
+    c.log.info('====== Finish startDOM', options)
     player.clearSwTimeouts()
     screen_dom_element.player = new player.SwPlayer(null, screen_dom_element, function(err, data) {
-        console.log('startDOM err:', err, (data))
+        c.log.info('startDOM err:', err, (data))
         process.exit(99)
     })
     screen_dom_element.player.restart(null, function(err, data) {
         if (err) {
-            console.log('startDOM err:', err, data)
-            callback(er, data)
+            c.log.error('startDOM err:', err, data)
+            c.log.error(err)
+            callback(err, data)
         }
     })
     // setTimeout(function() {
@@ -518,60 +498,17 @@ function startDOM(err, options) {
 
 
 
-// Begin capturing screenshots
-function captureScreenshot(err, callback) {
-    if (err) {
-        console.log('captureScreenshot err:', err)
-        return callback(err)
-    }
-
+function captureScreenshot(callback) {
     var datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '')
     var screenshot_path = c.__LOG_DIR + '/screencapture ' + datestring + '.raw.jpeg'
-    // var thumbnail_path = c.__LOG_DIR + '/screencapture ' + datestring + '.jpeg'
     var writer = fs.createWriteStream(screenshot_path)
     player_window.capturePage(function(buffer) {
         if (writer.write(buffer) === false) {
             writer.once('drain', function() {writer.write(buffer)})
         }
         writer.close()
-        function addScreenshot() {
-            console.log('Taking screenshot')
-            var filesize = fs.statSync(screenshot_path).size
-            EntuLib.addFile(c.__SCREEN_ID, 'sw-screen-photo', datestring + '.jpeg', 'image/jpeg', filesize, screenshot_path, function(err, data) {
-                if (err) {
-                    console.log('captureScreenshot err:', (err), (data))
-                }
-            })
-        }
-        EntuLib.getEntity(c.__SCREEN_ID, function(err, entity) {
-            if (err) {
-                if (err.code === 'ENOTFOUND') {
-                    // console.log('Not connected')
-                } else {
-                    console.log('captureScreenshot err:', (err), (entity))
-                }
-                return
-            }
-            if (entity.result.properties.photo.values === undefined) {
-                addScreenshot()
-            } else {
-                var stack = entity.result.properties.photo.values
-                // console.log(stack)
-                var stacksize = stack.length
-                stack.forEach(function(item) {
-                    EntuLib.removeProperty(c.__SCREEN_ID, 'sw-screen-photo', item.id, function(err, data) {
-                        if (err) {
-                            console.log('captureScreenshot err:', (item), (err), (data))
-                        }
-                        // console.log((item), (data))
-                        if(-- stacksize === 0) {
-                            addScreenshot()
-                        }
-                    })
-                })
-            }
-        })
-    }, { format : 'jpeg', datatype : 'buffer'})
-    // player.tcIncr()
-    // setTimeout(function() { callback(null, callback) }, 30*1000)
+    }, {
+        format : 'jpeg',
+        datatype : 'buffer'
+    })
 }

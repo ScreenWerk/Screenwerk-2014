@@ -1,7 +1,7 @@
 {
   "name": "ScreenWerk-2014",
   "description": "Digital signage made simple!",
-  "version": "1.0.2-test31",
+  "version": "1.0.2-test33",
   "main": "./index.html",
   "license": "CC-SA",
   "private": true,
@@ -11,6 +11,7 @@
     "url": "https://github.com/argoroots/Screenwerk"
   },
   "dependencies": {
+    "bunyan": "^1.5.1",
     "later": "^1.1.0",
     "node-slack-upload": "^1.0.3",
     "node-uuid": "^1.4.0",
@@ -18,7 +19,10 @@
     "os-utils": "*",
     "raven": "^0.9.0",
     "request": "*",
-    "slackbots": "^0.5.0"
+    "simple-node-logger": "^0.92.21",
+    "slack-winston": "0.0.3",
+    "slackbots": "^0.5.0",
+    "winston": "^2.1.1"
   },
   "window": {
     "icon": "./imgs/sw-p512.png",

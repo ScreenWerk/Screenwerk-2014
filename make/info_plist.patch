@@ -1,12 +1,12 @@
 47c47
-< 	<string>node-webkit</string>
+<     <string>node-webkit</string>
 ---
-> 	<string>Screenwerk</string>
+>     <string>Screenwerk</string>
 51c51
-< 	<string>30.0.1599.66</string>
+<     <string>30.0.1599.66</string>
 ---
-> 	<string>0.2.0-beta.2</string>
+>     <string>0.2.0-beta.2</string>
 53c53
-< 	<string>1599.66</string>
+<     <string>1599.66</string>
 ---
-> 	<string>beta</string>
+>     <string>beta</string>

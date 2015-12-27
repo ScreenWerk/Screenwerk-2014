@@ -20,11 +20,11 @@ var nw = new NwBuilder({
 
 //Log stuff you want
 
-nw.on('log',  console.log)
+nw.on('log',  c.log.info)
 
 // Build returns a promise
 nw.build().then(function () {
-   console.log('all done!')
+   c.log.info('all done!')
 }).catch(function (error) {
     console.error(error)
 })
