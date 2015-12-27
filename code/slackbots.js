@@ -139,7 +139,7 @@ slackbot.uploadLog = function uploadLog() {
         })
         req.form().append('file', fs.createReadStream(tempFileName))
     })
-    tempLogStream.end(c.log.messages.map(function(msg) {return msg.msg}).join('\n- '))
+    tempLogStream.end(c.log.messages.map(function(msg) {return msg.ts + ' ' + msg.msg}).join('\n- '))
 }
 
 
