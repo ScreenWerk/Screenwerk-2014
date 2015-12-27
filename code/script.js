@@ -50,10 +50,16 @@ ravenClient.patchGlobal()
 c.log = {}
 c.log.messages = []
 c.log.infoFile = path.resolve(c.__LOG_DIR, 'info.log')
+c.log.warningFile = path.resolve(c.__LOG_DIR, 'warning.log')
 c.log.errorFile = path.resolve(c.__LOG_DIR, 'error.log')
 c.log.append = function(message, channel) {
     var datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '')
     c.log.messages.push({ts:datestring, ch:channel, msg:message})
+    if (channel === 'warning') {
+        fs.appendFile(c.log.warningFile, datestring + ' ' + channel + ' ' + message + '\n')
+        if (slackbots) { slackbots.chatter(message, 'warning') }
+        return
+    }
     message = message + '\n'
     fs.appendFile(c.log.infoFile, datestring + ' ' + channel + ' ' + message)
     if (slackbots) { slackbots.chatter(message + (new Error()).stack, 'chat') }
