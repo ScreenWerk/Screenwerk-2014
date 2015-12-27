@@ -195,8 +195,10 @@ function upgrade(upgradeType) {
             if (curr.ino === 0) { process.exit(0) }
         })
         if (isWin) {
+            slackbot.chatter(':info: launching new instance on windows')
             child_process.execFile(scriptName + '.bat')
         } else {
+            slackbot.chatter(':info: launching new instance on linux')
             child_process.exec('. ' + scriptName + '.sh', function (err, stdout, stderr) {
                 if (err !== null) { throw err }
                 c.log.info('stdout: ' + stdout)
