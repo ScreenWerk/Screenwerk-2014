@@ -197,7 +197,7 @@ var SwPlayer = function SwPlayer(err, dom_element, callback) {
                 case 'sw-playlist':
                     dom_element.childNodes[0].player.play(null, 0, function(err, data) {
                         if (err) {
-                            c.log.error('Can\'t play playlist-media' + dom_element.childNodes[0].swElement.displayname + ' [eid:' + dom_element.childNodes[0].swElement.id + ']', err, data)
+                            c.log.warning('Can\'t play playlist-media' + dom_element.childNodes[0].swElement.displayname + ' [eid:' + dom_element.childNodes[0].swElement.id + ']', err, data)
                         }
                     })
                 break
@@ -206,7 +206,7 @@ var SwPlayer = function SwPlayer(err, dom_element, callback) {
                     if (dom_element.childNodes.length > 0) {
                         dom_element.childNodes[0].player.play(null, 0, function(err, data){
                             if (err) {
-                                c.log.error('Can\'t play media' + dom_element.childNodes[0].swElement.displayname + ' [eid:' + dom_element.childNodes[0].swElement.id + ']', err, data)
+                                c.log.warning('Can\'t play media' + dom_element.childNodes[0].swElement.displayname + ' [eid:' + dom_element.childNodes[0].swElement.id + ']', err, data)
                                 start_succeeded = false
                             }
                         })
@@ -214,7 +214,7 @@ var SwPlayer = function SwPlayer(err, dom_element, callback) {
                     if (start_succeeded && properties.duration.values !== undefined) {
                         this.stop(null, Number(properties.duration.values[0].db_value) * 1000, function(err, data) {
                             if (err) {
-                                c.log.error('Can\'t play media' + dom_element.childNodes[0].swElement.displayname + ' [eid:' + dom_element.childNodes[0].swElement.id + ']', err, data)
+                                c.log.warning('Can\'t play media' + dom_element.childNodes[0].swElement.displayname + ' [eid:' + dom_element.childNodes[0].swElement.id + ']', err, data)
                             }
                         })
                     }
@@ -234,7 +234,7 @@ var SwPlayer = function SwPlayer(err, dom_element, callback) {
                             media_dom_element.addEventListener('ended', function() {
                                 dom_element.parentNode.player.stop(null, 0, function(err, data) {
                                     if (err) {
-                                        c.log.error('Cant play', err, data)
+                                        c.log.warning('Cant play', err, data)
                                     }
                                 })
                             })
