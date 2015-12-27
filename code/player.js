@@ -84,7 +84,7 @@ var SwPlayer = function SwPlayer(err, dom_element, callback) {
                 var self = this
                 // tcIncr()
                 // helper.swLog('timeout_counter: ' + timeout_counter)
-                c.log.info(dom_element.id + ' Scheduling PLAY on ' + element.definition.keyname + ' ' + element.id + ' in ' + helper.msToTime(timeout), 'Timeouts set: ' + timeout_counter)
+                // c.log.info(dom_element.id + ' Scheduling PLAY on ' + element.definition.keyname + ' ' + element.id + ' in ' + helper.msToTime(timeout), 'Timeouts set: ' + timeout_counter)
                 var play_timeout = setTimeout(function() {
                                     self.play(null, false, callback)
                                 }, timeout)
@@ -367,7 +367,7 @@ var SwPlayer = function SwPlayer(err, dom_element, callback) {
             if (element.next !== undefined ) {
                 var next_eid = element.next
                 var next_dom_id = dom_element.parentNode.id + '_' + next_eid
-                c.log.info(dom_element.id + ' STOPPED, coming up:', next_dom_id)
+                // c.log.info(dom_element.id + ' STOPPED, coming up:', next_dom_id)
                 var delay_ms = c.__DEFAULT_DELAY_MS
                 if (properties.delay.values !== undefined) {
                     delay_ms = Number(properties.delay.values[0].db_value) * 1000
