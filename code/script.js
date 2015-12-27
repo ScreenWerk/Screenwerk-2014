@@ -70,9 +70,11 @@ c.log.append = function(message, channel) {
 }
 c.log.info = function(message) { c.log.append(message, 'info') }
 c.log.error = function(message) { c.log.append(message, 'error') }
+c.log.warning = function(message) { c.log.append(message, 'warning') }
 c.log.setPrefix = function(prx) {
     c.log.append('info', 'Setting logfile prefix to "' + prx + '".')
     c.log.infoFile = path.resolve(c.__LOG_DIR, prx + '_' + 'info.log')
+    c.log.warningFile = path.resolve(c.__LOG_DIR, prx + '_' + 'warning.log')
     c.log.errorFile = path.resolve(c.__LOG_DIR, prx + '_' + 'error.log')
 }
 
