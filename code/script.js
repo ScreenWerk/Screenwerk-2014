@@ -12,6 +12,7 @@ var stringifier     = require('./code/stringifier.js')
 var c               = require('./code/c.js')
 var configuration   = require('./code/configuration.json')
 
+
 c.__VERSION = gui.App.manifest.version
 c.__APPLICATION_NAME = gui.App.manifest.name
 c.slackChannels = {
@@ -23,6 +24,14 @@ c.slackChannels = {
 }
 
 c.homePath = path.join((process.env.HOMEDRIVE + process.env.HOMEPATH) || process.env.HOME, c.__APPLICATION_NAME)
+var singletonLock = path.join(c.homePath, 'singleton.txt')
+fs.readFile(singletonLock, function(err, pid) {
+    if (err) { return fs.writeFileSync(singletonLock, process.pid) }
+    try { process.kill(pid) }
+    catch (e) { }
+    finally { fs.writeFileSync(singletonLock, process.pid) }
+})
+
 c.flagFile = path.join(c.homePath, 'shutting_down')
 c.__LOG_DIR = path.resolve(c.homePath, 'sw-log')
 c.__META_DIR = path.resolve(c.homePath, 'sw-meta')
@@ -41,10 +50,16 @@ ravenClient.patchGlobal()
 c.log = {}
 c.log.messages = []
 c.log.infoFile = path.resolve(c.__LOG_DIR, 'info.log')
+c.log.warningFile = path.resolve(c.__LOG_DIR, 'warning.log')
 c.log.errorFile = path.resolve(c.__LOG_DIR, 'error.log')
 c.log.append = function(message, channel) {
     var datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '')
     c.log.messages.push({ts:datestring, ch:channel, msg:message})
+    if (channel === 'warning') {
+        fs.appendFile(c.log.warningFile, datestring + ' ' + channel + ' ' + message + '\n')
+        if (slackbots) { slackbots.chatter(message, 'warning') }
+        return
+    }
     message = message + '\n'
     fs.appendFile(c.log.infoFile, datestring + ' ' + channel + ' ' + message)
     if (slackbots) { slackbots.chatter(message + (new Error()).stack, 'chat') }
@@ -55,9 +70,11 @@ c.log.append = function(message, channel) {
 }
 c.log.info = function(message) { c.log.append(message, 'info') }
 c.log.error = function(message) { c.log.append(message, 'error') }
+c.log.warning = function(message) { c.log.append(message, 'warning') }
 c.log.setPrefix = function(prx) {
     c.log.append('info', 'Setting logfile prefix to "' + prx + '".')
     c.log.infoFile = path.resolve(c.__LOG_DIR, prx + '_' + 'info.log')
+    c.log.warningFile = path.resolve(c.__LOG_DIR, prx + '_' + 'warning.log')
     c.log.errorFile = path.resolve(c.__LOG_DIR, prx + '_' + 'error.log')
 }
 
@@ -286,21 +303,21 @@ function run() {
 }
 
 
-var player_window = gui.Window.get()
+c.player_window = gui.Window.get()
 if (c.__DEBUG_MODE) {
     c.log.info ( 'launching in debug mode')
-    player_window.moveTo(0,30)
-    player_window.isFullscreen = false
-    player_window.showDevTools()
+    c.player_window.moveTo(0,30)
+    c.player_window.isFullscreen = false
+    c.player_window.showDevTools()
 } else {
     c.log.info ( 'launching in fullscreen mode')
-    player_window.moveTo(window.screen.width * (c.__SCREEN - 1) + 1, 30)
-    player_window.isFullscreen = true
+    c.player_window.moveTo(window.screen.width * (c.__SCREEN - 1) + 1, 30)
+    c.player_window.isFullscreen = true
 }
 var nativeMenuBar = new gui.Menu({ type: 'menubar' })
 try {
     nativeMenuBar.createMacBuiltin(gui.App.manifest.name + ' ' + c.__VERSION)
-    player_window.menu = nativeMenuBar
+    c.player_window.menu = nativeMenuBar
 } catch (ex) {
     // c.log.info(ex.message)
 }
@@ -314,17 +331,17 @@ fs.readdirSync(c.homePath).forEach(function scanHome(filename) {
 })
 
 var first_load = true
-player_window.on('loaded', function playerWindowLoaded() {
+c.player_window.on('loaded', function playerWindowLoaded() {
     document.body.style.cursor = 'normal'
     document.body.style.cursor = 'none'
     // c.log.info('window loaded')
-    // player_window.removeListener('loaded', playerWindowLoaded)
+    // c.player_window.removeListener('loaded', playerWindowLoaded)
     if (!first_load) {
         return
     }
     first_load = false
-    player_window.show()
-    player_window.focus()
+    c.player_window.show()
+    c.player_window.focus()
     if (uuids.length === 1) {
         c.__SCREEN_ID = uuids[0].slice(0,-5)
         run()
@@ -494,21 +511,4 @@ function startDOM(err, options) {
     //  process.exit(0)
     // }, 300)
     return
-}
-
-
-
-function captureScreenshot(callback) {
-    var datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '')
-    var screenshot_path = c.__LOG_DIR + '/screencapture ' + datestring + '.raw.jpeg'
-    var writer = fs.createWriteStream(screenshot_path)
-    player_window.capturePage(function(buffer) {
-        if (writer.write(buffer) === false) {
-            writer.once('drain', function() {writer.write(buffer)})
-        }
-        writer.close()
-    }, {
-        format : 'jpeg',
-        datatype : 'buffer'
-    })
 }

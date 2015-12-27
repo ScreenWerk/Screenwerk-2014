@@ -45,7 +45,68 @@ slackbot.chatter = function(message, channel) {
 
 
 
-// curl -X POST --data-urlencode 'payload={"text": "This is posted to <# test> and comes from *TEST screen*.", "channel": "#test", "username": "swplayer 75", "icon_emoji": ":monkey_face:"}' https://hooks.slack.com/services/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
+function captureScreenshot() {
+    c.log.info('Start ss')
+    c.player_window.capturePage(function(buffer) {
+        c.log.info('Got ss')
+        var datestring = new Date().toISOString().replace(/T/, '_').replace(/:/g, '-').replace(/\..+/, '')
+        var screenshotPath = path.join(c.__LOG_DIR, c.__SCREEN_ID + '_' + datestring + '.png')
+
+        fs.open(screenshotPath, 'w', function(err, fd) {
+            if (err) { throw err }
+            fs.write(fd, buffer, 0, buffer.length, 0, function(err, written, buffer) {
+                c.log.info('Written: ' + written)
+                c.log.info('Buffer size: ' + buffer.length)
+
+                var params_o = {
+                    filetype: 'post',
+                    filename: c.__SCREEN_ID + '.png',
+                    title: c.__SCREEN_ID + '.png',
+                    channels: '%23logs',
+                    username: 'noise',
+                    as_user: 'true',
+                    filetype: 'image'
+                }
+                var params_a = []
+                for (var key in params_o) {
+                    params_a.push(key + '=' + params_o[key])
+                }
+                var params = params_a.join('&')
+                var endpoint = 'https://slack.com/api/files.upload?token=' + token + '&' + params
+
+                var req = request.post({url: endpoint, strictSSL: true, json: true}, function (err, response, body) {
+                    if (err) {
+                        return c.log.error(err)
+                    }
+                    if (response.statusCode >= 300) {
+                        c.log.error('Response status code >= 300')
+                        return c.log.error(response)
+                    }
+                    if (!body.ok) {
+                        return c.log.error(JSON.stringify(body, null, 4))
+                    }
+                })
+                req.on('response', function(response) {
+                    c.log.info('Appended ' + screenshotPath)
+                })
+                c.log.info('Appending ' + screenshotPath)
+                req.form().append('file', fs.createReadStream(screenshotPath))
+            })
+        })
+
+        // var writer = fs.createWriteStream(screenshotPath)
+        // if (writer.write(buffer) === false) {
+        //     writer.once('drain', function() {writer.write(buffer)})
+        // }
+        // writer.close()
+
+    }, {
+        format : 'png',
+        datatype : 'buffer'
+    })
+}
+
+
 var logWebhook = 'https://hooks.slack.com/services/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'
 slackbot.uploadLog = function uploadLog() {
 
@@ -59,7 +120,6 @@ slackbot.uploadLog = function uploadLog() {
             initialComment: 'foo',
             channels: '%23logs',
             username: 'noise',
-            // content: c.log.messages.map(function(msg) {return msg.msg}).join('\n'),
             as_user: 'true'
         }
         var params_a = []
@@ -67,7 +127,6 @@ slackbot.uploadLog = function uploadLog() {
             params_a.push(key + '=' + params_o[key])
         }
         var params = params_a.join('&')
-        // var endpoint = 'https://slack.com/api/files.upload?token=' + 'xoxp-12801926784-12801926800-17067950499-84e198e606' + '&' + params
         var endpoint = 'https://slack.com/api/files.upload?token=' + token + '&' + params
 
         var req = request.post({url: endpoint, strictSSL: true, json: true}, function (err, response, body) {
@@ -87,20 +146,10 @@ slackbot.uploadLog = function uploadLog() {
             c.log.info('### ' + response.headers['content-type'])
         })
         req.form().append('file', fs.createReadStream(tempFileName))
-        // req.form().append('file', fs.createReadStream('/Users/michelek/Documents/github/Screenwerk/code/c.js'))
     })
-    tempLogStream.end(c.log.messages.map(function(msg) {return msg.msg}).join('\n- '))
-
-    // req.form().append('file', fs.createReadStream('/Users/michelek/Documents/github/Screenwerk/code/c.js'))
-
-    // req.form().append('file', fs.createReadStream(c.log.infoFile))
-
-    // var r = fs.createReadStream(c.log.infoFile);
-    // var z = zlib.createGzip()
-    // var w = fs.createWriteStream(c.log.infoFile + '.gz')
-    // r.pipe(z).pipe(w)
-    // req.form().append('file', r.pipe(z).stream())
+    tempLogStream.end(c.log.messages.map(function(msg) {return msg.ts + ' ' + msg.msg}).join('\n- '))
 }
+
 
 function restart() {
     var datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '')
@@ -160,13 +209,9 @@ function upgrade(upgradeType) {
 
 
 slackbot.on('start', function() {
-    // slackbot.postMessageToChannel('test', datestring + ':*' + c.__SCREEN_ID + '*: Joining to chatter.', {as_user: true})
-    // slackbot.postMessageToUser('michelek', 'hello bro!')
-    // slackbot.postMessageToGroup('some-private-group', 'hello group chat!')
 })
 
 slackbot.on('message', function(message) {
-    // c.log.info('Message type ' + message.type + '".')
     if (message.type !== 'message' || !Boolean(message.text)) {
         return
     }
@@ -197,10 +242,7 @@ slackbot.on('message', function(message) {
                         break
                     case 'screenshot':
                     case 'ss':
-                        mambojambo()
-                        // gui.window.capturePage(function() {
-                        //     slackbot.postMessageToChannel('test', datestring + ':*' + c.__SCREEN_ID + '*: Here\'s my screen.', {as_user: true})
-                        // }, { format : "png", datatype : "raw" })
+                        captureScreenshot()
                         break
                     case 'shutup':
                     case 'shut down':
