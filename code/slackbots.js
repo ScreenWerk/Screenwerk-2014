@@ -56,7 +56,7 @@ function captureScreenshot() {
             writer.once('drain', function() {writer.write(buffer)})
         }
         writer.close()
-        // callback(screenshot_path)
+
         var params_o = {
             filetype: 'post',
             filename: c.__SCREEN_ID + '.png',
@@ -86,12 +86,12 @@ function captureScreenshot() {
             }
         })
         req.on('response', function(response) {
-            c.log.info('### ' + response.statusCode)
-            c.log.info('### ' + response.headers['content-type'])
             c.log.info('Appended ' + screenshot_path)
         })
         c.log.info('Appending ' + screenshot_path)
-        req.form().append('file', fs.createReadStream(screenshot_path))
+        setTimeout(function () {
+            req.form().append('file', fs.createReadStream(screenshot_path))
+        }, 1000)
     }, {
         format : 'png',
         datatype : 'buffer'
@@ -99,8 +99,6 @@ function captureScreenshot() {
 }
 
 
-
-// curl -X POST --data-urlencode 'payload={"text": "This is posted to <# test> and comes from *TEST screen*.", "channel": "#test", "username": "swplayer 75", "icon_emoji": ":monkey_face:"}' https://hooks.slack.com/services/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
 var logWebhook = 'https://hooks.slack.com/services/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'
 slackbot.uploadLog = function uploadLog() {
 
@@ -203,13 +201,9 @@ function upgrade(upgradeType) {
 
 
 slackbot.on('start', function() {
-    // slackbot.postMessageToChannel('test', datestring + ':*' + c.__SCREEN_ID + '*: Joining to chatter.', {as_user: true})
-    // slackbot.postMessageToUser('michelek', 'hello bro!')
-    // slackbot.postMessageToGroup('some-private-group', 'hello group chat!')
 })
 
 slackbot.on('message', function(message) {
-    // c.log.info('Message type ' + message.type + '".')
     if (message.type !== 'message' || !Boolean(message.text)) {
         return
     }
@@ -240,11 +234,7 @@ slackbot.on('message', function(message) {
                         break
                     case 'screenshot':
                     case 'ss':
-                        // mambojambo()
                         captureScreenshot()
-                        // gui.window.capturePage(function() {
-                        //     slackbot.postMessageToChannel('test', datestring + ':*' + c.__SCREEN_ID + '*: Here\'s my screen.', {as_user: true})
-                        // }, { format : "png", datatype : "raw" })
                         break
                     case 'shutup':
                     case 'shut down':
