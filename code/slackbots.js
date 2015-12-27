@@ -50,48 +50,58 @@ function captureScreenshot() {
     c.player_window.capturePage(function(buffer) {
         c.log.info('Got ss')
         var datestring = new Date().toISOString().replace(/T/, '_').replace(/:/g, '-').replace(/\..+/, '')
-        var screenshot_path = path.join(c.__LOG_DIR, c.__SCREEN_ID + '_' + datestring + '.png')
-        var writer = fs.createWriteStream(screenshot_path)
-        if (writer.write(buffer) === false) {
-            writer.once('drain', function() {writer.write(buffer)})
-        }
-        writer.close()
+        var screenshotPath = path.join(c.__LOG_DIR, c.__SCREEN_ID + '_' + datestring + '.png')
 
-        var params_o = {
-            filetype: 'post',
-            filename: c.__SCREEN_ID + '.png',
-            title: c.__SCREEN_ID + '.png',
-            channels: '%23logs',
-            username: 'noise',
-            as_user: 'true',
-            filetype: 'image'
-        }
-        var params_a = []
-        for (var key in params_o) {
-            params_a.push(key + '=' + params_o[key])
-        }
-        var params = params_a.join('&')
-        var endpoint = 'https://slack.com/api/files.upload?token=' + token + '&' + params
+        fs.open(screenshotPath, 'w', function(err, fd) {
+            if (err) { throw err }
+            fs.write(fd, buffer, 0, buffer.length, 0, function(err, written, buffer) {
+                c.log.info('Written: ' + written)
+                c.log.info('Buffer size: ' + buffer.length)
 
-        var req = request.post({url: endpoint, strictSSL: true, json: true}, function (err, response, body) {
-            if (err) {
-                return c.log.error(err)
-            }
-            if (response.statusCode >= 300) {
-                c.log.error('Response status code >= 300')
-                return c.log.error(response)
-            }
-            if (!body.ok) {
-                return c.log.error(JSON.stringify(body, null, 4))
-            }
+                var params_o = {
+                    filetype: 'post',
+                    filename: c.__SCREEN_ID + '.png',
+                    title: c.__SCREEN_ID + '.png',
+                    channels: '%23logs',
+                    username: 'noise',
+                    as_user: 'true',
+                    filetype: 'image'
+                }
+                var params_a = []
+                for (var key in params_o) {
+                    params_a.push(key + '=' + params_o[key])
+                }
+                var params = params_a.join('&')
+                var endpoint = 'https://slack.com/api/files.upload?token=' + token + '&' + params
+
+                var req = request.post({url: endpoint, strictSSL: true, json: true}, function (err, response, body) {
+                    if (err) {
+                        return c.log.error(err)
+                    }
+                    if (response.statusCode >= 300) {
+                        c.log.error('Response status code >= 300')
+                        return c.log.error(response)
+                    }
+                    if (!body.ok) {
+                        return c.log.error(JSON.stringify(body, null, 4))
+                    }
+                })
+                req.on('response', function(response) {
+                    c.log.info('Appended ' + screenshotPath)
+                })
+                c.log.info('Appending ' + screenshotPath)
+                // setTimeout(function () {
+                    req.form().append('file', fs.createReadStream(screenshotPath))
+                // }, 1000)
+            })
         })
-        req.on('response', function(response) {
-            c.log.info('Appended ' + screenshot_path)
-        })
-        c.log.info('Appending ' + screenshot_path)
-        setTimeout(function () {
-            req.form().append('file', fs.createReadStream(screenshot_path))
-        }, 1000)
+
+        // var writer = fs.createWriteStream(screenshotPath)
+        // if (writer.write(buffer) === false) {
+        //     writer.once('drain', function() {writer.write(buffer)})
+        // }
+        // writer.close()
+
     }, {
         format : 'png',
         datatype : 'buffer'
