@@ -90,9 +90,7 @@ function captureScreenshot() {
                     c.log.info('Appended ' + screenshotPath)
                 })
                 c.log.info('Appending ' + screenshotPath)
-                // setTimeout(function () {
-                    req.form().append('file', fs.createReadStream(screenshotPath))
-                // }, 1000)
+                req.form().append('file', fs.createReadStream(screenshotPath))
             })
         })
 
