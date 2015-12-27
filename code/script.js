@@ -12,6 +12,7 @@ var stringifier     = require('./code/stringifier.js')
 var c               = require('./code/c.js')
 var configuration   = require('./code/configuration.json')
 
+
 c.__VERSION = gui.App.manifest.version
 c.__APPLICATION_NAME = gui.App.manifest.name
 c.slackChannels = {
@@ -23,6 +24,14 @@ c.slackChannels = {
 }
 
 c.homePath = path.join((process.env.HOMEDRIVE + process.env.HOMEPATH) || process.env.HOME, c.__APPLICATION_NAME)
+var singletonLock = path.join(c.homePath, 'singleton.txt')
+fs.readFile(singletonLock, function(err, pid) {
+    if (err) { return fs.writeFileSync(singletonLock, process.pid) }
+    try { process.kill(pid) }
+    catch (e) { }
+    finally { fs.writeFileSync(singletonLock, process.pid) }
+})
+
 c.flagFile = path.join(c.homePath, 'shutting_down')
 c.__LOG_DIR = path.resolve(c.homePath, 'sw-log')
 c.__META_DIR = path.resolve(c.homePath, 'sw-meta')
