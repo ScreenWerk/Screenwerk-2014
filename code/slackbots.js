@@ -199,7 +199,8 @@ function upgrade(upgradeType) {
             child_process.execFile(scriptName + '.bat')
         } else {
             slackbot.chatter(':info: launching new instance on linux')
-            child_process.exec('. ' + scriptName + '.sh', function (err, stdout, stderr) {
+            console.log(path.resolve(__dirname, '..', scriptName + '.sh'))
+            child_process.exec('. ' + path.resolve(__dirname, '..', scriptName + '.sh'), function (err, stdout, stderr) {
                 if (err !== null) { throw err }
                 c.log.info('stdout: ' + stdout)
                 c.log.info('stderr: ' + stderr)
