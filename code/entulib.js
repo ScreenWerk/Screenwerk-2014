@@ -57,7 +57,7 @@ function EntuLib(entu_user_id, entu_user_key, entu_url) {
                     callback(null, JSON.parse(str))
                 }
                 catch (err) {
-                    console.log('EntuLib err: ', err)
+                    c.log.info('EntuLib err: ', err)
                     callback(err, str)
                     return
                 }
@@ -68,7 +68,7 @@ function EntuLib(entu_user_id, entu_user_key, entu_url) {
             return
         })
         if (data !== undefined) {
-            // console.log(typeof data + ' . ' + (data))
+            // c.log.info(typeof data + ' . ' + (data))
             request.write(data)
         }
         request.end()
@@ -112,7 +112,7 @@ module.exports = EntuLib
 // Sample usage
 
 // var print_result = function print_result(data) {
-//     console.log(stringifier(data))
+//     c.log.info(stringifier(data))
 // }
 
 // var stringifier = function stringifier(o) {

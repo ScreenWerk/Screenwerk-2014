@@ -17,18 +17,18 @@ var helper          = require('../code/helper.js')
 var document = window.document
 // var update_interval_ms = 10 * 60 * 1000 // set default update interval to 10 minutes
 
-console.log('Load function processElements')
+c.log.info('Load function processElements')
 function processElements(err, callback) {
     if (err) {
-        console.log('processElements err:', err)
+        c.log.info('processElements err:', err)
         process.exit(0)
         return
     }
-    // console.log(loader.swElements.length)
-    console.log('====== Start processElements')
+    // c.log.info(loader.swElements.length)
+    c.log.info('====== Start processElements')
     var stacksize = loader.swElements.length
     loader.swElements.forEach(function(swElement) {
-        // console.log('Processing ' + swElement.definition.keyname + ':' + swElement.id + ' - ' + swElement.displayname)
+        // c.log.info('Processing ' + swElement.definition.keyname + ':' + swElement.id + ' - ' + swElement.displayname)
         switch (swElement.definition.keyname) {
             case 'sw-screen':
             break
@@ -135,37 +135,37 @@ function processElements(err, callback) {
                 callback('Unrecognised definition: ' + swElement.definition.keyname, swElement)
                 return
         }
-        // console.log('Processed ' + swElement.definition.keyname + ':' + swElement.id + ' - ' + swElement.displayname)
+        // c.log.info('Processed ' + swElement.definition.keyname + ':' + swElement.id + ' - ' + swElement.displayname)
         var meta_path = path.resolve(c.__META_DIR, swElement.id + ' ' + swElement.definition.keyname.split('sw-')[1] + '.json')
         fs.writeFileSync(meta_path, stringifier(swElement))
 
         if(-- stacksize === 0) {
-            console.log('====== Finish processElements')
+            c.log.info('====== Finish processElements')
             callback(null, 'No more data')
         }
     })
 }
 
-console.log('Load function buildDom')
+c.log.info('Load function buildDom')
 function buildDom(err, callback) {
     if (err) {
-        console.log('buildDom err:', err)
+        c.log.info('buildDom err:', err)
         process.exit(0)
         return
     }
 
     var createDomRec = function createDomRec(eid, parent_dom_id) {
-        // console.log(eid, parent_dom_id)
+        // c.log.info(eid, parent_dom_id)
         var dom_element = document.createElement('div')
         var swElement = loader.swElementsById[eid]
         if (swElement === undefined) {
-            console.log('Error: Missing element eid=' + eid, (loader.swElementsById, {'depth':null}))
+            c.log.info('Error: Missing element eid=' + eid, (loader.swElementsById, {'depth':null}))
             callback('Error: Missing element eid=' + eid)
             return
         }
         var parentSwElement = loader.swElementsById[swElement.parents[0]]
-        // console.log(stringifier(dom_element))
-        // console.log(eid)
+        // c.log.info(stringifier(dom_element))
+        // c.log.info(eid)
         dom_element.id = parent_dom_id === undefined ? eid : parent_dom_id + '_' + eid
         dom_element.className = swElement.definition.keyname
         // dom_element.style.visibility = 'hidden'
@@ -213,12 +213,12 @@ function buildDom(err, callback) {
                 dom_element.style.padding = '0px'
                 dom_element.style.top = swElement.properties.top.values[0].db_value + unit
             }
-        // console.log(stringifier(dom_element.style.cssText))
+        // c.log.info(stringifier(dom_element.style.cssText))
 
         dom_element.swElement = swElement
         swElement.childs.forEach(function(child_eid){
             var child_node = createDomRec(child_eid, dom_element.id)
-            // console.log(stringifier(child_eid))
+            // c.log.info(stringifier(child_eid))
             dom_element.appendChild(child_node)
         })
 
@@ -234,7 +234,7 @@ function buildDom(err, callback) {
             var filename = swElement.properties.file.values[0].value
             var mimetype = 'video/' + filename.split('.')[filename.split('.').length-1]
             media_dom_element.type = mimetype
-            // console.log(mimetype)
+            // c.log.info(mimetype)
             media_dom_element.src = swElement.properties.filepath.values[0].db_value
             media_dom_element.overflow = 'hidden'
             dom_element.appendChild(media_dom_element)
@@ -244,7 +244,7 @@ function buildDom(err, callback) {
 
         } else if (mediatype === 'Flash') {
             media_dom_element = document.createElement('EMBED')
-            // console.log((swElement.properties.filepath.values[0]))
+            // c.log.info((swElement.properties.filepath.values[0]))
             media_dom_element.src = swElement.properties.filepath.values[0].db_value
             media_dom_element.type = 'application/x-shockwave-flash'
             // media_dom_element.type = 'application/vnd.adobe.flash-movie'
@@ -252,13 +252,13 @@ function buildDom(err, callback) {
 
         } else if (mediatype === 'Image') {
             media_dom_element = document.createElement('IMG')
-            // console.log((swElement.properties.filepath.values[0]))
+            // c.log.info((swElement.properties.filepath.values[0]))
             media_dom_element.src = swElement.properties.filepath.values[0].db_value
             dom_element.appendChild(media_dom_element)
 
         } else if (mediatype === 'URL') {
             media_dom_element = document.createElement('IFRAME')
-            // console.log((swElement.properties.filepath.values[0]))
+            // c.log.info((swElement.properties.filepath.values[0]))
             media_dom_element.id = 'if' + eid
             media_dom_element.src = swElement.properties.url.values[0].db_value
             media_dom_element.width = '100%'
@@ -272,13 +272,13 @@ function buildDom(err, callback) {
         }
         return dom_element
     }
-    console.log('Start createDomRec')
+    c.log.info('Start createDomRec')
     var screen_dom_element = createDomRec(c.__SCREEN_ID)
     // var scrdom = document.findElementByID(c.__SCREEN_ID)
     // scrdom.delete()
     document.body.appendChild(screen_dom_element)
     callback(null, screen_dom_element)
-    console.log('Finish createDomRec')
+    c.log.info('Finish createDomRec')
 }
 
 
