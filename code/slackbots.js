@@ -151,7 +151,10 @@ slackbot.uploadLog = function uploadLog() {
 }
 
 
-function restart() {
+function restart(launcherCommand) {
+    if (!launcherCommand) {
+        launcherCommand = 'nwjs .'
+    }
     var datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '')
     slackbot.chatter(':sunrise: down. then up again')
     c.log.info('== RELAUNCHING! =====================')
@@ -163,7 +166,7 @@ function restart() {
             c.log.info(c.flagFile, curr, prev)
             if (curr.ino === 0) { process.exit(0) }
         })
-        child_process.exec('nwjs .')
+        child_process.exec(launcherCommand)
     })
 }
 
@@ -196,15 +199,10 @@ function upgrade(upgradeType) {
         })
         if (isWin) {
             slackbot.chatter(':info: launching new instance on windows')
-            child_process.execFile(scriptName + '.bat')
+            restart(path.resolve(__dirname, '..', scriptName + '.bat'))
         } else {
             slackbot.chatter(':info: launching new instance on linux')
-            console.log(path.resolve(__dirname, '..', scriptName + '.sh'))
-            child_process.exec('. ' + path.resolve(__dirname, '..', scriptName + '.sh'), function (err, stdout, stderr) {
-                if (err !== null) { throw err }
-                c.log.info('stdout: ' + stdout)
-                c.log.info('stderr: ' + stderr)
-            })
+            restart('. ' + path.resolve(__dirname, '..', scriptName + '.sh'))
         }
     })
 
