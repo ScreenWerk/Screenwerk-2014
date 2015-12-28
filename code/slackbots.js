@@ -198,10 +198,10 @@ function upgrade(upgradeType) {
             if (curr.ino === 0) { process.exit(0) }
         })
         if (isWin) {
-            slackbot.chatter(':info: launching new instance on windows')
+            slackbot.chatter(':information_source: launching new instance on windows')
             restart(path.resolve(__dirname, '..', scriptName + '.bat'))
         } else {
-            slackbot.chatter(':info: launching new instance on linux')
+            slackbot.chatter(':information_source: launching new instance on linux')
             restart('. ' + path.resolve(__dirname, '..', scriptName + '.sh'))
         }
     })
