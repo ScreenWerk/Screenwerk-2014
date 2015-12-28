@@ -27,9 +27,11 @@ c.homePath = path.join((process.env.HOMEDRIVE + process.env.HOMEPATH) || process
 var singletonLock = path.join(c.homePath, 'singleton.txt')
 fs.readFile(singletonLock, function(err, pid) {
     if (err) { return fs.writeFileSync(singletonLock, process.pid) }
-    try { process.kill(pid) }
-    catch (e) { }
-    finally { fs.writeFileSync(singletonLock, process.pid) }
+    if (Number(pid) !== Number(process.pid) ) {
+        try { process.kill(pid) }
+        catch (e) { }
+        finally { fs.writeFileSync(singletonLock, process.pid) }
+    }
 })
 
 c.flagFile = path.join(c.homePath, 'shutting_down')
