@@ -59,15 +59,13 @@ c.log.append = function(message, channel) {
     c.log.messages.push({ts:datestring, ch:channel, msg:message})
     if (channel === 'warning') {
         fs.appendFile(c.log.warningFile, datestring + ' ' + channel + ' ' + message + '\n')
-        if (slackbots) { slackbots.chatter(message, 'warning') }
         return
     }
-    message = message + '\n'
-    fs.appendFile(c.log.infoFile, datestring + ' ' + channel + ' ' + message)
-    if (slackbots) { slackbots.chatter(message + (new Error()).stack, 'chat') }
+    fs.appendFile(c.log.infoFile, datestring + ' ' + channel + ' ' + message + '\n')
     if (channel === 'error') {
-        fs.appendFile(c.log.errorFile, datestring + ' ' + channel + ' ' + message + (new Error()).stack + '\n')
-        if (slackbots) { slackbots.chatter(message + (new Error()).stack, 'error') }
+        fs.appendFile(c.log.errorFile, datestring + ' ' + channel + ' ' + message + '\n' + (new Error()).stack + '\n')
+        if (slackbots && c.__SCREEN_ID) { slackbots.chatter(message + '\n' + (new Error()).stack, 'error') }
+        else { console.log('timeouting'); setTimeout(function () { c.log.append(message, channel) }, 1000) }
     }
 }
 c.log.info = function(message) { c.log.append(message, 'info') }
@@ -80,6 +78,7 @@ c.log.setPrefix = function(prx) {
     c.log.errorFile = path.resolve(c.__LOG_DIR, prx + '_' + 'error.log')
 }
 
+// c.log.error('test the errorz')
 
 var datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '')
 c.log.info('\n\n## Start logging at ' + datestring + '= ' + c.__APPLICATION_NAME + ' v.' + c.__VERSION + ' ##\n')
@@ -88,7 +87,6 @@ var slackbots       = require('./code/slackbots.js')
 var player          = require('./code/player.js')
 var digest          = require('./code/digest.js')
 var loader          = require('./code/loader.js')
-
 
 
 c.restart = function() {

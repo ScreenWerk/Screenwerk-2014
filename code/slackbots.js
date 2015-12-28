@@ -36,11 +36,11 @@ var isWin = /^win/.test(process.platform);
 
 
 slackbot.chatter = function(message, channel) {
-    if (!channel) { channel = c.slackChannels.chat }
+    if (!channel) { channel = 'chat' }
     // c.log.info('XXXXXXX', channel, message)
     // var datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '')
     datestring = ''
-    slackbot.postMessageToChannel(channel, datestring + ' *' + c.__SCREEN_ID + '* ' + message, {as_user: true})
+    slackbot.postMessageToChannel(c.slackChannels[channel], datestring + ' *' + c.__SCREEN_ID + '* ' + message, {as_user: true})
 }
 
 
@@ -198,10 +198,10 @@ function upgrade(upgradeType) {
             if (curr.ino === 0) { process.exit(0) }
         })
         if (isWin) {
-            slackbot.chatter(':info: launching new instance on windows')
+            slackbot.chatter(':information_source: launching new instance on windows')
             restart(path.resolve(__dirname, '..', scriptName + '.bat'))
         } else {
-            slackbot.chatter(':info: launching new instance on linux')
+            slackbot.chatter(':information_source: launching new instance on linux')
             restart('. ' + path.resolve(__dirname, '..', scriptName + '.sh'))
         }
     })
