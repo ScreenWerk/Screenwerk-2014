@@ -36,11 +36,11 @@ var isWin = /^win/.test(process.platform);
 
 
 slackbot.chatter = function(message, channel) {
-    if (!channel) { channel = c.slackChannels.chat }
+    if (!channel) { channel = 'chat' }
     // c.log.info('XXXXXXX', channel, message)
     // var datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '')
     datestring = ''
-    slackbot.postMessageToChannel(channel, datestring + ' *' + c.__SCREEN_ID + '* ' + message, {as_user: true})
+    slackbot.postMessageToChannel(c.slackChannels[channel], datestring + ' *' + c.__SCREEN_ID + '* ' + message, {as_user: true})
 }
 
 

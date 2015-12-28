@@ -70,7 +70,7 @@ var SwPlayer = function SwPlayer(err, dom_element, callback) {
                 if (properties['valid-to'].values !== undefined) {
                     var vt_date = new Date(properties['valid-to'].values[0].db_value)
                     if (vt_date.getTime() < Date.now()) {
-                        c.log.info('DOM id: ' + element.id + ' valid-to expired.', vt_date.getTime())
+                        c.log.warning('DOM id: ' + element.id + ' valid-to expired.', vt_date.getTime())
                         callback('expired', [vt_date.getTime(), element.id])
                         if (element.next !== undefined ) {
                             document.getElementById(dom_element.parentNode.id + '_' + element.next)
