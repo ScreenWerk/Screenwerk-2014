@@ -95,7 +95,7 @@ c.log.setPrefix = function(prx) {
     c.log.errorFile = path.resolve(c.__LOG_DIR, prx + '_' + 'error.log')
 }
 
-c.log.error('test the errorz 2')
+// c.log.error('test the errorz 2')
 
 var datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '')
 c.log.info('\n\n## Start logging at ' + datestring + '= ' + c.__APPLICATION_NAME + ' v.' + c.__VERSION + ' ##\n')
