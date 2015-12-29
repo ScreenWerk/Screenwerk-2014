@@ -13,6 +13,7 @@ var token = 'xoxb-12801543831-Bx3UtMRBeDoTMj3eX8d9HsIk'
 var token = 'xoxb-12801543831-Bx3UtMRBeDoTMj3eX8d9HsIk'
 
 var c = require('./c.js')
+var isConnected = false
 
 var jt = function() {
     var jt = require('./gintonic.json')
@@ -37,6 +38,10 @@ var isWin = /^win/.test(process.platform);
 
 slackbot.chatter = function(message, channel) {
     if (!channel) { channel = 'chat' }
+    if (!isConnected) {
+        c.log.info('Postponing chat message to ' + channel + ': ' + message)
+        return setTimeout(function () { slackbot.chatter(message, channel) }, 1000)
+    }
     // c.log.info('XXXXXXX', channel, message)
     // var datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '')
     datestring = ''
@@ -210,6 +215,21 @@ function upgrade(upgradeType) {
 
 
 slackbot.on('start', function() {
+    c.log.info('Slackbot: Started')
+})
+
+slackbot.on('open', function() {
+    c.log.info('Slackbot: Socket opened')
+    isConnected = true
+})
+
+slackbot.on('close', function() {
+    isConnected = false
+    console.log('Slackbot: Socket closed')
+    c.log.error('Slackbot: Socket closed')
+    setTimeout(function () {
+        slackbot = new SlackBot(slackbot_settings)
+    }, 1000)
 })
 
 slackbot.on('message', function(message) {
