@@ -51,12 +51,26 @@ ravenClient.patchGlobal()
 
 c.log = {}
 c.log.messages = []
+c.log.all = path.resolve(c.__LOG_DIR, 'all.log')
 c.log.infoFile = path.resolve(c.__LOG_DIR, 'info.log')
 c.log.warningFile = path.resolve(c.__LOG_DIR, 'warning.log')
 c.log.errorFile = path.resolve(c.__LOG_DIR, 'error.log')
-c.log.append = function(message, channel) {
-    var datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '')
-    c.log.messages.push({ts:datestring, ch:channel, msg:message})
+c.log.append = function(message, channel, datestring) {
+    console.log(channel, message)
+    if (!datestring) { // Having a timestamp here indicates we have this message already listed
+        datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '')
+        var logStream = fs.createWriteStream(c.log.all, 'w')
+        logStream.once('open', function(fd) {
+            logStream.write(datestring + ' ' + channel + ' ' + message)
+            logStream.end()
+        })
+        c.log.messages.push({ts:datestring, ch:channel, msg:message})
+    }
+    if (!c.__SCREEN_ID) {
+        console.log('Timeouting message "' + channel + ':' + message + '" Screen ID not available.')
+        setTimeout(function() { c.log.append(message, channel, datestring) }, 1000)
+        return
+    }
     if (channel === 'warning') {
         fs.appendFile(c.log.warningFile, datestring + ' ' + channel + ' ' + message + '\n')
         return
@@ -64,8 +78,11 @@ c.log.append = function(message, channel) {
     fs.appendFile(c.log.infoFile, datestring + ' ' + channel + ' ' + message + '\n')
     if (channel === 'error') {
         fs.appendFile(c.log.errorFile, datestring + ' ' + channel + ' ' + message + '\n' + (new Error()).stack + '\n')
-        if (slackbots && c.__SCREEN_ID) { slackbots.chatter(message + '\n' + (new Error()).stack, 'error') }
-        else { console.log('timeouting'); setTimeout(function () { c.log.append(message, channel) }, 1000) }
+        if (slackbots) { slackbots.chatter(message + '\n' + (new Error()).stack, 'error') }
+        else {
+            c.log.info('Timeouting error message - Slackbot not available:\n' + (new Error()).stack)
+            setTimeout(function() { c.log.append(message, channel, datestring) }, 1000)
+        }
     }
 }
 c.log.info = function(message) { c.log.append(message, 'info') }
@@ -78,7 +95,7 @@ c.log.setPrefix = function(prx) {
     c.log.errorFile = path.resolve(c.__LOG_DIR, prx + '_' + 'error.log')
 }
 
-// c.log.error('test the errorz')
+// c.log.error('test the errorz 2')
 
 var datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '')
 c.log.info('\n\n## Start logging at ' + datestring + '= ' + c.__APPLICATION_NAME + ' v.' + c.__VERSION + ' ##\n')
@@ -91,7 +108,7 @@ var loader          = require('./code/loader.js')
 
 c.restart = function() {
     fs.open(c.flagFile, 'w', function(err, fd) {
-        fs.watchFile(c.flagFile, function (curr, prev) {
+        fs.watchFile(c.flagFile, function(curr, prev) {
             c.log.info(c.flagFile, curr, prev)
             if (curr.ino === 0) { process.exit(0) }
         })
