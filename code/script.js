@@ -331,6 +331,10 @@ function run() {
 
 
 c.player_window = gui.Window.get()
+c.player_window.on('minimize', function() {
+    c.player_window.restore()
+})
+
 if (c.__DEBUG_MODE) {
     c.log.info ( 'launching in debug mode')
     c.player_window.moveTo(0,30)
