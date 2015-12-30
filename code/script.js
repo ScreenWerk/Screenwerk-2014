@@ -96,10 +96,18 @@ c.log.info = function(message) { c.log.append(message, 'info') }
 c.log.error = function(message) { c.log.append(message, 'error') }
 c.log.warning = function(message) { c.log.append(message, 'warning') }
 c.log.setPrefix = function(prx) {
-    c.log.append('info', 'Setting logfile prefix to "' + prx + '".')
-    c.log.infoFile = path.resolve(c.__LOG_DIR, prx + '_' + 'info.log')
-    c.log.warningFile = path.resolve(c.__LOG_DIR, prx + '_' + 'warning.log')
-    c.log.errorFile = path.resolve(c.__LOG_DIR, prx + '_' + 'error.log')
+    var datestring = new Date().toISOString().slice(0,10)
+    c.log.append('info', 'Setting logfile prefix to "' +  datestring + '_' + prx + '".')
+    c.log.infoFile = path.resolve(c.__LOG_DIR,  datestring + '_' + prx + '_' + 'info.log')
+    c.log.warningFile = path.resolve(c.__LOG_DIR,  datestring + '_' + prx + '_' + 'warning.log')
+    c.log.errorFile = path.resolve(c.__LOG_DIR,  datestring + '_' + prx + '_' + 'error.log')
+
+    var midnight = new Date()
+    midnight.setHours(24,0,0,0)
+    var dt = midnight.getTime() - Date.now()
+    setTimeout(function () {
+        c.log.setPrefix(prx)
+    }, dt + 1000)
 }
 
 var tick = function() {
