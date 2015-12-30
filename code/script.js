@@ -24,6 +24,7 @@ c.slackChannels = {
 }
 
 c.homePath = path.join((process.env.HOMEDRIVE + process.env.HOMEPATH) || process.env.HOME, c.__APPLICATION_NAME)
+if (!fs.existsSync(c.homePath)) { fs.mkdirSync(c.homePath) }
 var singletonLock = path.join(c.homePath, 'singleton.txt')
 fs.readFile(singletonLock, function(err, pid) {
     if (err) { return fs.writeFileSync(singletonLock, process.pid) }
