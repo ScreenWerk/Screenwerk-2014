@@ -49,6 +49,15 @@ var ravenClient = new raven.Client(
 )
 ravenClient.patchGlobal()
 
+function fsAppend(filePath, data) {
+    fs.open(filePath, 'a', function(err, fd) {
+        if (err) { return console.log('fs.open err', err) }
+        fs.write(fd, data + '\n', function(err) {
+            if (err) { return console.log('fs.write err', err) }
+            fs.close(fd)
+        })
+    })
+}
 c.log = {}
 c.log.messages = []
 c.log.all = path.resolve(c.__LOG_DIR, 'all.log')
@@ -56,14 +65,9 @@ c.log.infoFile = path.resolve(c.__LOG_DIR, 'info.log')
 c.log.warningFile = path.resolve(c.__LOG_DIR, 'warning.log')
 c.log.errorFile = path.resolve(c.__LOG_DIR, 'error.log')
 c.log.append = function(message, channel, datestring) {
-    console.log(channel, message)
     if (!datestring) { // Having a timestamp here indicates we have this message already listed
         datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '')
-        var logStream = fs.createWriteStream(c.log.all, 'w')
-        logStream.once('open', function(fd) {
-            logStream.write(datestring + ' ' + channel + ' ' + message)
-            logStream.end()
-        })
+        fsAppend(c.log.all, datestring + ' ' + channel + ' ' + message)
         c.log.messages.push({ts:datestring, ch:channel, msg:message})
     }
     if (!c.__SCREEN_ID) {
@@ -72,12 +76,13 @@ c.log.append = function(message, channel, datestring) {
         return
     }
     if (channel === 'warning') {
-        fs.appendFile(c.log.warningFile, datestring + ' ' + channel + ' ' + message + '\n')
+        fsAppend(c.log.warningFile, datestring + ' ' + channel + ' ' + message)
         return
     }
-    fs.appendFile(c.log.infoFile, datestring + ' ' + channel + ' ' + message + '\n')
+    console.log(channel, message)
+    fsAppend(c.log.infoFile, datestring + ' ' + channel + ' ' + message)
     if (channel === 'error') {
-        fs.appendFile(c.log.errorFile, datestring + ' ' + channel + ' ' + message + '\n' + (new Error()).stack + '\n')
+        fsAppend(c.log.errorFile, datestring + ' ' + channel + ' ' + message + '\n' + (new Error()).stack)
         if (slackbots) { slackbots.chatter(message + '\n' + (new Error()).stack, 'error') }
         else {
             c.log.info('Timeouting error message - Slackbot not available:\n' + (new Error()).stack)
@@ -95,6 +100,11 @@ c.log.setPrefix = function(prx) {
     c.log.errorFile = path.resolve(c.__LOG_DIR, prx + '_' + 'error.log')
 }
 
+var tick = function() {
+    c.log.info('tick')
+    setTimeout(function () { tick() }, 1000)
+}
+// tick()
 // c.log.error('test the errorz 2')
 
 var datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '')
@@ -297,7 +307,7 @@ function run() {
             c.__SCREEN_NAME = op.get(result, ['result', 'properties', 'name', 'values', 0, 'value'])
             c.log.info(c.__SCREEN_NAME)
 
-            slackbots.chatter(':up: ' + c.__SCREEN_NAME)
+            // slackbots.chatter(':up: ' + c.__SCREEN_NAME)
             fs.unlink(c.flagFile, function(err) {
                 if (err) {}
             })

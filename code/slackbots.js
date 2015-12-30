@@ -40,7 +40,8 @@ slackbot.chatter = function(message, channel) {
     if (!channel) { channel = 'chat' }
     if (!isConnected) {
         c.log.info('Postponing chat message to ' + channel + ': ' + message)
-        return setTimeout(function () { slackbot.chatter(message, channel) }, 1000)
+        // setTimeout(function () { slackbot.chatter(message, channel) }, 1000)
+        return
     }
     // c.log.info('XXXXXXX', channel, message)
     // var datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '')
@@ -115,44 +116,65 @@ function captureScreenshot() {
 var logWebhook = 'https://hooks.slack.com/services/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'
 slackbot.uploadLog = function uploadLog() {
 
-    var tempFileName = 'tmp.log'
-    var tempLogStream = fs.createWriteStream(tempFileName)
-    tempLogStream.on('finish', function() {
-        var params_o = {
-            filetype: 'post',
-            filename: c.__SCREEN_ID + '.log',
-            title: c.__SCREEN_ID + '.log',
-            initialComment: 'foo',
-            channels: '%23logs',
-            username: 'noise',
-            as_user: 'true'
-        }
-        var params_a = []
-        for (var key in params_o) {
-            params_a.push(key + '=' + params_o[key])
-        }
-        var params = params_a.join('&')
-        var endpoint = 'https://slack.com/api/files.upload?token=' + token + '&' + params
+    var params_o = {
+        filetype: 'post',
+        filename: c.__SCREEN_ID + '.log',
+        title: c.__SCREEN_ID + '.log',
+        initialComment: 'foo',
+        channels: '%23logs',
+        username: 'noise',
+        as_user: 'true'
+    }
+    var params_a = []
+    for (var key in params_o) {
+        params_a.push(key + '=' + params_o[key])
+    }
+    var params = params_a.join('&')
+    var endpoint = 'https://slack.com/api/files.upload?token=' + token + '&' + params
 
-        var req = request.post({url: endpoint, strictSSL: true, json: true}, function (err, response, body) {
-            if (err) {
-                return c.log.error(err)
-            }
-            if (response.statusCode >= 300) {
-                c.log.error('Response status code >= 300')
-                return c.log.error(response)
-            }
-            if (!body.ok) {
-                return c.log.error(JSON.stringify(body, null, 4))
-            }
-        })
-        req.on('response', function(response) {
-            c.log.info('### ' + response.statusCode)
-            c.log.info('### ' + response.headers['content-type'])
-        })
-        req.form().append('file', fs.createReadStream(tempFileName))
+    var req = request.post({url: endpoint, strictSSL: true, json: true}, function (err, response, body) {
+        if (err) {
+            return c.log.error(err)
+        }
+        if (response.statusCode >= 300) {
+            c.log.error('Response status code >= 300')
+            return c.log.error(response)
+        }
+        if (!body.ok) {
+            return c.log.error(JSON.stringify(body, null, 4))
+        }
     })
-    tempLogStream.end(c.log.messages.map(function(msg) {return msg.ts + ' ' + msg.msg}).join('\n- '))
+    req.on('response', function(response) {
+        c.log.info('### ' + response.statusCode)
+        c.log.info('### ' + response.headers['content-type'])
+    })
+    req.form().append('file', fs.createReadStream(c.log.all))
+
+
+
+    // var tempFileName = 'tmp.log'
+    // var tempLogStream = fs.createWriteStream(tempFileName)
+    // tempLogStream.on('finish', function() {
+    //
+    //     var req = request.post({url: endpoint, strictSSL: true, json: true}, function (err, response, body) {
+    //         if (err) {
+    //             return c.log.error(err)
+    //         }
+    //         if (response.statusCode >= 300) {
+    //             c.log.error('Response status code >= 300')
+    //             return c.log.error(response)
+    //         }
+    //         if (!body.ok) {
+    //             return c.log.error(JSON.stringify(body, null, 4))
+    //         }
+    //     })
+    //     req.on('response', function(response) {
+    //         c.log.info('### ' + response.statusCode)
+    //         c.log.info('### ' + response.headers['content-type'])
+    //     })
+    //     req.form().append('file', fs.createReadStream(tempFileName))
+    // })
+    // tempLogStream.end(c.log.messages.map(function(msg) {return msg.ts + ' ' + msg.msg}).join('\n- '))
 }
 
 
@@ -219,16 +241,20 @@ slackbot.on('start', function() {
 })
 
 slackbot.on('open', function() {
-    c.log.info('Slackbot: Socket opened')
     isConnected = true
+    console.log('Slackbot: Socket opened')
+    // c.log.info('Slackbot: Socket opened')
+    slackbot.chatter(':up: ' + c.__SCREEN_ID + ' connected.')
+    // slackbot.chatter('X ' + c.__SCREEN_ID + ' hello, ' + slackbot.getUsers()._value.members.map(function(member) { return '@' + member.name }).join(' and '))
 })
 
 slackbot.on('close', function() {
     isConnected = false
     console.log('Slackbot: Socket closed')
+    slackbot.chatter(':down: Socket closed')
     c.log.error('Slackbot: Socket closed')
     setTimeout(function () {
-        slackbot = new SlackBot(slackbot_settings)
+        slackbot.connect()
     }, 1000)
 })
 
