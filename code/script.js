@@ -332,6 +332,7 @@ function run() {
 
 c.player_window = gui.Window.get()
 c.player_window.on('minimize', function() {
+    c.log.info('minimized.')
     c.player_window.restore()
 })
 
