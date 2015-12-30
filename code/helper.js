@@ -89,6 +89,8 @@ var dates = {
 
 
 
-module.exports.bytesToSize = bytesToSize
-module.exports.msToTime = msToTime
-module.exports.dates = dates
+module.exports = {
+    bytesToSize: bytesToSize,
+    msToTime: msToTime,
+    dates: dates
+}

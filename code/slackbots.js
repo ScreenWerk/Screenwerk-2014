@@ -227,6 +227,7 @@ slackbot.on('close', function() {
     isConnected = false
     setTimeout(function () {
         slackbot.connect()
+        slackbot.login()
     }, 5 * 60 * 1000)
 })
 
