@@ -101,6 +101,10 @@ c.log.setPrefix = function(prx) {
     c.log.infoFile = path.resolve(c.__LOG_DIR,  datestring + '_' + prx + '_' + 'info.log')
     c.log.warningFile = path.resolve(c.__LOG_DIR,  datestring + '_' + prx + '_' + 'warning.log')
     c.log.errorFile = path.resolve(c.__LOG_DIR,  datestring + '_' + prx + '_' + 'error.log')
+    c.log.all = path.resolve(c.__LOG_DIR,  datestring + '_' + prx + '_' + 'all.log')
+
+    datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '')
+    fsAppend(c.log.all, '\n\n## ' + datestring + ' ' + c.__APPLICATION_NAME + ' v.' + c.__VERSION + ' ##\n')
 
     var midnight = new Date()
     midnight.setHours(24,0,0,0)
@@ -117,8 +121,6 @@ var tick = function() {
 // tick()
 // c.log.error('test the errorz 2')
 
-var datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '')
-fsAppend(c.log.all, '\n\n## Start logging at ' + datestring + '= ' + c.__APPLICATION_NAME + ' v.' + c.__VERSION + ' ##\n')
 
 var slackbots       = require('./code/slackbots.js')
 var player          = require('./code/player.js')
