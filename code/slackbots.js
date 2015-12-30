@@ -215,20 +215,19 @@ slackbot.on('start', function() {
 
 slackbot.on('open', function() {
     isConnected = true
+    slackbot.chatter(':up: ' + c.__SCREEN_ID + ' connected')
     console.log('Slackbot: Socket opened')
     // c.log.info('Slackbot: Socket opened')
-    slackbot.chatter(':up: ' + c.__SCREEN_ID + ' connected.')
     // slackbot.chatter('X ' + c.__SCREEN_ID + ' hello, ' + slackbot.getUsers()._value.members.map(function(member) { return '@' + member.name }).join(' and '))
 })
 
 slackbot.on('close', function() {
+    slackbot.chatter(':-1: Socket closed')
+    c.log.info('Slackbot: Socket closed')
     isConnected = false
-    console.log('Slackbot: Socket closed')
-    slackbot.chatter(':down: Socket closed')
-    c.log.error('Slackbot: Socket closed')
     setTimeout(function () {
         slackbot.connect()
-    }, 30 * 1000)
+    }, 5 * 60 * 1000)
 })
 
 slackbot.on('message', function(message) {
