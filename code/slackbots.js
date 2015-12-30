@@ -193,6 +193,9 @@ function upgrade(upgradeType) {
     var child_process = require('child_process')
 
     fs.open(c.flagFile, 'w', function(err, fd) {
+        if (err) {
+            c.log.error(JSON.stringify(err))
+        }
         fs.watchFile(c.flagFile, function (curr, prev) {
             c.log.info(c.flagFile, curr, prev)
             if (curr.ino === 0) { process.exit(0) }
