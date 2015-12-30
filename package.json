@@ -1,7 +1,7 @@
 {
   "name": "ScreenWerk-2014",
   "description": "Digital signage made simple!",
-  "version": "1.0.2-test45",
+  "version": "1.0.2-test46",
   "main": "./index.html",
   "license": "CC-SA",
   "private": true,
@@ -22,7 +22,7 @@
   },
   "window": {
     "icon": "./imgs/sw-p512.png",
-    "show_in_taskbar": true,
+    "show_in_taskbar": false,
     "toolbar": false,
     "frame": false,
     "show": false,
