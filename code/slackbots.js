@@ -215,7 +215,7 @@ slackbot.on('start', function() {
 
 slackbot.on('open', function() {
     isConnected = true
-    slackbot.chatter(':up: ' + c.__SCREEN_ID + ' connected')
+    slackbot.chatter(':+1: connected')
     console.log('Slackbot: Socket opened')
     // c.log.info('Slackbot: Socket opened')
     // slackbot.chatter('X ' + c.__SCREEN_ID + ' hello, ' + slackbot.getUsers()._value.members.map(function(member) { return '@' + member.name }).join(' and '))
