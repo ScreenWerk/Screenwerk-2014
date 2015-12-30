@@ -69,7 +69,7 @@ c.log.errorFile = path.resolve(c.__LOG_DIR, 'error.log')
 c.log.append = function(message, channel, datestring) {
     if (!datestring) { // Having a timestamp here indicates we have this message already listed
         datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '')
-        fsAppend(c.log.all, datestring + ' ' + channel + ' ' + message)
+        fsAppend(c.log.all, '- ' + datestring + ' ' + channel + ' ' + message)
         c.log.messages.push({ts:datestring, ch:channel, msg:message})
     }
     if (!c.__SCREEN_ID) {
@@ -110,7 +110,7 @@ var tick = function() {
 // c.log.error('test the errorz 2')
 
 var datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '')
-c.log.info('\n\n## Start logging at ' + datestring + '= ' + c.__APPLICATION_NAME + ' v.' + c.__VERSION + ' ##\n')
+fsAppend(c.log.all, '\n\n## Start logging at ' + datestring + '= ' + c.__APPLICATION_NAME + ' v.' + c.__VERSION + ' ##\n')
 
 var slackbots       = require('./code/slackbots.js')
 var player          = require('./code/player.js')

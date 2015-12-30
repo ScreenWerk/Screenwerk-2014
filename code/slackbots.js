@@ -148,31 +148,6 @@ slackbot.uploadLog = function uploadLog() {
     })
     req.form().append('file', fs.createReadStream(c.log.all))
 
-
-
-    // var tempFileName = 'tmp.log'
-    // var tempLogStream = fs.createWriteStream(tempFileName)
-    // tempLogStream.on('finish', function() {
-    //
-    //     var req = request.post({url: endpoint, strictSSL: true, json: true}, function (err, response, body) {
-    //         if (err) {
-    //             return c.log.error(err)
-    //         }
-    //         if (response.statusCode >= 300) {
-    //             c.log.error('Response status code >= 300')
-    //             return c.log.error(response)
-    //         }
-    //         if (!body.ok) {
-    //             return c.log.error(JSON.stringify(body, null, 4))
-    //         }
-    //     })
-    //     req.on('response', function(response) {
-    //         c.log.info('### ' + response.statusCode)
-    //         c.log.info('### ' + response.headers['content-type'])
-    //     })
-    //     req.form().append('file', fs.createReadStream(tempFileName))
-    // })
-    // tempLogStream.end(c.log.messages.map(function(msg) {return msg.ts + ' ' + msg.msg}).join('\n- '))
 }
 
 
