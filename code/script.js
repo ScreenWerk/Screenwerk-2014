@@ -49,10 +49,12 @@ var ravenClient = new raven.Client(
 )
 ravenClient.patchGlobal()
 
+c.isWin = /^win/.test(process.platform)
+c.nl = '\n' + (c.isWin ? '\r' : '')
 function fsAppend(filePath, data) {
     fs.open(filePath, 'a', function(err, fd) {
         if (err) { return console.log('fs.open err', err) }
-        fs.write(fd, data + '\n', function(err) {
+        fs.write(fd, data + c.nl, function(err) {
             if (err) { return console.log('fs.write err', err) }
             fs.close(fd)
         })
@@ -331,10 +333,6 @@ function run() {
 
 
 c.player_window = gui.Window.get()
-c.player_window.on('minimize', function() {
-    c.log.info('minimized.')
-    c.player_window.restore()
-})
 
 if (c.__DEBUG_MODE) {
     c.log.info ( 'launching in debug mode')
@@ -363,6 +361,10 @@ fs.readdirSync(c.homePath).forEach(function scanHome(filename) {
 })
 
 var first_load = true
+c.player_window.on('minimize', function() {
+    c.log.info('minimized.')
+    c.player_window.restore()
+})
 c.player_window.on('loaded', function playerWindowLoaded() {
     document.body.style.cursor = 'normal'
     document.body.style.cursor = 'none'

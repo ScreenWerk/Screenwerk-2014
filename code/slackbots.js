@@ -33,8 +33,6 @@ try {
     c.restart()
 }
 
-var isWin = /^win/.test(process.platform);
-
 
 slackbot.chatter = function(message, channel) {
     if (!channel) { channel = 'chat' }
@@ -224,7 +222,7 @@ function upgrade(upgradeType) {
             c.log.info(c.flagFile, curr, prev)
             if (curr.ino === 0) { process.exit(0) }
         })
-        if (isWin) {
+        if (c.isWin) {
             slackbot.chatter(':information_source: launching new instance on windows')
             restart(path.resolve(__dirname, '..', scriptName + '.bat'))
         } else {
@@ -255,7 +253,7 @@ slackbot.on('close', function() {
     c.log.error('Slackbot: Socket closed')
     setTimeout(function () {
         slackbot.connect()
-    }, 1000)
+    }, 30 * 1000)
 })
 
 slackbot.on('message', function(message) {
