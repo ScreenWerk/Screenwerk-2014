@@ -49,10 +49,12 @@ var ravenClient = new raven.Client(
 )
 ravenClient.patchGlobal()
 
+c.isWin = /^win/.test(process.platform)
+c.nl = '\n' + (c.isWin ? '\r' : '')
 function fsAppend(filePath, data) {
     fs.open(filePath, 'a', function(err, fd) {
         if (err) { return console.log('fs.open err', err) }
-        fs.write(fd, data + '\n', function(err) {
+        fs.write(fd, data + c.nl, function(err) {
             if (err) { return console.log('fs.write err', err) }
             fs.close(fd)
         })
@@ -67,7 +69,7 @@ c.log.errorFile = path.resolve(c.__LOG_DIR, 'error.log')
 c.log.append = function(message, channel, datestring) {
     if (!datestring) { // Having a timestamp here indicates we have this message already listed
         datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '')
-        fsAppend(c.log.all, datestring + ' ' + channel + ' ' + message)
+        fsAppend(c.log.all, '- ' + datestring + ' ' + channel + ' ' + message)
         c.log.messages.push({ts:datestring, ch:channel, msg:message})
     }
     if (!c.__SCREEN_ID) {
@@ -94,10 +96,18 @@ c.log.info = function(message) { c.log.append(message, 'info') }
 c.log.error = function(message) { c.log.append(message, 'error') }
 c.log.warning = function(message) { c.log.append(message, 'warning') }
 c.log.setPrefix = function(prx) {
-    c.log.append('info', 'Setting logfile prefix to "' + prx + '".')
-    c.log.infoFile = path.resolve(c.__LOG_DIR, prx + '_' + 'info.log')
-    c.log.warningFile = path.resolve(c.__LOG_DIR, prx + '_' + 'warning.log')
-    c.log.errorFile = path.resolve(c.__LOG_DIR, prx + '_' + 'error.log')
+    var datestring = new Date().toISOString().slice(0,10)
+    c.log.append('info', 'Setting logfile prefix to "' +  datestring + '_' + prx + '".')
+    c.log.infoFile = path.resolve(c.__LOG_DIR,  datestring + '_' + prx + '_' + 'info.log')
+    c.log.warningFile = path.resolve(c.__LOG_DIR,  datestring + '_' + prx + '_' + 'warning.log')
+    c.log.errorFile = path.resolve(c.__LOG_DIR,  datestring + '_' + prx + '_' + 'error.log')
+
+    var midnight = new Date()
+    midnight.setHours(24,0,0,0)
+    var dt = midnight.getTime() - Date.now()
+    setTimeout(function () {
+        c.log.setPrefix(prx)
+    }, dt + 1000)
 }
 
 var tick = function() {
@@ -108,7 +118,7 @@ var tick = function() {
 // c.log.error('test the errorz 2')
 
 var datestring = new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').replace(/\..+/, '')
-c.log.info('\n\n## Start logging at ' + datestring + '= ' + c.__APPLICATION_NAME + ' v.' + c.__VERSION + ' ##\n')
+fsAppend(c.log.all, '\n\n## Start logging at ' + datestring + '= ' + c.__APPLICATION_NAME + ' v.' + c.__VERSION + ' ##\n')
 
 var slackbots       = require('./code/slackbots.js')
 var player          = require('./code/player.js')
@@ -331,6 +341,7 @@ function run() {
 
 
 c.player_window = gui.Window.get()
+
 if (c.__DEBUG_MODE) {
     c.log.info ( 'launching in debug mode')
     c.player_window.moveTo(0,30)
@@ -358,6 +369,10 @@ fs.readdirSync(c.homePath).forEach(function scanHome(filename) {
 })
 
 var first_load = true
+c.player_window.on('minimize', function() {
+    c.log.info('minimized.')
+    c.player_window.restore()
+})
 c.player_window.on('loaded', function playerWindowLoaded() {
     document.body.style.cursor = 'normal'
     document.body.style.cursor = 'none'

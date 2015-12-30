@@ -33,8 +33,6 @@ try {
     c.restart()
 }
 
-var isWin = /^win/.test(process.platform);
-
 
 slackbot.chatter = function(message, channel) {
     if (!channel) { channel = 'chat' }
@@ -150,31 +148,6 @@ slackbot.uploadLog = function uploadLog() {
     })
     req.form().append('file', fs.createReadStream(c.log.all))
 
-
-
-    // var tempFileName = 'tmp.log'
-    // var tempLogStream = fs.createWriteStream(tempFileName)
-    // tempLogStream.on('finish', function() {
-    //
-    //     var req = request.post({url: endpoint, strictSSL: true, json: true}, function (err, response, body) {
-    //         if (err) {
-    //             return c.log.error(err)
-    //         }
-    //         if (response.statusCode >= 300) {
-    //             c.log.error('Response status code >= 300')
-    //             return c.log.error(response)
-    //         }
-    //         if (!body.ok) {
-    //             return c.log.error(JSON.stringify(body, null, 4))
-    //         }
-    //     })
-    //     req.on('response', function(response) {
-    //         c.log.info('### ' + response.statusCode)
-    //         c.log.info('### ' + response.headers['content-type'])
-    //     })
-    //     req.form().append('file', fs.createReadStream(tempFileName))
-    // })
-    // tempLogStream.end(c.log.messages.map(function(msg) {return msg.ts + ' ' + msg.msg}).join('\n- '))
 }
 
 
@@ -224,7 +197,7 @@ function upgrade(upgradeType) {
             c.log.info(c.flagFile, curr, prev)
             if (curr.ino === 0) { process.exit(0) }
         })
-        if (isWin) {
+        if (c.isWin) {
             slackbot.chatter(':information_source: launching new instance on windows')
             restart(path.resolve(__dirname, '..', scriptName + '.bat'))
         } else {
@@ -242,20 +215,19 @@ slackbot.on('start', function() {
 
 slackbot.on('open', function() {
     isConnected = true
+    slackbot.chatter(':up: ' + c.__SCREEN_ID + ' connected')
     console.log('Slackbot: Socket opened')
     // c.log.info('Slackbot: Socket opened')
-    slackbot.chatter(':up: ' + c.__SCREEN_ID + ' connected.')
     // slackbot.chatter('X ' + c.__SCREEN_ID + ' hello, ' + slackbot.getUsers()._value.members.map(function(member) { return '@' + member.name }).join(' and '))
 })
 
 slackbot.on('close', function() {
+    slackbot.chatter(':-1: Socket closed')
+    c.log.info('Slackbot: Socket closed')
     isConnected = false
-    console.log('Slackbot: Socket closed')
-    slackbot.chatter(':down: Socket closed')
-    c.log.error('Slackbot: Socket closed')
     setTimeout(function () {
         slackbot.connect()
-    }, 1000)
+    }, 5 * 60 * 1000)
 })
 
 slackbot.on('message', function(message) {
