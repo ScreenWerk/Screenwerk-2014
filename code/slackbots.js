@@ -161,13 +161,7 @@ function restart(launcherCommand) {
 
     var child_process = require('child_process')
 
-    fs.open(c.flagFile, 'w', function(err, fd) {
-        fs.watchFile(c.flagFile, function (curr, prev) {
-            c.log.info(c.flagFile, curr, prev)
-            if (curr.ino === 0) { process.exit(0) }
-        })
-        child_process.exec(launcherCommand)
-    })
+    child_process.exec(launcherCommand)
 }
 
 function mambojambo() {
@@ -190,22 +184,13 @@ function upgrade(upgradeType) {
         return mambojambo()
     }
 
-    var child_process = require('child_process')
-
-    fs.open(c.flagFile, 'w', function(err, fd) {
-        fs.watchFile(c.flagFile, function (curr, prev) {
-            c.log.info(c.flagFile, curr, prev)
-            if (curr.ino === 0) { process.exit(0) }
-        })
-        if (c.isWin) {
-            slackbot.chatter(':information_source: launching new instance on windows')
-            restart(path.resolve(__dirname, '..', scriptName + '.bat'))
-        } else {
-            slackbot.chatter(':information_source: launching new instance on linux')
-            restart('. ' + path.resolve(__dirname, '..', scriptName + '.sh'))
-        }
-    })
-
+    if (c.isWin) {
+        slackbot.chatter(':information_source: launching new instance on windows')
+        restart(path.resolve(__dirname, '..', scriptName + '.bat'))
+    } else {
+        slackbot.chatter(':information_source: launching new instance on linux')
+        restart('. ' + path.resolve(__dirname, '..', scriptName + '.sh'))
+    }
 }
 
 
@@ -215,17 +200,19 @@ slackbot.on('start', function() {
 
 slackbot.on('open', function() {
     isConnected = true
-    slackbot.chatter(':+1: connected')
+    // slackbot.chatter(':+1: connected')
     console.log('Slackbot: Socket opened')
     // c.log.info('Slackbot: Socket opened')
     // slackbot.chatter('X ' + c.__SCREEN_ID + ' hello, ' + slackbot.getUsers()._value.members.map(function(member) { return '@' + member.name }).join(' and '))
 })
 
+var connTo
 slackbot.on('close', function() {
-    slackbot.chatter(':-1: Socket closed')
+    slackbot.chatter(':-1: Socket closed', 'spam')
     c.log.info('Slackbot: Socket closed')
     isConnected = false
-    setTimeout(function () {
+    clearTimeout(connTo)
+    connTo = setTimeout(function () {
         slackbot.connect()
         slackbot.login()
     }, 5 * 60 * 1000)

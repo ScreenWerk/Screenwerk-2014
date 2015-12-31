@@ -20,6 +20,7 @@ c.slackChannels = {
     'log': 'logs',
     'warning': 'alerts',
     'error': 'alerts',
+    'spam': 'spam',
     'debug': 'test'
 }
 
