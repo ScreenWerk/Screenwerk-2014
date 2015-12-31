@@ -200,17 +200,19 @@ slackbot.on('start', function() {
 
 slackbot.on('open', function() {
     isConnected = true
-    slackbot.chatter(':+1: connected')
+    // slackbot.chatter(':+1: connected')
     console.log('Slackbot: Socket opened')
     // c.log.info('Slackbot: Socket opened')
     // slackbot.chatter('X ' + c.__SCREEN_ID + ' hello, ' + slackbot.getUsers()._value.members.map(function(member) { return '@' + member.name }).join(' and '))
 })
 
+var connTo
 slackbot.on('close', function() {
-    slackbot.chatter(':-1: Socket closed')
+    slackbot.chatter(':-1: Socket closed', 'spam')
     c.log.info('Slackbot: Socket closed')
     isConnected = false
-    setTimeout(function () {
+    clearTimeout(connTo)
+    connTo = setTimeout(function () {
         slackbot.connect()
         slackbot.login()
     }, 5 * 60 * 1000)
