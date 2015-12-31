@@ -161,13 +161,7 @@ function restart(launcherCommand) {
 
     var child_process = require('child_process')
 
-    fs.open(c.flagFile, 'w', function(err, fd) {
-        fs.watchFile(c.flagFile, function (curr, prev) {
-            c.log.info(c.flagFile, curr, prev)
-            if (curr.ino === 0) { process.exit(0) }
-        })
-        child_process.exec(launcherCommand)
-    })
+    child_process.exec(launcherCommand)
 }
 
 function mambojambo() {
@@ -190,25 +184,13 @@ function upgrade(upgradeType) {
         return mambojambo()
     }
 
-    var child_process = require('child_process')
-
-    fs.open(c.flagFile, 'w', function(err, fd) {
-        if (err) {
-            c.log.error(JSON.stringify(err))
-        }
-        fs.watchFile(c.flagFile, function (curr, prev) {
-            c.log.info(c.flagFile, curr, prev)
-            if (curr.ino === 0) { process.exit(0) }
-        })
-        if (c.isWin) {
-            slackbot.chatter(':information_source: launching new instance on windows')
-            restart(path.resolve(__dirname, '..', scriptName + '.bat'))
-        } else {
-            slackbot.chatter(':information_source: launching new instance on linux')
-            restart('. ' + path.resolve(__dirname, '..', scriptName + '.sh'))
-        }
-    })
-
+    if (c.isWin) {
+        slackbot.chatter(':information_source: launching new instance on windows')
+        restart(path.resolve(__dirname, '..', scriptName + '.bat'))
+    } else {
+        slackbot.chatter(':information_source: launching new instance on linux')
+        restart('. ' + path.resolve(__dirname, '..', scriptName + '.sh'))
+    }
 }
 
 
