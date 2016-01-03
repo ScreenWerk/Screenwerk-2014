@@ -215,7 +215,7 @@ slackbot.on('close', function() {
     connTo = setTimeout(function () {
         slackbot.connect()
         slackbot.login()
-    }, 5 * 60 * 1000)
+    }, 15 * 60e3)
 })
 
 slackbot.on('message', function(message) {
