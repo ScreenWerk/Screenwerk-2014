@@ -1,3 +1,4 @@
+cd %~dp0
 git checkout --force release
 git pull
 call npm update
