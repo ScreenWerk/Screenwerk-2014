@@ -213,8 +213,8 @@ slackbot.on('close', function() {
     isConnected = false
     clearTimeout(connTo)
     connTo = setTimeout(function () {
-        slackbot.connect()
-        // slackbot.login()
+        // slackbot.connect()
+        slackbot.login()
     }, 20 * 60e3)
 })
 
