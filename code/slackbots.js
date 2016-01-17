@@ -7,10 +7,10 @@ var SlackUp     = require('node-slack-upload')
 
 
 // TODO: Token for 'noise' has to be read from Entu screen
-var token = 'xoxb-12801543831-Bx3UtMRBeDoTMj3eX8d9HsIk'
+var token = 'xoxb-12801543831-1bwcwCcEfoq6uTl6qKgp6d41'
 
 // TODO: Token for 'alerts' webhook has to be read from Entu customer
-var token = 'xoxb-12801543831-Bx3UtMRBeDoTMj3eX8d9HsIk'
+// var token = 'xoxb-12801543831-1bwcwCcEfoq6uTl6qKgp6d41'
 
 var c = require('./c.js')
 var isConnected = false
