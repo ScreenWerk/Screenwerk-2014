@@ -353,8 +353,26 @@ if (c.__DEBUG_MODE) {
     c.player_window.showDevTools()
 } else {
     c.log.info ( 'launching in fullscreen mode')
-    c.player_window.moveTo(window.screen.width * (c.__SCREEN - 1) + 1, 30)
-    c.player_window.isFullscreen = true
+    // c.player_window.moveTo(window.screen.width * (c.__SCREEN - 1) + 1, 30)
+    // c.player_window.isFullscreen = true
+
+    gui.Screen.Init()
+    win = gui.Window.get()
+    if (win.x < gui.Screen.screens[c.__SCREEN -1].work_area.x) {
+        win.x = gui.Screen.screens[c.__SCREEN -1].work_area.x + win.x
+        win.isFullscreen = true
+    }
+    var screenCB = {
+        onDisplayAdded : function(screen) {
+            win = gui.Window.get()
+            if (win.x < screen.work_area.x) {
+                win.x = screen.work_area.x + win.x
+            }
+            win.isFullscreen = true
+        }
+    }
+    gui.Screen.on('displayAdded', screenCB.onDisplayAdded)
+
 }
 var nativeMenuBar = new gui.Menu({ type: 'menubar' })
 try {
