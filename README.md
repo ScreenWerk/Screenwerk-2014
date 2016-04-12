@@ -61,6 +61,8 @@ If you want to make sure that you are always running latest player, use a launch
 - Mac [0.2.0-beta.2.1](https://github.com/argoroots/Screenwerk/releases/download/0.2.0-beta.2.1/Screenwerk.dmg)
 
 
+[![Join the chat at https://gitter.im/argoroots/Screenwerk](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/argoroots/Screenwerk?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 ### Important notes
 > SW14 uses node-webkit >= v0.10.5
 > Out of the box SW14 supports only webm video type.
