@@ -13,6 +13,9 @@ var c               = require('./code/c.js')
 var configuration   = require('./code/configuration.json')
 
 
+console.log('hello')
+process.stdout.write('hi, too\n')
+
 c.__VERSION = gui.App.manifest.version
 c.__APPLICATION_NAME = gui.App.manifest.name
 c.slackChannels = {
@@ -124,7 +127,7 @@ var tick = function() {
 // c.log.error('test the errorz 2')
 
 
-var slackbots       = require('./code/slackbots.js')
+// var slackbots       = require('./code/slackbots.js')
 var player          = require('./code/player.js')
 var digest          = require('./code/digest.js')
 var loader          = require('./code/loader.js')
@@ -319,9 +322,8 @@ function run() {
             // alert('Result: ' + (result.result.properties.published))
             remote_published = new Date(Date.parse(result.result.properties.published.values[0].value))
             c.__SCREEN_NAME = op.get(result, ['result', 'properties', 'name', 'values', 0, 'value'])
-            c.log.info(c.__SCREEN_NAME)
+            c.log.info(c.__SCREEN_NAME + ' published at ' + remote_published)
 
-            // slackbots.chatter(':up: ' + c.__SCREEN_NAME)
             fs.unlink(c.flagFile, function(err) {
                 if (err) {}
             })
@@ -352,14 +354,16 @@ if (c.__DEBUG_MODE) {
     c.player_window.isFullscreen = false
     c.player_window.showDevTools()
 } else {
-    c.log.info ( 'launching in fullscreen mode')
+    // c.log.info ( 'launching in fullscreen mode')
     // c.player_window.moveTo(window.screen.width * (c.__SCREEN - 1) + 1, 30)
     // c.player_window.isFullscreen = true
 
     gui.Screen.Init()
     win = gui.Window.get()
-    if (win.x < gui.Screen.screens[c.__SCREEN -1].work_area.x) {
-        win.x = gui.Screen.screens[c.__SCREEN -1].work_area.x + win.x
+    var screenNo = Math.min(c.__SCREEN - 1, gui.Screen.screens.length - 1)
+    // process.stdout.write('screens: ' + JSON.stringify(gui.Screen.screens, null, 4) + ' scno: ' + screenNo)
+    if (win.x < gui.Screen.screens[screenNo].work_area.x) {
+        win.x = gui.Screen.screens[screenNo].work_area.x + win.x
         win.isFullscreen = true
     }
     var screenCB = {
@@ -403,6 +407,7 @@ c.player_window.on('loaded', function playerWindowLoaded() {
     if (!first_load) {
         return
     }
+    // process.stdout.write(JSON.stringify(c, null, 4) + '\n\n')
     first_load = false
     c.player_window.show()
     c.player_window.focus()
@@ -430,6 +435,7 @@ c.player_window.on('loaded', function playerWindowLoaded() {
             run()
         })
     }
+    process.stdout.write(JSON.stringify({UUIDs:uuids, ID:c.__SCREEN_ID, KEY:c.__API_KEY.toString()}) + '\n\n');
 })
 
 
@@ -451,69 +457,6 @@ function startDigester(err, data) {
     }
     window.c.log.info('Reached stable state. Flushing metadata and starting preprocessing elements.')
     fs.writeFileSync('elements.debug.json', stringifier(loader.swElementsById))
-
-
-    // var doTimeout = function() {
-    //     player.tcIncr()
-    //     CheckInToEntu(null, 'last-update', function CheckInCB(err, interval, sw_screen) {
-    //         if (err) {
-    //             c.log.info(err)
-    //         }
-    //         // c.log.info('"Last updated" registered with interval ' + helper.msToTime(interval) + ' ' + interval)
-    //         var color = 'green'
-    //         if (1000 * c.__UPDATE_INTERVAL_SECONDS / interval < 0.9) {
-    //             color = 'orange'
-    //         } else if (1000 * c.__UPDATE_INTERVAL_SECONDS / interval < 0.3) {
-    //             color = 'red'
-    //         }
-    //
-    //         if (sw_screen.result.properties['health'].values !== undefined) {
-    //             sw_screen.result.properties['health'].values.forEach(function(item) {
-    //                 EntuLib.removeProperty(c.__SCREEN_ID, 'sw-screen-' + 'health', item.id, function(err, sw_screen) {
-    //                     if (err) {
-    //                         c.log.info('RegisterHealth err:', (item), (err), (sw_screen))
-    //                     }
-    //                 })
-    //             })
-    //         }
-    //
-    //         var options = {'health': '<span style="color:' + color + ';">' + helper.msToTime(interval) + '</span>'}
-    //         EntuLib.addProperties(c.__SCREEN_ID, 'sw-screen', options, function(err, data) {
-    //             if (err) {
-    //                 c.log.info('RegisterHealth err:', (err))
-    //             }
-    //         })
-    //     })
-    //     setTimeout(function() {
-    //         // c.log.info('RRRRRRRRRRR: Pinging Entu for news.')
-    //         EntuLib.getEntity(c.__SCREEN_ID, function(err, result) {
-    //             if (err) {
-    //                 c.log.info('Can\'t reach Entu', err, result)
-    //             }
-    //             else if (result.error !== undefined) {
-    //                 c.log.info ('Failed to load from Entu.', result)
-    //             } else {
-    //                 remote_published = new Date(Date.parse(result.result.properties.published.values[0].value))
-    //                 // c.log.info('Remote published: ', remote_published.toJSON())
-    //             }
-    //
-    //             if (remote_published
-    //                 && local_published.toJSON() !== remote_published.toJSON()
-    //                 && (new Date()).toJSON() > remote_published.toJSON()
-    //                 ) {
-    //                 c.log.info('Remove local content. Fetch new from Entu!')
-    //                 player.clearSwTimeouts()
-    //                 local_published = new Date(Date.parse(remote_published.toJSON()))
-    //                 loader.reloadMeta(null, startDigester)
-    //             } else {
-    //                 doTimeout()
-    //                 // loader.loadMeta(null, null, c.__SCREEN_ID, c.__STRUCTURE, startDigester)
-    //             }
-    //         })
-    //     }, 1000 * c.__UPDATE_INTERVAL_SECONDS)
-    //     // c.log.info('RRRRRRRRRRR: Check for news scheduled in ' + c.__UPDATE_INTERVAL_SECONDS + ' seconds.')
-    // }
-    // doTimeout()
 
 
     function flushMeta(err) {

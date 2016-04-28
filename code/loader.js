@@ -17,7 +17,7 @@ var entulib         = require('../code/entulib.js')
 var stringifier     = require('../code/stringifier.js')
 var c               = require('../code/c.js')
 var helper          = require('../code/helper.js')
-var slackbots       = require('../code/slackbots.js')
+// var slackbots       = require('../code/slackbots.js')
 
 var document = window.document
 
@@ -133,24 +133,6 @@ function loadMedia(err, entity_id, file_value, loadMediaCallback) {
 var swElements = []
 var swElementsById = {}
 
-// function unregisterMeta(err, eidx, callback) {
-//     var eid = swElements[eidx].id
-//     c.log.info('UNREGISTER ' + eid)
-//     if (eid === c.__SCREEN_ID) {
-//         callback('Screen has no content. Everything expired?', eid)
-//         process.exit(99)
-//     }
-//     if (swElementsById[eid] === undefined) {
-//         callback('Entity absent. Already unregistered?', eid)
-//         return
-//     }
-//     var parent_eid = swElementsById[eid].parents[0]
-//     // c.log.info(swElementsById[eid], swElementsById[parent_eid], parent_eid)
-//     swElementsById[parent_eid].childs.splice(swElementsById[parent_eid].childs.indexOf(eid), 1)
-//     swElements.splice(eidx, 1)
-//     delete swElementsById[eid]
-//     callback()
-// }
 
 // Integrity check and element validation
 function registerMeta(err, metadata, callback) {
@@ -265,9 +247,12 @@ function reloadMeta(err, callback) {
 //
 // Load metafiles.
 // Fetch only if not present
+var EntuLib
 function loadMeta(err, parent_eid, eid, struct_node, callback) {
-    var EntuLib = entulib(c.__SCREEN_ID, c.__API_KEY, c.__HOSTNAME)
-    // c.log.info('initialize EntuLib with ' + c.__SCREEN_ID + '|' + c.__API_KEY + '|' + c.__HOSTNAME)
+    if (!EntuLib) {
+        EntuLib = entulib(c.__SCREEN_ID, c.__API_KEY, c.__HOSTNAME)
+        c.log.info('initialize EntuLib with ' + c.__SCREEN_ID + '|' + c.__API_KEY + '|' + c.__HOSTNAME)
+    }
     // c.log.info('loadMeta: ', eid, struct_node)
     incrementProcessCount()
     if (err) {
@@ -282,9 +267,10 @@ function loadMeta(err, parent_eid, eid, struct_node, callback) {
 
     fs.readFile(meta_path, function(err, data) {
         if (err) {
+            c.log.info('fetch ' + eid + ' from Entu')
             EntuLib.getEntity(eid, function(err, result) {
                 if (err) {
-                    c.log.info(definition + ': ' + (result), err, result)
+                    c.log.info(definition + ':' + eid + ' ' + (result), err, result)
                     callback(err)
                     decrementProcessCount()
                     return
@@ -297,9 +283,10 @@ function loadMeta(err, parent_eid, eid, struct_node, callback) {
                     var properties = result.result.properties
                     if (properties.animate !== undefined && properties.animate.values !== undefined) {
                         var animation_eid = properties.animate.values[0].db_value
+                        c.log.info('fetch aid ' + animation_eid + ' from Entu')
                         EntuLib.getEntity(animation_eid, function(err, animate_result) {
                             if (err) {
-                                c.log.info(definition + ': ' + (animate_result), err, animate_result)
+                                c.log.info(definition + ':' + eid + ' ' + (animate_result), err, animate_result)
                                 callback(err)
                                 decrementProcessCount()
                                 return
