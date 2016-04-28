@@ -15,14 +15,6 @@ var configuration   = require('./code/configuration.json')
 
 c.__VERSION = gui.App.manifest.version
 c.__APPLICATION_NAME = gui.App.manifest.name
-c.slackChannels = {
-    'chat': 'test',
-    'log': 'logs',
-    'warning': 'alerts',
-    'error': 'alerts',
-    'spam': 'spam',
-    'debug': 'test'
-}
 
 c.homePath = path.join((process.env.HOMEDRIVE + process.env.HOMEPATH) || process.env.HOME, c.__APPLICATION_NAME)
 if (!fs.existsSync(c.homePath)) { fs.mkdirSync(c.homePath) }
@@ -87,11 +79,6 @@ c.log.append = function(message, channel, datestring) {
     fsAppend(c.log.infoFile, datestring + ' ' + channel + ' ' + message)
     if (channel === 'error') {
         fsAppend(c.log.errorFile, datestring + ' ' + channel + ' ' + message + '\n' + (new Error()).stack)
-        if (slackbots) { slackbots.chatter(message + '\n' + (new Error()).stack, 'error') }
-        else {
-            c.log.info('Timeouting error message - Slackbot not available:\n' + (new Error()).stack)
-            setTimeout(function() { c.log.append(message, channel, datestring) }, 1000)
-        }
     }
 }
 c.log.info = function(message) { c.log.append(message, 'info') }
@@ -124,7 +111,6 @@ var tick = function() {
 // c.log.error('test the errorz 2')
 
 
-var slackbots       = require('./code/slackbots.js')
 var player          = require('./code/player.js')
 var digest          = require('./code/digest.js')
 var loader          = require('./code/loader.js')
@@ -224,7 +210,6 @@ var EntuLib, local_published, remote_published
 // Essential configuration has been successfully loaded
 //
 function run() {
-    // slackbots.chatter(':up:')
 
     if (!c.__SCREEN_ID) {
         c.terminate('Missing screen ID, blame programmer.\nExiting.')
@@ -321,7 +306,6 @@ function run() {
             c.__SCREEN_NAME = op.get(result, ['result', 'properties', 'name', 'values', 0, 'value'])
             c.log.info(c.__SCREEN_NAME)
 
-            // slackbots.chatter(':up: ' + c.__SCREEN_NAME)
             fs.unlink(c.flagFile, function(err) {
                 if (err) {}
             })

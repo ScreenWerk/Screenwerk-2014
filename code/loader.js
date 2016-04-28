@@ -17,7 +17,6 @@ var entulib         = require('../code/entulib.js')
 var stringifier     = require('../code/stringifier.js')
 var c               = require('../code/c.js')
 var helper          = require('../code/helper.js')
-var slackbots       = require('../code/slackbots.js')
 
 var document = window.document
 
@@ -111,8 +110,6 @@ function loadMedia(err, entity_id, file_value, loadMediaCallback) {
                         fs.rename(download_filename, filename)
                     } catch (e) {
                         c.log.info('CRITICAL: Messed up with parallel downloading of ' + filename + '. Cleanup and relaunch, please. Closing down.', e)
-                        slackbots.error('CRITICAL: Messed up with parallel downloading of ' + filename + '. Cleanup and relaunch, please. Closing down.')
-                        slackbots.uploadLog()
                         process.exit(99)
                     }
                     decrementProcessCount()
