@@ -1,7 +1,8 @@
 sw-media/*
 sw-meta/*
-node_modules
+bin/*
+
 *.log
 *.uuid
+
 elements.debug.json
-bin/*
