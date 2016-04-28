@@ -17,7 +17,7 @@ var helper          = require('../code/helper.js')
 var document = window.document
 // var update_interval_ms = 10 * 60 * 1000 // set default update interval to 10 minutes
 
-// c.log.info('Load function processElements')
+c.log.info('Load function processElements')
 function processElements(err, callback) {
     if (err) {
         c.log.info('processElements err:', err)
@@ -146,7 +146,7 @@ function processElements(err, callback) {
     })
 }
 
-// c.log.info('Load function buildDom')
+c.log.info('Load function buildDom')
 function buildDom(err, callback) {
     if (err) {
         c.log.info('buildDom err:', err)

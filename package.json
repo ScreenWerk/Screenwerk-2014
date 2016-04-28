@@ -1,7 +1,7 @@
 {
   "name": "ScreenWerk-2014",
   "description": "Digital signage made simple!",
-  "version": "1.0.2-test59",
+  "version": "1.0.2-test58",
   "main": "./index.html",
   "license": "CC-SA",
   "private": true,
