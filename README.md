@@ -21,10 +21,10 @@
 ### Add Task to autostart on logon from lockscreen, startup and sleep
 
 1. Open `Task Scheduler`
-2. Add new task to start `screenwerk.exe` on user logon  
->  Trigger 1 : On workstation unlock  
-Trigger 2 : At log on  
-Actions : open screenwerk.exe
+2. Add new task to start `screenwerk.exe` on user logon   
+   >Trigger 1 : On workstation unlock  
+   >Trigger 2 : At log on  
+   >Actions : open screenwerk.exe
 
 ### Add exception for windows to enable screensaver when video is playing (32bit)
 1. Open elevated `CMD` (run as Administrator)
