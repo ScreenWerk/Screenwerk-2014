@@ -22,7 +22,7 @@
 
 1. Open `Task Scheduler`
 2. Add new task to start `screenwerk.exe` on user logon  
->Trigger 1 : On workstation unlock  
+>  Trigger 1 : On workstation unlock  
 Trigger 2 : At log on  
 Actions : open screenwerk.exe
 
