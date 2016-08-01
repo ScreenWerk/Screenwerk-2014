@@ -4,6 +4,11 @@
 [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/argoroots/Screenwerk?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 [![Dependency Status](https://david-dm.org/mitselek/screenwerk.svg)](https://david-dm.org/mitselek/screenwerk)
 
+#!NB
+Development of this project is discontinued.  
+Get a new wersion from [ScreenWerk 2016](https://github.com/mitselek/Screenwerk-2016)
+
+
 ## Setup
 
 1. **Git** - Download and install git version control system from https://git-scm.com/download
@@ -55,6 +60,9 @@ If you want to make sure that you are always running latest player, use a launch
 - **Git** - https://git-scm.com/download  
 
 ## Latest installers
+###!NB
+Development of this project is discontinued.  
+Get a new wersion from [ScreenWerk 2016](https://github.com/mitselek/Screenwerk-2016)
 
 - Windows [0.2.0-beta.1](https://github.com/argoroots/Screenwerk/releases/download/0.2.0-beta.1/swsetup.exe)
 - Linux 32 bit [0.2.0-beta.2.1](https://github.com/argoroots/Screenwerk/releases/download/0.2.0-beta.2.1/linux32.2.zip)
